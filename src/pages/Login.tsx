@@ -31,7 +31,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-charcoal flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-charcoal flex items-start justify-center px-6 pb-10 pt-36 md:pt-44 relative overflow-hidden">
       {/* Immersive Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 

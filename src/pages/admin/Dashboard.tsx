@@ -1,21 +1,64 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Plus, Edit2, Trash2, LayoutDashboard, LogOut, Package, MapPin, Image as ImageIcon } from 'lucide-react'
+import {
+  BarChart3,
+  Calendar,
+  Edit2,
+  Globe2,
+  Image as ImageIcon,
+  LayoutDashboard,
+  LogOut,
+  MapPin,
+  Package,
+  Plus,
+  Search,
+  Star,
+  Trash2
+} from 'lucide-react'
 import { getTrips, deleteTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
 
 const AdminDashboard = () => {
   const [trips, setTrips] = useState<Trip[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [typeFilter, setTypeFilter] = useState<'All' | 'Domestic' | 'International'>('All')
   const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
       navigate('/admin/login')
+      return
     }
     getTrips().then(setTrips)
   }, [navigate])
+
+  const filteredTrips = useMemo(() => {
+    return trips.filter((trip) => {
+      const matchesSearch =
+        trip.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        trip.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        trip.category.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesType = typeFilter === 'All' || trip.type === typeFilter
+      return matchesSearch && matchesType
+    })
+  }, [trips, searchTerm, typeFilter])
+
+  const stats = useMemo(() => {
+    const domestic = trips.filter((trip) => trip.type === 'Domestic').length
+    const international = trips.filter((trip) => trip.type === 'International').length
+    const avgRating = trips.length
+      ? (trips.reduce((total, trip) => total + Number(trip.rating || 0), 0) / trips.length).toFixed(1)
+      : '0.0'
+
+    return [
+      { label: 'Total Packages', value: trips.length, icon: Package },
+      { label: 'Domestic', value: domestic, icon: MapPin },
+      { label: 'International', value: international, icon: Globe2 },
+      { label: 'Avg Rating', value: avgRating, icon: Star }
+    ]
+  }, [trips])
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to remove this expedition?')) {
@@ -29,110 +72,204 @@ const AdminDashboard = () => {
     navigate('/admin/login')
   }
 
+  const navItems = [
+    { label: 'Inventory', path: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Homepage Hero', path: '/admin/hero', icon: ImageIcon },
+    { label: 'New Package', path: '/admin/new', icon: Plus }
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className="w-80 bg-charcoal text-white p-8 hidden lg:flex flex-col">
+    <div className="min-h-screen bg-charcoal text-white flex">
+      <aside className="w-80 liquid-glass-dark border-r border-white/10 p-8 hidden lg:flex flex-col">
         <div className="mb-12">
-          <h1 className="text-2xl font-display font-black uppercase italic tracking-tighter">
-            Infi <span className="text-primary">Admin</span>
+          <p className="text-secondary text-[9px] font-black uppercase tracking-[0.4em] mb-3">WayBond</p>
+          <h1 className="text-3xl font-display font-black uppercase italic tracking-tighter liquid-text">
+            Admin <span className="text-primary">Basecamp</span>
           </h1>
         </div>
-        
-        <nav className="flex-grow space-y-4">
-          <Link to="/admin/dashboard" className={`flex items-center space-x-3 p-4 rounded-2xl font-bold transition-all ${location.pathname === '/admin/dashboard' ? 'bg-primary text-white' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-            <LayoutDashboard size={20} />
-            <span>Package Inventory</span>
-          </Link>
-          <Link to="/admin/hero" className={`flex items-center space-x-3 p-4 rounded-2xl font-bold transition-all ${location.pathname === '/admin/hero' ? 'bg-primary text-white' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>
-            <ImageIcon size={20} />
-            <span>Homepage Hero</span>
-          </Link>
-          <Link to="/admin/new" className="flex items-center space-x-3 p-4 text-white/60 hover:text-white hover:bg-white/5 transition-all font-bold">
-            <Plus size={20} />
-            <span>New Package</span>
-          </Link>
+
+        <nav className="flex-grow space-y-3">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex items-center gap-3 p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.16em] transition-all ${
+                location.pathname === item.path
+                  ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
+                  : 'text-white/55 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <item.icon size={18} />
+              <span>{item.label}</span>
+            </Link>
+          ))}
         </nav>
 
-        <button 
+        <button
           onClick={handleLogout}
-          className="flex items-center space-x-3 p-4 text-red-400 hover:text-red-300 transition-all font-bold mt-auto"
+          className="flex items-center gap-3 p-4 text-red-300/80 hover:text-red-200 hover:bg-red-500/10 rounded-2xl transition-all font-black text-[11px] uppercase tracking-[0.16em] mt-auto"
         >
-          <LogOut size={20} />
+          <LogOut size={18} />
           <span>Exit Basecamp</span>
         </button>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-grow p-8 md:p-12 overflow-y-auto">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-          <div>
-            <h2 className="text-4xl font-display font-black text-charcoal tracking-tighter uppercase italic">Inventory</h2>
-            <p className="text-gray-400 font-medium italic mt-1">Manage active expeditions and packages</p>
+      <main className="flex-grow p-6 md:p-10 lg:p-12 overflow-y-auto">
+        <header className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8 mb-10">
+          <div className="space-y-4">
+            <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Control Center</span>
+            <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
+              Package <span className="text-primary">Inventory</span>
+            </h2>
+            <p className="text-white/45 font-medium italic max-w-2xl">
+              Manage trips, pricing, hero content, and featured expedition details from one focused admin dashboard.
+            </p>
           </div>
-          <Link 
-            to="/admin/new"
-            className="bg-primary text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20 hover:scale-105 transition-all flex items-center"
-          >
-            <Plus size={16} className="mr-2" /> Add Expedition
-          </Link>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/admin/hero"
+              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-charcoal transition-all"
+            >
+              <ImageIcon size={16} /> Edit Hero
+            </Link>
+            <Link
+              to="/admin/new"
+              className="h-12 px-6 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-charcoal transition-all shadow-xl shadow-secondary/20"
+            >
+              <Plus size={16} /> Add Expedition
+            </Link>
+          </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-6">
-          {trips.map((trip) => (
-            <motion.div 
-              key={trip.id}
-              initial={{ opacity: 0, y: 10 }}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-charcoal p-6 rounded-[2rem] border border-gray-100 shadow-xl shadow-gray-200/40 flex flex-col md:flex-row items-center gap-8 group"
+              transition={{ delay: index * 0.06 }}
+              className="liquid-glass-dark border border-white/10 rounded-[2rem] p-6 flex items-center gap-5"
             >
-              <div className="w-32 h-32 rounded-3xl overflow-hidden shrink-0">
-                <img src={trip.image} alt={trip.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <div className="w-14 h-14 rounded-2xl bg-secondary/15 border border-secondary/20 flex items-center justify-center text-secondary">
+                <stat.icon size={24} />
               </div>
-              
-              <div className="flex-grow space-y-2 text-center md:text-left">
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                  <span className={`text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${trip.type === 'International' ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'}`}>
-                    {trip.type}
-                  </span>
-                  <span className="text-[8px] font-black uppercase tracking-widest px-3 py-1 bg-gray-100 text-gray-500 rounded-full">
-                    {trip.category}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold text-charcoal">{trip.title}</h3>
-                <div className="flex items-center justify-center md:justify-start text-gray-400 text-xs font-medium">
-                  <MapPin size={12} className="mr-1" /> {trip.location}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-8 px-8 border-x border-gray-50 hidden md:grid text-center">
-                <div>
-                  <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Rates From</span>
-                  <span className="text-lg font-black text-secondary tracking-tighter italic">₹{trip.price}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Duration</span>
-                  <span className="text-lg font-black text-charcoal tracking-tighter italic">{trip.duration}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <Link 
-                  to={`/admin/edit/${trip.id}`}
-                  className="p-4 bg-gray-50 text-gray-400 hover:text-primary hover:bg-primary/10 rounded-2xl transition-all"
-                >
-                  <Edit2 size={18} />
-                </Link>
-                <button 
-                  onClick={() => handleDelete(trip.id)}
-                  className="p-4 bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50/50 rounded-2xl transition-all"
-                >
-                  <Trash2 size={18} />
-                </button>
+              <div>
+                <p className="text-[9px] text-white/35 font-black uppercase tracking-[0.24em]">{stat.label}</p>
+                <p className="text-3xl font-display font-black text-white mt-2 leading-none">{stat.value}</p>
               </div>
             </motion.div>
           ))}
         </div>
+
+        <section className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-5 md:p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+            <div className="relative flex-grow max-w-2xl">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/25" size={18} />
+              <input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search package, location, category..."
+                className="w-full h-[52px] bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-4 text-sm text-white placeholder:text-white/25 outline-none focus:border-secondary transition-all"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {(['All', 'Domestic', 'International'] as const).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setTypeFilter(type)}
+                  className={`h-11 px-5 rounded-2xl font-black text-[9px] uppercase tracking-[0.18em] transition-all ${
+                    typeFilter === type
+                      ? 'bg-secondary text-white'
+                      : 'bg-white/5 text-white/45 border border-white/10 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-5">
+          {filteredTrips.map((trip, index) => (
+            <motion.article
+              key={trip.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.035 }}
+              className="liquid-glass-dark border border-white/10 rounded-[2rem] p-5 md:p-6 flex flex-col xl:flex-row xl:items-center gap-6 group"
+            >
+              <div className="w-full xl:w-32 h-44 xl:h-32 rounded-[1.5rem] overflow-hidden shrink-0">
+                <img src={trip.image} alt={trip.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              </div>
+
+              <div className="flex-grow min-w-0 space-y-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full border ${
+                    trip.type === 'International'
+                      ? 'bg-secondary/10 text-secondary border-secondary/20'
+                      : 'bg-primary/10 text-primary border-primary/20'
+                  }`}>
+                    {trip.type}
+                  </span>
+                  <span className="text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full bg-white/5 text-white/50 border border-white/10">
+                    {trip.category}
+                  </span>
+                </div>
+                <h3 className="text-2xl font-display font-black uppercase italic tracking-tighter text-white leading-none">{trip.title}</h3>
+                <div className="flex flex-wrap items-center gap-4 text-white/45 text-[10px] font-black uppercase tracking-[0.16em]">
+                  <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" /> {trip.location}</span>
+                  <span className="flex items-center gap-2"><Calendar size={13} className="text-secondary" /> {trip.nextBatch || 'Batch TBA'}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 xl:w-[260px]">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                  <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.18em] block mb-2">Rate</span>
+                  <span className="text-xl font-display font-black text-secondary tracking-tighter">₹{trip.price}</span>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                  <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.18em] block mb-2">Duration</span>
+                  <span className="text-sm font-black text-white">{trip.duration}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 xl:ml-auto">
+                <Link
+                  to={`/trip/${trip.id}`}
+                  className="h-12 px-5 rounded-2xl bg-white/5 text-white border border-white/10 hover:bg-white hover:text-charcoal transition-all flex items-center justify-center"
+                  title="Preview trip"
+                >
+                  <BarChart3 size={17} />
+                </Link>
+                <Link
+                  to={`/admin/edit/${trip.id}`}
+                  className="h-12 px-5 rounded-2xl bg-secondary text-white hover:bg-white hover:text-charcoal transition-all flex items-center justify-center"
+                  title="Edit trip"
+                >
+                  <Edit2 size={17} />
+                </Link>
+                <button
+                  onClick={() => handleDelete(trip.id)}
+                  className="h-12 px-5 rounded-2xl bg-red-500/10 text-red-300 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center"
+                  title="Delete trip"
+                >
+                  <Trash2 size={17} />
+                </button>
+              </div>
+            </motion.article>
+          ))}
+
+          {filteredTrips.length === 0 && (
+            <div className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-12 text-center">
+              <Package className="mx-auto text-white/20 mb-5" size={44} />
+              <h3 className="text-2xl font-display font-black uppercase italic tracking-tighter text-white/50">No packages found</h3>
+              <p className="text-white/35 text-sm font-medium italic mt-2">Try another search or add a fresh expedition.</p>
+            </div>
+          )}
+        </section>
       </main>
     </div>
   )
