@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFIYATRA | Premium Travel Expeditions</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+        rel="stylesheet">
+
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            teal: '#0f766e',
+                            tealDark: '#115e59',
+                            gold: '#d97706',
+                            slate: '#0f172a',
+                            slateMuted: '#64748b',
+                            surface: '#fafaf9',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['DM Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+
+        // Define the app data before Alpine loads
+        function appData() {
+            return {
+                currentView: 'home',
+                selectedTour: null,
+                isScrolled: false,
+                openDay: 1,
+                tours: [
+                    {
+                        id: "himalayas-mustang",
+                        title: "Whispers of the Upper Mustang",
+                        subtitle: "A Forbidden Kingdom Unveiled",
+                        category: "Himalayan Expedition",
+                        price: "1,85,000",
+                        duration: "12 Days",
+                        location: "Nepal",
+                        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2000",
+                        description: "The Mustang region remains one of the last bastions of pure Tibetan culture. A pilgrimage through ochre cliffs and ancient cave monasteries.",
+                        itinerary: [
+                            { day: 1, title: "Arrival in Kathmandu", desc: "Private transfer to Dwarika's Hotel for an evening briefing." },
+                            { day: 2, title: "Flight to Jomsom", desc: "A spectacular morning flight between the 8,000m massifs." },
+                            { day: 3, title: "Forbidden Zone", desc: "Crossing into Upper Mustang's high-altitude desert." }
+                        ]
+                    },
+                    {
+                        id: "bali-ubud",
+                        title: "The Soul of Ubud",
+                        subtitle: "Spiritual Heritage & Emerald Terraces",
+                        category: "Tropical Retreat",
+                        price: "1,42,000",
+                        duration: "8 Days",
+                        location: "Bali, Indonesia",
+                        image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?q=80&w=2000",
+                        description: "Immerse yourself in the artistic heart of Bali. From private sunrise yoga overlooking the Tegallalang rice terraces to secret water purification rituals.",
+                        itinerary: [
+                            { day: 1, title: "Sanctuary Arrival", desc: "Check-in to a private pool villa overlooking the Ayung River valley." },
+                            { day: 2, title: "Spiritual Cleansing", desc: "A private visit to Tirta Empul for a guided purification ceremony." },
+                            { day: 3, title: "Artisan Trails", desc: "Meet master woodcarvers and silversmiths in hidden village workshops." }
+                        ]
+                    },
+                    {
+                        id: "maldives-solitude",
+                        title: "Azure Solitude",
+                        subtitle: "Private Sandbars & Marine Conservation",
+                        category: "Island Exclusive",
+                        price: "3,20,000",
+                        duration: "6 Days",
+                        location: "Maldives",
+                        image: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?q=80&w=2000",
+                        description: "Experience the Maldives beyond the overwater bungalow. Join marine biologists for coral restoration and dine on a private sandbar under the Milky Way.",
+                        itinerary: [
+                            { day: 1, title: "Seaplane Odyssey", desc: "Aerial views of the atolls as you head to your private island reserve." },
+                            { day: 2, title: "Manta Ray Encounter", desc: "Snorkel with a resident biologist in Hanifaru Bay (seasonal)." },
+                            { day: 3, title: "Celestial Dining", desc: "A five-course dinner prepared by a private chef on a secluded sandbank." }
+                        ]
+                    },
+                    {
+                        id: "thailand-siamese",
+                        title: "Siam's Hidden Sanctuaries",
+                        subtitle: "Secret Temples & Culinary Arts",
+                        category: "Cultural Immersion",
+                        price: "1,15,000",
+                        duration: "10 Days",
+                        location: "Thailand",
+                        image: "https://images.unsplash.com/photo-1528181304800-2f5402924d84?q=80&w=2000",
+                        description: "Explore the northern jungles of Chiang Rai and the hidden canals of Bangkok. A masterclass in Siamese culture, spice, and serenity.",
+                        itinerary: [
+                            { day: 1, title: "Bangkok's Hidden Khlongs", desc: "Navigate the old city canals by private long-tail boat." },
+                            { day: 2, title: "Royal Kitchens", desc: "Private cooking masterclass at the Blue Elephant governor's mansion." },
+                            { day: 3, title: "The Golden Triangle", desc: "Luxury tented camp experience with rehabilitated elephants." }
+                        ]
+                    }
+                ],
+                init() {
+                    window.addEventListener('scroll', () => {
+                        this.isScrolled = window.scrollY > 50;
+                    });
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                    });
+                },
+                navigateToTour(tour) {
+                    this.selectedTour = tour;
+                    this.currentView = 'detail';
+                    this.openDay = 1;
+                    window.scrollTo(0, 0);
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                    });
+                },
+                scrollToFeatured() {
+                    const el = document.getElementById('featured');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('appData', appData);
+        });
+    </script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+
+        .selection-gold::selection {
+            background-color: #d97706;
+            color: white;
+        }
+
+        .hero-zoom {
+            animation: zoom 20s infinite alternate linear;
+        }
+
+        @keyframes zoom {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.15);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+
+<body class="bg-brand-surface font-sans selection-gold" x-data="appData" x-cloak>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-[100] px-8 py-6 flex justify-between items-center transition-all duration-700"
+        :class="isScrolled ? 'bg-white shadow-sm py-4' : 'bg-transparent text-white'">
+
+        <div @click="currentView = 'home'; window.scrollTo(0,0)"
+            class="font-serif text-2xl tracking-tighter cursor-pointer"
+            :class="isScrolled ? 'text-brand-slate' : 'text-white'">
+            INFIYATRA
+        </div>
+
+        <div class="hidden md:flex gap-12 text-[10px] uppercase tracking-[0.3em] font-bold"
+            :class="isScrolled ? 'text-brand-slate' : 'text-white'">
+            <a href="#" class="hover:text-brand-gold transition-colors">Expeditions</a>
+            <a href="#" class="hover:text-brand-gold transition-colors">Private Jet</a>
+            <a href="#" class="hover:text-brand-gold transition-colors">Impact</a>
+            <a href="#" class="hover:text-brand-gold transition-colors">Journal</a>
+        </div>
+
+        <div class="flex items-center gap-6" :class="isScrolled ? 'text-brand-slate' : 'text-white'">
+            <i data-lucide="search" class="w-4 h-4 cursor-pointer"></i>
+            <i data-lucide="menu" class="w-4 h-4 md:hidden cursor-pointer"></i>
+        </div>
+    </nav>
+
+    <!-- MAIN VIEWS -->
+    <main>
+
+        <!-- HOME VIEW -->
+        <template x-if="currentView === 'home'">
+            <div x-transition.opacity.duration.800ms>
+                <!-- Hero Section -->
+                <section class="relative h-screen flex items-center justify-center overflow-hidden">
+                    <div class="absolute inset-0">
+                        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000"
+                            class="w-full h-full object-cover grayscale-[30%] hero-zoom" alt="Hero">
+                        <div class="absolute inset-0 bg-brand-slate/40"></div>
+                    </div>
+
+                    <div class="relative z-10 text-center text-white px-6 fade-in-up">
+                        <p class="text-[10px] uppercase tracking-[0.5em] font-bold mb-6">The Art of Mindful Exploration
+                        </p>
+                        <h1 class="text-6xl md:text-9xl font-serif mb-12 leading-[0.9]">World Reimagined.</h1>
+                        <div class="flex flex-col md:flex-row gap-6 justify-center">
+                            <button @click="scrollToFeatured()"
+                                class="bg-brand-teal text-white px-8 py-3 font-medium transition-all duration-300 rounded-sm text-xs tracking-widest uppercase hover:bg-brand-tealDark hover:-translate-y-1">
+                                Explore Expeditions
+                            </button>
+                            <button
+                                class="border border-white/20 backdrop-blur-sm text-white px-8 py-3 font-medium transition-all duration-300 rounded-sm text-xs tracking-widest uppercase hover:text-brand-gold hover:-translate-y-1">
+                                Our Philosophy
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-12 text-white/40 animate-bounce">
+                        <i data-lucide="chevron-down" class="w-6 h-6"></i>
+                    </div>
+                </section>
+
+                <!-- Featured Collections -->
+                <section id="featured" class="max-w-7xl mx-auto px-8 py-32">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+                        <div class="space-y-4">
+                            <span class="text-[10px] uppercase tracking-[0.3em] font-bold text-brand-gold">2024
+                                Collection</span>
+                            <h2 class="text-5xl md:text-7xl font-serif text-brand-slate">The Signature Series</h2>
+                        </div>
+                        <p class="max-w-xs text-brand-slateMuted text-sm italic border-l border-brand-teal/20 pl-6">
+                            Curated journeys that bridge the gap between luxury and raw, authentic immersion.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                        <template x-for="tour in tours" :key="tour.id">
+                            <div @click="navigateToTour(tour)"
+                                class="group cursor-pointer flex flex-col h-full fade-in-up">
+                                <div class="relative aspect-[3/4] overflow-hidden rounded-sm bg-gray-100">
+                                    <img :src="tour.image" :alt="tour.title"
+                                        class="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                                    <div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors">
+                                    </div>
+                                    <div class="absolute top-4 left-4">
+                                        <span
+                                            class="bg-white/90 backdrop-blur-sm px-3 py-1 text-[9px] uppercase tracking-[0.2em] font-bold text-brand-teal"
+                                            x-text="tour.location"></span>
+                                    </div>
+                                </div>
+                                <div class="mt-8 space-y-3">
+                                    <h3 class="text-3xl font-serif text-brand-slate group-hover:text-brand-teal transition-colors leading-tight"
+                                        x-text="tour.title"></h3>
+                                    <p class="text-sm text-brand-slateMuted font-sans line-clamp-2 italic"
+                                        x-text="'&quot;' + tour.subtitle + '&quot;'"></p>
+                                    <div
+                                        class="flex items-center justify-between pt-4 border-t border-brand-teal/10 text-[10px] uppercase tracking-widest font-bold">
+                                        <span class="text-brand-slateMuted"
+                                            x-text="tour.duration + ' • ' + tour.category"></span>
+                                        <span class="text-brand-gold" x-text="'From ₹' + tour.price"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <!-- Philosophy Section -->
+                <section class="bg-brand-slate text-white py-32 overflow-hidden">
+                    <div class="max-w-7xl mx-auto px-8">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                            <div class="space-y-12">
+                                <h2 class="text-5xl font-serif leading-tight">Travel is not a hobby. <br /><span
+                                        class="italic text-white/40">It is a transformation.</span></h2>
+                                <p class="text-brand-slateMuted text-lg leading-relaxed">
+                                    At INFIYATRA, we reject the notion of 'bucket lists'. Instead, we build bridges to
+                                    cultures, ecosystems, and spiritual practices that demand deep presence and ethical
+                                    engagement.
+                                </p>
+                                <div class="grid grid-cols-2 gap-8">
+                                    <div class="space-y-4">
+                                        <i data-lucide="wind" class="text-brand-gold w-8 h-8"></i>
+                                        <h4 class="font-serif text-xl">Low Impact</h4>
+                                        <p class="text-xs text-brand-slateMuted">Carbon-conscious logistics and
+                                            zero-waste expeditions.</p>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <i data-lucide="globe" class="text-brand-gold w-8 h-8"></i>
+                                        <h4 class="font-serif text-xl">Ethical Stays</h4>
+                                        <p class="text-xs text-brand-slateMuted">We only partner with indigenous-owned
+                                            or hyper-local boutiques.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="relative aspect-[4/5]">
+                                <img src="https://images.unsplash.com/photo-1518005020250-675f0f0fd13b?q=80&w=1000"
+                                    class="w-full h-full object-cover rounded-sm grayscale" alt="Philosophy">
+                                <div class="absolute -bottom-8 -left-8 bg-brand-gold p-12 hidden md:block">
+                                    <span class="text-5xl font-serif">12+</span>
+                                    <p class="text-[10px] uppercase tracking-widest font-bold mt-2">Years of Curating
+                                        Rare Experiences</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </template>
+
+        <!-- TOUR DETAIL VIEW -->
+        <template x-if="currentView === 'detail'">
+            <div x-transition:enter="transition ease-out duration-500"
+                x-transition:enter-start="opacity-0 translate-x-8" x-transition:enter-end="opacity-100 translate-x-0">
+
+                <!-- Hero -->
+                <section class="relative h-[80vh] w-full overflow-hidden">
+                    <img :src="selectedTour.image" class="w-full h-full object-cover" :alt="selectedTour.title">
+                    <div class="absolute inset-0 bg-gradient-to-t from-brand-slate via-transparent to-transparent">
+                    </div>
+
+                    <button @click="currentView = 'home'; window.scrollTo(0,0)"
+                        class="absolute top-10 left-10 z-50 flex items-center gap-3 text-white text-[10px] uppercase tracking-widest font-bold group">
+                        <div
+                            class="p-2 border border-white/20 rounded-full group-hover:bg-white group-hover:text-brand-slate transition-all">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        </div>
+                        Back to Expeditions
+                    </button>
+
+                    <div class="absolute bottom-20 left-10 max-w-4xl">
+                        <span class="text-[10px] uppercase tracking-[0.4em] font-bold text-brand-gold mb-4 block"
+                            x-text="selectedTour.category"></span>
+                        <h1 class="text-6xl md:text-8xl font-serif text-white" x-text="selectedTour.title"></h1>
+                    </div>
+                </section>
+
+                <!-- Detail Content -->
+                <main class="max-w-7xl mx-auto px-8 py-24">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-20">
+                        <div class="lg:col-span-8 space-y-24">
+                            <section class="space-y-8">
+                                <h2 class="text-3xl font-serif italic text-brand-slate"
+                                    x-text="'&quot;' + selectedTour.subtitle + '&quot;'"></h2>
+                                <p class="text-xl text-brand-slateMuted leading-relaxed font-sans"
+                                    x-text="selectedTour.description"></p>
+                            </section>
+
+                            <section class="space-y-12">
+                                <h3 class="text-4xl font-serif">The Expedition Flow</h3>
+                                <div class="space-y-4">
+                                    <template x-for="(item, idx) in selectedTour.itinerary" :key="idx">
+                                        <div class="border-b border-brand-teal/10 py-8">
+                                            <button @click="openDay = (openDay === item.day ? null : item.day)"
+                                                class="flex w-full items-start justify-between text-left">
+                                                <div class="flex gap-8">
+                                                    <span class="text-3xl font-serif text-brand-gold/30"
+                                                        x-text="'0' + item.day"></span>
+                                                    <div>
+                                                        <h4 class="text-xl font-serif" x-text="item.title"></h4>
+                                                        <div x-show="openDay === item.day"
+                                                            x-transition:enter="transition ease-out duration-300"
+                                                            x-transition:enter-start="opacity-0 -translate-y-2"
+                                                            x-transition:enter-end="opacity-100 translate-y-0"
+                                                            class="mt-4 text-brand-slateMuted leading-relaxed"
+                                                            x-text="item.desc">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"
+                                                    :class="openDay === item.day ? 'rotate-180' : ''"></i>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </section>
+                        </div>
+
+                        <!-- Sticky Sidebar -->
+                        <div class="lg:col-span-4">
+                            <div
+                                class="sticky top-32 bg-white border border-brand-teal/10 p-10 shadow-2xl rounded-sm space-y-10">
+                                <div>
+                                    <p class="text-[10px] uppercase tracking-widest text-brand-slateMuted mb-1">Total
+                                        Investment</p>
+                                    <div class="flex items-baseline gap-2">
+                                        <span class="text-4xl font-serif text-brand-teal"
+                                            x-text="'₹' + selectedTour.price"></span>
+                                        <span class="text-xs text-brand-slateMuted">/ explorer</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <button
+                                        class="w-full bg-brand-teal text-white py-5 text-sm font-medium transition-all duration-300 rounded-sm tracking-widest uppercase hover:bg-brand-tealDark">
+                                        Secure Your Spot
+                                    </button>
+                                    <p class="text-[10px] text-center text-brand-slateMuted italic">Includes all
+                                        internal travel, gourmet meals & permits.</p>
+                                </div>
+                                <div class="pt-8 border-t border-brand-teal/10 flex flex-col gap-4">
+                                    <div class="flex items-center gap-3 text-xs text-brand-slateMuted">
+                                        <i data-lucide="shield-check" class="w-4 h-4 text-brand-gold"></i> Full Payment
+                                        Protection
+                                    </div>
+                                    <div class="flex items-center gap-3 text-xs text-brand-slateMuted">
+                                        <i data-lucide="star" class="w-4 h-4 text-brand-gold"></i> 5-Star Private
+                                        Logistics
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </template>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-brand-slate text-white/40 py-24 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-4 gap-16">
+            <div class="col-span-2 space-y-8">
+                <h2 class="text-3xl font-serif text-white">INFIYATRA</h2>
+                <p class="max-w-xs text-sm leading-relaxed">
+                    Curating rare, high-impact travel experiences for the discerning explorer. We believe in the ethical
+                    preservation of culture through mindful exploration.
+                </p>
+            </div>
+            <div class="space-y-6">
+                <h6 class="text-[10px] uppercase tracking-[0.3em] font-bold text-white">Regions</h6>
+                <ul class="text-sm space-y-3">
+                    <li><a href="#" class="hover:text-white transition-colors">Himalayan Highlands</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Archipelagos</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Siam & Indochina</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Sub-Saharan Africa</a></li>
+                </ul>
+            </div>
+            <div class="space-y-6">
+                <h6 class="text-[10px] uppercase tracking-[0.3em] font-bold text-white">Membership</h6>
+                <ul class="text-sm space-y-3">
+                    <li><a href="#" class="hover:text-white transition-colors">Private Concierge</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Corporate Retreats</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Sustainability Fund</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div
+            class="max-w-7xl mx-auto px-8 pt-24 mt-24 border-t border-white/5 flex flex-col md:flex-row justify-between gap-6">
+            <p class="text-[10px] uppercase tracking-widest">© 2024 INFIYATRA EXPEDITIONS PVT LTD. ALL RIGHTS RESERVED.
+            </p>
+            <div class="flex gap-8 text-[10px] uppercase tracking-widest">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="#">License</a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
