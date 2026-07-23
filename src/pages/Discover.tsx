@@ -53,7 +53,7 @@ const Discover = () => {
             </div>
 
             {/* Search - Liquid Glass */}
-            <div className="liquid-glass p-2 rounded-full flex items-center max-w-lg w-full border-white/20 group hover:shadow-[0_0_50px_rgba(37,99,235,0.15)] transition-all duration-700">
+            <div className="liquid-glass p-2 rounded-full flex items-center max-w-lg w-full border-white/20 group hover:shadow-[0_0_50px_rgba(100,149,237,0.15)] transition-all duration-700">
               <div className="w-12 h-12 rounded-full flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
                 <Search size={20} />
               </div>
@@ -236,18 +236,18 @@ const Discover = () => {
                         {trip.description || "Embark on an unforgettable journey through Ahmedabad's most curated travel collective."}
                       </p>
 
-                      <div className="pt-6 border-t border-white/10 flex justify-between items-end">
-                        <div className="space-y-1">
+                      <div className="pt-6 border-t border-white/10 space-y-4">
+                        <div className="space-y-1 min-w-0">
                           <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Starting from</span>
                           <div className="flex items-baseline space-x-1">
-                            <span className="text-3xl font-display font-black text-white tracking-tighter">₹{trip.price}</span>
+                            <span className="text-[2rem] font-display font-black text-white tracking-tighter leading-none">₹{trip.price}</span>
                           </div>
                         </div>
 
                         <Link
                           to={`/trip/${trip.id}`}
                           onClick={() => haptics.medium()}
-                          className="px-8 py-3 liquid-glass border-white/20 rounded-2xl text-white font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-charcoal transition-all transform hover:scale-105"
+                          className="w-full h-12 liquid-glass border-white/20 rounded-2xl text-white font-black text-[10px] uppercase tracking-[0.16em] leading-none hover:bg-white hover:text-charcoal transition-all transform hover:scale-105 flex items-center justify-center text-center whitespace-nowrap"
                         >
                           Experience
                         </Link>

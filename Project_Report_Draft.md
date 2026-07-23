@@ -133,7 +133,7 @@ The project was executed in several systematic phases:
 ## **Design Strategy**
 The design of infiYATRA follows a "Modern & Immersive" approach. The color palette was carefully chosen to evoke a sense of adventure and trust:
 - **Teal (#0D7377):** Representing stability, the ocean, and professional reliability.
-- **Blue (#2563EB):** Representing energy, confidence, and the spirit of adventure.
+- **Blue (#6495ED):** Representing energy, confidence, and the spirit of adventure.
 - **Gold (#FFD700):** Representing premium quality, sunshine, and luxury.
 
 The typography uses **Inter** for UI elements and **Poppins** for headings, ensuring a balance between modern aesthetics and readability.

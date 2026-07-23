@@ -14,7 +14,7 @@ export default {
           dark: '#0a5a5e',
         },
         secondary: {
-          DEFAULT: '#2563eb',
+          DEFAULT: '#6495ED',
           light: '#60a5fa',
           dark: '#1d4ed8',
         },

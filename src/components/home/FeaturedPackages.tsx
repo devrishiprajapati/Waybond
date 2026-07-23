@@ -88,10 +88,10 @@ export default function FeaturedPackages() {
                         >
                           <MessageCircle size={18} />
                         </a>
-                        <Link 
-                          to={`/trip/${trip.id}`} 
+                        <Link
+                          to={`/trip/${trip.id}`}
                           onClick={() => haptics.medium()}
-                          className="bg-charcoal text-charcoal px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-secondary hover:text-white transition-all shadow-2xl duration-500"
+                          className="h-11 px-7 rounded-2xl bg-white text-charcoal font-black text-[10px] uppercase tracking-[0.16em] transition-all shadow-2xl duration-500 hover:bg-secondary hover:text-white flex items-center justify-center text-center whitespace-nowrap"
                         >
                           Details
                         </Link>
@@ -105,8 +105,8 @@ export default function FeaturedPackages() {
         </div>
 
         <div className="mt-20 text-center">
-          <Link 
-            to="/discover" 
+          <Link
+            to="/discover"
             onClick={() => haptics.light()}
             className="text-secondary font-black uppercase tracking-[0.3em] text-xs border-b-2 border-secondary/20 pb-2 hover:border-secondary transition-all drop-shadow-md"
           >

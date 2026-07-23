@@ -33,7 +33,7 @@ const C = {
   teal:      "0D7377",
   tealDark:  "0A5A5E",
   tealLight: "14BDCC",
-  blue:      "2563EB",
+  blue:      "6495ED",
   gold:      "F5A623",
   white:     "FFFFFF",
   offWhite:  "F0F8F9",
@@ -215,7 +215,7 @@ async function build() {
       { label: "React 18", sub: "Vite-based frontend framework", icon: icons.react, col: C.teal },
       { label: "TypeScript 5.6", sub: "Type-safe codebase throughout", icon: icons.ts, col: "3178C6" },
       { label: "Tailwind CSS", sub: "Mobile-first responsive styling", icon: icons.tw, col: "0891B2" },
-      { label: "Framer Motion", sub: "Smooth page animations", icon: icons.rocket, col: "2563EB" },
+      { label: "Framer Motion", sub: "Smooth page animations", icon: icons.rocket, col: "6495ED" },
       { label: "Three.js / R3F", sub: "3D GLB model rendering", icon: icons.three, col: C.mid },
       { label: "Node.js + Express", sub: "RESTful API backend", icon: icons.node, col: "3D7A3D" },
     ];

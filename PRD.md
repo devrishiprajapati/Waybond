@@ -24,7 +24,7 @@ We will update the core configuration files to establish the new design system.
 
 [MODIFY] tailwind.config.js
 
-Add custom color palette (Teal: #0D7377, Blue: #2563EB, Gold: #FFD700).
+Add custom color palette (Teal: #0D7377, Blue: #6495ED, Gold: #FFD700).
 
 Add custom font families (Inter, Poppins).
 
