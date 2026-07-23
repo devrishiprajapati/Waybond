@@ -24,7 +24,7 @@ We will update the core configuration files to establish the new design system.
 
 [MODIFY] tailwind.config.js
 
-Add custom color palette (Teal: #0D7377, Orange: #FF6B35, Gold: #FFD700).
+Add custom color palette (Teal: #0D7377, Blue: #2563EB, Gold: #FFD700).
 
 Add custom font families (Inter, Poppins).
 
@@ -102,7 +102,7 @@ We will start the Vite dev server (npm run dev) and use the browser subagent (vi
 
 Routing navigates correctly across Home, Discover, TripDetails, and Dashboard.
 
-The color palette matches the prompt's Teal, Orange, and Golden Yellow.
+The color palette matches the prompt's Teal, Blue, and Golden Yellow.
 
 Hover states and Framer Motion fluid animations work smoothly on the trip cards and hero search bar.
 

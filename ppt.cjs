@@ -28,12 +28,12 @@ async function iconPng(Icon, color = "#FFFFFF", size = 256) {
   }
 }
 
-// ── Color palette (travel / teal-orange theme) ──────────────────────────────
+// ── Color palette (travel / teal-blue theme) ──────────────────────────────
 const C = {
   teal:      "0D7377",
   tealDark:  "0A5A5E",
   tealLight: "14BDCC",
-  orange:    "FF6B35",
+  blue:      "2563EB",
   gold:      "F5A623",
   white:     "FFFFFF",
   offWhite:  "F0F8F9",
@@ -96,7 +96,7 @@ async function build() {
     s.addShape(pres.shapes.OVAL, { x: 8.2, y: -0.5, w: 2.5, h: 2.5, fill: { color: C.tealLight, transparency: 70 }, line: { color: C.tealLight, transparency: 70 } });
 
     // Bottom-left small circle
-    s.addShape(pres.shapes.OVAL, { x: -0.5, y: 4.2, w: 2.2, h: 2.2, fill: { color: C.orange, transparency: 80 }, line: { color: C.orange, transparency: 80 } });
+    s.addShape(pres.shapes.OVAL, { x: -0.5, y: 4.2, w: 2.2, h: 2.2, fill: { color: C.blue, transparency: 80 }, line: { color: C.blue, transparency: 80 } });
 
     // Globe icon
     s.addImage({ data: icons.globe, x: 0.5, y: 0.55, w: 0.55, h: 0.55 });
@@ -114,7 +114,7 @@ async function build() {
     });
     s.addText("YATRA", {
       x: 1.82, y: 1.2, w: 4.5, h: 1.1,
-      fontSize: 62, fontFace: "Calibri", bold: true, color: C.orange, align: "left", margin: 0
+      fontSize: 62, fontFace: "Calibri", bold: true, color: C.blue, align: "left", margin: 0
     });
 
     s.addText("A Modern Travel & Tourism Platform", {
@@ -123,7 +123,7 @@ async function build() {
     });
 
     // Divider
-    s.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: 3.1, w: 3.5, h: 0.04, fill: { color: C.orange }, line: { color: C.orange } });
+    s.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: 3.1, w: 3.5, h: 0.04, fill: { color: C.blue }, line: { color: C.blue } });
 
     // Meta info
     s.addText([
@@ -163,7 +163,7 @@ async function build() {
 
     // LEFT – Problem card
     s.addShape(pres.shapes.RECTANGLE, { x: 0.35, y: 1.05, w: 4.4, h: 3.9, fill: { color: C.white }, line: { color: C.lightGrey }, shadow: mkShadow() });
-    s.addShape(pres.shapes.RECTANGLE, { x: 0.35, y: 1.05, w: 4.4, h: 0.45, fill: { color: C.orange }, line: { color: C.orange } });
+    s.addShape(pres.shapes.RECTANGLE, { x: 0.35, y: 1.05, w: 4.4, h: 0.45, fill: { color: C.blue }, line: { color: C.blue } });
     s.addText("THE PROBLEM", { x: 0.45, y: 1.05, w: 4.2, h: 0.45, fontSize: 13, fontFace: "Calibri", bold: true, color: C.white, valign: "middle" });
 
     const problems = [
@@ -215,7 +215,7 @@ async function build() {
       { label: "React 18", sub: "Vite-based frontend framework", icon: icons.react, col: C.teal },
       { label: "TypeScript 5.6", sub: "Type-safe codebase throughout", icon: icons.ts, col: "3178C6" },
       { label: "Tailwind CSS", sub: "Mobile-first responsive styling", icon: icons.tw, col: "0891B2" },
-      { label: "Framer Motion", sub: "Smooth page animations", icon: icons.rocket, col: "FF6B35" },
+      { label: "Framer Motion", sub: "Smooth page animations", icon: icons.rocket, col: "2563EB" },
       { label: "Three.js / R3F", sub: "3D GLB model rendering", icon: icons.three, col: C.mid },
       { label: "Node.js + Express", sub: "RESTful API backend", icon: icons.node, col: "3D7A3D" },
     ];
@@ -256,7 +256,7 @@ async function build() {
     // Three layer boxes
     const layers = [
       { title: "FRONTEND  (React + Vite)", items: ["Home / Discover / Trip Details / Admin pages", "Components: Navbar, HeroSection, TripCard, LensModel", "State: useState / useEffect  |  Routing: React Router DOM", "Animations: Framer Motion  |  3D: React Three Fiber"], col: C.teal, x: 0.3 },
-      { title: "BACKEND  (Node.js + Express)", items: ["RESTful API: /api/trips  /api/hero", "CRUD endpoints: GET / POST / PUT / DELETE", "CORS configured  |  JSON data store (db.json)", "Vite proxy → Express (port 5173 → 3001)"], col: C.orange, x: 3.65 },
+      { title: "BACKEND  (Node.js + Express)", items: ["RESTful API: /api/trips  /api/hero", "CRUD endpoints: GET / POST / PUT / DELETE", "CORS configured  |  JSON data store (db.json)", "Vite proxy → Express (port 5173 → 3001)"], col: C.blue, x: 3.65 },
       { title: "DATA LAYER  (JSON Store)", items: ["db.json — Trip records with full itinerary arrays", "Hero slides — Managed via Admin Dashboard", "Designed for migration to PostgreSQL / MongoDB", "Lightweight & fast for development phase"], col: C.gold, x: 7.0 },
     ];
 
@@ -290,7 +290,7 @@ async function build() {
 
     const features = [
       { icon: icons.globe, title: "Dynamic Hero Section", desc: "Rotating high-res destination slides with animated text overlays, fully managed via Admin Dashboard.", col: C.teal },
-      { icon: icons.search, title: "Smart Trip Filter", desc: "Real-time search + filter by destination, category tag, and price range on the Discover page.", col: C.orange },
+      { icon: icons.search, title: "Smart Trip Filter", desc: "Real-time search + filter by destination, category tag, and price range on the Discover page.", col: C.blue },
       { icon: icons.route, title: "Day-by-Day Itinerary", desc: "Interactive timeline view showing daily activities, highlights, and accommodation for each trip.", col: "9B59B6" },
       { icon: icons.cube, title: "3D Immersive Landing", desc: "Real-time GLB model rendered via React Three Fiber — a visual metaphor for discovery & perspective.", col: C.gold },
       { icon: icons.lock, title: "Admin Dashboard", desc: "Secure CRUD interface for managing all trip records, hero slides, pricing, and descriptions.", col: "E74C3C" },
@@ -378,7 +378,7 @@ async function build() {
     trips.forEach((t, i) => {
       const py = 1.02 + i * 0.88;
       s.addShape(pres.shapes.RECTANGLE, { x: 0.35, y: py, w: 9.3, h: 0.78, fill: { color: "1A3535" }, line: { color: C.mid }, shadow: mkShadow() });
-      s.addShape(pres.shapes.RECTANGLE, { x: 0.35, y: py, w: 0.08, h: 0.78, fill: { color: C.orange }, line: { color: C.orange } });
+      s.addShape(pres.shapes.RECTANGLE, { x: 0.35, y: py, w: 0.08, h: 0.78, fill: { color: C.blue }, line: { color: C.blue } });
       // Emoji
       s.addText(t.emoji, { x: 0.52, y: py + 0.1, w: 0.7, h: 0.55, fontSize: 22, align: "center", valign: "middle" });
       // Name
@@ -387,7 +387,7 @@ async function build() {
       s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 7.2, y: py + 0.18, w: 1.0, h: 0.4, fill: { color: C.teal }, line: { color: C.teal }, rectRadius: 0.08 });
       s.addText(t.days, { x: 7.2, y: py + 0.18, w: 1.0, h: 0.4, fontSize: 10, fontFace: "Calibri", color: C.white, align: "center", valign: "middle", bold: true });
       // Category tag
-      s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 8.3, y: py + 0.18, w: 1.1, h: 0.4, fill: { color: C.orange, transparency: 20 }, line: { color: C.orange }, rectRadius: 0.08 });
+      s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 8.3, y: py + 0.18, w: 1.1, h: 0.4, fill: { color: C.blue, transparency: 20 }, line: { color: C.blue }, rectRadius: 0.08 });
       s.addText(t.tag, { x: 8.3, y: py + 0.18, w: 1.1, h: 0.4, fontSize: 10, fontFace: "Calibri", color: C.white, align: "center", valign: "middle", bold: true });
     });
   }
@@ -408,7 +408,7 @@ async function build() {
     // Big stat cards
     const stats = [
       { num: "15", label: "Test Cases", sub: "All Passed ✓", col: C.teal },
-      { num: "3", label: "Browsers", sub: "Chrome · Firefox · Safari", col: C.orange },
+      { num: "3", label: "Browsers", sub: "Chrome · Firefox · Safari", col: C.blue },
       { num: "3", label: "Device Types", sub: "Mobile · Tablet · Desktop", col: "9B59B6" },
       { num: "100%", label: "API Tests", sub: "Verified via Postman", col: "27AE60" },
     ];
@@ -462,7 +462,7 @@ async function build() {
       {
         challenge: "3D Performance Optimization",
         solution: "GLB model compressed via gltf-pipeline. React Suspense used for async loading. WebGL canvas performance settings tuned → smooth 60 fps.",
-        col: C.orange
+        col: C.blue
       },
       {
         challenge: "Mobile Navigation Complexity",
@@ -508,10 +508,10 @@ async function build() {
       x: 0.5, y: 0.35, w: 6, h: 0.7, fontSize: 32, fontFace: "Calibri", bold: true, color: C.white
     });
     s.addText("FUTURE SCOPE", {
-      x: 0.5, y: 1.0, w: 6, h: 0.7, fontSize: 32, fontFace: "Calibri", bold: true, color: C.orange
+      x: 0.5, y: 1.0, w: 6, h: 0.7, fontSize: 32, fontFace: "Calibri", bold: true, color: C.blue
     });
 
-    s.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: 1.85, w: 3, h: 0.05, fill: { color: C.orange }, line: { color: C.orange } });
+    s.addShape(pres.shapes.RECTANGLE, { x: 0.5, y: 1.85, w: 3, h: 0.05, fill: { color: C.blue }, line: { color: C.blue } });
 
     s.addText("infiYATRA successfully delivers a modern,\nimmersive travel discovery platform using\ncutting-edge web technologies.", {
       x: 0.5, y: 2.05, w: 5.5, h: 0.9, fontSize: 12.5, fontFace: "Calibri", color: "C8E6E8", italic: true
@@ -532,7 +532,7 @@ async function build() {
 
     future.forEach((f, i) => {
       const py = 3.52 + i * 0.41;
-      s.addShape(pres.shapes.OVAL, { x: 0.5, y: py + 0.04, w: 0.3, h: 0.3, fill: { color: C.orange }, line: { color: C.orange } });
+      s.addShape(pres.shapes.OVAL, { x: 0.5, y: py + 0.04, w: 0.3, h: 0.3, fill: { color: C.blue }, line: { color: C.blue } });
       s.addImage({ data: f.icon, x: 0.52, y: py + 0.06, w: 0.26, h: 0.26 });
       s.addText(f.text, { x: 0.92, y: py, w: 4.8, h: 0.38, fontSize: 12, fontFace: "Calibri", color: C.white, valign: "middle" });
     });
@@ -546,11 +546,11 @@ async function build() {
     s.background = { color: C.dark };
 
     s.addShape(pres.shapes.RECTANGLE, { x: 0, y: 0, w: 10, h: 0.07, fill: { color: C.teal }, line: { color: C.teal } });
-    s.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.555, w: 10, h: 0.07, fill: { color: C.orange }, line: { color: C.orange } });
+    s.addShape(pres.shapes.RECTANGLE, { x: 0, y: 5.555, w: 10, h: 0.07, fill: { color: C.blue }, line: { color: C.blue } });
 
     // Big circle decorations
     s.addShape(pres.shapes.OVAL, { x: -1, y: 0.5, w: 4, h: 4, fill: { color: C.teal, transparency: 85 }, line: { color: C.teal, transparency: 85 } });
-    s.addShape(pres.shapes.OVAL, { x: 7.5, y: 1.5, w: 3, h: 3, fill: { color: C.orange, transparency: 85 }, line: { color: C.orange, transparency: 85 } });
+    s.addShape(pres.shapes.OVAL, { x: 7.5, y: 1.5, w: 3, h: 3, fill: { color: C.blue, transparency: 85 }, line: { color: C.blue, transparency: 85 } });
 
     s.addImage({ data: icons.globe, x: 4.65, y: 0.6, w: 0.7, h: 0.7 });
 
@@ -559,7 +559,7 @@ async function build() {
     });
 
     s.addText("THANK YOU", {
-      x: 1, y: 2.45, w: 8, h: 0.65, fontSize: 28, fontFace: "Calibri", bold: true, color: C.orange, align: "center", charSpacing: 6
+      x: 1, y: 2.45, w: 8, h: 0.65, fontSize: 28, fontFace: "Calibri", bold: true, color: C.blue, align: "center", charSpacing: 6
     });
 
     s.addShape(pres.shapes.RECTANGLE, { x: 3.5, y: 3.25, w: 3, h: 0.05, fill: { color: C.tealLight }, line: { color: C.tealLight } });

@@ -41,7 +41,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 mt-24 pt-8 border-t border-white/5 text-center relative z-10">
-        <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.3em]">© 2026 INFIYATRA Travels. All rights reserved. <span className="text-secondary/50">Designed for Ahmedabad, Built for the World.</span></p>
+        <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.3em]">© 2026 WayBond Travels. All rights reserved. <span className="text-secondary/50">Designed for Ahmedabad, Built for the World.</span></p>
       </div>
     </footer>
   )

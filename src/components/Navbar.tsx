@@ -78,7 +78,7 @@ const Navbar = () => {
                   <Heart size={18} />
                 </Link>
                 <a
-                  href={getWhatsAppLink("Hi Infi Yatra! I'd like to book an adventure.")}
+                  href={getWhatsAppLink("Hi WayBond! I'd like to book an adventure.")}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => haptics.medium()}

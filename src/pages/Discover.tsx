@@ -53,7 +53,7 @@ const Discover = () => {
             </div>
 
             {/* Search - Liquid Glass */}
-            <div className="liquid-glass p-2 rounded-full flex items-center max-w-lg w-full border-white/20 group hover:shadow-[0_0_50px_rgba(255,107,53,0.15)] transition-all duration-700">
+            <div className="liquid-glass p-2 rounded-full flex items-center max-w-lg w-full border-white/20 group hover:shadow-[0_0_50px_rgba(37,99,235,0.15)] transition-all duration-700">
               <div className="w-12 h-12 rounded-full flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
                 <Search size={20} />
               </div>

@@ -155,7 +155,7 @@ const Community = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-24">
       {[
         { title: "Tribe Chat", icon: MessageCircle, color: "bg-blue-500/10", desc: "Instant connectivity with travelers on your upcoming voyage." },
-        { title: "Memory Share", icon: Share2, color: "bg-orange-500/10", desc: "A cinematic gallery of stories told through raw adventurer lenses." },
+        { title: "Memory Share", icon: Share2, color: "bg-blue-500/10", desc: "A cinematic gallery of stories told through raw adventurer lenses." },
         { title: "Local Intel", icon: MapPin, color: "bg-teal-500/10", desc: "Crowdsourced secret spots and authentic local experiences." }
       ].map((card, i) => (
         <motion.div
