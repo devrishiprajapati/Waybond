@@ -1,2 +1,2 @@
-# infiYATRA
+# Waybond 
 Travel website
