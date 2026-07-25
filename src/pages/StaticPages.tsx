@@ -215,12 +215,12 @@ const Wishlist = () => (
         <Star size={32} className="absolute -top-4 -right-4 text-secondary animate-pulse" />
       </div>
       <h3 className="text-3xl md:text-4xl font-display font-black uppercase italic tracking-tighter text-white/30 mb-10">Your Expedition Vault is Empty</h3>
-      <a
+      {/* <a
         href="/discover"
         className="inline-block bg-charcoal text-charcoal px-12 py-5 rounded-full font-black text-[10px] uppercase tracking-[0.3em] hover:bg-secondary hover:text-white transition-all shadow-xl shadow-black/40 active:scale-95 duration-500"
       >
         UNCOVER DESTINATIONS
-      </a>
+      </a> */}
     </div>
   </PageLayout>
 )
