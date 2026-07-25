@@ -31,7 +31,7 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen bg-charcoal flex items-start justify-center px-6 pb-10 pt-36 md:pt-44 relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-charcoal flex items-start justify-center px-6 pb-10 pt-36 md:pt-44 relative overflow-hidden">
       {/* Immersive Background Image with Overlay */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <img
@@ -109,7 +109,7 @@ const Login = () => {
                   <input
                     type="text"
                     placeholder="Your Name"
-                    className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white focus:border-secondary outline-none transition-all placeholder:text-white/10 text-sm"
+                    className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white focus:border-secondary outline-none transition-all placeholder:text-white/10 text-base md:text-sm"
                   />
                 </div>
               </div>
@@ -125,7 +125,7 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="hello@example.com"
-                    className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white focus:border-secondary outline-none transition-all placeholder:text-white/10 text-sm"
+                    className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white focus:border-secondary outline-none transition-all placeholder:text-white/10 text-base md:text-sm"
                     required
                   />
                 </div>
@@ -143,7 +143,7 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className={`w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white outline-none transition-all placeholder:text-white/10 text-sm ${mode === 'admin' ? 'focus:border-primary' : 'focus:border-secondary'}`}
+                  className={`w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white outline-none transition-all placeholder:text-white/10 text-base md:text-sm ${mode === 'admin' ? 'focus:border-primary' : 'focus:border-secondary'}`}
                   required
                 />
               </div>

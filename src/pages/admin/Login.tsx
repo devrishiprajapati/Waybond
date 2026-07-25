@@ -20,7 +20,7 @@ const AdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-charcoal flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-[100dvh] bg-charcoal flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
@@ -48,7 +48,7 @@ const AdminLogin = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter credentials..."
-              className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white focus:border-primary outline-none transition-all placeholder:text-white/20"
+              className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white focus:border-primary outline-none transition-all placeholder:text-white/20 text-base md:text-sm"
             />
           </div>
 
