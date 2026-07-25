@@ -33,20 +33,20 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-charcoal flex items-start justify-center px-6 pb-10 pt-36 md:pt-44 relative overflow-hidden">
       {/* Immersive Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1506461883276-594a12b11cf3?auto=format&fit=crop&q=80&w=2000" 
-          alt="Travel Background" 
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <img
+          src="https://images.unsplash.com/photo-1506461883276-594a12b11cf3?auto=format&fit=crop&q=80&w=2000"
+          alt="Travel Background"
           className="w-full h-full object-cover opacity-20 scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal/80 via-charcoal/60 to-charcoal"></div>
       </div>
 
       {/* Dynamic Background Accents */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[180px] -translate-y-1/2 translate-x-1/2 z-0"></div>
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[180px] translate-y-1/2 -translate-x-1/2 z-0"></div>
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[180px] -translate-y-1/2 translate-x-1/2 z-0 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-[180px] translate-y-1/2 -translate-x-1/2 z-0 pointer-events-none"></div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-lg relative z-10"
@@ -54,7 +54,8 @@ const Login = () => {
         {/* Mode Switcher Tabs */}
         <div className="flex justify-center mb-4">
           <div className="liquid-glass-dark p-1 rounded-full border border-white/10 flex gap-1">
-            <button 
+            <button
+              type="button"
               onClick={() => {
                 haptics.light();
                 setMode('user');
@@ -63,7 +64,8 @@ const Login = () => {
             >
               <Compass size={12} /> Explorer
             </button>
-            <button 
+            <button
+              type="button"
               onClick={() => {
                 haptics.light();
                 setMode('admin');
@@ -91,8 +93,8 @@ const Login = () => {
                 )}
               </h1>
               <p className="text-white/40 font-medium text-xs italic tracking-wide">
-                {mode === 'admin' 
-                  ? 'Authorized access for organizers' 
+                {mode === 'admin'
+                  ? 'Authorized access for organizers'
                   : (isLogin ? 'Sign in to your curated expeditions' : 'Ahmedabad\'s premier travel collective')}
               </p>
             </motion.div>
@@ -104,8 +106,8 @@ const Login = () => {
                 <label className="text-[8px] uppercase font-black text-white/40 tracking-[0.2em] ml-4">Full Name</label>
                 <div className="relative">
                   <User className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Your Name"
                     className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white focus:border-secondary outline-none transition-all placeholder:text-white/10 text-sm"
                   />
@@ -118,8 +120,8 @@ const Login = () => {
                 <label className="text-[8px] uppercase font-black text-white/40 tracking-[0.2em] ml-4">Email Address</label>
                 <div className="relative">
                   <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="hello@example.com"
@@ -136,8 +138,8 @@ const Login = () => {
               </label>
               <div className="relative">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -147,11 +149,11 @@ const Login = () => {
               </div>
             </div>
 
-            <button 
+            <button
               type="submit"
               className={`w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl transition-all flex items-center justify-center group hover:scale-[1.02] active:scale-[0.98] ${mode === 'admin' ? 'bg-primary shadow-primary/20' : 'bg-secondary shadow-secondary/20'} text-white`}
             >
-              {mode === 'admin' ? 'Authorize' : (isLogin ? 'Sign In' : 'Join')} 
+              {mode === 'admin' ? 'Authorize' : (isLogin ? 'Sign In' : 'Join')}
               <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={14} />
             </button>
           </form>
@@ -161,13 +163,13 @@ const Login = () => {
               <div className="mt-8 text-center">
                 <p className="text-white/40 text-[8px] font-black uppercase tracking-[0.2em] mb-4">Or continue with</p>
                 <div className="flex justify-center gap-4">
-                  <button 
+                  <button
                     onClick={() => haptics.light()}
                     className="p-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all hover:scale-110"
                   >
                     <Chrome size={18} />
                   </button>
-                  <button 
+                  <button
                     onClick={() => haptics.light()}
                     className="p-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 transition-all hover:scale-110"
                   >
@@ -177,7 +179,7 @@ const Login = () => {
               </div>
 
               <div className="mt-8 pt-6 border-t border-white/5 text-center">
-                <button 
+                <button
                   onClick={() => {
                     haptics.light();
                     setIsLogin(!isLogin);
