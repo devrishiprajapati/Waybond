@@ -5,7 +5,7 @@ import { getWhatsAppLink } from '../lib/data'
 import { haptics } from '../lib/haptics'
 
 const WhatsAppButton = () => {
-  const message = "Hi Infi Yatra! I'm interested in booking a trip. Could you please help me with the details?"
+  const message = "Hi Waybond! I'm interested in booking a trip. Could you please help me with the details?"
   const whatsappUrl = getWhatsAppLink(message)
 
   return (
