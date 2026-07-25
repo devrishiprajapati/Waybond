@@ -17,7 +17,7 @@ const Footer = () => {
           <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-secondary drop-shadow-md">Quick Links</h4>
           <ul className="space-y-4 text-white/50 text-xs font-bold uppercase tracking-widest">
             <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>Domestic Tours</a></li>
-            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>International Escapes</a></li>
+            {/* <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>International Escapes</a></li> */}
             <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>Group Adventures</a></li>
             <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>Custom Planning</a></li>
           </ul>
@@ -25,10 +25,10 @@ const Footer = () => {
         <div>
           <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-secondary drop-shadow-md">Support & Safety</h4>
           <ul className="space-y-4 text-white/50 text-xs font-bold uppercase tracking-widest">
-            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>24/7 Helpline</a></li>
-            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>Safety Protocols</a></li>
-            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>Refund Policy</a></li>
-            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>FAQs</a></li>
+            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>24/7 SUPPORT </a></li>
+            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>TRIP SAFETY GUIDELINES</a></li>
+            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>CANCELLATION & REFUNDS</a></li>
+            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>TRAVELER FAQS</a></li>
           </ul>
         </div>
         <div>
