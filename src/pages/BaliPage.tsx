@@ -16,17 +16,17 @@ export default function BaliPage() {
   return (
     <div className="bg-charcoal min-h-screen text-white">
       <Helmet>
-        <title>Bali Essence — 7 Day Tropical Escape | INFIYATRA</title>
-        <meta name="description" content="Luxury Bali escape with INFIYATRA. 7 days through Ubud & Seminyak with private villas and island tours starting at ₹54,999." />
+        <title>Bali Essence — 7 Day Tropical Escape | WAYBOND</title>
+        <meta name="description" content="Luxury Bali escape with WAYBOND. 7 days through Ubud & Seminyak with private villas and island tours starting at ₹54,999." />
       </Helmet>
       <section className="relative h-[85vh] overflow-hidden">
-        <img 
-          src="/assets/bali.jpg" 
-          alt="Bali" 
+        <img
+          src="/assets/bali.jpg"
+          alt="Bali"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-charcoal"></div>
-        
+
         <div className="absolute inset-0 flex items-center justify-center pt-20">
           <div className="text-center px-6 max-w-5xl">
             <motion.div
@@ -36,7 +36,7 @@ export default function BaliPage() {
             >
               <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">TROPICAL PARADISE</span>
             </motion.div>
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
@@ -45,7 +45,7 @@ export default function BaliPage() {
               BALI<br />
               <span className="text-transparent px-4 italic" style={{ WebkitTextStroke: '2px white' }}>ESSENCE</span>
             </motion.h1>
-            
+
             <div className="flex flex-wrap justify-center gap-6 mt-12 pb-10 border-b border-white/10">
               {[
                 { icon: MapPin, text: "Ubud & Seminyak" },
@@ -79,7 +79,7 @@ export default function BaliPage() {
             <h3 className="text-2xl font-display font-black uppercase tracking-tighter border-l-4 border-secondary pl-6">Deep Dive Journey</h3>
             <div className="space-y-4">
               {itinerary.map((day, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   whileInView={{ opacity: 1, x: 0 }}
                   initial={{ opacity: 0, x: -20 }}
@@ -103,7 +103,7 @@ export default function BaliPage() {
               <span className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px]">ALL-INCLUSIVE PACK</span>
               <p className="text-5xl font-display font-black text-white mt-2 tracking-tighter">₹54,999<span className="text-xs text-white/20 ml-2">/PP</span></p>
             </div>
-            
+
             <div className="space-y-6 mb-10">
               <div className="flex justify-between items-center text-sm font-black uppercase tracking-widest text-white/60">
                 <span>Inclusion Highlights</span>
@@ -123,7 +123,7 @@ export default function BaliPage() {
               <button className="w-full bg-secondary text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-charcoal transition-all shadow-xl shadow-secondary/30 transform hover:scale-105 active:scale-95 duration-500">
                 Claim My Escape
               </button>
-              <a 
+              <a
                 href={getWhatsAppLink("Hi! I want to plan my Bali Essence trip.")}
                 target="_blank"
                 className="w-full liquid-glass-dark py-5 rounded-3xl flex items-center justify-center space-x-3 border-white/10 hover:bg-white/10 transition-all"

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  MapPin, Calendar, Users, Star, ArrowLeft, 
-  CheckCircle2, Clock, ShieldCheck, ChevronDown, 
-  ChevronUp, PlayCircle, Instagram, MessageCircle 
+import {
+  MapPin, Calendar, Users, Star, ArrowLeft,
+  CheckCircle2, Clock, ShieldCheck, ChevronDown,
+  ChevronUp, PlayCircle, Instagram, MessageCircle
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
@@ -28,7 +28,7 @@ const TripDetails = () => {
   }, [id])
 
   if (loading) {
-     return <div className="min-h-screen flex items-center justify-center bg-charcoal uppercase font-black tracking-widest text-white/40">Loading Expedition...</div>
+    return <div className="min-h-screen flex items-center justify-center bg-charcoal uppercase font-black tracking-widest text-white/40">Loading Expedition...</div>
   }
 
   if (!trip) {
@@ -42,19 +42,19 @@ const TripDetails = () => {
   return (
     <div className="bg-charcoal min-h-screen pt-28 pb-12">
       <Helmet>
-        <title>{trip.title} | INFIYATRA</title>
+        <title>{trip.title} | WAYBOND</title>
         <meta name="description" content={trip.description.substring(0, 160)} />
       </Helmet>
       {/* Navigation & Header */}
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 py-8">
-        <Link 
-          to="/discover" 
+        <Link
+          to="/discover"
           onClick={() => haptics.light()}
           className="inline-flex items-center text-secondary font-black tracking-widest text-xs uppercase hover:gap-3 transition-all mb-8 drop-shadow-md"
         >
           <ArrowLeft size={16} className="mr-2" /> Back to Discover
         </Link>
-        
+
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -70,13 +70,13 @@ const TripDetails = () => {
             </div>
           </div>
           <div className="flex gap-3">
-            <button 
+            <button
               onClick={() => haptics.light()}
               className="liquid-glass-dark p-4 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors shadow-xl"
             >
               <Instagram size={20} className="text-white/80" />
             </button>
-            <a 
+            <a
               href={getWhatsAppLink(`Hi! I'm interested in the ${trip.title}`)}
               target="_blank" rel="noopener noreferrer"
               onClick={() => haptics.medium()}
@@ -91,18 +91,18 @@ const TripDetails = () => {
       {/* Gallery Section */}
       <section className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
         <div className="lg:col-span-8 space-y-6">
-          <motion.div 
+          <motion.div
             layoutId="main-image"
             className="relative h-[350px] md:h-[500px] rounded-[3rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10"
           >
-            <img 
-              src={trip.images[activeImage] || trip.image} 
-              alt="Main Trip" 
+            <img
+              src={trip.images[activeImage] || trip.image}
+              alt="Main Trip"
               className="w-full h-full object-cover transition-transform duration-[2s] hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent"></div>
             <div className="absolute top-8 right-8">
-              <button 
+              <button
                 onClick={() => haptics.light()}
                 className="liquid-glass p-5 rounded-full shadow-2xl hover:scale-110 hover:bg-secondary/20 transition-all border border-white/20"
               >
@@ -110,10 +110,10 @@ const TripDetails = () => {
               </button>
             </div>
           </motion.div>
-          
+
           <div className="grid grid-cols-4 gap-4">
             {(trip.images.length > 0 ? trip.images : [trip.image]).map((img: string, idx: number) => (
-              <button 
+              <button
                 key={idx}
                 onClick={() => {
                   haptics.light();
@@ -148,7 +148,7 @@ const TripDetails = () => {
                 </div>
                 <span className="text-white font-black">{trip.nextBatch}</span>
               </div>
-              
+
               <div className="flex items-center justify-between p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
                 <div className="flex items-center text-white/80 font-black uppercase tracking-widest text-xs">
                   <Users size={18} className="mr-3 text-secondary" /> Group Size
@@ -157,7 +157,7 @@ const TripDetails = () => {
               </div>
             </div>
 
-            <a 
+            <a
               href={getWhatsAppLink(`Hi! I'm interested in booking the ${trip.title}`)}
               target="_blank" rel="noopener noreferrer"
               onClick={() => haptics.medium()}
@@ -166,7 +166,7 @@ const TripDetails = () => {
               Book Your Slot
             </a>
             <p className="text-center text-[10px] text-white/40 font-bold uppercase tracking-widest">No cancellation fee up to 15 days before departure</p>
-            
+
             <div className="pt-6 space-y-4 border-t border-white/10">
               <div className="flex items-center text-xs font-black tracking-widest uppercase text-white/60">
                 <ShieldCheck size={18} className="text-green-400 mr-3" /> Verified Captains
@@ -188,7 +188,7 @@ const TripDetails = () => {
             <p className="text-lg text-white/60 leading-relaxed font-medium italic">
               {trip.description}
             </p>
-            
+
             <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
               {trip.highlights.map((highlight: string, idx: number) => (
                 <div key={idx} className="flex items-center gap-4 p-5 liquid-glass-dark border border-white/10 rounded-2xl shadow-lg">
@@ -203,7 +203,7 @@ const TripDetails = () => {
           <div>
             <div className="flex justify-between items-end mb-10">
               <h2 className="text-3xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
-              <button 
+              <button
                 onClick={() => {
                   haptics.light();
                   setExpandedDay(expandedDay === null ? 1 : null);
@@ -216,7 +216,7 @@ const TripDetails = () => {
 
             <div className="space-y-4">
               {trip.itinerary.map((item: any) => (
-                <div 
+                <div
                   key={item.day}
                   className={`border rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
                   onClick={() => {
@@ -234,10 +234,10 @@ const TripDetails = () => {
                     </div>
                     {expandedDay === item.day ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
                   </div>
-                  
+
                   <AnimatePresence>
                     {expandedDay === item.day && (
-                      <motion.div 
+                      <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -264,19 +264,19 @@ const TripDetails = () => {
           {/* Captain Profile */}
           <div className="p-8 md:p-12 liquid-glass-dark border border-white/10 rounded-[3rem] text-white overflow-hidden relative group shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
             <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-transform duration-1000 group-hover:scale-150"></div>
-            
+
             <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
               <div className="relative shrink-0">
-                <img 
-                  src={trip.captain.avatar} 
-                  alt="Captain" 
+                <img
+                  src={trip.captain.avatar}
+                  alt="Captain"
                   className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] object-cover border-2 border-white/20 shadow-2xl group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute -bottom-3 -right-3 bg-secondary text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-secondary/30 border border-white/20">
                   Top Rated
                 </div>
               </div>
-              
+
               <div className="space-y-5">
                 <div>
                   <h3 className="text-3xl md:text-4xl font-display font-black italic tracking-tighter liquid-text">{trip.captain.name}</h3>

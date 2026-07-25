@@ -108,7 +108,7 @@ const About = () => (
 
 const Community = () => (
   <PageLayout
-    seoTitle="Community & Socials — Join the INFIYATRA Tribe"
+    seoTitle="Community & Socials — Join the WAYBOND Tribe"
     seoDescription="Connect with 45K+ fellow travelers. Share stories, find expedition partners, and access local intel."
     title={<>TRAVELER<br /><span className="text-secondary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>ELITE</span> HUB</>}
     subtitle="The digital campfire for our global tribe. Connect with fellow explorers, share road-side epiphanies, and find your next expedition partner."
@@ -204,7 +204,7 @@ const Community = () => (
 
 const Wishlist = () => (
   <PageLayout
-    seoTitle="Your Wishlist — Future Expeditions with INFIYATRA"
+    seoTitle="Your Wishlist — Future Expeditions with WAYBOND"
     seoDescription="Your personal vault of saved travel adventures. Keep track of trips you want to conquer."
     title={<>YOUR<br /><span className="text-primary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>DREAMS</span></>}
     subtitle="The vault of adventures awaiting your signal. Keep track of the soul-stirring voyages you're planning to conquer."

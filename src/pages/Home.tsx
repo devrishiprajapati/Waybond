@@ -14,7 +14,7 @@ export default function Home() {
       <Helmet>
         <title>WAYBOND — Ahmedabad's Premier Travel Community</title>
         <meta name="description" content="Discover meaningful travel experiences with Ahmedabad's most authentic travel community. Curated domestic and international trips led by verified local captains." />
-        <meta property="og:title" content="INFIYATRA — The Art of Meaningful Travel" />
+        <meta property="og:title" content="WAYBOND — The Art of Meaningful Travel" />
         <meta property="og:description" content="Curated adventures from the Himalayas to Bali. Join 100K+ travelers." />
         <meta property="og:type" content="website" />
       </Helmet>

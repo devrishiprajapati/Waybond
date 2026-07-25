@@ -1,4 +1,4 @@
-const CACHE_NAME = 'infiyatra-v2-blue';
+const CACHE_NAME = 'waybond-v2-blue';
 const urlsToCache = [
   '/',
   '/index.html',

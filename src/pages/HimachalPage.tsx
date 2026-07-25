@@ -16,17 +16,17 @@ export default function HimachalPage() {
   return (
     <div className="bg-charcoal min-h-screen text-white">
       <Helmet>
-        <title>Himachal Mystique — 6 Day Expedition | INFIYATRA</title>
-        <meta name="description" content="Explore the rugged Himalayas with INFIYATRA. 6-day expedition through Manali, Kasol, and Kheerganga starting at ₹14,999." />
+        <title>Himachal Mystique — 6 Day Expedition | WAYBOND</title>
+        <meta name="description" content="Explore the rugged Himalayas with WAYBOND. 6-day expedition through Manali, Kasol, and Kheerganga starting at ₹14,999." />
       </Helmet>
       <section className="relative h-[85vh] overflow-hidden">
-        <img 
-          src="/assets/himalayas-bg.jpg" 
-          alt="Himachal" 
+        <img
+          src="/assets/himalayas-bg.jpg"
+          alt="Himachal"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-charcoal"></div>
-        
+
         <div className="absolute inset-0 flex items-center justify-center pt-20">
           <div className="text-center px-6 max-w-5xl">
             <motion.div
@@ -36,7 +36,7 @@ export default function HimachalPage() {
             >
               <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">ULTIMATE EXPEDITION</span>
             </motion.div>
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
@@ -45,7 +45,7 @@ export default function HimachalPage() {
               HIMACHAL<br />
               <span className="text-transparent px-4 italic" style={{ WebkitTextStroke: '2px white' }}>MYSTIQUE</span>
             </motion.h1>
-            
+
             <div className="flex flex-wrap justify-center gap-6 mt-12 pb-10 border-b border-white/10">
               {[
                 { icon: MapPin, text: "Manali & Kasol" },
@@ -77,7 +77,7 @@ export default function HimachalPage() {
             <h3 className="text-2xl font-display font-black uppercase tracking-tighter border-l-4 border-secondary pl-6">Detailed Itinerary</h3>
             <div className="space-y-4">
               {itinerary.map((day, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
                   whileInView={{ opacity: 1, x: 0 }}
                   initial={{ opacity: 0, x: -20 }}
@@ -101,7 +101,7 @@ export default function HimachalPage() {
               <span className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px]">PACKAGE STARTS FROM</span>
               <p className="text-5xl font-display font-black text-white mt-2 tracking-tighter">₹14,999<span className="text-xs text-white/20 ml-2">/PP</span></p>
             </div>
-            
+
             <div className="space-y-6 mb-10">
               <div className="flex justify-between items-center text-sm font-black uppercase tracking-widest text-white/60">
                 <span>Inclusions</span>
@@ -121,7 +121,7 @@ export default function HimachalPage() {
               <button className="w-full bg-secondary text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-charcoal transition-all shadow-xl shadow-secondary/30 transform hover:scale-105 active:scale-95 duration-500">
                 Book My Adventure
               </button>
-              <a 
+              <a
                 href={getWhatsAppLink("Hi! I want to book the Himachal Mystique trip.")}
                 target="_blank"
                 className="w-full liquid-glass-dark py-5 rounded-3xl flex items-center justify-center space-x-3 border-white/10 hover:bg-white/10 transition-all"
@@ -143,11 +143,11 @@ export default function HimachalPage() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-6xl font-display font-black uppercase tracking-tighter italic mb-12">Looking for <span className="text-secondary">More?</span></h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-             {["Spiti", "Ladakh", "Srinagar", "Shimla"].map((place, i) => (
-               <div key={i} className="liquid-glass p-6 rounded-3xl hover:bg-secondary transition-all cursor-pointer group border-white/5">
-                 <h4 className="font-display font-black text-xl uppercase italic group-hover:scale-110 transition-transform">{place}</h4>
-               </div>
-             ))}
+            {["Spiti", "Ladakh", "Srinagar", "Shimla"].map((place, i) => (
+              <div key={i} className="liquid-glass p-6 rounded-3xl hover:bg-secondary transition-all cursor-pointer group border-white/5">
+                <h4 className="font-display font-black text-xl uppercase italic group-hover:scale-110 transition-transform">{place}</h4>
+              </div>
+            ))}
           </div>
         </div>
       </section>
