@@ -26,7 +26,7 @@ export const heroSlides = [
   }
 ];
 
-export const getWhatsAppLink = (message = "Hi Infi Yatra! I'd like to plan a trip.") => {
-  const phoneNumber = '919601793485';
+export const getWhatsAppLink = (message = "Hi Waybond! I'd like to plan a trip.") => {
+  const phoneNumber = '919328019913';
   return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 };

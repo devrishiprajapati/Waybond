@@ -53,8 +53,8 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Nav */}
-            <div className="hidden md:flex items-center space-x-12">
-              <div className="flex items-center space-x-12">
+            <div className="hidden lg:flex items-center lg:space-x-8 xl:space-x-12">
+              <div className="flex items-center lg:space-x-6 xl:space-x-12">
                 {navLinks.map((link) => (
                   <Link
                     key={link.name}
@@ -70,7 +70,7 @@ const Navbar = () => {
 
               <div className="h-4 w-px bg-white/20"></div>
 
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center lg:space-x-4 xl:space-x-6">
                 <Link to="/dashboard" onClick={() => haptics.light()} className="transition-colors duration-500 text-white hover:text-secondary">
                   <User size={18} />
                 </Link>
@@ -82,7 +82,7 @@ const Navbar = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => haptics.medium()}
-                  className="bg-secondary text-white px-5 py-2 rounded-full font-black text-[8px] uppercase tracking-widest hover:bg-white hover:text-charcoal transition-all duration-500 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20"
+                  className="bg-secondary text-white px-5 py-2 rounded-full font-black text-[8px] uppercase tracking-widest hover:bg-white hover:text-charcoal transition-all duration-500 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20 whitespace-nowrap"
                 >
                   Book Now
                 </a>
@@ -90,7 +90,7 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Menu Toggle */}
-            <div className="md:hidden flex items-center">
+            <div className="lg:hidden flex items-center">
               <button
                 onClick={() => {
                   haptics.light();
@@ -108,7 +108,7 @@ const Navbar = () => {
       {/* Modern Mobile Hub Overlay */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[60] md:hidden">
+          <div className="fixed inset-0 z-[60] lg:hidden">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -172,7 +172,7 @@ const Navbar = () => {
               </div>
 
               <a
-                href={getWhatsAppLink("Hi Infi Yatra! I\'d like to book an adventure.")}
+                href={getWhatsAppLink("Hi Waybond! I\'d like to book an adventure.")}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => haptics.medium()}
