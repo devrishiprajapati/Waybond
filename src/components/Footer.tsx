@@ -42,13 +42,13 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a
-                href="#"
+              <Link
+                to="/testimonials"
                 className="hover:text-white transition-colors flex items-center gap-2 group"
               >
                 <span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>
                 Testimonials / Reviews
-              </a>
+              </Link>
             </li>
             <li>
               <a

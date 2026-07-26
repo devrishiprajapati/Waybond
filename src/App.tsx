@@ -19,6 +19,7 @@ import AdminLogin from './pages/admin/Login'
 import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
 import SafetyGuidelines from './pages/SafetyGuidelines'
+import Testimonials from './pages/Testimonials'
 
 function App() {
   const location = useLocation();
@@ -44,6 +45,7 @@ function App() {
             <Route path="/faqs" element={<FAQs />} />
             <Route path="/cancellation-refunds" element={<CancellationRefunds />} />
             <Route path="/safety-guidelines" element={<SafetyGuidelines />} />
+            <Route path="/testimonials" element={<Testimonials />} />
             <Route path="/trip/:id" element={<TripDetails />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/login" element={<Login />} />
