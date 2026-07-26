@@ -173,7 +173,7 @@ const FAQs = () => {
               Our team is here to help you plan your next journey with confidence.
             </p>
             <a
-              href={getWhatsAppLink("Hi WayBond! I have a question about travelling with you.")}
+              href={getWhatsAppLink("Hi WayBond! I have a question and couldn't find the answer in your FAQs. Can you help me?")}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => haptics.medium()}

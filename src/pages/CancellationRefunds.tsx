@@ -111,7 +111,7 @@ const CancellationRefunds = () => (
           <h2 className="text-3xl font-display font-black uppercase italic tracking-tighter text-white">Need help with a refund?</h2>
           <p className="text-sm text-white/50 leading-relaxed italic font-medium mt-5 mb-8">Contact our team through our official support channels for refund-related queries.</p>
           <a
-            href={getWhatsAppLink('Hi WayBond! I have a question about a cancellation or refund.')}
+            href={getWhatsAppLink(`Hi WayBond! I'd like to cancel or reschedule my trip. Can you assist me with this?`)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => haptics.medium()}

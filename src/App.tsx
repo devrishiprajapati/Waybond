@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -17,9 +18,14 @@ import EditHero from './pages/admin/EditHero'
 import AdminLogin from './pages/admin/Login'
 import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
+import SafetyGuidelines from './pages/SafetyGuidelines'
 
 function App() {
   const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname])
 
   return (
     <div className="flex flex-col min-h-screen selection:bg-secondary/30 w-full overflow-x-hidden">
@@ -37,6 +43,7 @@ function App() {
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/faqs" element={<FAQs />} />
             <Route path="/cancellation-refunds" element={<CancellationRefunds />} />
+            <Route path="/safety-guidelines" element={<SafetyGuidelines />} />
             <Route path="/trip/:id" element={<TripDetails />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/login" element={<Login />} />
