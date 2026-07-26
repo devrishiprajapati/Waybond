@@ -15,6 +15,8 @@ import AdminDashboard from './pages/admin/Dashboard'
 import EditTrip from './pages/admin/EditTrip'
 import EditHero from './pages/admin/EditHero'
 import AdminLogin from './pages/admin/Login'
+import FAQs from './pages/FAQs'
+import CancellationRefunds from './pages/CancellationRefunds'
 
 function App() {
   const location = useLocation();
@@ -33,6 +35,8 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/community" element={<Community />} />
             <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/faqs" element={<FAQs />} />
+            <Route path="/cancellation-refunds" element={<CancellationRefunds />} />
             <Route path="/trip/:id" element={<TripDetails />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/login" element={<Login />} />

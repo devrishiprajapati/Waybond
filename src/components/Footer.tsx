@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
   return (
@@ -27,8 +28,8 @@ const Footer = () => {
           <ul className="space-y-4 text-white/50 text-xs font-bold uppercase tracking-widest">
             <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>24/7 SUPPORT </a></li>
             <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>TRIP SAFETY GUIDELINES</a></li>
-            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>CANCELLATION & REFUNDS</a></li>
-            <li><a href="#" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>TRAVELER FAQS</a></li>
+            <li><a href="/cancellation-refunds" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>CANCELLATION & REFUNDS</a></li>
+            <li><a href="/faqs" className="hover:text-white transition-colors flex items-center gap-2 group"><span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>TRAVELER FAQS</a></li>
           </ul>
         </div>
         <div>
