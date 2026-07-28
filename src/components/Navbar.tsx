@@ -82,7 +82,7 @@ const Navbar = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => haptics.medium()}
-                  className="bg-secondary text-white px-5 py-2 rounded-full font-black text-[8px] uppercase tracking-widest hover:bg-white hover:text-slate-800 transition-all duration-500 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20 whitespace-nowrap"
+                  className="bg-secondary text-white px-5 py-2 rounded-full font-black text-[8px] uppercase tracking-widest transition-all duration-300 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 whitespace-nowrap"
                 >
                   Book Now
                 </a>
