@@ -7,12 +7,12 @@ export default function NewsletterSection() {
     <section className="py-32 bg-white relative overflow-hidden">
       {/* Background Graphic */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 blur-[150px] rounded-full"></div>
-      
+
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 relative z-10 text-center">
         <div className="space-y-4 mb-20 text-center">
           <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px] drop-shadow-sm">COMMUNITY EXCLUSIVE</span>
           <h2 className="text-4xl sm:text-5xl md:text-8xl font-display font-black text-white tracking-tighter uppercase italic leading-none">
-            Join the <span className="text-primary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>Infi Elite</span>
+            Join the <span className="text-primary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>WayBond Elite</span>
           </h2>
           <p className="text-white/40 font-medium text-lg max-w-xl mx-auto py-6 italic leading-relaxed">Early access to expedition openings and exclusive members-only gatherings.</p>
         </div>
@@ -31,7 +31,7 @@ export default function NewsletterSection() {
             Secure Spot
           </button>
         </motion.div>
-        
+
         <p className="mt-10 text-white/20 text-[10px] uppercase font-black tracking-[0.4em]">Zero Spam. Pure Adventure.</p>
       </div>
     </section>

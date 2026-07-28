@@ -30,7 +30,7 @@ export default function StatsSection() {
             </div>
           </div>
           <motion.div initial={{ opacity: 0, scale: 1.03 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="relative min-h-[300px] lg:min-h-full overflow-hidden group">
-            <img src="/assets/group.jpeg" alt="WayBond travellers sharing a moment" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]" />
+            <img src="/assets/groupimg.jpg" alt="WayBond travellers sharing a moment" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-800/10 to-transparent" />
             <div className="keep-light-text absolute bottom-8 left-8 md:bottom-10 md:left-10 right-8"><p className="text-secondary font-black uppercase tracking-[0.3em] text-[9px] mb-3">Explore together</p><p className="text-2xl md:text-3xl font-display font-black text-white uppercase italic tracking-tighter max-w-sm">More than a trip, it&apos;s a bond.</p></div>
           </motion.div>

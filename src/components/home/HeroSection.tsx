@@ -28,7 +28,7 @@ export default function HeroSection() {
     if (heroSlides.length === 0) return;
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % heroSlides.length);
-    }, 6000); 
+    }, 6000);
 
     // Preload next image in sequence
     const nextIndex = (index + 1) % heroSlides.length;
@@ -57,7 +57,7 @@ export default function HeroSection() {
       {heroSlides.map((s, i) => {
         const isActive = i === index;
         const isPrev = i === (index - 1 + heroSlides.length) % heroSlides.length;
-        
+
         // Only render current and previous (for exit animation) to save DOM/memory
         if (!isActive && !isPrev) return null;
 
@@ -65,23 +65,23 @@ export default function HeroSection() {
           <motion.div
             key={`bg-${i}`}
             initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ 
-              opacity: isActive ? 1 : 0, 
+            animate={{
+              opacity: isActive ? 1 : 0,
               scale: isActive ? 1 : 1.05
             }}
-            transition={{ 
+            transition={{
               opacity: { duration: 1.2, ease: "easeInOut" },
-              scale: { duration: 6, ease: "easeOut" } 
+              scale: { duration: 6, ease: "easeOut" }
             }}
             className="absolute inset-0"
             style={{ zIndex: isActive ? 1 : 0 }}
           >
             <img
-               src={optimizeImageUrl(s.image, 1920, 85)}
-               alt={s.title}
-               className="w-full h-full object-cover"
-               loading={i === 0 ? "eager" : "lazy"}
-             />
+              src={optimizeImageUrl(s.image, 1920, 85)}
+              alt={s.title}
+              className="w-full h-full object-cover"
+              loading={i === 0 ? "eager" : "lazy"}
+            />
           </motion.div>
         );
       })}
@@ -93,47 +93,47 @@ export default function HeroSection() {
       <div className="absolute inset-0 flex items-center z-20 pt-20 pb-20 sm:pb-0">
         <div className="max-w-[1920px] mx-auto w-full px-6 md:px-12 lg:px-20">
           <div className="max-w-3xl">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`content-${index}`}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-              <p className="text-secondary font-black text-[10px] sm:text-xs uppercase tracking-[0.35em] mb-5"></p>
-              <h1 className="font-display font-black text-[2.5rem] sm:text-5xl lg:text-7xl xl:text-8xl text-white mb-5 leading-[0.95] uppercase tracking-tighter liquid-text">
-                {slide.title}
-              </h1>
-              <p className="text-white/80 text-base sm:text-lg lg:text-xl mb-9 font-medium max-w-2xl leading-relaxed">
-                {slide.subtitle}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`content-${index}`}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <p className="text-secondary font-black text-[10px] sm:text-xs uppercase tracking-[0.35em] mb-5"></p>
+                <h1 className="font-display font-black text-[2.5rem] sm:text-5xl lg:text-7xl xl:text-8xl text-white mb-5 leading-[0.95] uppercase tracking-tighter liquid-text">
+                  {slide.title}
+                </h1>
+                <p className="text-white/80 text-base sm:text-lg lg:text-xl mb-9 font-medium max-w-2xl leading-relaxed">
+                  {slide.subtitle}
+                </p>
+              </motion.div>
+            </AnimatePresence>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4"
-          >
-            <Link
-              to="/discover"
-              onClick={() => haptics.medium()}
-              className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-6 sm:px-10 py-4 bg-secondary text-white rounded-full font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 hover:bg-white hover:text-slate-800 shadow-2xl shadow-secondary/30 sm:min-w-[220px]"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4"
             >
-              Explore Packages
-            </Link>
-            <a
-              href={getWhatsAppLink()}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => haptics.medium()}
-              className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-6 sm:px-10 py-4 liquid-glass text-white font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 sm:min-w-[220px] !rounded-full before:!rounded-full after:!rounded-full"
-            >
-              Contact Us
-            </a>
-          </motion.div>
+              <Link
+                to="/discover"
+                onClick={() => haptics.medium()}
+                className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-6 sm:px-10 py-4 bg-secondary text-white rounded-full font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 shadow-2xl shadow-secondary/30 sm:min-w-[220px]"
+              >
+                Explore Packages
+              </Link>
+              <a
+                href={getWhatsAppLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => haptics.medium()}
+                className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-6 sm:px-10 py-4 liquid-glass text-white font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 sm:min-w-[220px] !rounded-full before:!rounded-full after:!rounded-full"
+              >
+                Contact Us
+              </a>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -147,9 +147,8 @@ export default function HeroSection() {
               haptics.light();
               goTo(i);
             }}
-            className={`h-1.5 rounded-full transition-all duration-500 ${
-              i === index ? "w-10 bg-secondary" : "w-1.5 bg-white/30 hover:bg-white/60"
-            }`}
+            className={`h-1.5 rounded-full transition-all duration-500 ${i === index ? "w-10 bg-secondary" : "w-1.5 bg-white/30 hover:bg-white/60"
+              }`}
           />
         ))}
       </div>
