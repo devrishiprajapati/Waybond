@@ -82,7 +82,7 @@ const Footer = () => {
           <p className="text-white/40 leading-relaxed text-sm italic font-medium">
             Ahmedabad's premier community travel platform. Connecting curious
             travelers with authentic local and international experiences since
-            2024.
+            2026.
           </p>
         </div>
         <div>
@@ -124,7 +124,7 @@ const Footer = () => {
                 className="hover:text-secondary transition-colors flex items-center gap-2 group"
               >
                 <span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>
-               Contact Us
+                Contact Us
               </a>
             </li>
           </ul>
