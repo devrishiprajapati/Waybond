@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Heart, Star } from 'lucide-react'
+import { Heart, Quote, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 type Testimonial = {
@@ -30,10 +30,10 @@ function TestimonialCard({ test }: { test: Testimonial }) {
     <Link
       to="/testimonials"
       aria-label={`Read ${test.name}'s review`}
-      className="block shrink-0 w-80 md:w-96 mx-3 rounded-[2.5rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+      className="block shrink-0 w-80 md:w-96 mx-3 rounded-[2.5rem] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       tabIndex={-1}
     >
-      <div className="h-full p-8 rounded-[2.5rem] border border-slate-200 bg-white shadow-lg hover:shadow-xl hover:border-secondary/40 transition-all duration-500 group">
+      <div className="p-8 rounded-[2.5rem] border border-slate-200 bg-white shadow-lg hover:shadow-xl hover:border-accent/40 transition-all duration-500 group">
         {test.media && (
           <div className="h-36 rounded-2xl overflow-hidden bg-slate-100 mb-6">
             {test.mediaType === 'video'
@@ -42,13 +42,14 @@ function TestimonialCard({ test }: { test: Testimonial }) {
           </div>
         )}
 
-        <p className="text-slate-600 font-medium text-sm leading-relaxed italic mb-5 line-clamp-4">
+        <Quote size={20} className="text-accent mb-3" />
+        <p className="text-slate-600 font-medium text-sm leading-relaxed italic mb-5">
           &quot;{test.review}&quot;
         </p>
 
         <div className="flex gap-1 mb-5">
           {Array.from({ length: Math.min(test.rating || 5, 5) }).map((_, i) => (
-            <Star key={i} size={13} className="text-secondary fill-secondary" />
+            <Star key={i} size={13} className="text-accent fill-accent" />
           ))}
         </div>
 
