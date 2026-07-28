@@ -48,7 +48,7 @@ export default function TestimonialsSection() {
   }, [])
 
   return (
-    <section className="py-24 bg-charcoal relative overflow-hidden">
+    <section className="py-24 bg-white relative overflow-hidden">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/5 blur-[100px] rounded-full pointer-events-none"></div>
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
         <div className="text-center mb-16 space-y-4">

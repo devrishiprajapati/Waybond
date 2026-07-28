@@ -8,7 +8,7 @@ const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, class
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
-    className={`min-h-screen pt-40 pb-24 bg-charcoal text-white ${className}`}
+    className={`min-h-screen pt-40 pb-24 bg-white text-white ${className}`}
   >
     {seoTitle && (
       <Helmet>
@@ -94,7 +94,7 @@ const About = () => (
         className="relative rounded-[4rem] overflow-hidden group shadow-2xl h-[600px] lg:h-[700px] border border-white/10"
       >
         <img src="/assets/LBK.jpeg" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-black/20 to-transparent"></div>
         <div className="absolute bottom-12 left-12 right-12">
           <div className="liquid-glass p-8 rounded-[3rem] border border-white/20 text-center shadow-2xl backdrop-blur-xl">
             <p className="text-4xl lg:text-5xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
@@ -127,7 +127,7 @@ const Community = () => (
           className="relative rounded-[3rem] overflow-hidden group shadow-[0_15px_40px_rgba(0,0,0,0.5)] h-[400px] md:h-[500px] border border-white/10"
         >
           <img src="/assets/group.jpeg" alt="Travel Group 1" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-black/20 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-black/20 to-transparent"></div>
           <div className="absolute bottom-10 left-10">
             <p className="text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">The First Step</p>
             <p className="text-[10px] text-secondary uppercase font-black tracking-[0.3em] mt-2">Shared Journeys</p>
@@ -142,7 +142,7 @@ const Community = () => (
           className="relative rounded-[3rem] overflow-hidden group shadow-[0_15px_40px_rgba(0,0,0,0.5)] h-[400px] md:h-[500px] border border-white/10"
         >
           <img src="/assets/group2.jpeg" alt="Travel Group 2" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-charcoal/90 via-black/20 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-black/20 to-transparent"></div>
           <div className="absolute bottom-10 left-10">
             <p className="text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">Bonds Forged</p>
             <p className="text-[10px] text-secondary uppercase font-black tracking-[0.3em] mt-2">Lifelong Connections</p>
@@ -217,7 +217,7 @@ const Wishlist = () => (
       <h3 className="text-3xl md:text-4xl font-display font-black uppercase italic tracking-tighter text-white/30 mb-10">Your Expedition Vault is Empty</h3>
       {/* <a
         href="/discover"
-        className="inline-block bg-charcoal text-charcoal px-12 py-5 rounded-full font-black text-[10px] uppercase tracking-[0.3em] hover:bg-secondary hover:text-white transition-all shadow-xl shadow-black/40 active:scale-95 duration-500"
+        className="inline-block bg-white text-slate-800 px-12 py-5 rounded-full font-black text-[10px] uppercase tracking-[0.3em] hover:bg-secondary hover:text-white transition-all shadow-xl shadow-black/40 active:scale-95 duration-500"
       >
         UNCOVER DESTINATIONS
       </a> */}

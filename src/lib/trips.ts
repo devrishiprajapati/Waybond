@@ -9,7 +9,7 @@ export interface Trip {
   reviews: number;
   duration: string;
   category: string;
-  type: 'Domestic' | 'International';
+  experience: 'monsoon' | 'weekend' | 'road' | 'snow';
   image: string;
   link: string;
   description: string;
@@ -17,6 +17,7 @@ export interface Trip {
   videoThumbnail?: string;
   groupSize: string;
   nextBatch: string;
+  departureDates: string[];
   highlights: string[];
   captain: {
     name: string;
@@ -52,7 +53,7 @@ export const ALL_TRIPS: Trip[] = [
     reviews: 245,
     duration: '8 Days',
     category: 'Adventure',
-    type: 'Domestic',
+    experience: 'road',
     image: '/assets/spiti.jpg',
     link: '/spiti-valley',
     description: 'Journey through the rugged landscapes of Spiti Valley. Drive along the Indo-Tibetan highway, visit ancient monasteries, and camp under the starry sky at Chandratal Lake.',
@@ -61,6 +62,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '12-15 Persons',
     nextBatch: 'May 15, 2026',
+    departureDates: ['2026-08-15', '2026-09-12', '2027-05-15'],
     highlights: ['Key Monastery Visit', 'Chandratal Lake Camping', 'Kibber Village', 'Kunzum Pass'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -83,7 +85,7 @@ export const ALL_TRIPS: Trip[] = [
     reviews: 412,
     duration: '7 Days',
     category: 'Adventure',
-    type: 'Domestic',
+    experience: 'road',
     image: '/assets/himalayas-bg.jpg',
     link: '/leh-ladakh',
     description: 'Experience the ultimate road trip to the Land of High Passes. Marvel at the changing colors of Pangong Tso, ride camels in Nubra Valley, and conquer Khardung La.',
@@ -92,6 +94,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '10-15 Persons',
     nextBatch: 'Jun 10, 2026',
+    departureDates: ['2026-08-10', '2026-09-07'],
     highlights: ['Khardung La Pass', 'Pangong Tso Lake', 'Double-Humped Camel Ride', 'Shanti Stupa'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -113,7 +116,7 @@ export const ALL_TRIPS: Trip[] = [
     reviews: 320,
     duration: '6 Days',
     category: 'Nature',
-    type: 'Domestic',
+    experience: 'snow',
     image: '/assets/kashmir.jpg',
     link: '/kashmir',
     description: 'Step into paradise on earth. Sail on the tranquil Dal Lake in a Shikara, experience the thrill of the Gulmarg Gondola, and wander through the scenic valleys of Pahalgam.',
@@ -122,6 +125,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '10-12 Persons',
     nextBatch: 'Dec 20, 2026',
+    departureDates: ['2026-12-20', '2027-01-10'],
     highlights: ['Houseboat Stay', 'Gulmarg Gondola Ride', 'Betaab Valley', 'Dal Lake Shikara Ride'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -142,7 +146,7 @@ export const ALL_TRIPS: Trip[] = [
     reviews: 189,
     duration: '6 Days',
     category: 'Backpacking',
-    type: 'Domestic',
+    experience: 'monsoon',
     image: '/assets/meghaa.jpg',
     link: '/meghalaya',
     description: 'Dive into the abode of clouds. Trek to the magical living root bridges, explore the deepest caves, and boat on the crystal-clear waters of the Umngot River.',
@@ -151,6 +155,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '10-15 Persons',
     nextBatch: 'Sep 10, 2026',
+    departureDates: ['2026-08-08', '2026-09-10'],
     highlights: ['Double Decker Root Bridge', 'Dawki River Boating', 'Mawsmai Caves', 'Nohkalikai Falls'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -171,7 +176,7 @@ export const ALL_TRIPS: Trip[] = [
     reviews: 210,
     duration: '5 Days',
     category: 'Nature',
-    type: 'Domestic',
+    experience: 'monsoon',
     image: '/assets/kerelabeach.jpg',
     link: '/kerala',
     description: 'A perfect blend of serene backwaters, lush tea gardens, and rich wildlife. Witness the majestic Western Ghats and cruise through the tranquil waters of Alleppey.',
@@ -180,6 +185,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '10-12 Persons',
     nextBatch: 'Nov 05, 2026',
+    departureDates: ['2026-09-20', '2026-11-05'],
     highlights: ['Alleppey Houseboat Stay', 'Munnar Tea Gardens', 'Periyar Wildlife Safari', 'Kathakali Show'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -199,7 +205,7 @@ export const ALL_TRIPS: Trip[] = [
     reviews: 145,
     duration: '7 Days',
     category: 'Beach',
-    type: 'Domestic',
+    experience: 'weekend',
     image: '/assets/andaman.jpg',
     link: '/andaman',
     description: 'Unwind on pristine white-sand beaches and dive into crystal clear waters. Discover the rich marine life of the Andaman Sea and the historical significance of Port Blair.',
@@ -208,6 +214,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '8-12 Persons',
     nextBatch: 'Jan 12, 2027',
+    departureDates: ['2026-10-18', '2027-01-12'],
     highlights: ['Scuba Diving', 'Radhanagar Beach Sunset', 'Cellular Jail', 'Island Hopping'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -229,13 +236,14 @@ export const ALL_TRIPS: Trip[] = [
     reviews: 350,
     duration: '8 Days',
     category: 'Honeymoon',
-    type: 'International',
+    experience: 'weekend',
     image: '/assets/bali.jpg',
     link: '/bali',
     description: 'A romantic getaway to the island of gods. Pristine beaches and vibrant culture.',
     images: ['/assets/bali.jpg'],
     groupSize: '2-4 Persons',
     nextBatch: 'Sept 10, 2026',
+    departureDates: ['2026-09-10', '2026-10-15'],
     highlights: ['Beach Dinners', 'Temple Tours'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [{ day: 1, title: 'Ubud Arrival', description: 'Welcome to Bali.' }]
@@ -249,13 +257,14 @@ export const ALL_TRIPS: Trip[] = [
     reviews: 156,
     duration: '7 Days',
     category: 'Beach',
-    type: 'International',
+    experience: 'weekend',
     image: '/assets/thai.jpg',
     link: '#',
     description: 'Explore the stunning limestone cliffs and crystal clear waters of Thailand.',
     images: ['/assets/thai.jpg'],
     groupSize: '8-10 Persons',
     nextBatch: 'Dec 12, 2026',
+    departureDates: ['2026-11-14', '2026-12-12'],
     highlights: ['Island Hopping', 'Night Markets'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [{ day: 1, title: 'Phuket Check-in', description: 'Patong beach evening.' }]
@@ -269,13 +278,14 @@ export const ALL_TRIPS: Trip[] = [
     reviews: 42,
     duration: '9 Days',
     category: 'Luxury',
-    type: 'International',
+    experience: 'weekend',
     image: '/assets/seychelles.jpg',
     link: '#',
     description: 'Luxury island getaway featuring the most beautiful beaches in the world.',
     images: ['/assets/seychelles.jpg'],
     groupSize: '4-6 Persons',
     nextBatch: 'Jan 15, 2027',
+    departureDates: ['2026-12-20', '2027-01-15'],
     highlights: ['Island Cruises', 'Marine Park'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [{ day: 1, title: 'Seychelles Arrival', description: 'Victoria city tour.' }]

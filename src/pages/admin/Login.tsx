@@ -20,7 +20,7 @@ const AdminLogin = () => {
 
   return (
     /* iOS fixes: min-h-[100dvh], no overflow-hidden, background via fixed layer */
-    <div className="min-h-[100dvh] bg-charcoal flex flex-col items-center justify-center p-6 relative">
+    <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center p-6 relative">
 
       {/* Background Decor — fixed so it doesn't scroll, pointer-events-none so it can't intercept touches */}
       <div
@@ -44,22 +44,21 @@ const AdminLogin = () => {
          * 16px blur is the sweet spot — looks great, stays performant on iOS.
          */}
         <div
-          className="p-8 md:p-10 rounded-[3rem] border border-white/10 shadow-2xl"
-          style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+          className="p-6 sm:p-8 md:p-10 rounded-[2rem] sm:rounded-[3rem] border border-slate-200 shadow-xl bg-white"
         >
           <div className="text-center mb-10">
             <div className="inline-flex p-4 bg-primary/10 rounded-2xl mb-6">
               <Lock className="text-primary" size={32} />
             </div>
-            <h1 className="text-3xl font-display font-black text-white uppercase italic tracking-tighter">
+            <h1 className="text-2xl sm:text-3xl font-display font-black text-slate-800 uppercase italic tracking-tighter">
               Admin <span className="text-primary">Basecamp</span>
             </h1>
-            <p className="text-gray-400 font-medium text-sm mt-2 italic">Secure access for WayBond organizers</p>
+            <p className="text-slate-500 font-medium text-sm mt-2 italic">Secure access for WayBond organizers</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] uppercase font-black text-white/40 tracking-[0.2em] ml-4">Access Key</label>
+              <label className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Access Key</label>
               <input
                 type="password"
                 value={password}
@@ -67,7 +66,7 @@ const AdminLogin = () => {
                 placeholder="Enter credentials..."
                 autoComplete="current-password"
                 /* text-base (16px) prevents iOS Safari/Chrome auto-zoom on focus */
-                className="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-white focus:border-primary outline-none transition-colors placeholder:text-white/20 text-base"
+                className="w-full bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-2xl text-slate-800 focus:border-primary outline-none transition-colors placeholder:text-slate-400 text-base"
                 required
               />
             </div>
@@ -90,8 +89,8 @@ const AdminLogin = () => {
             </button>
           </form>
 
-          <div className="mt-10 pt-8 border-t border-white/5 text-center">
-            <div className="flex items-center justify-center space-x-2 text-white/40 text-[10px] font-black uppercase tracking-widest">
+          <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-slate-100 text-center">
+            <div className="flex items-center justify-center space-x-2 text-slate-500 text-[10px] font-black uppercase tracking-widest">
               <ShieldCheck size={14} />
               <span>Encrypted Connection</span>
             </div>

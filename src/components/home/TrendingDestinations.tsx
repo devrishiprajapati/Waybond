@@ -10,7 +10,7 @@ export default function TrendingDestinations() {
   ];
 
   return (
-    <section className="py-24 bg-charcoal">
+    <section className="py-24 bg-white">
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 space-y-8 md:space-y-0">
           <div className="space-y-4">
@@ -19,7 +19,7 @@ export default function TrendingDestinations() {
               Destinations <span className="text-primary" style={{ WebkitTextStroke: '1px white' }}>In Demand</span>
             </h2>
           </div>
-          <button className="liquid-glass text-white px-10 py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-charcoal transition-all shadow-xl">Global Map</button>
+          <button className="liquid-glass text-white px-10 py-4 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-slate-800 transition-all shadow-xl">Global Map</button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -30,7 +30,7 @@ export default function TrendingDestinations() {
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
               viewport={{ once: true }}
-              className="relative h-[450px] rounded-[3rem] overflow-hidden group cursor-pointer shadow-2xl"
+              className="keep-light-text relative h-[450px] rounded-[3rem] overflow-hidden group cursor-pointer shadow-2xl"
             >
               <img src={optimizeImageUrl(dest.img, 800, 80)} alt={dest.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2s] will-change-transform" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>

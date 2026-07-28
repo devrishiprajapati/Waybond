@@ -12,7 +12,7 @@ const guidelines: { icon: LucideIcon, title: string, description: string }[] = [
 ]
 
 const SafetyGuidelines = () => (
-  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen pt-40 pb-24 bg-charcoal text-white relative overflow-hidden">
+  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen pt-40 pb-24 bg-white text-white relative overflow-hidden">
     <Helmet>
       <title>Trip Safety Guidelines | WayBond</title>
       <meta name="description" content="Essential safety guidelines for travelling with WayBond Experiences." />

@@ -5,7 +5,6 @@ import {
   BarChart3,
   Calendar,
   Edit2,
-  Globe2,
   Image as ImageIcon,
   LayoutDashboard,
   LogOut,
@@ -22,7 +21,7 @@ import { Trip } from '../../lib/trips'
 const AdminDashboard = () => {
   const [trips, setTrips] = useState<Trip[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [typeFilter, setTypeFilter] = useState<'All' | 'Domestic' | 'International'>('All')
+  const [experienceFilter, setExperienceFilter] = useState<'All' | Trip['experience']>('All')
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -40,22 +39,22 @@ const AdminDashboard = () => {
         trip.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         trip.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
         trip.category.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesType = typeFilter === 'All' || trip.type === typeFilter
-      return matchesSearch && matchesType
+      const matchesExperience = experienceFilter === 'All' || trip.experience === experienceFilter
+      return matchesSearch && matchesExperience
     })
-  }, [trips, searchTerm, typeFilter])
+  }, [trips, searchTerm, experienceFilter])
 
   const stats = useMemo(() => {
-    const domestic = trips.filter((trip) => trip.type === 'Domestic').length
-    const international = trips.filter((trip) => trip.type === 'International').length
+    const monsoon = trips.filter((trip) => trip.experience === 'monsoon').length
+    const road = trips.filter((trip) => trip.experience === 'road').length
     const avgRating = trips.length
       ? (trips.reduce((total, trip) => total + Number(trip.rating || 0), 0) / trips.length).toFixed(1)
       : '0.0'
 
     return [
       { label: 'Total Packages', value: trips.length, icon: Package },
-      { label: 'Domestic', value: domestic, icon: MapPin },
-      { label: 'International', value: international, icon: Globe2 },
+      { label: 'Monsoon Treks', value: monsoon, icon: MapPin },
+      { label: 'Road Trips', value: road, icon: Calendar },
       { label: 'Avg Rating', value: avgRating, icon: Star }
     ]
   }, [trips])
@@ -79,7 +78,7 @@ const AdminDashboard = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-charcoal text-white flex">
+    <div className="min-h-screen bg-white text-white flex">
       <aside className="w-80 liquid-glass-dark border-r border-white/10 p-8 hidden lg:flex flex-col">
         <div className="mb-12">
           <p className="text-secondary text-[9px] font-black uppercase tracking-[0.4em] mb-3">WayBond</p>
@@ -129,13 +128,13 @@ const AdminDashboard = () => {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/admin/hero"
-              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-charcoal transition-all"
+              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all"
             >
               <ImageIcon size={16} /> Edit Hero
             </Link>
             <Link
               to="/admin/new"
-              className="h-12 px-6 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-charcoal transition-all shadow-xl shadow-secondary/20"
+              className="h-12 px-6 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all shadow-xl shadow-secondary/20"
             >
               <Plus size={16} /> Add Expedition
             </Link>
@@ -175,17 +174,17 @@ const AdminDashboard = () => {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {(['All', 'Domestic', 'International'] as const).map((type) => (
+              {(['All', 'monsoon', 'weekend', 'road', 'snow'] as const).map((experience) => (
                 <button
-                  key={type}
-                  onClick={() => setTypeFilter(type)}
+                  key={experience}
+                  onClick={() => setExperienceFilter(experience)}
                   className={`h-11 px-5 rounded-2xl font-black text-[9px] uppercase tracking-[0.18em] transition-all ${
-                    typeFilter === type
+                    experienceFilter === experience
                       ? 'bg-secondary text-white'
                       : 'bg-white/5 text-white/45 border border-white/10 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  {type}
+                  {experience === 'All' ? 'All' : `${experience} trips`}
                 </button>
               ))}
             </div>
@@ -207,12 +206,8 @@ const AdminDashboard = () => {
 
               <div className="flex-grow min-w-0 space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={`text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full border ${
-                    trip.type === 'International'
-                      ? 'bg-secondary/10 text-secondary border-secondary/20'
-                      : 'bg-primary/10 text-primary border-primary/20'
-                  }`}>
-                    {trip.type}
+                  <span className="text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full border bg-secondary/10 text-secondary border-secondary/20">
+                    {trip.experience} trips
                   </span>
                   <span className="text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full bg-white/5 text-white/50 border border-white/10">
                     {trip.category}
@@ -239,14 +234,14 @@ const AdminDashboard = () => {
               <div className="flex items-center gap-3 xl:ml-auto">
                 <Link
                   to={`/trip/${trip.id}`}
-                  className="h-12 px-5 rounded-2xl bg-white/5 text-white border border-white/10 hover:bg-white hover:text-charcoal transition-all flex items-center justify-center"
+                  className="h-12 px-5 rounded-2xl bg-white/5 text-white border border-white/10 hover:bg-white hover:text-slate-800 transition-all flex items-center justify-center"
                   title="Preview trip"
                 >
                   <BarChart3 size={17} />
                 </Link>
                 <Link
                   to={`/admin/edit/${trip.id}`}
-                  className="h-12 px-5 rounded-2xl bg-secondary text-white hover:bg-white hover:text-charcoal transition-all flex items-center justify-center"
+                  className="h-12 px-5 rounded-2xl bg-secondary text-white hover:bg-white hover:text-slate-800 transition-all flex items-center justify-center"
                   title="Edit trip"
                 >
                   <Edit2 size={17} />

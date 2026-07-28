@@ -10,7 +10,7 @@ export default function BackupHome() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div className="bg-charcoal min-h-screen">
+    <div className="bg-white min-h-screen">
       {/* Cinematic Video Hero — this is the scrollable container */}
       <div ref={containerRef} className="relative h-screen overflow-hidden">
         <video
@@ -22,7 +22,7 @@ export default function BackupHome() {
         >
           <source src="/assets/best.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-charcoal/90"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-slate-900/90"></div>
 
         {/* Hero Text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pointer-events-none">
@@ -78,7 +78,7 @@ export default function BackupHome() {
                 <MapPin size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">GLOBAL TOURS</span>
               </div>
-              <button className="bg-secondary text-white px-8 py-3 mx-1 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-charcoal transition-all shadow-xl flex-shrink-0">
+              <button className="bg-secondary text-white px-8 py-3 mx-1 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-slate-800 transition-all shadow-xl flex-shrink-0">
                 SEARCH
               </button>
             </div>

@@ -29,7 +29,7 @@ function App() {
   }, [location.pathname])
 
   return (
-    <div className="flex flex-col min-h-screen selection:bg-secondary/30 w-full overflow-x-hidden">
+    <div className="light-theme flex flex-col min-h-screen selection:bg-secondary/30 w-full overflow-x-hidden">
       <Navbar />
       <main className="flex-grow w-full">
         <AnimatePresence mode="wait">

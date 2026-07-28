@@ -9,7 +9,7 @@
       "reviews": 245,
       "duration": "8 Days",
       "category": "Adventure",
-      "type": "Domestic",
+      "experience": "road",
       "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&q=80&w=1200",
       "link": "/spiti-valley",
       "description": "Journey through the rugged landscapes of Spiti Valley. Drive along the Indo-Tibetan highway, visit ancient monasteries, and camp under the starry sky at Chandratal Lake.",
@@ -19,6 +19,7 @@
       ],
       "groupSize": "12-15 Persons",
       "nextBatch": "May 15, 2026",
+      "departureDates": ["2026-08-15", "2026-09-12", "2027-05-15"],
       "highlights": [
         "Key Monastery Visit",
         "Chandratal Lake Camping",
@@ -85,7 +86,7 @@
       "reviews": 412,
       "duration": "7 Days",
       "category": "Adventure",
-      "type": "Domestic",
+      "experience": "road",
       "image": "https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&q=80&w=1200",
       "link": "/leh-ladakh",
       "description": "Experience the ultimate road trip to the Land of High Passes. Marvel at the changing colors of Pangong Tso, ride camels in Nubra Valley, and conquer Khardung La.",
@@ -94,6 +95,7 @@
       ],
       "groupSize": "10-15 Persons",
       "nextBatch": "Jun 10, 2026",
+      "departureDates": ["2026-08-10", "2026-09-07"],
       "highlights": [
         "Khardung La Pass",
         "Pangong Tso Lake",
@@ -155,7 +157,7 @@
       "reviews": 320,
       "duration": "6 Days",
       "category": "Nature",
-      "type": "Domestic",
+      "experience": "snow",
       "image": "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&q=80&w=1200",
       "link": "/kashmir",
       "description": "Step into paradise on earth. Sail on the tranquil Dal Lake in a Shikara, experience the thrill of the Gulmarg Gondola, and wander through the scenic valleys of Pahalgam.",
@@ -164,6 +166,7 @@
       ],
       "groupSize": "10-12 Persons",
       "nextBatch": "Dec 20, 2026",
+      "departureDates": ["2026-12-20", "2027-01-10"],
       "highlights": [
         "Houseboat Stay",
         "Gulmarg Gondola Ride",
@@ -220,7 +223,7 @@
       "reviews": 189,
       "duration": "6 Days",
       "category": "Backpacking",
-      "type": "Domestic",
+      "experience": "monsoon",
       "image": "/assets/meghaa.jpg",
       "link": "/meghalaya",
       "description": "Dive into the abode of clouds. Trek to the magical living root bridges, explore the deepest caves, and boat on the crystal-clear waters of the Umngot River.",
@@ -229,6 +232,7 @@
       ],
       "groupSize": "10-15 Persons",
       "nextBatch": "Sep 10, 2026",
+      "departureDates": ["2026-08-08", "2026-09-10"],
       "highlights": [
         "Double Decker Root Bridge",
         "Dawki River Boating",
@@ -285,7 +289,7 @@
       "reviews": 210,
       "duration": "5 Days",
       "category": "Nature",
-      "type": "Domestic",
+      "experience": "monsoon",
       "image": "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&q=80&w=1200",
       "link": "/kerala",
       "description": "A perfect blend of serene backwaters, lush tea gardens, and rich wildlife. Witness the majestic Western Ghats and cruise through the tranquil waters of Alleppey.",
@@ -294,6 +298,7 @@
       ],
       "groupSize": "10-12 Persons",
       "nextBatch": "Nov 05, 2026",
+      "departureDates": ["2026-09-20", "2026-11-05"],
       "highlights": [
         "Alleppey Houseboat Stay",
         "Munnar Tea Gardens",
@@ -345,7 +350,7 @@
       "reviews": 145,
       "duration": "7 Days",
       "category": "Beach",
-      "type": "Domestic",
+      "experience": "weekend",
       "image": "/assets/andaman.jpg",
       "link": "/andaman",
       "description": "Unwind on pristine white-sand beaches and dive into crystal clear waters. Discover the rich marine life of the Andaman Sea and the historical significance of Port Blair.",
@@ -354,6 +359,7 @@
       ],
       "groupSize": "8-12 Persons",
       "nextBatch": "Jan 12, 2027",
+      "departureDates": ["2026-10-18", "2027-01-12"],
       "highlights": [
         "Scuba Diving",
         "Radhanagar Beach Sunset",
@@ -415,7 +421,7 @@
       "reviews": 350,
       "duration": "8 Days",
       "category": "Honeymoon",
-      "type": "International",
+      "experience": "weekend",
       "image": "/assets/bali.jpg",
       "link": "/bali",
       "description": "A romantic getaway to the island of gods. Pristine beaches and vibrant culture.",
@@ -424,6 +430,7 @@
       ],
       "groupSize": "2-4 Persons",
       "nextBatch": "Sept 10, 2026",
+      "departureDates": ["2026-09-10", "2026-10-15"],
       "highlights": [
         "Beach Dinners",
         "Temple Tours"
@@ -453,7 +460,7 @@
       "reviews": 156,
       "duration": "7 Days",
       "category": "Beach",
-      "type": "International",
+      "experience": "weekend",
       "image": "/assets/thai.jpg",
       "link": "#",
       "description": "Explore the stunning limestone cliffs and crystal clear waters of Thailand.",
@@ -462,6 +469,7 @@
       ],
       "groupSize": "8-10 Persons",
       "nextBatch": "Dec 12, 2026",
+      "departureDates": ["2026-11-14", "2026-12-12"],
       "highlights": [
         "Island Hopping",
         "Night Markets"
@@ -491,7 +499,7 @@
       "reviews": 42,
       "duration": "9 Days",
       "category": "Luxury",
-      "type": "International",
+      "experience": "weekend",
       "image": "/assets/seychelles.jpg",
       "link": "#",
       "description": "Luxury island getaway featuring the most beautiful beaches in the world.",
@@ -500,6 +508,7 @@
       ],
       "groupSize": "4-6 Persons",
       "nextBatch": "Jan 15, 2027",
+      "departureDates": ["2026-12-20", "2027-01-15"],
       "highlights": [
         "Island Cruises",
         "Marine Park"

@@ -22,7 +22,7 @@ export default function WhyChooseUs() {
   ];
 
   return (
-    <section className="py-24 bg-charcoal">
+    <section className="py-24 bg-white">
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {reasons.map((reason, i) => (

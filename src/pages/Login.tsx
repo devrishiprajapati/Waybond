@@ -34,21 +34,21 @@ const Login = () => {
      * iOS fixes:
      * - min-h-[100dvh] accounts for safari's collapsible address bar
      * - NO overflow-hidden: kills fixed positioning & clips form when keyboard opens
-     * - bg-charcoal solid ensures no flash while image loads
+     * - bg-white solid ensures no flash while image loads
      * - pb-safe uses safe-area-inset-bottom for home indicator
      */
-    <div className="min-h-[100dvh] bg-charcoal flex flex-col items-center justify-start px-5 pt-28 pb-10 relative">
+    <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-start px-4 sm:px-5 pt-24 sm:pt-28 pb-8 sm:pb-10 relative">
 
       {/* Background Image — pointer-events-none prevents touch interception */}
       <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
         <img
           src="https://images.unsplash.com/photo-1506461883276-594a12b11cf3?auto=format&fit=crop&q=80&w=1200"
           alt=""
-          className="w-full h-full object-cover opacity-15"
+          className="w-full h-full object-cover opacity-[0.07]"
           loading="eager"
           decoding="async"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-charcoal/85 via-charcoal/70 to-charcoal" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/85 to-white" />
       </div>
 
       {/*
@@ -75,13 +75,12 @@ const Login = () => {
         {/* Explorer / Admin mode tabs */}
         <div className="flex justify-center mb-4">
           <div
-            className="p-1 rounded-full flex gap-1 border border-white/10"
-            style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+            className="p-1 rounded-full flex gap-1 border border-slate-200 shadow-sm bg-white"
           >
             <button
               type="button"
               onClick={() => { haptics.light(); setMode('user'); }}
-              className={`px-6 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${mode === 'user' ? 'bg-secondary text-white shadow-lg shadow-secondary/20' : 'text-white/40'
+              className={`px-4 sm:px-6 py-2.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${mode === 'user' ? 'bg-secondary text-white shadow-lg shadow-secondary/20' : 'text-slate-500'
                 }`}
             >
               <Compass size={12} /> Explorer
@@ -89,7 +88,7 @@ const Login = () => {
             <button
               type="button"
               onClick={() => { haptics.light(); setMode('admin'); }}
-              className={`px-6 py-2.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${mode === 'admin' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/40'
+              className={`px-4 sm:px-6 py-2.5 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${mode === 'admin' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-500'
                 }`}
             >
               <Shield size={12} /> Admin
@@ -103,8 +102,7 @@ const Login = () => {
          * We keep the glass aesthetic while being mobile-performant.
          */}
         <div
-          className="p-7 md:p-10 rounded-[2.5rem] border border-white/10 shadow-2xl"
-          style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}
+          className="p-5 sm:p-7 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] border border-slate-200 shadow-xl bg-white"
         >
           <div className="text-center mb-7">
             <motion.div
@@ -113,14 +111,14 @@ const Login = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <h1 className="text-3xl md:text-4xl font-display font-black text-white uppercase italic tracking-tighter liquid-text mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-slate-800 uppercase italic tracking-tighter mb-2">
                 {mode === 'admin' ? (
                   <>Admin <span className="text-primary">Basecamp</span></>
                 ) : (
                   <>{isLogin ? 'Welcome' : 'Join the'} <span className="text-secondary">Community</span></>
                 )}
               </h1>
-              <p className="text-white/40 font-medium text-xs italic tracking-wide">
+              <p className="text-slate-500 font-medium text-xs italic tracking-wide">
                 {mode === 'admin'
                   ? 'Authorized access for organizers'
                   : (isLogin ? 'Sign in to your curated expeditions' : "Ahmedabad's premier travel collective")}
@@ -131,15 +129,15 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'user' && !isLogin && (
               <div className="space-y-1">
-                <label className="text-[8px] uppercase font-black text-white/40 tracking-[0.2em] ml-4">Full Name</label>
+                <label className="text-[8px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Full Name</label>
                 <div className="relative">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={16} />
+                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                   <input
                     type="text"
                     placeholder="Your Name"
                     autoComplete="name"
                     /* text-base (16px) prevents iOS auto-zoom on focus */
-                    className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white focus:border-secondary outline-none transition-colors placeholder:text-white/20 text-base"
+                    className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
                   />
                 </div>
               </div>
@@ -147,9 +145,9 @@ const Login = () => {
 
             {mode === 'user' && (
               <div className="space-y-1">
-                <label className="text-[8px] uppercase font-black text-white/40 tracking-[0.2em] ml-4">Email Address</label>
+                <label className="text-[8px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={16} />
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                   <input
                     type="email"
                     value={email}
@@ -157,7 +155,7 @@ const Login = () => {
                     placeholder="hello@example.com"
                     autoComplete="email"
                     inputMode="email"
-                    className="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white focus:border-secondary outline-none transition-colors placeholder:text-white/20 text-base"
+                    className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
                     required
                   />
                 </div>
@@ -165,18 +163,18 @@ const Login = () => {
             )}
 
             <div className="space-y-1">
-              <label className="text-[8px] uppercase font-black text-white/40 tracking-[0.2em] ml-4">
+              <label className="text-[8px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">
                 {mode === 'admin' ? 'Access Key' : 'Password'}
               </label>
               <div className="relative">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none" size={16} />
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete={isLogin ? 'current-password' : 'new-password'}
-                  className={`w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white outline-none transition-colors placeholder:text-white/20 text-base ${mode === 'admin' ? 'focus:border-primary' : 'focus:border-secondary'
+                  className={`w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 outline-none transition-colors placeholder:text-slate-400 text-base ${mode === 'admin' ? 'focus:border-primary' : 'focus:border-secondary'
                     }`}
                   required
                 />
@@ -196,30 +194,30 @@ const Login = () => {
           {mode === 'user' && (
             <>
               <div className="mt-7 text-center">
-                <p className="text-white/40 text-[8px] font-black uppercase tracking-[0.2em] mb-4">Or continue with</p>
+                <p className="text-slate-500 text-[8px] font-black uppercase tracking-[0.2em] mb-4">Or continue with</p>
                 <div className="flex justify-center gap-4">
                   <button
                     type="button"
                     onClick={() => haptics.light()}
-                    className="p-3 bg-white/5 border border-white/10 rounded-xl text-white transition-colors active:bg-white/20 touch-manipulation"
+                    className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 transition-colors active:bg-slate-100 touch-manipulation"
                   >
                     <Chrome size={18} />
                   </button>
                   <button
                     type="button"
                     onClick={() => haptics.light()}
-                    className="p-3 bg-white/5 border border-white/10 rounded-xl text-white transition-colors active:bg-white/20 touch-manipulation"
+                    className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 transition-colors active:bg-slate-100 touch-manipulation"
                   >
                     <Github size={18} />
                   </button>
                 </div>
               </div>
 
-              <div className="mt-7 pt-5 border-t border-white/5 text-center">
+              <div className="mt-7 pt-5 border-t border-slate-100 text-center">
                 <button
                   type="button"
                   onClick={() => { haptics.light(); setIsLogin(!isLogin); }}
-                  className="text-white/60 text-[9px] font-black uppercase tracking-[0.2em] transition-colors active:text-secondary touch-manipulation"
+                  className="text-slate-600 text-[9px] font-black uppercase tracking-[0.2em] transition-colors active:text-secondary touch-manipulation"
                 >
                   {isLogin ? 'Join the community' : 'Already a member?'}
                 </button>
@@ -228,8 +226,8 @@ const Login = () => {
           )}
 
           {mode === 'admin' && (
-            <div className="mt-7 pt-5 border-t border-white/5 text-center">
-              <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2">
+            <div className="mt-7 pt-5 border-t border-slate-100 text-center">
+              <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-2">
                 <Shield size={10} /> SECURE BASECAMP
               </p>
             </div>

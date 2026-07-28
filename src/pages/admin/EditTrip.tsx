@@ -6,6 +6,12 @@ import { getTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
 
 const CATEGORIES = ['Adventure', 'Beach', 'Luxury', 'Nature', 'Honeymoon', 'Backpacking']
+const EXPERIENCES: { value: Trip['experience'], label: string }[] = [
+  { value: 'monsoon', label: 'Monsoon Treks' },
+  { value: 'weekend', label: 'Weekend Treks' },
+  { value: 'road', label: 'Road Trips' },
+  { value: 'snow', label: 'Snow Treks' }
+]
 
 const sectionClass = 'liquid-glass-dark border border-white/10 rounded-[2.5rem] p-5 md:p-8 space-y-7'
 const labelClass = 'text-[10px] uppercase font-black text-white/45 tracking-[0.2em] ml-2 flex items-center'
@@ -21,7 +27,7 @@ const EditTrip = () => {
     price: '',
     duration: '',
     category: 'Adventure',
-    type: 'Domestic',
+    experience: 'weekend',
     image: '',
     rating: 4.8,
     reviews: 120,
@@ -30,6 +36,7 @@ const EditTrip = () => {
     images: [],
     highlights: [],
     nextBatch: '',
+    departureDates: [],
     groupSize: '',
     captain: {
       name: '',
@@ -59,6 +66,7 @@ const EditTrip = () => {
       ...formData,
       images: formData.images && formData.images.length > 0 ? formData.images : [formData.image || ''],
       highlights: formData.highlights || [],
+      departureDates: formData.departureDates?.filter(Boolean) || [],
       itinerary: formData.itinerary || []
     }
 
@@ -71,7 +79,7 @@ const EditTrip = () => {
   }
 
   return (
-    <div className="min-h-screen bg-charcoal text-white px-5 md:px-10 lg:px-12 pt-32 pb-36">
+    <div className="min-h-screen bg-white text-white px-5 md:px-10 lg:px-12 pt-32 pb-36">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between mb-10">
           <div className="space-y-5">
@@ -141,7 +149,7 @@ const EditTrip = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               <div className="space-y-2">
                 <label className={labelClass}><IndianRupee size={13} className="mr-1 text-secondary" /> Base Price</label>
                 <input
@@ -171,18 +179,17 @@ const EditTrip = () => {
                   onChange={e => setFormData({ ...formData, category: e.target.value })}
                   className={`${inputClass} appearance-none`}
                 >
-                  {CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-charcoal text-white">{cat}</option>)}
+                  {CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-white text-white">{cat}</option>)}
                 </select>
               </div>
               <div className="space-y-2">
-                <label className={labelClass}>Type</label>
+                <label className={labelClass}>Experience</label>
                 <select
-                  value={formData.type}
-                  onChange={e => setFormData({ ...formData, type: e.target.value as Trip['type'] })}
+                  value={formData.experience}
+                  onChange={e => setFormData({ ...formData, experience: e.target.value as Trip['experience'] })}
                   className={`${inputClass} appearance-none`}
                 >
-                  <option value="Domestic" className="bg-charcoal text-white">Domestic</option>
-                  <option value="International" className="bg-charcoal text-white">International</option>
+                  {EXPERIENCES.map(item => <option key={item.value} value={item.value} className="bg-white text-white">{item.label}</option>)}
                 </select>
               </div>
             </div>
@@ -351,6 +358,43 @@ const EditTrip = () => {
                 />
               </div>
             </div>
+            <div className="space-y-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <label className={labelClass}>Available Departure Dates</label>
+                  <p className="text-xs text-white/45 mt-2 ml-2">Travellers can select only these dates on trip cards.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, departureDates: [...(formData.departureDates || []), ''] })}
+                  className="h-10 px-4 rounded-xl bg-secondary/15 text-secondary border border-secondary/20 uppercase font-black text-[9px] tracking-[0.16em] hover:bg-secondary hover:text-white transition-colors"
+                >
+                  <Plus size={13} className="inline mr-1" /> Add date
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {formData.departureDates?.map((date, index) => <div key={`${date}-${index}`} className="flex gap-2">
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={event => {
+                      const departureDates = [...(formData.departureDates || [])]
+                      departureDates[index] = event.target.value
+                      setFormData({ ...formData, departureDates })
+                    }}
+                    className={`${inputClass} p-3 text-sm min-w-0`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, departureDates: (formData.departureDates || []).filter((_, dateIndex) => dateIndex !== index) })}
+                    className="w-11 shrink-0 rounded-xl border border-red-200 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
+                    aria-label="Remove departure date"
+                  >
+                    <Trash2 size={15} className="mx-auto" />
+                  </button>
+                </div>)}
+              </div>
+            </div>
           </section>
 
           <section className={sectionClass}>
@@ -410,7 +454,7 @@ const EditTrip = () => {
             </div>
           </section>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-5 bg-charcoal/85 backdrop-blur-3xl border border-white/10 p-4 md:p-5 rounded-[2rem] fixed bottom-6 left-5 right-5 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 shadow-2xl shadow-black/40">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-5 bg-white/85 backdrop-blur-3xl border border-white/10 p-4 md:p-5 rounded-[2rem] fixed bottom-6 left-5 right-5 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 shadow-2xl shadow-black/40">
             <button
               type="button"
               onClick={() => navigate('/admin/dashboard')}

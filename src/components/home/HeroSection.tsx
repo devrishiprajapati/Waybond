@@ -47,7 +47,7 @@ export default function HeroSection() {
   const slide = heroSlides[index] || { image: "", title: "", subtitle: "" };
 
   return (
-    <section className="relative h-screen min-h-[600px] overflow-hidden bg-charcoal">
+    <section className="keep-light-text relative h-[68svh] sm:h-[82vh] min-h-[500px] sm:min-h-[680px] overflow-hidden bg-white">
       <Helmet>
         {heroSlides.slice(0, 2).map((s, i) => (
           <link key={`preload-${i}`} rel="preload" as="image" href={s.image} />
@@ -86,11 +86,13 @@ export default function HeroSection() {
         );
       })}
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/70 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/55 to-black/10 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-black/20 z-10" />
 
       {/* Text Content — Dynamic but synchronized */}
-      <div className="absolute inset-0 flex items-center justify-center z-20">
-        <div className="text-center px-4 max-w-4xl">
+      <div className="absolute inset-0 flex items-center z-20 pt-20 pb-20 sm:pb-0">
+        <div className="max-w-[1920px] mx-auto w-full px-6 md:px-12 lg:px-20">
+          <div className="max-w-3xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={`content-${index}`}
@@ -99,10 +101,11 @@ export default function HeroSection() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <h1 className="font-display font-black text-4xl sm:text-5xl lg:text-7xl text-white mb-4 leading-tight uppercase tracking-tighter liquid-text">
+              <p className="text-secondary font-black text-[10px] sm:text-xs uppercase tracking-[0.35em] mb-5"></p>
+              <h1 className="font-display font-black text-[2.5rem] sm:text-5xl lg:text-7xl xl:text-8xl text-white mb-5 leading-[0.95] uppercase tracking-tighter liquid-text">
                 {slide.title}
               </h1>
-              <p className="text-white/80 text-lg sm:text-xl lg:text-2xl mb-8 font-medium italic">
+              <p className="text-white/80 text-base sm:text-lg lg:text-xl mb-9 font-medium max-w-2xl leading-relaxed">
                 {slide.subtitle}
               </p>
             </motion.div>
@@ -112,12 +115,12 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4"
           >
             <Link
               to="/discover"
               onClick={() => haptics.medium()}
-              className="px-10 py-4 bg-secondary text-white rounded-full font-black text-xs uppercase tracking-widest transition-all duration-300 hover:scale-105 hover:bg-white hover:text-charcoal shadow-2xl shadow-secondary/30 min-w-[220px]"
+              className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-6 sm:px-10 py-4 bg-secondary text-white rounded-full font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 hover:bg-white hover:text-slate-800 shadow-2xl shadow-secondary/30 sm:min-w-[220px]"
             >
               Explore Packages
             </Link>
@@ -126,16 +129,17 @@ export default function HeroSection() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => haptics.medium()}
-              className="px-10 py-4 liquid-glass text-white font-black text-xs uppercase tracking-widest transition-all duration-300 hover:scale-105 min-w-[220px] !rounded-full before:!rounded-full after:!rounded-full"
+              className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-6 sm:px-10 py-4 liquid-glass text-white font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 sm:min-w-[220px] !rounded-full before:!rounded-full after:!rounded-full"
             >
               Contact Us
             </a>
           </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Dot Navigation */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-3 z-30">
+      <div className="absolute bottom-5 sm:bottom-9 left-1/2 -translate-x-1/2 md:left-12 md:translate-x-0 lg:left-20 flex gap-3 z-30">
         {heroSlides.map((_, i) => (
           <button
             key={i}
@@ -150,13 +154,6 @@ export default function HeroSection() {
         ))}
       </div>
 
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30"
-      >
-        <div className="w-px h-12 bg-gradient-to-b from-white via-white/40 to-transparent"></div>
-      </motion.div>
     </section>
   );
 }

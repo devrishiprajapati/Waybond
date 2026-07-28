@@ -10,7 +10,7 @@ import NewsletterSection from "../components/home/NewsletterSection";
 
 export default function Home() {
   return (
-    <div className="bg-charcoal">
+    <div className="bg-white">
       <Helmet>
         <title>WAYBOND — Ahmedabad's Premier Travel Community</title>
         <meta name="description" content="Discover meaningful travel experiences with Ahmedabad's most authentic travel community. Curated domestic and international trips led by verified local captains." />

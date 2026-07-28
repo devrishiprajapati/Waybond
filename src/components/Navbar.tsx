@@ -43,7 +43,7 @@ const Navbar = () => {
     <>
       <nav className={`fixed left-0 right-0 z-50 transition-all duration-700 transform flex justify-center w-full px-4 md:px-12 pt-4 md:pt-6 safe-area-padding ${visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
         }`}>
-        <div className={`w-full max-w-[1920px] mx-auto rounded-full liquid-glass shadow-2xl transition-all duration-500 relative group/nav ${scrolled ? 'py-1.5 scale-[0.98]' : 'py-2.5 md:py-3'}`}>
+        <div className={`navbar-glass w-full max-w-[1920px] mx-auto rounded-full liquid-glass shadow-2xl transition-all duration-500 relative group/nav ${scrolled ? 'py-1.5 scale-[0.98]' : 'py-2.5 md:py-3'}`}>
 
           <div className="flex justify-between items-center h-10 relative z-10 px-4 md:px-10">
             <Link to="/" onClick={() => haptics.light()} className="flex items-center space-x-2 group">
@@ -82,7 +82,7 @@ const Navbar = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => haptics.medium()}
-                  className="bg-secondary text-white px-5 py-2 rounded-full font-black text-[8px] uppercase tracking-widest hover:bg-white hover:text-charcoal transition-all duration-500 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20 whitespace-nowrap"
+                  className="bg-secondary text-white px-5 py-2 rounded-full font-black text-[8px] uppercase tracking-widest hover:bg-white hover:text-slate-800 transition-all duration-500 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20 whitespace-nowrap"
                 >
                   Book Now
                 </a>
@@ -124,7 +124,7 @@ const Navbar = () => {
               className="absolute top-1/2 left-1/2 w-[90%] max-w-[340px] liquid-glass shadow-2xl p-10 rounded-[3rem] flex flex-col max-h-[85vh] overflow-y-auto"
             >
               {/* Internal Glass Depth */}
-              <div className="absolute inset-0 bg-charcoal/40 backdrop-blur-2xl rounded-[3rem] pointer-events-none"></div>
+              <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl rounded-[3rem] pointer-events-none"></div>
 
               <div className="flex justify-between items-center mb-10 relative z-10">
                 <span className="text-2xl font-display font-black text-white tracking-tight liquid-text">

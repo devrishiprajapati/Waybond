@@ -111,7 +111,7 @@ const UserDashboard = () => {
   if (!user) return null
 
   return (
-    <div className="min-h-screen bg-charcoal text-white pt-32 pb-20 px-6 md:px-12 lg:px-20">
+    <div className="min-h-screen bg-white text-white pt-32 pb-20 px-6 md:px-12 lg:px-20">
       <div className="max-w-[1600px] mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-8">
           <div className="space-y-4">
@@ -128,7 +128,7 @@ const UserDashboard = () => {
             {isAdmin && (
               <Link
                 to="/admin/dashboard"
-                className="flex items-center gap-2 bg-white text-charcoal px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-secondary hover:text-white transition-all"
+                className="flex items-center gap-2 bg-white text-slate-800 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-secondary hover:text-white transition-all"
               >
                 <Shield size={14} />
                 <span>Admin Panel</span>
@@ -237,7 +237,7 @@ const UserDashboard = () => {
                         <div className="flex flex-wrap gap-3">
                           <Link
                             to={`/trip/${trip.id}`}
-                            className="bg-secondary text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] hover:bg-white hover:text-charcoal transition-all"
+                            className="bg-secondary text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] hover:bg-white hover:text-slate-800 transition-all"
                           >
                             View Trip Details
                           </Link>
@@ -246,7 +246,7 @@ const UserDashboard = () => {
                               setTestimonialTripId(String(trip.id))
                               document.getElementById('testimonial-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                             }}
-                            className="bg-white/5 text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-white/10 hover:bg-white hover:text-charcoal transition-all"
+                            className="bg-white/5 text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-white/10 hover:bg-white hover:text-slate-800 transition-all"
                           >
                             Add Testimonial
                           </button>
@@ -264,7 +264,7 @@ const UserDashboard = () => {
               <div className="absolute top-0 right-0 w-40 h-40 bg-secondary/20 blur-3xl rounded-full"></div>
               <div className="relative z-10 space-y-7">
                 <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-primary to-secondary p-1">
-                  <div className="w-full h-full rounded-[1.7rem] bg-charcoal flex items-center justify-center">
+                  <div className="w-full h-full rounded-[1.7rem] bg-white flex items-center justify-center">
                     <User size={38} className="text-white/40" />
                   </div>
                 </div>
@@ -299,9 +299,9 @@ const UserDashboard = () => {
                   onChange={(event) => setTestimonialTripId(event.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white outline-none focus:border-secondary"
                 >
-                  <option className="text-charcoal" value="">Select booked trip</option>
+                  <option className="text-slate-800" value="">Select booked trip</option>
                   {bookedTrips.map((trip) => (
-                    <option className="text-charcoal" key={trip.id} value={trip.id}>{trip.title}</option>
+                    <option className="text-slate-800" key={trip.id} value={trip.id}>{trip.title}</option>
                   ))}
                 </select>
 
@@ -330,7 +330,7 @@ const UserDashboard = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-charcoal transition-all"
+                  className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-slate-800 transition-all"
                 >
                   Publish Testimonial
                 </button>

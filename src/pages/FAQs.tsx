@@ -78,7 +78,7 @@ const FAQs = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen pt-40 pb-24 bg-charcoal text-white relative overflow-hidden"
+      className="min-h-screen pt-40 pb-24 bg-white text-white relative overflow-hidden"
     >
       <Helmet>
         <title>Traveler FAQs | WayBond</title>
@@ -177,7 +177,7 @@ const FAQs = () => {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => haptics.medium()}
-              className="inline-flex items-center justify-center gap-3 w-full bg-secondary text-white px-6 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.22em] hover:bg-white hover:text-charcoal transition-all duration-500 shadow-xl shadow-secondary/20 active:scale-95"
+              className="inline-flex items-center justify-center gap-3 w-full bg-secondary text-white px-6 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.22em] hover:bg-white hover:text-slate-800 transition-all duration-500 shadow-xl shadow-secondary/20 active:scale-95"
             >
               <MessageCircle size={16} /> Chat with us
             </a>

@@ -23,12 +23,11 @@ export default {
           light: '#ffeb33',
           dark: '#ccac00',
         },
-        charcoal: '#333333',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        serif: ['Inter', 'sans-serif'],
-        display: ['Inter', 'sans-serif'],
+        sans: ['Google Sans', 'Arial', 'sans-serif'],
+        serif: ['Google Sans', 'Arial', 'sans-serif'],
+        display: ['Google Sans', 'Arial', 'sans-serif'],
       },
       keyframes: {
         fadeIn: {

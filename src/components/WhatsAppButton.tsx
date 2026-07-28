@@ -29,7 +29,7 @@ const WhatsAppButton = () => {
       </div>
 
       {/* Label Tooltip */}
-      <div className="absolute right-full mr-6 top-1/2 -translate-y-1/2 bg-charcoal text-white text-[10px] uppercase font-black tracking-widest px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap hidden md:block">
+      <div className="absolute right-full mr-6 top-1/2 -translate-y-1/2 bg-white text-white text-[10px] uppercase font-black tracking-widest px-4 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap hidden md:block">
         Chat with us
       </div>
     </motion.a>

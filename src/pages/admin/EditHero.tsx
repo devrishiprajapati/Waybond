@@ -41,7 +41,7 @@ const EditHero = () => {
   }
 
   return (
-    <div className="min-h-screen bg-charcoal text-white px-5 md:px-10 lg:px-12 pt-32 pb-36">
+    <div className="min-h-screen bg-white text-white px-5 md:px-10 lg:px-12 pt-32 pb-36">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between mb-10">
           <div className="space-y-5">
@@ -154,7 +154,7 @@ const EditHero = () => {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-5 bg-charcoal/85 backdrop-blur-3xl border border-white/10 p-4 md:p-5 rounded-[2rem] fixed bottom-6 left-5 right-5 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 shadow-2xl shadow-black/40">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-5 bg-white/85 backdrop-blur-3xl border border-white/10 p-4 md:p-5 rounded-[2rem] fixed bottom-6 left-5 right-5 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 shadow-2xl shadow-black/40">
             <button
               type="button"
               onClick={() => navigate('/admin/dashboard')}

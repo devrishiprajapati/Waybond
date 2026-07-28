@@ -14,18 +14,18 @@ export default function HimachalPage() {
   ];
 
   return (
-    <div className="bg-charcoal min-h-screen text-white">
+    <div className="bg-white min-h-screen text-white">
       <Helmet>
         <title>Himachal Mystique — 6 Day Expedition | WAYBOND</title>
         <meta name="description" content="Explore the rugged Himalayas with WAYBOND. 6-day expedition through Manali, Kasol, and Kheerganga starting at ₹14,999." />
       </Helmet>
-      <section className="relative h-[85vh] overflow-hidden">
+      <section className="keep-light-text relative h-[85vh] overflow-hidden">
         <img
           src="/assets/himalayas-bg.jpg"
           alt="Himachal"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-charcoal"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-slate-900"></div>
 
         <div className="absolute inset-0 flex items-center justify-center pt-20">
           <div className="text-center px-6 max-w-5xl">
@@ -118,7 +118,7 @@ export default function HimachalPage() {
             </div>
 
             <div className="space-y-4">
-              <button className="w-full bg-secondary text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-charcoal transition-all shadow-xl shadow-secondary/30 transform hover:scale-105 active:scale-95 duration-500">
+              <button className="w-full bg-secondary text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-slate-800 transition-all shadow-xl shadow-secondary/30 transform hover:scale-105 active:scale-95 duration-500">
                 Book My Adventure
               </button>
               <a

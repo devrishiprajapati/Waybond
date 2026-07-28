@@ -103,7 +103,7 @@ const Testimonials = () => {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen pt-40 pb-24 bg-charcoal text-white relative overflow-hidden">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen pt-40 pb-24 bg-white text-white relative overflow-hidden">
       <Helmet><title>Testimonials & Reviews | WayBond</title><meta name="description" content="Read WayBond traveller reviews and share your own trip story." /></Helmet>
       <div className="absolute top-24 right-[-10%] h-[34rem] w-[34rem] rounded-full bg-secondary/10 blur-[140px] pointer-events-none" />
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
@@ -130,9 +130,9 @@ const Testimonials = () => {
               <textarea value={review} onChange={event => setReview(event.target.value)} placeholder="YOUR REVIEW" rows={5} className="w-full resize-none bg-black/20 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary/60" />
               <div><p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/50 mb-3">Your rating</p><div className="flex gap-2">{[1, 2, 3, 4, 5].map(value => <button key={value} type="button" onClick={() => setRating(value)} className="p-1"><Star size={22} className={value <= rating ? 'text-secondary fill-secondary' : 'text-white/20'} /></button>)}</div></div>
               <label className="block cursor-pointer rounded-2xl border border-dashed border-white/20 hover:border-secondary/60 transition-colors p-5 text-center"><input type="file" accept="image/*,video/*" onChange={handleMedia} className="hidden" /><div className="flex justify-center gap-3 text-secondary mb-2"><ImagePlus size={20} /><Video size={20} /></div><p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Upload photo or video</p><p className="text-[9px] text-white/35 mt-2">Image or video · maximum 8 MB</p></label>
-              {media && <div className="relative h-32 rounded-2xl overflow-hidden bg-black/30">{mediaType === 'video' ? <video src={media} className="h-full w-full object-cover" /> : <img src={media} alt="Upload preview" className="h-full w-full object-cover" />}<button type="button" onClick={() => { setMedia(undefined); setMediaType(undefined) }} className="absolute top-3 right-3 bg-charcoal/80 p-2 rounded-full"><X size={14} /></button></div>}
+              {media && <div className="relative h-32 rounded-2xl overflow-hidden bg-black/30">{mediaType === 'video' ? <video src={media} className="h-full w-full object-cover" /> : <img src={media} alt="Upload preview" className="h-full w-full object-cover" />}<button type="button" onClick={() => { setMedia(undefined); setMediaType(undefined) }} className="absolute top-3 right-3 bg-white/80 p-2 rounded-full"><X size={14} /></button></div>}
               {error && <p className="text-xs text-red-300">{error}</p>}
-              <button type="submit" className="w-full bg-secondary text-white py-4 rounded-full font-black text-[10px] uppercase tracking-[0.22em] hover:bg-white hover:text-charcoal transition-all duration-500 flex items-center justify-center gap-3"><Send size={15} /> Submit review</button>
+              <button type="submit" className="w-full bg-secondary text-white py-4 rounded-full font-black text-[10px] uppercase tracking-[0.22em] hover:bg-white hover:text-slate-800 transition-all duration-500 flex items-center justify-center gap-3"><Send size={15} /> Submit review</button>
             </form>}
           </aside>
         </div>

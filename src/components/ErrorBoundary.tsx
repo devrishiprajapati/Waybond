@@ -24,9 +24,9 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-charcoal p-6 text-center">
+        <div className="min-h-screen flex items-center justify-center bg-white p-6 text-center">
           <div className="max-w-md space-y-6">
-            <h1 className="text-4xl font-display font-black text-charcoal uppercase italic tracking-tighter">
+            <h1 className="text-4xl font-display font-black text-slate-800 uppercase italic tracking-tighter">
               Something went <span className="text-primary">wrong</span>
             </h1>
             <p className="text-gray-400 font-medium italic">

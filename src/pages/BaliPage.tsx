@@ -14,18 +14,18 @@ export default function BaliPage() {
   ];
 
   return (
-    <div className="bg-charcoal min-h-screen text-white">
+    <div className="bg-white min-h-screen text-white">
       <Helmet>
         <title>Bali Essence — 7 Day Tropical Escape | WAYBOND</title>
         <meta name="description" content="Luxury Bali escape with WAYBOND. 7 days through Ubud & Seminyak with private villas and island tours starting at ₹54,999." />
       </Helmet>
-      <section className="relative h-[85vh] overflow-hidden">
+      <section className="keep-light-text relative h-[85vh] overflow-hidden">
         <img
           src="/assets/bali.jpg"
           alt="Bali"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-charcoal"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-slate-900"></div>
 
         <div className="absolute inset-0 flex items-center justify-center pt-20">
           <div className="text-center px-6 max-w-5xl">
@@ -120,7 +120,7 @@ export default function BaliPage() {
             </div>
 
             <div className="space-y-4">
-              <button className="w-full bg-secondary text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-charcoal transition-all shadow-xl shadow-secondary/30 transform hover:scale-105 active:scale-95 duration-500">
+              <button className="w-full bg-secondary text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-slate-800 transition-all shadow-xl shadow-secondary/30 transform hover:scale-105 active:scale-95 duration-500">
                 Claim My Escape
               </button>
               <a

@@ -1,23 +1,47 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
-import { Filter, Search, MapPin, Calendar, Star, ChevronDown, CheckCircle2, MessageCircle, ShieldCheck, ArrowUpRight, Clock } from 'lucide-react'
+import { Filter, Search, MapPin, Calendar, Star, ChevronDown, CheckCircle2, MessageCircle, ShieldCheck, ArrowUpRight, Clock, Download } from 'lucide-react'
 import { CATEGORIES, getTripWhatsAppLink } from '../lib/trips'
 import { getTrips } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
+import DepartureDatePicker from '../components/DepartureDatePicker'
+
+const experienceFilters = [
+  { key: 'monsoon', label: 'Monsoon Treks', icon: '⛰️' },
+  { key: 'weekend', label: 'Weekend Treks', icon: '🥾' },
+  { key: 'road', label: 'Road Trips', icon: '🚙' },
+  { key: 'snow', label: 'Snow Treks', icon: '❄️' },
+] as const
 
 const Discover = () => {
   const [trips, setTrips] = useState<any[]>([])
+  const [searchParams] = useSearchParams()
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [selectedDepartures, setSelectedDepartures] = useState<Record<number, string>>({})
 
   useEffect(() => {
     getTrips().then(setTrips);
   }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeType, setActiveType] = useState<'All' | 'Domestic' | 'International'>('All');
+  const [activeExperience, setActiveExperience] = useState<'All' | 'monsoon' | 'weekend' | 'road' | 'snow'>('All');
+  const footerCategory = searchParams.get('category')
+  const footerExperience = searchParams.get('experience')
+  const footerRegion = searchParams.get('region')
+  const footerDuration = searchParams.get('duration')
+
+  const getDays = (duration: string) => Number.parseInt(duration, 10) || 0
+  const matchesRegion = (trip: any, region: string) => {
+    const text = `${trip.title} ${trip.location}`.toLowerCase()
+    if (region === 'himalayas') return /spiti|leh|ladakh|kashmir|manali|shimla/.test(text)
+    if (region === 'northeast') return /meghalaya|shillong|cherrapunji|dawki/.test(text)
+    if (region === 'south-india') return /kerala|munnar|alleppey|thekkady/.test(text)
+    if (region === 'islands') return /andaman|bali|thai|phuket|krabi|seychelles/.test(text)
+    return true
+  }
 
   const toggleFilter = (cat: string) => {
     setActiveFilters(prev =>
@@ -29,12 +53,20 @@ const Discover = () => {
     const matchesSearch = trip.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       trip.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = activeFilters.length === 0 || activeFilters.includes(trip.category);
-    const matchesType = activeType === 'All' || trip.type === activeType;
-    return matchesSearch && matchesFilter && matchesType;
+    const matchesExperience = activeExperience === 'All' || trip.experience === activeExperience;
+    const matchesFooterCategory = !footerCategory || trip.category === footerCategory
+    const matchesFooterExperience = !footerExperience || trip.experience === footerExperience
+    const matchesFooterRegion = !footerRegion || matchesRegion(trip, footerRegion)
+    const days = getDays(trip.duration)
+    const matchesFooterDuration = !footerDuration ||
+      (footerDuration === 'weekend' && days <= 5) ||
+      (footerDuration === 'week-long' && days >= 6 && days <= 7) ||
+      (footerDuration === 'extended' && days >= 8)
+    return matchesSearch && matchesFilter && matchesExperience && matchesFooterCategory && matchesFooterExperience && matchesFooterRegion && matchesFooterDuration;
   })
 
   return (
-    <div className="min-h-screen bg-charcoal text-white pt-28 pb-12">
+    <div className="min-h-screen bg-white text-white pt-28 pb-12">
       <Helmet>
         <title>Explore Adventures — WAYBOND Trips Catalog</title>
         <meta name="description" content="Browse curated domestic and international travel packages. From Himachal to Bali — find your next adventure with Infi Yatra." />
@@ -43,6 +75,10 @@ const Discover = () => {
 
         {/* Cinematic Header */}
         <div className="mb-6 space-y-4">
+          {(footerCategory || footerExperience || footerRegion || footerDuration) && <div className="inline-flex items-center gap-3 rounded-full bg-secondary/10 border border-secondary/20 px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-secondary">
+            Viewing a curated category
+            <Link to="/discover" className="text-slate-500 hover:text-secondary">Clear</Link>
+          </div>}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">
               <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px] drop-shadow-lg">COLLECTIONS 2024</span>
@@ -67,35 +103,25 @@ const Discover = () => {
             </div>
           </div>
 
-          {/* Type Filters & Sidebar Toggle */}
+          {/* Experience Filters & Sidebar Toggle */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/5">
-            <div className="flex flex-wrap gap-2">
-              {['All', 'Domestic', 'International'].map((type) => (
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full lg:w-auto">
+              {experienceFilters.map((experience) => (
                 <button
-                  key={type}
+                  key={experience.key}
                   onClick={() => {
                     haptics.light();
-                    setActiveType(type as any);
+                    setActiveExperience(activeExperience === experience.key ? 'All' : experience.key);
                   }}
-                  className={`px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.3em] transition-all duration-500 ${activeType === type
+                  className={`px-3 sm:px-5 py-3 rounded-full text-[10px] font-black transition-all duration-500 ${activeExperience === experience.key
                     ? 'bg-secondary text-white shadow-2xl shadow-secondary/40'
                     : 'liquid-glass text-white/40 hover:text-white hover:bg-white/10'}`}
                 >
-                  {type}
+                  <span className="mr-1.5" aria-hidden="true">{experience.icon}</span>{experience.label}
                 </button>
               ))}
             </div>
 
-            <button
-              onClick={() => {
-                haptics.light();
-                setIsFiltersOpen(!isFiltersOpen);
-              }}
-              className={`flex items-center gap-2 px-6 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.3em] transition-all duration-500 ${isFiltersOpen ? 'bg-charcoal text-charcoal' : 'liquid-glass text-white/40 hover:text-white'}`}
-            >
-              <Filter size={14} className={isFiltersOpen ? 'text-charcoal' : 'text-secondary'} />
-              {isFiltersOpen ? 'Hide Filters' : 'Show Filters'}
-            </button>
           </div>
         </div>
 
@@ -176,14 +202,16 @@ const Discover = () => {
           <div className="flex-grow">
             <div className={`grid grid-cols-1 md:grid-cols-2 ${isFiltersOpen ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-3 xl:grid-cols-4'} gap-6 transition-all duration-700`}>
               <AnimatePresence mode="popLayout">
-                {filteredTrips.map((trip) => (
+                {filteredTrips.map((trip) => {
+                  const selectedDeparture = selectedDepartures[trip.id] || trip.departureDates?.[0]
+                  return (
                   <motion.div
                     key={trip.id}
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="group relative liquid-glass-dark liquid-glass-shine rounded-[2.5rem] overflow-hidden border border-white/10 hover:border-white/30 transition-all duration-700 h-auto flex flex-col shadow-2xl"
+                    className="group relative bg-white rounded-[2rem] overflow-hidden border border-slate-200 hover:border-secondary/40 transition-all duration-500 h-auto flex flex-col shadow-lg hover:shadow-xl"
                   >
                     {/* Top Visual Area */}
                     <div className="relative h-48 overflow-hidden">
@@ -193,13 +221,13 @@ const Discover = () => {
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-transparent to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
 
                       {/* Difficulty/Type Tag */}
                       <div className="absolute top-4 left-4">
                         <div className="liquid-glass backdrop-blur-md text-white text-[10px] font-black uppercase px-4 py-1.5 rounded-full tracking-[0.2em] border-white/20 flex items-center gap-2">
                           <div className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></div>
-                          {trip.type}
+                          {experienceFilters.find(item => item.key === trip.experience)?.label || 'Adventure'}
                         </div>
                       </div>
 
@@ -215,7 +243,7 @@ const Discover = () => {
                     </div>
 
                     {/* Content Area */}
-                    <div className="p-6 flex-grow flex flex-col space-y-4 relative z-20">
+                    <div className="p-5 sm:p-6 flex-grow flex flex-col space-y-4 relative z-20">
                       <div className="flex justify-between items-start">
                         <div className="space-y-1">
                           <h3 className="text-xl font-display font-black text-white uppercase italic tracking-tighter leading-tight group-hover:text-secondary transition-colors line-clamp-1">
@@ -236,7 +264,13 @@ const Discover = () => {
                         {trip.description || "Embark on an unforgettable journey through Ahmedabad's most curated travel collective."}
                       </p>
 
-                      <div className="pt-6 border-t border-white/10 space-y-4">
+                      <DepartureDatePicker
+                        dates={trip.departureDates}
+                        value={selectedDeparture}
+                        onChange={date => setSelectedDepartures(current => ({ ...current, [trip.id]: date }))}
+                      />
+
+                      <div className="pt-5 border-t border-slate-100 space-y-4">
                         <div className="space-y-1 min-w-0">
                           <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Starting from</span>
                           <div className="flex items-baseline space-x-1">
@@ -244,17 +278,28 @@ const Discover = () => {
                           </div>
                         </div>
 
-                        <Link
-                          to={`/trip/${trip.id}`}
-                          onClick={() => haptics.medium()}
-                          className="w-full h-12 liquid-glass border-white/20 rounded-2xl text-white font-black text-[10px] uppercase tracking-[0.16em] leading-none hover:bg-white hover:text-charcoal transition-all transform hover:scale-105 flex items-center justify-center text-center whitespace-nowrap"
-                        >
-                          Experience
-                        </Link>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Link
+                            to={`/trip/${trip.id}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`}
+                            onClick={() => haptics.medium()}
+                            className="h-12 liquid-glass border-white/20 rounded-2xl text-white font-black text-[9px] uppercase tracking-[0.12em] leading-none hover:bg-white hover:text-slate-800 transition-all flex items-center justify-center text-center whitespace-nowrap"
+                          >
+                            More Details
+                          </Link>
+                          <a
+                            href={getTripWhatsAppLink(`${trip.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => haptics.medium()}
+                            className="h-12 rounded-2xl bg-secondary/15 text-secondary font-black text-[9px] uppercase tracking-[0.12em] hover:bg-secondary hover:text-white transition-all flex items-center justify-center gap-2 text-center whitespace-nowrap"
+                          >
+                            <Download size={14} /> Get PDF
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
-                ))}
+                )})}
               </AnimatePresence>
             </div>
 
@@ -268,7 +313,7 @@ const Discover = () => {
                   onClick={() => {
                     haptics.light();
                     setActiveFilters([]);
-                    setActiveType('All');
+                    setActiveExperience('All');
                   }}
                   className="text-secondary font-black uppercase tracking-widest text-xs border-b-2 border-secondary/20 pb-1 hover:border-secondary transition-all"
                 >

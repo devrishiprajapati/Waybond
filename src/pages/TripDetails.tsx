@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  MapPin, Calendar, Users, Star, ArrowLeft,
+  MapPin, Users, Star, ArrowLeft,
   CheckCircle2, Clock, ShieldCheck, ChevronDown,
   ChevronUp, PlayCircle, Instagram, MessageCircle
 } from 'lucide-react'
@@ -10,37 +10,42 @@ import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
 import { getTripById } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
+import DepartureDatePicker from '../components/DepartureDatePicker'
 
 const TripDetails = () => {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const departureParam = searchParams.get('departure')
   const [trip, setTrip] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [activeImage, setActiveImage] = useState(0)
   const [expandedDay, setExpandedDay] = useState<number | null>(1)
+  const [selectedDeparture, setSelectedDeparture] = useState('')
 
   useEffect(() => {
     if (id) {
       getTripById(parseInt(id)).then(t => {
         setTrip(t || null)
+        if (t) setSelectedDeparture(departureParam || t.departureDates?.[0] || '')
         setLoading(false)
       })
     }
-  }, [id])
+  }, [id, departureParam])
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-charcoal uppercase font-black tracking-widest text-white/40">Loading Expedition...</div>
+    return <div className="min-h-screen flex items-center justify-center bg-white uppercase font-black tracking-widest text-white/40">Loading Expedition...</div>
   }
 
   if (!trip) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-charcoal uppercase font-black text-4xl tracking-tighter text-white/30 liquid-text">
+      <div className="min-h-screen flex items-center justify-center bg-white uppercase font-black text-4xl tracking-tighter text-white/30 liquid-text">
         Expedition Not Found
       </div>
     )
   }
 
   return (
-    <div className="bg-charcoal min-h-screen pt-28 pb-12">
+    <div className="bg-white min-h-screen pt-28 pb-12">
       <Helmet>
         <title>{trip.title} | WAYBOND</title>
         <meta name="description" content={trip.description.substring(0, 160)} />
@@ -57,7 +62,7 @@ const TripDetails = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
           <div>
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
               <span className="liquid-glass text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20">Most Popular</span>
               <div className="flex items-center text-accent bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
                 <Star size={14} fill="currentColor" />
@@ -65,8 +70,8 @@ const TripDetails = () => {
               </div>
             </div>
             <h1 className="text-4xl md:text-6xl font-display font-black text-white liquid-text italic uppercase tracking-tighter">{trip.title}</h1>
-            <div className="flex items-center text-white/60 mt-4 font-black uppercase tracking-widest text-xs">
-              <MapPin size={16} className="mr-2 text-secondary" /> {trip.location}
+            <div className="flex items-center text-white/60 mt-4 font-black uppercase tracking-widest text-xs min-w-0">
+              <MapPin size={16} className="mr-2 text-secondary shrink-0" /> <span className="break-words">{trip.location}</span>
             </div>
           </div>
           <div className="flex gap-3">
@@ -100,7 +105,7 @@ const TripDetails = () => {
               alt="Main Trip"
               className="w-full h-full object-cover transition-transform duration-[2s] hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-charcoal/60 via-transparent to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
             <div className="absolute top-8 right-8">
               <button
                 onClick={() => haptics.light()}
@@ -111,7 +116,7 @@ const TripDetails = () => {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-4">
             {(trip.images.length > 0 ? trip.images : [trip.image]).map((img: string, idx: number) => (
               <button
                 key={idx}
@@ -119,7 +124,7 @@ const TripDetails = () => {
                   haptics.light();
                   setActiveImage(idx);
                 }}
-                className={`h-20 md:h-24 rounded-[2rem] overflow-hidden border-2 transition-all duration-500 ${activeImage === idx ? 'border-secondary scale-95 shadow-xl shadow-secondary/20' : 'border-white/10 opacity-50 hover:opacity-100 hover:scale-105'}`}
+                className={`h-16 sm:h-20 md:h-24 rounded-2xl sm:rounded-[2rem] overflow-hidden border-2 transition-all duration-500 ${activeImage === idx ? 'border-secondary scale-95 shadow-xl shadow-secondary/20' : 'border-white/10 opacity-50 hover:opacity-100 hover:scale-105'}`}
               >
                 <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
               </button>
@@ -142,14 +147,11 @@ const TripDetails = () => {
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                <div className="flex items-center text-white/80 font-black uppercase tracking-widest text-xs">
-                  <Calendar size={18} className="mr-3 text-secondary" /> Next Batch
-                </div>
-                <span className="text-white font-black">{trip.nextBatch}</span>
+              <div className="p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                <DepartureDatePicker dates={trip.departureDates} value={selectedDeparture} onChange={setSelectedDeparture} />
               </div>
 
-              <div className="flex items-center justify-between p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
                 <div className="flex items-center text-white/80 font-black uppercase tracking-widest text-xs">
                   <Users size={18} className="mr-3 text-secondary" /> Group Size
                 </div>
@@ -158,7 +160,7 @@ const TripDetails = () => {
             </div>
 
             <a
-              href={getWhatsAppLink(`Hi! I'm interested in booking the ${trip.title}`)}
+              href={getWhatsAppLink(`Hi! I'm interested in booking the ${trip.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)}
               target="_blank" rel="noopener noreferrer"
               onClick={() => haptics.medium()}
               className="w-full bg-secondary text-white py-6 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 block text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20"

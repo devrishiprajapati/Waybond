@@ -1,118 +1,90 @@
-import React, { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MapPin, MessageCircle } from 'lucide-react'
+import { CalendarDays, CircleHelp, Download, MapPin } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { getTripWhatsAppLink } from '../../lib/trips'
 import { getTrips, optimizeImageUrl } from '../../lib/dataService'
-import { Link } from 'react-router-dom'
 import { haptics } from '../../lib/haptics'
+import DepartureDatePicker from '../DepartureDatePicker'
+
+type Experience = 'monsoon' | 'weekend' | 'road' | 'snow'
+
+const experiences: { key: Experience, label: string, icon: string }[] = [
+  { key: 'monsoon', label: 'Monsoon Treks', icon: '⛰️' },
+  { key: 'weekend', label: 'Weekend Treks', icon: '🥾' },
+  { key: 'road', label: 'Road Trips', icon: '🚙' },
+  { key: 'snow', label: 'Snow Treks', icon: '❄️' },
+]
+
+const tripMatchesExperience = (trip: any, experience: Experience) => trip.experience === experience
 
 export default function FeaturedPackages() {
-  const [category, setCategory] = useState<'Domestic' | 'International'>('Domestic')
+  const [experience, setExperience] = useState<Experience>('monsoon')
   const [trips, setTrips] = useState<any[]>([])
+  const [selectedDepartures, setSelectedDepartures] = useState<Record<number, string>>({})
 
-  useEffect(() => {
-    getTrips().then(setTrips);
-  }, []);
+  useEffect(() => { getTrips().then(setTrips) }, [])
+
+  const selectedTrips = useMemo(() => trips.filter(trip => tripMatchesExperience(trip, experience)), [trips, experience])
 
   return (
-    <section className="py-24 bg-charcoal">
-      <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20">
-        <div className="text-center mb-16 space-y-4">
-          <h2 className="text-4xl md:text-6xl font-display font-black text-white tracking-tighter uppercase italic leading-none liquid-text">
-            Explore Our <span className="text-primary" style={{ WebkitTextStroke: '1px white' }}>Masterpieces</span>
-          </h2>
-          <p className="text-white/40 font-medium text-lg max-w-xl mx-auto italic leading-relaxed">Authentic journeys curated for the Ahmedabad explorer.</p>
+    <section className="py-24 bg-white relative overflow-hidden">
+      <div className="absolute left-1/2 top-0 h-80 w-2/3 -translate-x-1/2 rounded-full bg-secondary/5 blur-[110px] pointer-events-none" />
+      <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
+        <div className="text-center mb-10 md:mb-12">
+          <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-4">WayBond adventures</p>
+          <h2 className="text-4xl md:text-6xl font-display font-black text-white tracking-tighter uppercase italic leading-none liquid-text">Choose Your <span className="text-secondary">Experience</span></h2>
+          <p className="text-white/45 font-medium text-base md:text-lg mt-5">Pick the perfect adventure for you.</p>
         </div>
 
-        <div className="flex justify-center mb-20">
-          <div className="liquid-glass-dark p-1.5 rounded-full border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex">
-            {['Domestic', 'International'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => {
-                  haptics.light();
-                  setCategory(tab as 'Domestic' | 'International');
-                }}
-                className={`px-10 py-3.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 ${category === tab
-                  ? 'bg-secondary text-white shadow-xl shadow-secondary/30'
-                  : 'text-white/40 hover:text-white hover:bg-white/5'
-                  }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-xl md:max-w-none mx-auto mb-14 md:mb-16">
+          {experiences.map(filter => (
+            <button
+              key={filter.key}
+              type="button"
+              onClick={() => { haptics.light(); setExperience(filter.key) }}
+              className={`min-w-0 w-full px-2 sm:px-4 md:px-5 py-3 sm:py-3.5 rounded-full border text-[11px] sm:text-sm font-black whitespace-nowrap transition-all duration-300 ${experience === filter.key ? 'bg-secondary border-secondary text-white shadow-xl shadow-secondary/20' : 'bg-white/5 border-white/15 text-white hover:border-secondary/50 hover:bg-white/10'}`}
+            >
+              <span className="mr-2 text-base" aria-hidden="true">{filter.icon}</span>{filter.label}
+            </button>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          <AnimatePresence mode="wait">
-            {trips.filter(t => t.type === category).map((trip) => (
-              <motion.div
-                key={trip.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="group relative bg-charcoal rounded-[2.5rem] overflow-hidden border border-white/10 hover:border-secondary/20 transition-all duration-700 h-[380px] shadow-2xl"
-              >
-                <div className="relative h-full w-full overflow-hidden">
-                  <img
-                    src={optimizeImageUrl(trip.image, 800, 80)}
-                    alt={trip.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s] will-change-transform"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent"></div>
-
-                  <div className="absolute top-6 left-6">
-                    <span className="liquid-glass text-white text-[10px] font-black uppercase px-4 py-2 rounded-full tracking-widest shadow-xl border-white/20">{trip.duration}</span>
-                  </div>
-
-                  <div className="absolute bottom-8 left-8 right-8 space-y-4">
-                    <div className="flex items-center space-x-2 text-secondary">
-                      <MapPin size={14} className="fill-secondary/20" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] drop-shadow-md">{trip.location}</span>
-                    </div>
-                    <h3 className="text-2xl font-display font-black text-white uppercase tracking-tighter leading-[0.9] italic group-hover:text-secondary transition-all duration-500 drop-shadow-2xl">{trip.title}</h3>
-
-                    <div className="pt-6 flex justify-between items-center border-t border-white/10">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Starts At</span>
-                        <span className="text-2xl font-display font-black text-white tracking-tighter">₹{trip.price}</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <a
-                          href={getTripWhatsAppLink(trip.title)}
-                          target="_blank" rel="noopener noreferrer"
-                          onClick={() => haptics.medium()}
-                          className="liquid-glass-dark text-white p-3.5 rounded-2xl hover:bg-secondary transition-all transform hover:scale-105 border border-white/10 shadow-xl"
-                        >
-                          <MessageCircle size={18} />
-                        </a>
-                        <Link
-                          to={`/trip/${trip.id}`}
-                          onClick={() => haptics.medium()}
-                          className="h-11 px-7 rounded-2xl bg-white text-charcoal font-black text-[10px] uppercase tracking-[0.16em] transition-all shadow-2xl duration-500 hover:bg-secondary hover:text-white flex items-center justify-center text-center whitespace-nowrap"
-                        >
-                          Details
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+        <AnimatePresence mode="wait">
+          <motion.div key={experience} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7 md:gap-9">
+            {selectedTrips.map(trip => {
+              const selectedDeparture = selectedDepartures[trip.id] || trip.departureDates?.[0]
+              return <article key={trip.id} className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2">
+              <div className="relative h-56 sm:h-60 overflow-hidden bg-white">
+                <img src={optimizeImageUrl(trip.image, 800, 80)} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-transparent to-transparent" />
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">{Array.from({ length: 4 }).map((_, dot) => <span key={dot} className={`h-2 w-2 rounded-full border border-white/60 ${dot === 0 ? 'bg-secondary' : 'bg-white/70'}`} />)}</div>
+              </div>
+              <div className="p-6 md:p-7">
+                <div className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-3 text-[11px] font-bold text-white/55">
+                  <span className="inline-flex items-center gap-2 whitespace-nowrap"><CalendarDays size={15} className="text-secondary" /> {trip.duration}</span>
+                  <span className="inline-flex items-center gap-2 min-w-0"><MapPin size={15} className="text-secondary shrink-0" /><span className="truncate">{trip.location}</span></span>
                 </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+                <div className="h-px bg-white/10 my-5" />
+                <h3 className="text-xl font-display font-black tracking-tight text-white leading-tight">{trip.title}</h3>
+                <p className="text-sm text-white/55 mt-2 min-h-10">{trip.description}</p>
+                <div className="grid grid-cols-2 gap-4 mt-7 items-end">
+                  <div><p className="text-[9px] font-black uppercase tracking-widest text-white/45 mb-1">Starting from</p><p className="text-2xl font-display font-black text-secondary leading-none">₹{trip.price}</p></div>
+                  <div className="text-right"><p className="text-[9px] font-black uppercase tracking-widest text-white/45 mb-2">Difficulty</p><div className="flex justify-end gap-1.5">{[0, 1, 2].map(level => <span key={level} className={`h-1.5 w-5 rounded-full ${level === 0 ? 'bg-secondary' : 'bg-white/20'}`} />)}</div></div>
+                </div>
+                <div className="mt-7"><DepartureDatePicker dates={trip.departureDates} value={selectedDeparture} onChange={date => setSelectedDepartures(current => ({ ...current, [trip.id]: date }))} /></div>
+                <div className="grid grid-cols-2 gap-3 mt-7">
+                  <Link to={`/trip/${trip.id}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-2 rounded-full bg-white/10 px-3 py-3.5 text-[10px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors"><CircleHelp size={15} /> More details</Link>
+                  <a href={getTripWhatsAppLink(`${trip.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)} target="_blank" rel="noopener noreferrer" onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-2 rounded-full bg-secondary/15 px-3 py-3.5 text-[10px] font-black uppercase tracking-wider text-secondary hover:bg-secondary hover:text-white transition-colors"><Download size={15} /> Get PDF</a>
+                </div>
+              </div>
+            </article>
+            })}
+          </motion.div>
+        </AnimatePresence>
 
-        <div className="mt-20 text-center">
-          <Link
-            to="/discover"
-            onClick={() => haptics.light()}
-            className="text-secondary font-black uppercase tracking-[0.3em] text-xs border-b-2 border-secondary/20 pb-2 hover:border-secondary transition-all drop-shadow-md"
-          >
-            View All Adventures Hub
-          </Link>
-        </div>
+        {trips.length > 0 && selectedTrips.length === 0 && <p className="text-center text-white/50 italic py-10">More adventures are coming soon.</p>}
+        <div className="mt-16 text-center"><Link to="/discover" onClick={() => haptics.light()} className="text-secondary font-black uppercase tracking-[0.3em] text-xs border-b-2 border-secondary/20 pb-2 hover:border-secondary transition-all">View All Adventures Hub</Link></div>
       </div>
     </section>
   )
