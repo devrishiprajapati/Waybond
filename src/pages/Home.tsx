@@ -2,9 +2,10 @@ import React from 'react'
 import { Helmet } from 'react-helmet-async'
 import HeroSection from "../components/home/HeroSection";
 import StatsSection from "../components/home/StatsSection";
+import TrendingDestinations from "../components/home/TrendingDestinations";
 import FeaturedPackages from "../components/home/FeaturedPackages";
 import WhyChooseUs from "../components/home/WhyChooseUs";
-import TrendingDestinations from "../components/home/TrendingDestinations";
+import LatestBlogs from "../components/home/LatestBlogs";
 import TestimonialsSection from "../components/home/TestimonialsSection";
 import NewsletterSection from "../components/home/NewsletterSection";
 
@@ -20,11 +21,12 @@ export default function Home() {
       </Helmet>
       <HeroSection />
       <StatsSection />
+      <TrendingDestinations />
       <FeaturedPackages />
       <WhyChooseUs />
-      <TrendingDestinations />
+      <LatestBlogs />
       <TestimonialsSection />
-      <NewsletterSection />
+      {/* <NewsletterSection /> */}
     </div>
   );
 }

@@ -20,6 +20,8 @@ import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
 import SafetyGuidelines from './pages/SafetyGuidelines'
 import Testimonials from './pages/Testimonials'
+import Blogs from './pages/Blogs'
+import BlogDetail from './pages/BlogDetail'
 
 function App() {
   const location = useLocation();
@@ -46,6 +48,8 @@ function App() {
             <Route path="/cancellation-refunds" element={<CancellationRefunds />} />
             <Route path="/safety-guidelines" element={<SafetyGuidelines />} />
             <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/blogs" element={<Blogs />} />
+            <Route path="/blog/:slug" element={<BlogDetail />} />
             <Route path="/trip/:id" element={<TripDetails />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/login" element={<Login />} />

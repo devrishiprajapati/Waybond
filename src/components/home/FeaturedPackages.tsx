@@ -10,8 +10,8 @@ import DepartureDatePicker from '../DepartureDatePicker'
 type Experience = 'monsoon' | 'weekend' | 'road' | 'snow'
 
 const experiences: { key: Experience, label: string, icon: string }[] = [
-  { key: 'monsoon', label: 'Monsoon Treks', icon: '⛰️' },
-  { key: 'weekend', label: 'Weekend Treks', icon: '🥾' },
+  { key: 'monsoon', label: 'Monsoon ', icon: '⛰️' },
+  { key: 'weekend', label: 'Weekend ', icon: '🥾' },
   { key: 'road', label: 'Road Trips', icon: '🚙' },
   { key: 'snow', label: 'Snow Treks', icon: '❄️' },
 ]
@@ -43,9 +43,12 @@ export default function FeaturedPackages() {
               key={filter.key}
               type="button"
               onClick={() => { haptics.light(); setExperience(filter.key) }}
-              className={`min-w-0 w-full px-2 sm:px-4 md:px-5 py-3 sm:py-3.5 rounded-full border text-[11px] sm:text-sm font-black whitespace-nowrap transition-all duration-300 ${experience === filter.key ? 'bg-secondary border-secondary text-white shadow-xl shadow-secondary/20' : 'bg-white/5 border-white/15 text-white hover:border-secondary/50 hover:bg-white/10'}`}
+              className={`min-w-0 w-full px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-full border text-[10px] sm:text-xs md:text-sm font-black transition-all duration-300 overflow-hidden ${experience === filter.key ? 'bg-secondary border-secondary text-white shadow-xl shadow-secondary/20' : 'bg-white/5 border-white/15 text-white hover:border-secondary/50 hover:bg-white/10'}`}
+              title={`${filter.label}`}
             >
-              <span className="mr-2 text-base" aria-hidden="true">{filter.icon}</span>{filter.label}
+              <span className="inline-block mr-1 text-sm sm:text-base" aria-hidden="true">{filter.icon}</span>
+              <span className="hidden sm:inline">{filter.label}</span>
+              <span className="sm:hidden">{filter.label.split(' ')[0]}</span>
             </button>
           ))}
         </div>
@@ -74,8 +77,16 @@ export default function FeaturedPackages() {
                 </div>
                 <div className="mt-7"><DepartureDatePicker dates={trip.departureDates} value={selectedDeparture} onChange={date => setSelectedDepartures(current => ({ ...current, [trip.id]: date }))} /></div>
                 <div className="grid grid-cols-2 gap-3 mt-7">
-                  <Link to={`/trip/${trip.id}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-2 rounded-full bg-white/10 px-3 py-3.5 text-[10px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors"><CircleHelp size={15} /> More details</Link>
-                  <a href={getTripWhatsAppLink(`${trip.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)} target="_blank" rel="noopener noreferrer" onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-2 rounded-full bg-secondary/15 px-3 py-3.5 text-[10px] font-black uppercase tracking-wider text-secondary hover:bg-secondary hover:text-white transition-colors"><Download size={15} /> Get PDF</a>
+                  <Link to={`/trip/${trip.id}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 sm:gap-2 rounded-full bg-white/10 px-2 sm:px-3 py-2.5 sm:py-3.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors" title="More details">
+                    <CircleHelp size={14} className="sm:w-[15px] sm:h-[15px]" /> 
+                    <span className="hidden sm:inline">More details</span>
+                    <span className="sm:hidden">Details</span>
+                  </Link>
+                  <a href={getTripWhatsAppLink(`${trip.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)} target="_blank" rel="noopener noreferrer" onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 sm:gap-2 rounded-full bg-secondary/15 px-2 sm:px-3 py-2.5 sm:py-3.5 text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-secondary hover:bg-secondary hover:text-white transition-colors" title="Get PDF">
+                    <Download size={14} className="sm:w-[15px] sm:h-[15px]" /> 
+                    <span className="hidden sm:inline">Get PDF</span>
+                    <span className="sm:hidden">PDF</span>
+                  </a>
                 </div>
               </div>
             </article>

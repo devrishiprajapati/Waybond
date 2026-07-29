@@ -35,6 +35,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Explore Trips', path: '/discover' },
+    { name: 'Travel Stories', path: '/blogs' },
     { name: 'Community', path: '/community' },
     { name: 'About Us', path: '/about' }
   ]
@@ -82,7 +83,7 @@ const Navbar = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => haptics.medium()}
-                  className="bg-secondary text-white px-5 py-2 rounded-full font-black text-[8px] uppercase tracking-widest transition-all duration-300 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 whitespace-nowrap"
+                  className="bg-secondary text-white px-4 md:px-5 py-2 rounded-full font-black text-[7px] md:text-[8px] uppercase tracking-widest transition-all duration-300 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 whitespace-nowrap flex items-center justify-center"
                 >
                   Book Now
                 </a>
@@ -121,14 +122,14 @@ const Navbar = () => {
               animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
               exit={{ opacity: 0, scale: 0.9, x: '-50%', y: '-45%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-1/2 left-1/2 w-[90%] max-w-[340px] liquid-glass shadow-2xl p-10 rounded-[3rem] flex flex-col max-h-[85vh] overflow-y-auto"
+              className="absolute top-1/2 left-1/2 w-[90%] max-w-[340px] liquid-glass shadow-2xl p-8 rounded-[3rem] flex flex-col max-h-[90vh] overflow-y-auto"
             >
               {/* Internal Glass Depth */}
               <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl rounded-[3rem] pointer-events-none"></div>
 
-              <div className="flex justify-between items-center mb-10 relative z-10">
+              <div className="flex justify-between items-center mb-8 relative z-10 sticky top-0">
                 <span className="text-2xl font-display font-black text-white tracking-tight liquid-text">
-                  INFI<span className="text-secondary text-xl ml-1">Yatra</span>
+                  WAY<span className="text-secondary text-xl ml-0.5">Bond</span>
                 </span>
                 <button
                   onClick={() => {
@@ -141,7 +142,7 @@ const Navbar = () => {
                 </button>
               </div>
 
-              <div className="flex flex-col space-y-8 flex-grow relative z-10">
+              <div className="flex flex-col space-y-6 flex-grow relative z-10 pb-4">
                 {navLinks.map((link, idx) => (
                   <motion.div
                     key={link.name}
@@ -152,7 +153,7 @@ const Navbar = () => {
                     <Link
                       to={link.path}
                       onClick={() => haptics.light()}
-                      className="text-2xl font-display font-black text-white hover:text-secondary transition-colors uppercase italic drop-shadow-lg"
+                      className="text-xl font-display font-black text-white hover:text-secondary transition-colors uppercase italic drop-shadow-lg"
                     >
                       {link.name}
                     </Link>
@@ -161,24 +162,24 @@ const Navbar = () => {
 
                 <div className="h-px bg-white/20 w-full my-4"></div>
 
-                <div className="flex items-center space-x-8">
+                <div className="flex items-center space-x-6">
                   <Link to="/dashboard" onClick={() => haptics.light()} className="text-white p-3 liquid-glass border border-white/20 rounded-2xl hover:bg-white/10 transition-all">
-                    <User size={24} />
+                    <User size={22} />
                   </Link>
                   <Link to="/wishlist" onClick={() => haptics.light()} className="text-white p-3 liquid-glass border border-white/20 rounded-2xl hover:bg-white/10 transition-all">
-                    <Heart size={24} />
+                    <Heart size={22} />
                   </Link>
                 </div>
               </div>
 
               <a
-                href={getWhatsAppLink("Hi Waybond! I\'d like to book an adventure.")}
+                href="/discover"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => haptics.medium()}
-                className="w-full bg-secondary text-white py-5 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-secondary/30 mt-10 active:scale-95 transition-all outline-none relative z-10"
+                className="w-full bg-secondary text-white py-4 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-secondary/30 active:scale-95 transition-all outline-none relative z-10 mt-auto"
               >
-                Book My Adventure
+                Book Now
               </a>
             </motion.div>
           </div>
