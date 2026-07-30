@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import FloatingWhatsApp from './components/FloatingWhatsApp'
 import Home from './pages/Home'
 import Discover from './pages/Discover'
 import HimachalPage from './pages/HimachalPage'
@@ -27,8 +28,18 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0)
+    // Scroll to top on route change
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
   }, [location.pathname])
+
+  // Scroll to top on initial page load/reload
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    // Disable browser's automatic scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
+    }
+  }, [])
 
   return (
     <div className="light-theme flex flex-col min-h-screen selection:bg-secondary/30 w-full overflow-x-hidden">
@@ -64,6 +75,7 @@ function App() {
         </AnimatePresence>
       </main>
       <Footer />
+      <FloatingWhatsApp />
     </div>
   )
 }

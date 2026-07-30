@@ -62,7 +62,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '12-15 Persons',
     nextBatch: 'May 15, 2026',
-    departureDates: ['2026-08-15', '2026-09-12', '2027-05-15'],
+    departureDates: ['2026-08-05', '2026-08-12', '2026-08-19', '2026-08-26', '2026-09-02', '2026-09-09', '2026-09-16', '2026-09-23', '2026-09-30'],
     highlights: ['Key Monastery Visit', 'Chandratal Lake Camping', 'Kibber Village', 'Kunzum Pass'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -94,7 +94,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '10-15 Persons',
     nextBatch: 'Jun 10, 2026',
-    departureDates: ['2026-08-10', '2026-09-07'],
+    departureDates: ['2026-08-03', '2026-08-10', '2026-08-17', '2026-08-24', '2026-08-31', '2026-09-07', '2026-09-14', '2026-09-21', '2026-09-28'],
     highlights: ['Khardung La Pass', 'Pangong Tso Lake', 'Double-Humped Camel Ride', 'Shanti Stupa'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -125,7 +125,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '10-12 Persons',
     nextBatch: 'Dec 20, 2026',
-    departureDates: ['2026-12-20', '2027-01-10'],
+    departureDates: ['2026-12-10', '2026-12-15', '2026-12-20', '2026-12-27', '2027-01-03', '2027-01-10', '2027-01-17', '2027-01-24', '2027-01-31'],
     highlights: ['Houseboat Stay', 'Gulmarg Gondola Ride', 'Betaab Valley', 'Dal Lake Shikara Ride'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -155,7 +155,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '10-15 Persons',
     nextBatch: 'Sep 10, 2026',
-    departureDates: ['2026-08-08', '2026-09-10'],
+    departureDates: ['2026-08-03', '2026-08-10', '2026-08-17', '2026-08-24', '2026-09-07', '2026-09-14', '2026-09-21'],
     highlights: ['Double Decker Root Bridge', 'Dawki River Boating', 'Mawsmai Caves', 'Nohkalikai Falls'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -185,7 +185,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '10-12 Persons',
     nextBatch: 'Nov 05, 2026',
-    departureDates: ['2026-09-20', '2026-11-05'],
+    departureDates: ['2026-08-05', '2026-08-12', '2026-08-19', '2026-08-26', '2026-09-02', '2026-09-09', '2026-09-16', '2026-09-23', '2026-09-30'],
     highlights: ['Alleppey Houseboat Stay', 'Munnar Tea Gardens', 'Periyar Wildlife Safari', 'Kathakali Show'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -214,7 +214,7 @@ export const ALL_TRIPS: Trip[] = [
     ],
     groupSize: '8-12 Persons',
     nextBatch: 'Jan 12, 2027',
-    departureDates: ['2026-10-18', '2027-01-12'],
+    departureDates: ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26', '2026-11-02', '2026-11-09', '2026-11-16', '2026-11-23', '2026-11-30'],
     highlights: ['Scuba Diving', 'Radhanagar Beach Sunset', 'Cellular Jail', 'Island Hopping'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
@@ -243,7 +243,7 @@ export const ALL_TRIPS: Trip[] = [
     images: ['/assets/bali.jpg'],
     groupSize: '2-4 Persons',
     nextBatch: 'Sept 10, 2026',
-    departureDates: ['2026-09-10', '2026-10-15'],
+    departureDates: ['2026-09-10', '2026-09-17', '2026-09-24', '2026-10-01', '2026-10-08', '2026-10-15', '2026-10-22', '2026-10-29'],
     highlights: ['Beach Dinners', 'Temple Tours'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [{ day: 1, title: 'Ubud Arrival', description: 'Welcome to Bali.' }]
@@ -264,7 +264,7 @@ export const ALL_TRIPS: Trip[] = [
     images: ['/assets/thai.jpg'],
     groupSize: '8-10 Persons',
     nextBatch: 'Dec 12, 2026',
-    departureDates: ['2026-11-14', '2026-12-12'],
+    departureDates: ['2026-11-07', '2026-11-14', '2026-11-21', '2026-11-28', '2026-12-05', '2026-12-12', '2026-12-19', '2026-12-26'],
     highlights: ['Island Hopping', 'Night Markets'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [{ day: 1, title: 'Phuket Check-in', description: 'Patong beach evening.' }]
@@ -285,7 +285,7 @@ export const ALL_TRIPS: Trip[] = [
     images: ['/assets/seychelles.jpg'],
     groupSize: '4-6 Persons',
     nextBatch: 'Jan 15, 2027',
-    departureDates: ['2026-12-20', '2027-01-15'],
+    departureDates: ['2026-12-15', '2026-12-22', '2026-12-29', '2027-01-05', '2027-01-12', '2027-01-19', '2027-01-26'],
     highlights: ['Island Cruises', 'Marine Park'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [{ day: 1, title: 'Seychelles Arrival', description: 'Victoria city tour.' }]
