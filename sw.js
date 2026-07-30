@@ -1,4 +1,4 @@
-const CACHE_NAME = 'waybond-v2-blue';
+const CACHE_NAME = 'waybond-v3';
 const urlsToCache = [
   '/',
   '/index.html',

@@ -51,9 +51,9 @@ const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, class
 const About = () => (
   <PageLayout
     seoTitle="About WAYBOND — Ahmedabad's Premier Travel Community"
-    seoDescription="Learn about Infi Yatra's mission to make travel meaningful, accessible, and community-driven for Ahmedabad."
+    seoDescription="Learn about Way Bond's mission to make travel meaningful, accessible, and community-driven for Ahmedabad."
     title={<>THE WAY<br /><span className="text-primary px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>BOND</span> SPIRIT</>}
-    subtitle="Infi Yatra is Ahmedabad's premier authentic travel community. We don't just book tours; we craft soul-stirring memories that resonate for a lifetime."
+    subtitle="Way Bond is Ahmedabad's premier authentic travel community. We don't just book tours; we craft soul-stirring memories that resonate for a lifetime."
   >
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
       <motion.div
