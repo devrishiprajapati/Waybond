@@ -141,12 +141,12 @@ const TripDetails = () => {
         {/* Desktop Booking Widget */}
         <div className="lg:col-span-4">
           <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-[3rem] p-8 md:p-10 shadow-[0_15px_60px_rgba(0,0,0,0.5)] space-y-8">
-            <div className="flex justify-between items-center pb-8 border-b border-white/10">
-              <div>
+            <div className="flex justify-between items-center gap-4 pb-8 border-b border-white/10">
+              <div className="min-w-0 flex-1 overflow-hidden">
                 <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em] drop-shadow-sm">Price per person</span>
-                <div className="text-5xl font-display font-black text-white tracking-tighter mt-2 liquid-text italic">₹{trip.price}</div>
+                <div className="text-4xl font-display font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
               </div>
-              <div className="liquid-glass p-4 rounded-2xl text-center min-w-[100px] border border-white/5">
+              <div className="liquid-glass p-4 rounded-2xl text-center shrink-0 min-w-[72px] border border-white/5">
                 <div className="text-white font-black text-2xl drop-shadow-md">{trip.duration.split(' ')[0]}</div>
                 <div className="text-[9px] text-white/60 font-black uppercase tracking-[0.2em] mt-1">Days</div>
               </div>
@@ -157,7 +157,7 @@ const TripDetails = () => {
               <div className="p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
                 <div className="space-y-2">
                   <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
-                  
+
                   {(() => {
                     const dates = trip.departureDates || []
                     if (!dates.length) return <p className="text-[7px] text-white/30">No dates available</p>
@@ -184,7 +184,7 @@ const TripDetails = () => {
                     // Get current selected month
                     let currentSelectedMonth = firstMonth
                     let currentSelectedDate = selectedDeparture
-                    
+
                     if (currentSelectedDate) {
                       const dateMonthKey = currentSelectedDate.slice(0, 7)
                       if (monthGroups[dateMonthKey]) {
@@ -219,11 +219,10 @@ const TripDetails = () => {
                                     handleDateChange(firstDate)
                                   }
                                 }}
-                                className={`px-2 py-1 text-[7px] font-black uppercase tracking-wider rounded transition-colors ${
-                                  isActive
+                                className={`px-2 py-1 text-[7px] font-black uppercase tracking-wider rounded transition-colors ${isActive
                                     ? 'bg-secondary text-white'
                                     : 'bg-transparent text-white/50 hover:text-white'
-                                }`}
+                                  }`}
                               >
                                 {monthName} {year}
                               </button>
@@ -245,11 +244,10 @@ const TripDetails = () => {
                                   onClick={() => {
                                     handleDateChange(date)
                                   }}
-                                  className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${
-                                    isSelected
+                                  className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${isSelected
                                       ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
                                       : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
-                                  }`}
+                                    }`}
                                   title={date}
                                 >
                                   {day}
