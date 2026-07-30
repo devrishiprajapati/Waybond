@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import { Filter, Search, MapPin, Calendar, Star, ChevronDown, CheckCircle2, MessageCircle, ShieldCheck, CircleHelp, Download } from 'lucide-react'
 import { CATEGORIES, getTripWhatsAppLink } from '../lib/trips'
-import { getTrips } from '../lib/dataService'
+import { getTrips, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 
 const experienceFilters = [
@@ -368,7 +368,7 @@ const Discover = () => {
 
                       {/* Action Buttons */}
                       <div className="grid grid-cols-2 gap-2 pt-1">
-                        <Link to={`/trip/${trip.id}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 rounded-full bg-white/10 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors" title="More details">
+                        <Link to={`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 rounded-full bg-white/10 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors" title="More details">
                           <CircleHelp size={12} /> 
                           <span className="hidden sm:inline">Details</span>
                           <span className="sm:hidden">View</span>

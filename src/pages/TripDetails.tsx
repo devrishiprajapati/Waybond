@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link, useSearchParams } from 'react-router-dom'
+import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   MapPin, Users, Star, ArrowLeft,
@@ -8,12 +8,12 @@ import {
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
-import { getTripById } from '../lib/dataService'
+import { getTripBySlug, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
-import DepartureDatePicker from '../components/DepartureDatePicker'
 
 const TripDetails = () => {
-  const { id } = useParams()
+  const { slug } = useParams()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const departureParam = searchParams.get('departure')
   const [trip, setTrip] = useState<any>(null)
@@ -23,14 +23,20 @@ const TripDetails = () => {
   const [selectedDeparture, setSelectedDeparture] = useState('')
 
   useEffect(() => {
-    if (id) {
-      getTripById(parseInt(id)).then(t => {
+    if (slug) {
+      getTripBySlug(slug).then(t => {
         setTrip(t || null)
         if (t) setSelectedDeparture(departureParam || t.departureDates?.[0] || '')
         setLoading(false)
       })
     }
-  }, [id, departureParam])
+  }, [slug, departureParam])
+
+  // Update URL when date changes
+  const handleDateChange = (date: string) => {
+    setSelectedDeparture(date)
+    navigate(`/trip/${slug}?departure=${date}`, { replace: true })
+  }
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-white uppercase font-black tracking-widest text-white/40">Loading Expedition...</div>
@@ -147,8 +153,117 @@ const TripDetails = () => {
             </div>
 
             <div className="space-y-4">
+              {/* Date Picker - Same as Discover */}
               <div className="p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                <DepartureDatePicker dates={trip.departureDates} value={selectedDeparture} onChange={setSelectedDeparture} />
+                <div className="space-y-2">
+                  <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
+                  
+                  {(() => {
+                    const dates = trip.departureDates || []
+                    if (!dates.length) return <p className="text-[7px] text-white/30">No dates available</p>
+
+                    // Create month groups
+                    const monthGroups: Record<string, string[]> = {}
+                    dates.forEach(date => {
+                      const monthKey = date.slice(0, 7)
+                      if (!monthGroups[monthKey]) {
+                        monthGroups[monthKey] = []
+                      }
+                      monthGroups[monthKey].push(date)
+                    })
+
+                    // Sort each month's dates
+                    Object.keys(monthGroups).forEach(month => {
+                      monthGroups[month].sort()
+                    })
+
+                    // Get sorted month keys
+                    const sortedMonths = Object.keys(monthGroups).sort()
+                    const firstMonth = sortedMonths[0]
+
+                    // Get current selected month
+                    let currentSelectedMonth = firstMonth
+                    let currentSelectedDate = selectedDeparture
+                    
+                    if (currentSelectedDate) {
+                      const dateMonthKey = currentSelectedDate.slice(0, 7)
+                      if (monthGroups[dateMonthKey]) {
+                        currentSelectedMonth = dateMonthKey
+                      } else {
+                        currentSelectedMonth = firstMonth
+                        currentSelectedDate = monthGroups[firstMonth]?.[0]
+                      }
+                    } else {
+                      currentSelectedDate = monthGroups[firstMonth]?.[0]
+                    }
+
+                    // Get dates in current month
+                    const datesInMonth = monthGroups[currentSelectedMonth] || []
+
+                    return (
+                      <div className="space-y-2">
+                        {/* Month tabs */}
+                        <div className="flex gap-1 flex-wrap">
+                          {sortedMonths.map(monthKey => {
+                            const isActive = monthKey === currentSelectedMonth
+                            const [year, month] = monthKey.split('-')
+                            const monthName = new Date(`${year}-${month}-01`).toLocaleDateString('en-IN', { month: 'short' })
+
+                            return (
+                              <button
+                                key={monthKey}
+                                type="button"
+                                onClick={() => {
+                                  const firstDate = monthGroups[monthKey]?.[0]
+                                  if (firstDate) {
+                                    handleDateChange(firstDate)
+                                  }
+                                }}
+                                className={`px-2 py-1 text-[7px] font-black uppercase tracking-wider rounded transition-colors ${
+                                  isActive
+                                    ? 'bg-secondary text-white'
+                                    : 'bg-transparent text-white/50 hover:text-white'
+                                }`}
+                              >
+                                {monthName} {year}
+                              </button>
+                            )
+                          })}
+                        </div>
+
+                        {/* Date circles */}
+                        <div className="flex gap-1.5 flex-wrap">
+                          {datesInMonth && datesInMonth.length > 0 ? (
+                            datesInMonth.map(date => {
+                              const day = date.slice(8, 10)
+                              const isSelected = currentSelectedDate === date
+
+                              return (
+                                <button
+                                  key={date}
+                                  type="button"
+                                  onClick={() => {
+                                    handleDateChange(date)
+                                  }}
+                                  className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${
+                                    isSelected
+                                      ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
+                                      : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
+                                  }`}
+                                  title={date}
+                                >
+                                  {day}
+                                </button>
+                              )
+                            })
+                          ) : (
+                            <p className="text-[7px] text-white/30">No dates for this month</p>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
