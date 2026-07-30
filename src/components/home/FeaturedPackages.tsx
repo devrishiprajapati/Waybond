@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { CalendarDays, CircleHelp, Download, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { getTripWhatsAppLink } from '../../lib/trips'
-import { getTrips, optimizeImageUrl } from '../../lib/dataService'
+import { getTrips, optimizeImageUrl, createSlug } from '../../lib/dataService'
 import { haptics } from '../../lib/haptics'
 
 type Experience = 'monsoon' | 'weekend' | 'road' | 'snow'
@@ -242,7 +242,7 @@ export default function FeaturedPackages() {
 
                       {/* Action Buttons */}
                       <div className="grid grid-cols-2 gap-2 pt-1">
-                        <Link to={`/trip/${trip.id}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 rounded-full bg-white/10 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors" title="More details">
+                        <Link to={`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 rounded-full bg-white/10 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors" title="More details">
                           <CircleHelp size={12} /> 
                           <span className="hidden sm:inline">Details</span>
                           <span className="sm:hidden">View</span>

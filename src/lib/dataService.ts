@@ -54,6 +54,22 @@ export const getTripById = async (id: number): Promise<Trip | undefined> => {
   return trips.find(t => t.id === id);
 }
 
+// Create a URL-friendly slug from trip title
+export const createSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
+
+// Get trip by slug
+export const getTripBySlug = async (slug: string): Promise<Trip | undefined> => {
+  const trips = await getTrips();
+  return trips.find(t => createSlug(t.title) === slug);
+}
+
 export const updateTrip = async (updatedTrip: Trip) => {
   try {
     await fetch(`/api/trips/${updatedTrip.id}`, {
