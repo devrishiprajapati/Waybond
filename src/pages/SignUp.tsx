@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, ArrowRight, Github, Chrome, Compass, Phone, MapPin, AlertCircle, Upload, Droplet } from 'lucide-react'
+import { User, Mail, Lock, ArrowRight, Compass, Phone, MapPin, AlertCircle, Upload, Droplet } from 'lucide-react'
 import { haptics } from '../lib/haptics'
 
 const SignUp = () => {

@@ -12,6 +12,12 @@ import BackupHome from './pages/BackupHome'
 import TripDetails from './pages/TripDetails'
 import { About, Community, Wishlist } from './pages/StaticPages'
 import UserDashboard from './pages/UserDashboard'
+import BookedTripsPage from './pages/dashboard/BookedTripsPage'
+import ConfirmedTripsPage from './pages/dashboard/ConfirmedTripsPage'
+import TestimonialsPage from './pages/dashboard/TestimonialsPage'
+import CancelledTripsPage from './pages/dashboard/CancelledTripsPage'
+import AllTripsPage from './pages/dashboard/AllTripsPage'
+import ProfilePage from './pages/dashboard/ProfilePage'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
 import AdminDashboard from './pages/admin/Dashboard'
@@ -24,6 +30,7 @@ import SafetyGuidelines from './pages/SafetyGuidelines'
 import Testimonials from './pages/Testimonials'
 import Blogs from './pages/Blogs'
 import BlogDetail from './pages/BlogDetail'
+import BookingConfirmation from './pages/BookingConfirmation'
 
 function App() {
   const location = useLocation();
@@ -63,7 +70,15 @@ function App() {
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/blog/:slug" element={<BlogDetail />} />
             <Route path="/trip/:slug" element={<TripDetails />} />
+            <Route path="/booking-confirmation/:bookingId" element={<BookingConfirmation />} />
             <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/dashboard/:userId" element={<UserDashboard />} />
+            <Route path="/dashboard/:userId/all-trips" element={<AllTripsPage />} />
+            <Route path="/dashboard/:userId/booked-trips" element={<BookedTripsPage />} />
+            <Route path="/dashboard/:userId/confirmed" element={<ConfirmedTripsPage />} />
+            <Route path="/dashboard/:userId/testimonials" element={<TestimonialsPage />} />
+            <Route path="/dashboard/:userId/cancelled" element={<CancelledTripsPage />} />
+            <Route path="/dashboard/:userId/profile" element={<ProfilePage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             
