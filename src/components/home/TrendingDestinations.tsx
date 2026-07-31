@@ -12,8 +12,8 @@ export default function TrendingDestinations() {
 
   // Map experiences to icons
   const getExperienceIcons = (experience: string) => {
-    const iconProps = { size: 24, className: 'text-white hover:text-secondary transition-colors' }
-    
+    const iconProps = { size: 24, className: '!text-white hover:!text-white transition-colors', style: { color: '#ffffff', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.9))' } }
+
     const iconMap: Record<string, React.ReactNode[]> = {
       monsoon: [
         <MapPin key="1" {...iconProps} />,
@@ -40,7 +40,7 @@ export default function TrendingDestinations() {
         <MapPin key="4" {...iconProps} />
       ]
     }
-    
+
     return iconMap[experience] || iconMap.weekend
   }
 
@@ -93,7 +93,7 @@ export default function TrendingDestinations() {
                 className="block relative h-96 sm:h-[420px] md:h-[480px] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/20 backdrop-blur-sm group"
               >
                 {/* Image Container */}
-                <div className="relative w-full h-full overflow-hidden bg-gray-200">
+                <div className="relative z-0 w-full h-full overflow-hidden bg-gray-200">
                   <img
                     src={optimizeImageUrl(trip.image, 900, 85)}
                     alt={trip.title}
@@ -106,7 +106,7 @@ export default function TrendingDestinations() {
                 </div>
 
                 {/* Top Right - Experience Type Badge */}
-                <div className="absolute top-5 md:top-6 right-5 md:right-6">
+                <div className="absolute top-5 md:top-6 right-5 md:right-6 z-10">
                   <motion.span
                     initial={{ opacity: 0, scale: 0.8, y: -20 }}
                     whileInView={{ opacity: 1, scale: 1, y: 0 }}
@@ -119,25 +119,31 @@ export default function TrendingDestinations() {
                 </div>
 
                 {/* Center - Destination Title */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-4 z-10">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     transition={{ delay: idx * 0.12 + 0.1, duration: 0.6 }}
                     viewport={{ once: true }}
-                    className="text-center space-y-1 md:space-y-2"
+                    className="text-center space-y-1 md:space-y-2 mt-10"
                   >
-                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-white uppercase tracking-tight leading-tight drop-shadow-xl group-hover:text-secondary transition-colors duration-300 line-clamp-2">
+                    <h3
+                      className="text-3xl sm:text-4xl md:text-5xl font-display font-black !text-white uppercase tracking-tight leading-tight line-clamp-2"
+                      style={{ color: 'white' }}
+                    >
                       {trip.title.split(' ')[0]}
                     </h3>
-                    <p className="text-white/70 text-xs md:text-sm font-semibold tracking-widest uppercase drop-shadow-lg line-clamp-1">
+                    <p
+                      className="!text-white text-xs md:text-sm font-semibold tracking-widest uppercase line-clamp-1"
+                      style={{ color: 'white' }}
+                    >
                       {trip.location.split(',')[0]}
                     </p>
                   </motion.div>
                 </div>
 
                 {/* Bottom - Activity Icons with Strong Background */}
-                <div className="absolute bottom-0 left-0 right-0 h-24 md:h-28 bg-gradient-to-t from-black/90 via-black/70 to-transparent flex items-center justify-center gap-3 md:gap-4">
+                <div className="absolute bottom-0 left-0 right-0 h-24 md:h-28 bg-gradient-to-t from-black/90 via-black/70 to-transparent flex items-center justify-center gap-3 md:gap-4 z-10">
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
