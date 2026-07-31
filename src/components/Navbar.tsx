@@ -56,11 +56,11 @@ const Navbar = () => {
     <>
       <nav className={`fixed left-0 right-0 z-50 transition-all duration-700 transform flex justify-center w-full px-4 md:px-12 pt-4 md:pt-6 safe-area-padding ${visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
         }`}>
-        <div className={`navbar-glass w-full max-w-[1920px] mx-auto rounded-full liquid-glass shadow-2xl transition-all duration-500 relative group/nav ${scrolled ? 'py-1.5 scale-[0.98]' : 'py-2.5 md:py-3'}`}>
+        <div className={`navbar-glass mobile-navbar-surface w-full max-w-[1920px] mx-auto rounded-full liquid-glass shadow-2xl transition-all duration-500 relative group/nav ${scrolled ? 'py-1.5 scale-[0.98]' : 'py-2.5 md:py-3'}`}>
 
           <div className="flex justify-between items-center h-10 relative z-10 px-4 md:px-10">
             <Link to="/" onClick={() => haptics.light()} className="flex items-center space-x-2 group">
-              <span className="text-2xl font-display font-black tracking-tighter text-white liquid-text">
+              <span className="mobile-brand text-2xl font-display font-black tracking-tighter text-charcoal lg:text-white liquid-text">
                 WAY<span className="text-secondary tracking-tighter uppercase text-base ml-0.5">Bond</span>
               </span>
             </Link>
@@ -106,7 +106,7 @@ const Navbar = () => {
                   haptics.light();
                   setIsOpen(true);
                 }}
-                className="p-2 transition-colors duration-500 text-white"
+                className="mobile-menu-icon p-2 transition-colors duration-500 text-charcoal lg:text-white"
               >
                 <Menu size={24} />
               </button>
@@ -131,15 +131,17 @@ const Navbar = () => {
               animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
               exit={{ opacity: 0, scale: 0.9, x: '-50%', y: '-45%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="absolute top-1/2 left-1/2 w-[90%] max-w-[340px] liquid-glass shadow-2xl p-8 rounded-[3rem] flex flex-col max-h-[90vh] overflow-y-auto"
+              className="absolute top-1/2 left-1/2 w-[90%] max-w-[340px] liquid-glass shadow-2xl p-8 rounded-[3rem] flex flex-col max-h-[90vh] overflow-y-auto isolate"
             >
-              {/* Internal Glass Depth */}
-              <div className="absolute inset-0 bg-white/40 backdrop-blur-2xl rounded-[3rem] pointer-events-none"></div>
-
-              <div className="flex justify-between items-center mb-8 relative z-10 sticky top-0">
-                <span className="text-2xl font-display font-black text-white tracking-tight liquid-text">
-                  WAY<span className="text-secondary text-xl ml-0.5">Bond</span>
-                </span>
+              <div className="flex justify-between items-center mb-8 relative z-20 sticky top-0 bg-white rounded-2xl px-3 py-2">
+                <Link to="/" onClick={() => haptics.light()} className="flex items-center" aria-label="Waybond home">
+                  <span
+                    className="text-2xl font-display font-black tracking-tight"
+                    style={{ color: '#111111', opacity: 1, textShadow: 'none', WebkitTextFillColor: '#111111' }}
+                  >
+                    WAY<span style={{ color: '#6495ED', opacity: 1, WebkitTextFillColor: '#6495ED' }} className="text-xl ml-0.5">BOND</span>
+                  </span>
+                </Link>
                 <button
                   onClick={() => {
                     haptics.light();
