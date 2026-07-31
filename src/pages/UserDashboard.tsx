@@ -62,6 +62,7 @@ const UserDashboard = () => {
     setIsAdmin(sessionStorage.getItem('isAdmin') === 'true')
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     const savedTestimonials = localStorage.getItem(TESTIMONIALS_KEY)
     if (savedTestimonials) {
       setTestimonials(JSON.parse(savedTestimonials))
@@ -112,6 +113,29 @@ const UserDashboard = () => {
         const savedBookings = localStorage.getItem(BOOKINGS_KEY)
         if (savedBookings) setBookedTrips(JSON.parse(savedBookings))
       }
+=======
+    const loadDashboard = async () => {
+      try {
+        if (!parsedUser.id) throw new Error('No database user')
+        const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
+        if (!response.ok) throw new Error('Dashboard unavailable')
+        const data = await response.json()
+        setTestimonials(data.testimonials.map((item: any) => ({ ...item, tripTitle: item.trip, text: item.review, createdAt: new Date(item.createdAt).toLocaleDateString('en-IN') })))
+        if (data.bookings.length) {
+          setBookedTrips(data.bookings)
+          return
+        }
+        const trips = await getTrips()
+        const starterBookings = trips.slice(0, 2).map((trip, index) => ({ ...trip, bookingId: `WB-${new Date().getFullYear()}-${String(index + 1).padStart(3, '0')}`, status: index === 0 ? 'Confirmed' : 'Payment Pending', travelers: index === 0 ? 2 : 1, bookedOn: index === 0 ? 'Jul 12, 2026' : 'Jul 18, 2026' }))
+        await Promise.all(starterBookings.map((booking) => fetch(`/api/users/${parsedUser.id}/bookings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(booking) })))
+        setBookedTrips(starterBookings)
+      } catch {
+        const savedTestimonials = localStorage.getItem(TESTIMONIALS_KEY)
+        if (savedTestimonials) setTestimonials(JSON.parse(savedTestimonials))
+        const savedBookings = localStorage.getItem(BOOKINGS_KEY)
+        if (savedBookings) setBookedTrips(JSON.parse(savedBookings))
+      }
+>>>>>>> 3b2c3185a64cd08d0a2aeb076d472d48fe3781ef
     }
     loadDashboard()
   }, [navigate])
@@ -135,6 +159,7 @@ const UserDashboard = () => {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const handleCancelTrip = (tripId: string | number) => {
     const tripToCancel = bookedTrips.find((trip) => trip.id === tripId || trip.bookingId === tripId)
     if (!tripToCancel) return
@@ -150,6 +175,9 @@ const UserDashboard = () => {
   }
 
   const handleTestimonialSubmit = (event: React.FormEvent) => {
+=======
+  const handleTestimonialSubmit = async (event: React.FormEvent) => {
+>>>>>>> 3b2c3185a64cd08d0a2aeb076d472d48fe3781ef
 =======
   const handleTestimonialSubmit = async (event: React.FormEvent) => {
 >>>>>>> 3b2c3185a64cd08d0a2aeb076d472d48fe3781ef
