@@ -3,9 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Github, Chrome, Shield, Compass } from 'lucide-react'
 import { haptics } from '../lib/haptics'
+import { registerUser } from '../lib/adminStorage'
 
 const Login = () => {
   const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
   const [password, setPassword] = useState('')
   const [isLogin, setIsLogin] = useState(true)
   const [mode, setMode] = useState<'user' | 'admin'>('user')
@@ -27,7 +29,8 @@ const Login = () => {
       return
     }
     haptics.success()
-    localStorage.setItem('user', JSON.stringify({ email, name: email.split('@')[0] }))
+    const registeredUser = registerUser({ name, email })
+    localStorage.setItem('user', JSON.stringify({ email: registeredUser.email, name: registeredUser.name }))
     navigate(redirectTo)
   }
 
@@ -138,6 +141,8 @@ const Login = () => {
                     type="text"
                     placeholder="Your Name"
                     autoComplete="name"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
                     /* text-base (16px) prevents iOS auto-zoom on focus */
                     className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
                   />

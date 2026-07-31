@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import { ImagePlus, Quote, Send, Star, Video, X } from 'lucide-react'
 import { haptics } from '../lib/haptics'
+import { isTestimonialHidden } from '../lib/adminStorage'
 
 type Testimonial = {
   id: number
@@ -115,7 +116,7 @@ const Testimonials = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-10 lg:gap-16 items-start">
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {testimonials.map((testimonial, index) => <motion.article key={`${testimonial.id}-${index}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="liquid-glass-dark rounded-[2.5rem] overflow-hidden border border-white/10 shadow-xl">
+            {testimonials.filter((testimonial) => !isTestimonialHidden(testimonial.id)).map((testimonial, index) => <motion.article key={`${testimonial.id}-${index}`} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="liquid-glass-dark rounded-[2.5rem] overflow-hidden border border-white/10 shadow-xl">
               {testimonial.media && <div className="h-56 bg-black/30">{testimonial.mediaType === 'video' ? <video src={testimonial.media} controls className="w-full h-full object-cover" /> : <img src={testimonial.media} alt={`${testimonial.name}'s trip`} className="w-full h-full object-cover" />}</div>}
               <div className="p-7 md:p-8"><Quote size={24} className="text-secondary/70 mb-5" /><p className="text-white/65 text-sm leading-relaxed italic font-medium">“{testimonial.review}”</p><div className="flex gap-1 mt-6">{Array.from({ length: testimonial.rating }).map((_, star) => <Star key={star} size={14} className="text-secondary fill-secondary" />)}</div><p className="mt-5 font-display font-black uppercase italic text-white tracking-tight">{testimonial.name}</p><p className="text-[9px] font-black uppercase tracking-[0.22em] text-secondary mt-1">{testimonial.trip}</p></div>
             </motion.article>)}

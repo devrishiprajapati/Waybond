@@ -16,6 +16,7 @@ import {
   User
 } from 'lucide-react'
 import { getTrips } from '../lib/dataService'
+import { registerUser } from '../lib/adminStorage'
 
 const BOOKINGS_KEY = 'waybond_user_bookings'
 const TESTIMONIALS_KEY = 'waybond_user_testimonials'
@@ -38,6 +39,7 @@ const UserDashboard = () => {
     }
 
     const parsedUser = JSON.parse(savedUser)
+    registerUser(parsedUser)
     setUser(parsedUser)
     setIsAdmin(sessionStorage.getItem('isAdmin') === 'true')
 

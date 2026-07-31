@@ -17,12 +17,16 @@ import AdminDashboard from './pages/admin/Dashboard'
 import EditTrip from './pages/admin/EditTrip'
 import EditHero from './pages/admin/EditHero'
 import AdminLogin from './pages/admin/Login'
+import AdminTestimonials from './pages/admin/Testimonials'
+import AdminUsers from './pages/admin/Users'
+import AdminGallery from './pages/admin/Gallery'
 import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
 import SafetyGuidelines from './pages/SafetyGuidelines'
 import Testimonials from './pages/Testimonials'
 import Blogs from './pages/Blogs'
 import BlogDetail from './pages/BlogDetail'
+import CommunityGallery from './pages/CommunityGallery'
 
 function App() {
   const location = useLocation();
@@ -54,6 +58,7 @@ function App() {
             <Route path="/backup" element={<BackupHome />} />
             <Route path="/about" element={<About />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/community/:destination" element={<CommunityGallery />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/faqs" element={<FAQs />} />
             <Route path="/cancellation-refunds" element={<CancellationRefunds />} />
@@ -68,6 +73,9 @@ function App() {
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/gallery" element={<AdminGallery />} />
             <Route path="/admin/hero" element={<EditHero />} />
             <Route path="/admin/edit/:id" element={<EditTrip />} />
             <Route path="/admin/new" element={<EditTrip />} />

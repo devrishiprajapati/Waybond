@@ -1,7 +1,9 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import { CheckCircle2, ShieldCheck, MapPin, Star, UserCheck, MessageCircle, Heart, Users, Share2, Compass } from 'lucide-react'
+import { communityGalleries } from '../lib/communityGalleries'
 
 const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, className = "" }: { children: React.ReactNode, title: React.ReactNode, subtitle?: string, seoTitle?: string, seoDescription?: string, className?: string }) => (
   <motion.div
@@ -120,34 +122,24 @@ const Community = () => (
         <p className="text-white/40 italic mt-4 text-sm font-medium tracking-wide">Real smiles, real connections.</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative rounded-[3rem] overflow-hidden group shadow-[0_15px_40px_rgba(0,0,0,0.5)] h-[400px] md:h-[500px] border border-white/10"
-        >
-          <img src="/assets/group.jpeg" alt="Travel Group 1" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-black/20 to-transparent"></div>
-          <div className="absolute bottom-10 left-10">
-            <p className="text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">The First Step</p>
-            <p className="text-[10px] text-secondary uppercase font-black tracking-[0.3em] mt-2">Shared Journeys</p>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="relative rounded-[3rem] overflow-hidden group shadow-[0_15px_40px_rgba(0,0,0,0.5)] h-[400px] md:h-[500px] border border-white/10"
-        >
-          <img src="/assets/group2.jpeg" alt="Travel Group 2" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-black/20 to-transparent"></div>
-          <div className="absolute bottom-10 left-10">
-            <p className="text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">Bonds Forged</p>
-            <p className="text-[10px] text-secondary uppercase font-black tracking-[0.3em] mt-2">Lifelong Connections</p>
-          </div>
-        </motion.div>
+        {communityGalleries.map((gallery, index) => (
+          <motion.div
+            key={gallery.destination}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1 }}
+            className="relative rounded-[3rem] overflow-hidden group keep-light-text shadow-[0_15px_40px_rgba(0,0,0,0.5)] h-[400px] md:h-[500px] border border-white/10"
+          >
+            <img src={gallery.images[0].src} alt={`${gallery.destination} travel memories`} loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-black/20 to-transparent"></div>
+            <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination} gallery`} className="absolute inset-0 z-10" />
+            <div className="absolute bottom-10 left-10">
+              <p className="text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
+              <p className="text-[10px] text-white uppercase font-black tracking-[0.3em] mt-2">{gallery.label}</p>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </div>
 
