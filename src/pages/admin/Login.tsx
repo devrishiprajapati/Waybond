@@ -8,13 +8,22 @@ const AdminLogin = () => {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password === 'admin123') {
+    setError('')
+    try {
+      const response = await fetch('/api/auth/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.message || 'Unable to authorize')
       sessionStorage.setItem('isAdmin', 'true')
+      localStorage.setItem('user', JSON.stringify(data.user))
       navigate('/admin/dashboard')
-    } else {
-      setError('Invalid expedition credentials')
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Invalid expedition credentials')
     }
   }
 

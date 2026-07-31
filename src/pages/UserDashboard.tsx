@@ -43,28 +43,29 @@ const UserDashboard = () => {
     setUser(parsedUser)
     setIsAdmin(sessionStorage.getItem('isAdmin') === 'true')
 
-    const savedTestimonials = localStorage.getItem(TESTIMONIALS_KEY)
-    if (savedTestimonials) {
-      setTestimonials(JSON.parse(savedTestimonials))
-    }
-
-    getTrips().then((trips) => {
-      const savedBookings = localStorage.getItem(BOOKINGS_KEY)
-      if (savedBookings) {
-        setBookedTrips(JSON.parse(savedBookings))
-        return
+    const loadDashboard = async () => {
+      try {
+        if (!parsedUser.id) throw new Error('No database user')
+        const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
+        if (!response.ok) throw new Error('Dashboard unavailable')
+        const data = await response.json()
+        setTestimonials(data.testimonials.map((item: any) => ({ ...item, tripTitle: item.trip, text: item.review, createdAt: new Date(item.createdAt).toLocaleDateString('en-IN') })))
+        if (data.bookings.length) {
+          setBookedTrips(data.bookings)
+          return
+        }
+        const trips = await getTrips()
+        const starterBookings = trips.slice(0, 2).map((trip, index) => ({ ...trip, bookingId: `WB-${new Date().getFullYear()}-${String(index + 1).padStart(3, '0')}`, status: index === 0 ? 'Confirmed' : 'Payment Pending', travelers: index === 0 ? 2 : 1, bookedOn: index === 0 ? 'Jul 12, 2026' : 'Jul 18, 2026' }))
+        await Promise.all(starterBookings.map((booking) => fetch(`/api/users/${parsedUser.id}/bookings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(booking) })))
+        setBookedTrips(starterBookings)
+      } catch {
+        const savedTestimonials = localStorage.getItem(TESTIMONIALS_KEY)
+        if (savedTestimonials) setTestimonials(JSON.parse(savedTestimonials))
+        const savedBookings = localStorage.getItem(BOOKINGS_KEY)
+        if (savedBookings) setBookedTrips(JSON.parse(savedBookings))
       }
-
-      const starterBookings = trips.slice(0, 2).map((trip, index) => ({
-        ...trip,
-        bookingId: `WB-${new Date().getFullYear()}-${String(index + 1).padStart(3, '0')}`,
-        status: index === 0 ? 'Confirmed' : 'Payment Pending',
-        travelers: index === 0 ? 2 : 1,
-        bookedOn: index === 0 ? 'Jul 12, 2026' : 'Jul 18, 2026'
-      }))
-      setBookedTrips(starterBookings)
-      localStorage.setItem(BOOKINGS_KEY, JSON.stringify(starterBookings))
-    })
+    }
+    loadDashboard()
   }, [navigate])
 
   const stats = useMemo(() => {
@@ -82,7 +83,7 @@ const UserDashboard = () => {
     navigate('/login')
   }
 
-  const handleTestimonialSubmit = (event: React.FormEvent) => {
+  const handleTestimonialSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!testimonialText.trim()) return
 
@@ -103,8 +104,16 @@ const UserDashboard = () => {
       ...testimonials
     ]
 
-    setTestimonials(nextTestimonials)
-    localStorage.setItem(TESTIMONIALS_KEY, JSON.stringify(nextTestimonials))
+    try {
+      if (!user.id) throw new Error('No database user')
+      const response = await fetch('/api/testimonials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: user.name, email: user.email, trip: selectedTrip?.title || 'WayBond Trip', review: testimonialText.trim(), rating: testimonialRating, userId: user.id }) })
+      if (!response.ok) throw new Error('Unable to publish')
+      const saved = await response.json()
+      setTestimonials((current) => [{ ...saved, tripTitle: saved.trip, text: saved.review, createdAt: new Date(saved.createdAt).toLocaleDateString('en-IN') }, ...current])
+    } catch {
+      setTestimonials(nextTestimonials)
+      localStorage.setItem(TESTIMONIALS_KEY, JSON.stringify(nextTestimonials))
+    }
     setTestimonialText('')
     setTestimonialRating(5)
     setTestimonialTripId('')

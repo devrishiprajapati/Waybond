@@ -11,27 +11,41 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [isLogin, setIsLogin] = useState(true)
   const [mode, setMode] = useState<'user' | 'admin'>('user')
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/dashboard'
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (mode === 'admin') {
-      if (password === 'admin123') {
-        haptics.success()
+    setError('')
+    setSubmitting(true)
+    try {
+      const endpoint = mode === 'admin' ? '/api/auth/admin/login' : isLogin ? '/api/auth/login' : '/api/auth/signup'
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.message || 'Unable to continue.')
+      haptics.success()
+      if (mode === 'admin') {
         sessionStorage.setItem('isAdmin', 'true')
+        localStorage.setItem('user', JSON.stringify(data.user))
         navigate('/admin/dashboard')
       } else {
-        haptics.error()
-        alert('Invalid Admin Credentials')
+        const registeredUser = registerUser(data.user)
+        localStorage.setItem('user', JSON.stringify({ ...data.user, name: registeredUser.name }))
+        navigate(redirectTo)
       }
-      return
+    } catch (requestError) {
+      haptics.error()
+      setError(requestError instanceof Error ? requestError.message : 'Unable to connect to the server.')
+    } finally {
+      setSubmitting(false)
     }
-    haptics.success()
-    const registeredUser = registerUser({ name, email })
-    localStorage.setItem('user', JSON.stringify({ email: registeredUser.email, name: registeredUser.name }))
-    navigate(redirectTo)
   }
 
   return (
@@ -190,12 +204,14 @@ const Login = () => {
 
             <button
               type="submit"
+              disabled={submitting}
               className={`w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center active:scale-95 touch-manipulation ${mode === 'admin' ? 'bg-primary shadow-primary/20' : 'bg-secondary shadow-secondary/20'
                 } text-white`}
             >
-              {mode === 'admin' ? 'Authorize' : (isLogin ? 'Sign In' : 'Join')}
+              {submitting ? 'Please wait' : mode === 'admin' ? 'Authorize' : (isLogin ? 'Sign In' : 'Join')}
               <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={14} />
             </button>
+            {error && <p className="text-center text-xs font-bold text-red-500">{error}</p>}
           </form>
 
           {mode === 'user' && (
