@@ -98,6 +98,26 @@ button,
   }
 }
 
+/* Keep the mobile navigation readable over every image and scroll position. */
+@media (max-width: 1023px) {
+  .mobile-navbar-surface {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(17, 24, 39, 0.16) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+  }
+
+  .mobile-brand,
+  .mobile-menu-icon {
+    color: #111111 !important;
+    opacity: 1 !important;
+  }
+
+  .mobile-brand {
+    text-shadow: none !important;
+  }
+}
+
 @media (max-width: 640px) {
   main {
     min-width: 0;

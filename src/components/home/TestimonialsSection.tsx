@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Heart, Quote, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { isTestimonialHidden } from '../../lib/adminStorage'
 
 type Testimonial = {
   id: number
@@ -91,7 +92,8 @@ export default function TestimonialsSection() {
   }, [])
 
   // Duplicate so the marquee can translate -50% and loop perfectly
-  const doubled = [...testimonials, ...testimonials]
+  const visibleTestimonials = testimonials.filter((testimonial) => !isTestimonialHidden(testimonial.id))
+  const doubled = [...visibleTestimonials, ...visibleTestimonials]
 
   return (
     <section className="py-24 bg-white relative overflow-hidden">

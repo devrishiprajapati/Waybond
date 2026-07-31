@@ -19,7 +19,7 @@ const readDB = () => {
         const data = fs.readFileSync(DB_FILE, 'utf-8');
         return JSON.parse(data);
     } catch (error) {
-        return { trips: [], heroSlides: [], testimonials: [] };
+        return { trips: [], heroSlides: [], testimonials: [], users: [] };
     }
 };
 
@@ -30,7 +30,7 @@ const writeDB = (data) => {
 
 // Initialize DB if empty
 if (!fs.existsSync(DB_FILE)) {
-    writeDB({ trips: [], heroSlides: [], testimonials: [] });
+    writeDB({ trips: [], heroSlides: [], testimonials: [], users: [] });
 }
 
 // REST Routes for Trips
@@ -101,6 +101,55 @@ app.post('/api/testimonials', (req, res) => {
     db.testimonials = testimonials;
     writeDB(db);
     res.json(newTestimonial);
+});
+
+app.delete('/api/testimonials/:id', (req, res) => {
+    const db = readDB();
+    db.testimonials = (db.testimonials || []).filter(t => String(t.id) !== String(req.params.id));
+    writeDB(db);
+    res.json({ success: true });
+});
+
+app.get('/api/users', (req, res) => {
+    const db = readDB();
+    res.json(db.users || []);
+});
+
+app.post('/api/users', (req, res) => {
+    const db = readDB();
+    const users = db.users || [];
+    const email = String(req.body.email || '').trim().toLowerCase();
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const now = new Date().toISOString();
+    const index = users.findIndex(user => String(user.email || '').toLowerCase() === email);
+    const existing = users[index];
+    const user = {
+        id: existing?.id || `user-${Date.now()}`,
+        name: String(req.body.name || existing?.name || email.split('@')[0]).trim(),
+        email,
+        joinedAt: existing?.joinedAt || now,
+        lastLoginAt: now
+    };
+    if (index >= 0) users[index] = user;
+    else users.unshift(user);
+    db.users = users;
+    writeDB(db);
+    res.json(user);
+});
+
+app.get('/api/community-galleries', (req, res) => {
+    const db = readDB();
+    if (!Array.isArray(db.communityGalleries)) return res.status(404).json({ message: 'No gallery data yet' });
+    res.json(db.communityGalleries);
+});
+
+app.put('/api/community-galleries', (req, res) => {
+    if (!Array.isArray(req.body)) return res.status(400).json({ message: 'Gallery data must be an array' });
+    const db = readDB();
+    db.communityGalleries = req.body;
+    writeDB(db);
+    res.json({ success: true });
 });
 
 const PORT = 3001;

@@ -16,6 +16,7 @@ import {
   User
 } from 'lucide-react'
 import { getTrips } from '../lib/dataService'
+import { registerUser } from '../lib/adminStorage'
 
 const BOOKINGS_KEY = 'waybond_user_bookings'
 const TESTIMONIALS_KEY = 'waybond_user_testimonials'
@@ -41,6 +42,7 @@ const UserDashboard = () => {
     }
 
     const parsedUser = JSON.parse(savedUser)
+<<<<<<< HEAD
     
     if (userId && userId !== parsedUser.email?.replace(/[^a-z0-9]/g, '')) {
       navigate('/login')
@@ -53,6 +55,9 @@ const UserDashboard = () => {
       return
     }
 
+=======
+    registerUser(parsedUser)
+>>>>>>> f8341f01d632edaac39f48bd08d3c3c5ba240267
     setUser(parsedUser)
     setIsAdmin(sessionStorage.getItem('isAdmin') === 'true')
 
