@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Github, Chrome, Shield, Compass } from 'lucide-react'
 import { haptics } from '../lib/haptics'
@@ -10,6 +10,8 @@ const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
   const [mode, setMode] = useState<'user' | 'admin'>('user')
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/dashboard'
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,7 +28,7 @@ const Login = () => {
     }
     haptics.success()
     localStorage.setItem('user', JSON.stringify({ email, name: email.split('@')[0] }))
-    navigate('/dashboard')
+    navigate(redirectTo)
   }
 
   return (

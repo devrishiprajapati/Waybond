@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, Search, Menu, Phone, User, Heart, X, Plane } from 'lucide-react'
 import { getWhatsAppLink } from '../lib/data'
 import { haptics } from '../lib/haptics'
+import { isLoggedIn } from '../lib/auth'
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false)
@@ -11,6 +12,17 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
   const location = useLocation()
+  const navigate = useNavigate()
+
+  /** Auth-gate: navigate to /discover if logged in, else go to login with redirect back */
+  const handleBookNow = (redirect = '/discover') => {
+    haptics.medium()
+    if (isLoggedIn()) {
+      navigate(redirect)
+    } else {
+      navigate(`/login?redirect=${encodeURIComponent(redirect)}`)
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,15 +90,12 @@ const Navbar = () => {
                 <Link to="/wishlist" onClick={() => haptics.light()} className="transition-colors duration-500 text-white hover:text-secondary">
                   <Heart size={18} />
                 </Link>
-                <a
-                  href={getWhatsAppLink("Hi WayBond! I'd like to book an adventure.")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => haptics.medium()}
+                <button
+                  onClick={() => handleBookNow('/discover')}
                   className="bg-secondary text-white px-4 md:px-5 py-2 rounded-full font-black text-[7px] md:text-[8px] uppercase tracking-widest transition-all duration-300 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 whitespace-nowrap flex items-center justify-center"
                 >
                   Book Now
-                </a>
+                </button>
               </div>
             </div>
 
@@ -172,15 +181,12 @@ const Navbar = () => {
                 </div>
               </div>
 
-              <a
-                href="/discover"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => haptics.medium()}
+              <button
+                onClick={() => { setIsOpen(false); handleBookNow('/discover') }}
                 className="w-full bg-secondary text-white py-4 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-secondary/30 active:scale-95 transition-all outline-none relative z-10 mt-auto"
               >
                 Book Now
-              </a>
+              </button>
             </motion.div>
           </div>
         )}

@@ -10,6 +10,7 @@ import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
 import { getTripBySlug, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
+import { isLoggedIn } from '../lib/auth'
 
 const TripDetails = () => {
   const { slug } = useParams()
@@ -36,6 +37,17 @@ const TripDetails = () => {
   const handleDateChange = (date: string) => {
     setSelectedDeparture(date)
     navigate(`/trip/${slug}?departure=${date}`, { replace: true })
+  }
+
+  /** Auth-gate: open WhatsApp if logged in, else go to login with redirect back */
+  const handleBookSlot = () => {
+    haptics.medium()
+    const waUrl = getWhatsAppLink(`Hi! I'm interested in booking the ${trip?.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)
+    if (isLoggedIn()) {
+      window.open(waUrl, '_blank')
+    } else {
+      navigate(`/login?redirect=${encodeURIComponent(`/trip/${slug}`)}`)
+    }
   }
 
   if (loading) {
@@ -220,8 +232,8 @@ const TripDetails = () => {
                                   }
                                 }}
                                 className={`px-2 py-1 text-[7px] font-black uppercase tracking-wider rounded transition-colors ${isActive
-                                    ? 'bg-secondary text-white'
-                                    : 'bg-transparent text-white/50 hover:text-white'
+                                  ? 'bg-secondary text-white'
+                                  : 'bg-transparent text-white/50 hover:text-white'
                                   }`}
                               >
                                 {monthName} {year}
@@ -245,8 +257,8 @@ const TripDetails = () => {
                                     handleDateChange(date)
                                   }}
                                   className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${isSelected
-                                      ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
-                                      : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
+                                    ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
+                                    : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
                                     }`}
                                   title={date}
                                 >
@@ -272,14 +284,12 @@ const TripDetails = () => {
               </div>
             </div>
 
-            <a
-              href={getWhatsAppLink(`Hi! I'm interested in booking the ${trip.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)}
-              target="_blank" rel="noopener noreferrer"
-              onClick={() => haptics.medium()}
-              className="w-full bg-secondary text-white py-6 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 block text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20"
+            <button
+              onClick={handleBookSlot}
+              className="w-full bg-secondary text-white py-6 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20"
             >
               Book Your Slot
-            </a>
+            </button>
             <p className="text-center text-[10px] text-white/40 font-bold uppercase tracking-widest">No cancellation fee up to 15 days before departure</p>
 
             <div className="pt-6 space-y-4 border-t border-white/10">
