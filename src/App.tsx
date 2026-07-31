@@ -13,6 +13,7 @@ import TripDetails from './pages/TripDetails'
 import { About, Community, Wishlist } from './pages/StaticPages'
 import UserDashboard from './pages/UserDashboard'
 import Login from './pages/Login'
+import SignUp from './pages/SignUp'
 import AdminDashboard from './pages/admin/Dashboard'
 import EditTrip from './pages/admin/EditTrip'
 import EditHero from './pages/admin/EditHero'
@@ -64,6 +65,7 @@ function App() {
             <Route path="/trip/:slug" element={<TripDetails />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

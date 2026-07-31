@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Github, Chrome, Shield, Compass } from 'lucide-react'
 import { haptics } from '../lib/haptics'
@@ -39,22 +39,7 @@ const Login = () => {
      */
     <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-start px-4 sm:px-5 pt-24 sm:pt-28 pb-8 sm:pb-10 relative">
 
-      {/* Background Image — pointer-events-none prevents touch interception */}
-      <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
-        <img
-          src="https://images.unsplash.com/photo-1506461883276-594a12b11cf3?auto=format&fit=crop&q=80&w=1200"
-          alt=""
-          className="w-full h-full object-cover opacity-[0.07]"
-          loading="eager"
-          decoding="async"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/85 to-white" />
-      </div>
-
-      {/*
-       * Background accents: replaced giant blur-[180px] circles with a simple
-       * radial gradient — far cheaper to composite on mobile GPUs.
-       */}
+      {/* Background accents only - removed image */}
       <div
         className="fixed inset-0 z-0 pointer-events-none"
         aria-hidden="true"
@@ -193,7 +178,7 @@ const Login = () => {
 
           {mode === 'user' && (
             <>
-              <div className="mt-7 text-center">
+              {/* <div className="mt-7 text-center">
                 <p className="text-slate-500 text-[8px] font-black uppercase tracking-[0.2em] mb-4">Or continue with</p>
                 <div className="flex justify-center gap-4">
                   <button
@@ -211,16 +196,18 @@ const Login = () => {
                     <Github size={18} />
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               <div className="mt-7 pt-5 border-t border-slate-100 text-center">
-                <button
-                  type="button"
-                  onClick={() => { haptics.light(); setIsLogin(!isLogin); }}
-                  className="text-slate-600 text-[9px] font-black uppercase tracking-[0.2em] transition-colors active:text-secondary touch-manipulation"
+                <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.2em] mb-2">
+                  {isLogin ? 'Need an account?' : 'Already a member?'}
+                </p>
+                <Link
+                  to="/signup"
+                  className="text-secondary text-[9px] font-black uppercase tracking-[0.2em] border-b border-secondary pb-0.5 transition-colors hover:text-secondary/80 touch-manipulation"
                 >
-                  {isLogin ? 'Join the community' : 'Already a member?'}
-                </button>
+                  {isLogin ? 'Sign Up' : 'Sign In'}
+                </Link>
               </div>
             </>
           )}
