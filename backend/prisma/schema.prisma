@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  passwordHash String
+  role        String   @default("USER")
+  joinedAt    DateTime @default(now())
+  lastLoginAt DateTime @updatedAt
+  bookings    Booking[]
+  testimonials Testimonial[]
+}
+
+model Trip {
+  id        Int      @id @default(autoincrement())
+  payload   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HeroSlide {
+  id        Int      @id @default(autoincrement())
+  position  Int      @unique
+  payload   Json
+  updatedAt DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  trip      String
+  review    String
+  rating    Int
+  email     String?
+  media     String?
+  mediaType String?
+  createdAt DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  userId    String
+  payload   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model CommunityGallery {
+  slug        String   @id
+  destination String
+  label       String
+  images      Json
+  updatedAt   DateTime @updatedAt
+}
