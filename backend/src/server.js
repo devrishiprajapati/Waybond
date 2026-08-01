@@ -129,6 +129,28 @@ app.get('/api/users', async (_req, res, next) => {
   try { res.json((await prisma.user.findMany({ orderBy: { lastLoginAt: 'desc' } })).map(publicUser)) } catch (error) { next(error) }
 })
 
+app.get('/api/admin/dashboard', async (_req, res, next) => {
+  try {
+    const [tripRecords, userCount, bookingCount, testimonialCount] = await prisma.$transaction([
+      prisma.trip.findMany({ orderBy: { id: 'asc' } }),
+      prisma.user.count({ where: { role: { not: 'ADMIN' } } }),
+      prisma.booking.count(),
+      prisma.testimonial.count()
+    ])
+
+    res.json({
+      trips: tripRecords.map(toTrip),
+      stats: {
+        totalPackages: tripRecords.length,
+        users: userCount,
+        bookings: bookingCount,
+        testimonials: testimonialCount
+      },
+      updatedAt: new Date().toISOString()
+    })
+  } catch (error) { next(error) }
+})
+
 app.post('/api/users', async (req, res, next) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase()

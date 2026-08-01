@@ -21,8 +21,16 @@ import {
 import { getTrips, deleteTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
 
+type DashboardStats = {
+  totalPackages: number
+  users: number
+  bookings: number
+  testimonials: number
+}
+
 const AdminDashboard = () => {
   const [trips, setTrips] = useState<Trip[]>([])
+  const [liveStats, setLiveStats] = useState<DashboardStats | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [experienceFilter, setExperienceFilter] = useState<'All' | Trip['experience']>('All')
   const navigate = useNavigate()
@@ -33,7 +41,21 @@ const AdminDashboard = () => {
       navigate('/admin/login')
       return
     }
-    getTrips().then(setTrips)
+    const loadDashboard = async () => {
+      try {
+        const response = await fetch('/api/admin/dashboard')
+        if (!response.ok) throw new Error('Live dashboard data is unavailable.')
+        const data = await response.json()
+        setTrips(data.trips)
+        setLiveStats(data.stats)
+      } catch {
+        setTrips(await getTrips())
+      }
+    }
+
+    void loadDashboard()
+    const refreshInterval = window.setInterval(() => void loadDashboard(), 15000)
+    return () => window.clearInterval(refreshInterval)
   }, [navigate])
 
   const filteredTrips = useMemo(() => {
@@ -48,24 +70,25 @@ const AdminDashboard = () => {
   }, [trips, searchTerm, experienceFilter])
 
   const stats = useMemo(() => {
-    const monsoon = trips.filter((trip) => trip.experience === 'monsoon').length
-    const road = trips.filter((trip) => trip.experience === 'road').length
-    const avgRating = trips.length
-      ? (trips.reduce((total, trip) => total + Number(trip.rating || 0), 0) / trips.length).toFixed(1)
-      : '0.0'
-
     return [
-      { label: 'Total Packages', value: trips.length, icon: Package },
-      { label: 'Monsoon Treks', value: monsoon, icon: MapPin },
-      { label: 'Road Trips', value: road, icon: Calendar },
-      { label: 'Avg Rating', value: avgRating, icon: Star }
+      { label: 'Total Packages', value: liveStats?.totalPackages ?? trips.length, icon: Package },
+      { label: 'Registered Users', value: liveStats?.users ?? 0, icon: UsersRound },
+      { label: 'Total Bookings', value: liveStats?.bookings ?? 0, icon: Calendar },
+      { label: 'Testimonials', value: liveStats?.testimonials ?? 0, icon: Star }
     ]
-  }, [trips])
+  }, [liveStats, trips.length])
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to remove this expedition?')) {
       await deleteTrip(id)
-      getTrips().then(setTrips)
+      const response = await fetch('/api/admin/dashboard')
+      if (response.ok) {
+        const data = await response.json()
+        setTrips(data.trips)
+        setLiveStats(data.stats)
+      } else {
+        getTrips().then(setTrips)
+      }
     }
   }
 
