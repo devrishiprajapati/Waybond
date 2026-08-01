@@ -248,8 +248,8 @@ const UserDashboard = () => {
                 </div>
               </section>
 
-              {/* Testimonials Form on Desktop */}
-              <section id="testimonial-form" className="liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">
+              {/* Testimonials Form on Desktop ONLY */}
+              <section id="testimonial-form" className="hidden lg:block liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">
                 <div>
                   <p className="text-secondary text-[9px] font-black uppercase tracking-[0.3em]">Your Voice</p>
                   <h2 className="text-2xl font-display font-black uppercase italic tracking-tighter mt-2">Add Testimonial</h2>
@@ -299,8 +299,8 @@ const UserDashboard = () => {
                 </form>
               </section>
 
-              {/* Testimonials List on Desktop */}
-              <section className="liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">
+              {/* Testimonials List on Desktop ONLY */}
+              <section className="hidden lg:block liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">
                 <h2 className="text-xl font-display font-black uppercase italic tracking-tighter">My Testimonials</h2>
                 {testimonials.length === 0 ? (
                   <div className="text-center py-8">
