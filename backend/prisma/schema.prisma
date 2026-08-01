@@ -12,6 +12,7 @@ model User {
   email       String   @unique
   passwordHash String
   role        String   @default("USER")
+  profile     Json?
   joinedAt    DateTime @default(now())
   lastLoginAt DateTime @updatedAt
   bookings    Booking[]

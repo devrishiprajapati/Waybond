@@ -42,8 +42,6 @@ const UserDashboard = () => {
     }
 
     const parsedUser = JSON.parse(savedUser)
-<<<<<<< HEAD
-    
     if (userId && userId !== parsedUser.email?.replace(/[^a-z0-9]/g, '')) {
       navigate('/login')
       return
@@ -55,43 +53,10 @@ const UserDashboard = () => {
       return
     }
 
-=======
     registerUser(parsedUser)
->>>>>>> f8341f01d632edaac39f48bd08d3c3c5ba240267
     setUser(parsedUser)
     setIsAdmin(sessionStorage.getItem('isAdmin') === 'true')
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const savedTestimonials = localStorage.getItem(TESTIMONIALS_KEY)
-    if (savedTestimonials) {
-      setTestimonials(JSON.parse(savedTestimonials))
-    }
-
-    const savedCancelledTrips = localStorage.getItem(CANCELLED_TRIPS_KEY)
-    if (savedCancelledTrips) {
-      setCancelledTrips(JSON.parse(savedCancelledTrips))
-    }
-
-    getTrips().then((trips) => {
-      const savedBookings = localStorage.getItem(BOOKINGS_KEY)
-      if (savedBookings) {
-        setBookedTrips(JSON.parse(savedBookings))
-        return
-      }
-
-      const starterBookings = trips.slice(0, 2).map((trip, index) => ({
-        ...trip,
-        bookingId: `WB-${new Date().getFullYear()}-${String(index + 1).padStart(3, '0')}`,
-        status: index === 0 ? 'Confirmed' : 'Payment Pending',
-        travelers: index === 0 ? 2 : 1,
-        bookedOn: index === 0 ? 'Jul 12, 2026' : 'Jul 18, 2026'
-      }))
-      setBookedTrips(starterBookings)
-      localStorage.setItem(BOOKINGS_KEY, JSON.stringify(starterBookings))
-    })
-  }, [navigate, userId])
-=======
     const loadDashboard = async () => {
       try {
         if (!parsedUser.id) throw new Error('No database user')
@@ -113,33 +78,9 @@ const UserDashboard = () => {
         const savedBookings = localStorage.getItem(BOOKINGS_KEY)
         if (savedBookings) setBookedTrips(JSON.parse(savedBookings))
       }
-=======
-    const loadDashboard = async () => {
-      try {
-        if (!parsedUser.id) throw new Error('No database user')
-        const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
-        if (!response.ok) throw new Error('Dashboard unavailable')
-        const data = await response.json()
-        setTestimonials(data.testimonials.map((item: any) => ({ ...item, tripTitle: item.trip, text: item.review, createdAt: new Date(item.createdAt).toLocaleDateString('en-IN') })))
-        if (data.bookings.length) {
-          setBookedTrips(data.bookings)
-          return
-        }
-        const trips = await getTrips()
-        const starterBookings = trips.slice(0, 2).map((trip, index) => ({ ...trip, bookingId: `WB-${new Date().getFullYear()}-${String(index + 1).padStart(3, '0')}`, status: index === 0 ? 'Confirmed' : 'Payment Pending', travelers: index === 0 ? 2 : 1, bookedOn: index === 0 ? 'Jul 12, 2026' : 'Jul 18, 2026' }))
-        await Promise.all(starterBookings.map((booking) => fetch(`/api/users/${parsedUser.id}/bookings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(booking) })))
-        setBookedTrips(starterBookings)
-      } catch {
-        const savedTestimonials = localStorage.getItem(TESTIMONIALS_KEY)
-        if (savedTestimonials) setTestimonials(JSON.parse(savedTestimonials))
-        const savedBookings = localStorage.getItem(BOOKINGS_KEY)
-        if (savedBookings) setBookedTrips(JSON.parse(savedBookings))
-      }
->>>>>>> 3b2c3185a64cd08d0a2aeb076d472d48fe3781ef
     }
     loadDashboard()
-  }, [navigate])
->>>>>>> 3b2c3185a64cd08d0a2aeb076d472d48fe3781ef
+  }, [navigate, userId])
 
   const stats = useMemo(() => {
     const confirmedTrips = bookedTrips.filter((trip) => trip.status === 'Confirmed').length
@@ -158,8 +99,6 @@ const UserDashboard = () => {
     navigate('/login')
   }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   const handleCancelTrip = (tripId: string | number) => {
     const tripToCancel = bookedTrips.find((trip) => trip.id === tripId || trip.bookingId === tripId)
     if (!tripToCancel) return
@@ -174,13 +113,7 @@ const UserDashboard = () => {
     localStorage.setItem(CANCELLED_TRIPS_KEY, JSON.stringify([...cancelledTrips, cancelledTrip]))
   }
 
-  const handleTestimonialSubmit = (event: React.FormEvent) => {
-=======
   const handleTestimonialSubmit = async (event: React.FormEvent) => {
->>>>>>> 3b2c3185a64cd08d0a2aeb076d472d48fe3781ef
-=======
-  const handleTestimonialSubmit = async (event: React.FormEvent) => {
->>>>>>> 3b2c3185a64cd08d0a2aeb076d472d48fe3781ef
     event.preventDefault()
     if (!testimonialText.trim()) return
 

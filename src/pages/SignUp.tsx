@@ -19,9 +19,17 @@ const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const toDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(new Error('Unable to read the government ID file.'))
+    reader.readAsDataURL(file)
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
@@ -87,20 +95,26 @@ const SignUp = () => {
       return
     }
 
-    haptics.success()
-    localStorage.setItem('user', JSON.stringify({
-      fullName,
-      dateOfBirth,
-      gender,
-      mobileNumber,
-      email,
-      address,
-      emergencyContact,
-      medicalInfo,
-      bloodGroup,
-      name: fullName
-    }))
-    navigate('/dashboard')
+    setSubmitting(true)
+    try {
+      if (governmentID.size > 4 * 1024 * 1024) throw new Error('Government ID must be smaller than 4 MB.')
+      const governmentIdData = await toDataUrl(governmentID)
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: fullName, email, password, profile: { dateOfBirth, gender, mobileNumber, address, emergencyContact, medicalInfo, bloodGroup, governmentId: { name: governmentID.name, type: governmentID.type, data: governmentIdData } } })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.message || 'Unable to create account.')
+      haptics.success()
+      localStorage.setItem('user', JSON.stringify(data.user))
+      navigate('/dashboard')
+    } catch (submitError) {
+      haptics.error()
+      setError(submitError instanceof Error ? submitError.message : 'Unable to create account.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -371,9 +385,10 @@ const SignUp = () => {
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={submitting}
               className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center active:scale-95 touch-manipulation bg-secondary shadow-secondary/20 text-white sticky bottom-0"
             >
-              Create Account
+              {submitting ? 'Creating Account' : 'Create Account'}
               <ArrowRight className="ml-2 transition-transform" size={14} />
             </button>
           </form>

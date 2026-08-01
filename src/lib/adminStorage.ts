@@ -51,15 +51,19 @@ export const isTestimonialHidden = (id: string | number): boolean =>
 
 export const getManagedTestimonials = async (): Promise<ManagedTestimonial[]> => {
   let apiTestimonials: any[] = []
+  let apiAvailable = false
   try {
     const response = await fetch('/api/testimonials')
-    if (response.ok) apiTestimonials = await response.json()
+    if (response.ok) {
+      apiTestimonials = await response.json()
+      apiAvailable = true
+    }
   } catch {
     // The static deployment uses local storage as its data source.
   }
 
-  const published = [...apiTestimonials, ...readList<any>(PUBLIC_TESTIMONIALS_KEY)]
-  const dashboard = readList<any>(DASHBOARD_TESTIMONIALS_KEY)
+  const published = apiAvailable ? apiTestimonials : readList<any>(PUBLIC_TESTIMONIALS_KEY)
+  const dashboard = apiAvailable ? [] : readList<any>(DASHBOARD_TESTIMONIALS_KEY)
   const hiddenIds = getHiddenTestimonialIds()
   const seen = new Set<string>()
 
@@ -109,26 +113,18 @@ export const registerUser = (user: { name?: string; email: string }): Registered
   if (existingIndex >= 0) users[existingIndex] = nextUser
   else users.unshift(nextUser)
   writeList(USERS_KEY, users)
-  fetch('/api/users', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(nextUser)
-  }).catch(() => undefined)
   return nextUser
 }
 
 export const getRegisteredUsers = (): RegisteredUser[] => readList<RegisteredUser>(USERS_KEY)
 
 export const getAllRegisteredUsers = async (): Promise<RegisteredUser[]> => {
-  let apiUsers: RegisteredUser[] = []
   try {
     const response = await fetch('/api/users')
-    if (response.ok) apiUsers = await response.json()
+    if (response.ok) return await response.json()
   } catch {
     // Static hosting continues with the local user registry.
   }
 
-  const usersByEmail = new Map<string, RegisteredUser>()
-  ;[...apiUsers, ...getRegisteredUsers()].forEach((user) => usersByEmail.set(user.email.toLowerCase(), user))
-  return Array.from(usersByEmail.values()).sort((a, b) => new Date(b.lastLoginAt).getTime() - new Date(a.lastLoginAt).getTime())
+  return getRegisteredUsers().sort((a, b) => new Date(b.lastLoginAt).getTime() - new Date(a.lastLoginAt).getTime())
 }

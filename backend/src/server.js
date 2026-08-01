@@ -33,9 +33,10 @@ app.post('/api/auth/signup', async (req, res, next) => {
     const email = String(req.body.email || '').trim().toLowerCase()
     const name = String(req.body.name || '').trim()
     const password = String(req.body.password || '')
+    const profile = req.body.profile || undefined
     if (!name || !email || password.length < 6) return res.status(400).json({ message: 'Name, email, and a 6-character password are required.' })
     if (await prisma.user.findUnique({ where: { email } })) return res.status(409).json({ message: 'An account already exists for this email.' })
-    const user = await prisma.user.create({ data: { name, email, passwordHash: hashPassword(password) } })
+    const user = await prisma.user.create({ data: { name, email, passwordHash: hashPassword(password), profile } })
     res.status(201).json({ user: publicUser(user) })
   } catch (error) { next(error) }
 })
@@ -125,7 +126,7 @@ app.delete('/api/testimonials/:id', async (req, res, next) => {
 })
 
 app.get('/api/users', async (_req, res, next) => {
-  try { res.json(await prisma.user.findMany({ orderBy: { lastLoginAt: 'desc' } })) } catch (error) { next(error) }
+  try { res.json((await prisma.user.findMany({ orderBy: { lastLoginAt: 'desc' } })).map(publicUser)) } catch (error) { next(error) }
 })
 
 app.post('/api/users', async (req, res, next) => {

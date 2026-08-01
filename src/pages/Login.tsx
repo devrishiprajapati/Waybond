@@ -1,9 +1,5 @@
 import React, { useState } from 'react'
-<<<<<<< HEAD
-import { useNavigate, Link } from 'react-router-dom'
-=======
-import { useNavigate, useSearchParams } from 'react-router-dom'
->>>>>>> f8341f01d632edaac39f48bd08d3c3c5ba240267
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Github, Chrome, Shield, Compass } from 'lucide-react'
 import { haptics } from '../lib/haptics'

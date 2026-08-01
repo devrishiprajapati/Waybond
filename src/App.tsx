@@ -33,11 +33,8 @@ import SafetyGuidelines from './pages/SafetyGuidelines'
 import Testimonials from './pages/Testimonials'
 import Blogs from './pages/Blogs'
 import BlogDetail from './pages/BlogDetail'
-<<<<<<< HEAD
 import BookingConfirmation from './pages/BookingConfirmation'
-=======
 import CommunityGallery from './pages/CommunityGallery'
->>>>>>> f8341f01d632edaac39f48bd08d3c3c5ba240267
 
 function App() {
   const location = useLocation();
