@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, ArrowRight, Compass, Phone, MapPin, AlertCircle, Upload, Droplet } from 'lucide-react'
+import { User, Mail, Lock, ArrowRight, Compass, Phone, MapPin, AlertCircle, Upload, Droplet, Eye, EyeOff } from 'lucide-react'
 import { haptics } from '../lib/haptics'
+import { getUser } from '../lib/auth'
 
 const SignUp = () => {
   const [fullName, setFullName] = useState('')
@@ -20,7 +21,14 @@ const SignUp = () => {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const navigate = useNavigate()
+  const existingUser = getUser()
+
+  if (existingUser) {
+    return <Navigate to={sessionStorage.getItem('isAdmin') === 'true' ? '/admin/dashboard' : '/dashboard'} replace />
+  }
 
   const toDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
@@ -104,8 +112,12 @@ const SignUp = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: fullName, email, password, profile: { dateOfBirth, gender, mobileNumber, address, emergencyContact, medicalInfo, bloodGroup, governmentId: { name: governmentID.name, type: governmentID.type, data: governmentIdData } } })
       })
-      const data = await response.json()
+      const responseText = await response.text()
+      let data: { user?: { id?: string; name: string; email: string; [key: string]: unknown }; message?: string } = {}
+      try { data = responseText ? JSON.parse(responseText) : {} } catch { /* Non-JSON server responses are handled below. */ }
+      if (!response.ok && !data.message) throw new Error(`Signup service returned ${response.status}. Restart the backend and try again.`)
       if (!response.ok) throw new Error(data.message || 'Unable to create account.')
+      if (!data.user) throw new Error('Signup service returned an incomplete response. Restart the backend and try again.')
       haptics.success()
       localStorage.setItem('user', JSON.stringify(data.user))
       navigate('/dashboard')
@@ -338,7 +350,7 @@ const SignUp = () => {
               <div className="relative">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -346,6 +358,9 @@ const SignUp = () => {
                   className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
                   required
                 />
+                <button type="button" onClick={() => setShowPassword((current) => !current)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-secondary" aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
               </div>
             </div>
 
@@ -355,7 +370,7 @@ const SignUp = () => {
               <div className="relative">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                 <input
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
@@ -363,6 +378,9 @@ const SignUp = () => {
                   className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
                   required
                 />
+                <button type="button" onClick={() => setShowConfirmPassword((current) => !current)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-secondary" aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
+                  {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
               </div>
             </div>
 

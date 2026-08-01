@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Lock, ShieldCheck, ArrowRight } from 'lucide-react'
 
@@ -7,6 +7,10 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const navigate = useNavigate()
+
+  if (sessionStorage.getItem('isAdmin') === 'true') {
+    return <Navigate to="/admin/dashboard" replace />
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

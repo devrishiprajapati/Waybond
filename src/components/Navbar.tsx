@@ -84,7 +84,7 @@ const Navbar = () => {
               <div className="h-4 w-px bg-white/20"></div>
 
               <div className="flex items-center lg:space-x-4 xl:space-x-6">
-                <Link to="/login" onClick={() => haptics.light()} className="transition-colors duration-500 text-white hover:text-secondary">
+                <Link to={isLoggedIn() ? '/dashboard' : '/login'} onClick={() => haptics.light()} className="transition-colors duration-500 text-white hover:text-secondary">
                   <User size={18} />
                 </Link>
                 <Link to="/wishlist" onClick={() => haptics.light()} className="transition-colors duration-500 text-white hover:text-secondary">

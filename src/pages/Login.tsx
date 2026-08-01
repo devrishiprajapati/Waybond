@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { useNavigate, Link, useSearchParams } from 'react-router-dom'
+import { useNavigate, Link, Navigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, ArrowRight, Github, Chrome, Shield, Compass } from 'lucide-react'
+import { User, Mail, Lock, ArrowRight, Github, Chrome, Shield, Compass, Eye, EyeOff } from 'lucide-react'
 import { haptics } from '../lib/haptics'
 import { registerUser } from '../lib/adminStorage'
+import { getUser } from '../lib/auth'
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -13,9 +14,15 @@ const Login = () => {
   const [mode, setMode] = useState<'user' | 'admin'>('user')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/dashboard'
+  const existingUser = getUser()
+
+  if (existingUser) {
+    return <Navigate to={sessionStorage.getItem('isAdmin') === 'true' ? '/admin/dashboard' : redirectTo} replace />
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,8 +35,12 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })
       })
-      const data = await response.json()
+      const responseText = await response.text()
+      let data: { user?: { id?: string; name: string; email: string; [key: string]: unknown }; message?: string } = {}
+      try { data = responseText ? JSON.parse(responseText) : {} } catch { /* Non-JSON server responses are handled below. */ }
+      if (!response.ok && !data.message) throw new Error(`Authentication service returned ${response.status}. Restart the backend and try again.`)
       if (!response.ok) throw new Error(data.message || 'Unable to continue.')
+      if (!data.user) throw new Error('Authentication service returned an incomplete response. Restart the backend and try again.')
       haptics.success()
       if (mode === 'admin') {
         sessionStorage.setItem('isAdmin', 'true')
@@ -175,7 +186,7 @@ const Login = () => {
               <div className="relative">
                 <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -184,6 +195,9 @@ const Login = () => {
                     }`}
                   required
                 />
+                <button type="button" onClick={() => setShowPassword((current) => !current)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-secondary" aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
               </div>
             </div>
 
