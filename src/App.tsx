@@ -1,9 +1,10 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import FloatingWhatsApp from './components/FloatingWhatsApp'
+import SplashScreen from './components/SplashScreen'
 import Home from './pages/Home'
 import Discover from './pages/Discover'
 import HimachalPage from './pages/HimachalPage'
@@ -38,6 +39,23 @@ import CommunityGallery from './pages/CommunityGallery'
 
 function App() {
   const location = useLocation();
+  const [showSplash, setShowSplash] = useState(true);
+
+  // Handle splash screen
+  useEffect(() => {
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+    
+    if (!hasSeenSplash) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        sessionStorage.setItem('hasSeenSplash', 'true');
+      }, 5000); // 5 seconds
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowSplash(false);
+    }
+  }, []);
 
   useEffect(() => {
     // Scroll to top on route change
@@ -54,7 +72,12 @@ function App() {
   }, [])
 
   return (
-    <div className="light-theme flex flex-col min-h-screen selection:bg-secondary/30 w-full overflow-x-hidden">
+    <>
+      <AnimatePresence mode="wait">
+        {showSplash && <SplashScreen key="splash" />}
+      </AnimatePresence>
+      
+      <div className="light-theme flex flex-col min-h-screen selection:bg-secondary/30 w-full overflow-x-hidden">
       <Navbar />
       <main className="flex-grow w-full">
         <AnimatePresence mode="wait">
@@ -102,6 +125,7 @@ function App() {
       <Footer />
       <FloatingWhatsApp />
     </div>
+    </>
   )
 }
 
