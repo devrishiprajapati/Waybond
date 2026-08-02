@@ -121,6 +121,26 @@ app.post('/api/testimonials', async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
+app.put('/api/testimonials/:id', async (req, res, next) => {
+  try {
+    const existing = await prisma.testimonial.findUnique({ where: { id: req.params.id } })
+    if (!existing) return res.status(404).json({ message: 'Testimonial not found' })
+
+    const name = String(req.body.name ?? existing.name).trim()
+    const trip = String(req.body.trip ?? existing.trip).trim()
+    const review = String(req.body.review ?? existing.review).trim()
+    const rating = Math.min(5, Math.max(1, Number(req.body.rating ?? existing.rating)))
+    if (!name || !trip || !review || !Number.isFinite(rating)) {
+      return res.status(400).json({ message: 'Name, trip, review, and a rating from 1 to 5 are required.' })
+    }
+
+    res.json(await prisma.testimonial.update({
+      where: { id: existing.id },
+      data: { name, trip, review, rating }
+    }))
+  } catch (error) { next(error) }
+})
+
 app.delete('/api/testimonials/:id', async (req, res, next) => {
   try { await prisma.testimonial.delete({ where: { id: req.params.id } }); res.json({ success: true }) } catch (error) { next(error) }
 })

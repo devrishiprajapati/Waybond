@@ -96,6 +96,33 @@ export const deleteManagedTestimonial = async (testimonial: ManagedTestimonial):
   }
 }
 
+export const updateManagedTestimonial = async (
+  testimonial: ManagedTestimonial,
+  updates: Pick<ManagedTestimonial, 'name' | 'trip' | 'review' | 'rating'>
+): Promise<ManagedTestimonial> => {
+  const normalizedUpdates = {
+    name: updates.name.trim(),
+    trip: updates.trip.trim(),
+    review: updates.review.trim(),
+    rating: Math.min(5, Math.max(1, Number(updates.rating)))
+  }
+
+  if (testimonial.source === 'published') {
+    const response = await fetch(`/api/testimonials/${testimonial.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(normalizedUpdates)
+    })
+    if (response.ok) return normalizeTestimonial(await response.json())
+  }
+
+  const key = testimonial.source === 'dashboard' ? DASHBOARD_TESTIMONIALS_KEY : PUBLIC_TESTIMONIALS_KEY
+  writeList(key, readList<any>(key).map((item) =>
+    String(item.id) === String(testimonial.id) ? { ...item, ...normalizedUpdates } : item
+  ))
+  return { ...testimonial, ...normalizedUpdates }
+}
+
 export const registerUser = (user: { name?: string; email: string }): RegisteredUser => {
   const users = readList<RegisteredUser>(USERS_KEY)
   const email = user.email.trim().toLowerCase()

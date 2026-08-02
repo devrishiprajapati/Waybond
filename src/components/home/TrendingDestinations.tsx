@@ -1,48 +1,12 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { MapPin, Compass, Zap, Smartphone, Users, Trophy, ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { ALL_TRIPS } from '../../lib/trips'
 import { optimizeImageUrl } from '../../lib/dataService'
-import { haptics } from '../../lib/haptics'
 
 export default function TrendingDestinations() {
   // Get top 6 trips to display as trending destinations
   const trendingTrips = ALL_TRIPS.slice(0, 6)
-
-  // Map experiences to icons
-  const getExperienceIcons = (experience: string) => {
-    const iconProps = { size: 24, className: '!text-white hover:!text-white transition-colors', style: { color: '#ffffff', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.9))' } }
-
-    const iconMap: Record<string, React.ReactNode[]> = {
-      monsoon: [
-        <MapPin key="1" {...iconProps} />,
-        <Compass key="2" {...iconProps} />,
-        <Zap key="3" {...iconProps} />,
-        <Users key="4" {...iconProps} />
-      ],
-      weekend: [
-        <Smartphone key="1" {...iconProps} />,
-        <Users key="2" {...iconProps} />,
-        <Trophy key="3" {...iconProps} />,
-        <Zap key="4" {...iconProps} />
-      ],
-      road: [
-        <MapPin key="1" {...iconProps} />,
-        <Zap key="2" {...iconProps} />,
-        <Compass key="3" {...iconProps} />,
-        <Users key="4" {...iconProps} />
-      ],
-      snow: [
-        <Trophy key="1" {...iconProps} />,
-        <Compass key="2" {...iconProps} />,
-        <Zap key="3" {...iconProps} />,
-        <MapPin key="4" {...iconProps} />
-      ]
-    }
-
-    return iconMap[experience] || iconMap.weekend
-  }
 
   return (
     <section className="py-20 md:py-32 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
@@ -89,7 +53,7 @@ export default function TrendingDestinations() {
               className="group h-full"
             >
               <Link
-                to={`/trip/${trip.id}`}
+                to="/discover"
                 className="block relative h-96 sm:h-[420px] md:h-[480px] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/20 backdrop-blur-sm group"
               >
                 {/* Image Container */}
@@ -142,38 +106,6 @@ export default function TrendingDestinations() {
                   </motion.div>
                 </div>
 
-                {/* Bottom - Activity Icons with Strong Background */}
-                <div className="absolute bottom-0 left-0 right-0 h-24 md:h-28 bg-gradient-to-t from-black/90 via-black/70 to-transparent flex items-center justify-center gap-3 md:gap-4 z-10">
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ delay: idx * 0.12 + 0.3, duration: 0.5 }}
-                    viewport={{ once: true }}
-                    className="flex gap-3 md:gap-4"
-                  >
-                    {getExperienceIcons(trip.experience).map((icon, i) => (
-                      <motion.div
-                        key={i}
-                        whileHover={{ scale: 1.3, y: -5 }}
-                        className="cursor-pointer"
-                      >
-                        {icon}
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </div>
-
-                {/* Floating Action Button on Hover */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0 }}
-                  whileHover={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                >
-                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-secondary to-blue-400 text-white shadow-2xl shadow-secondary/50">
-                    <ArrowUpRight size={24} />
-                  </div>
-                </motion.div>
               </Link>
             </motion.div>
           ))}
