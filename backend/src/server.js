@@ -14,7 +14,7 @@ app.use(express.json({ limit: '20mb' }))
 const toTrip = (record) => ({ id: record.id, ...record.payload })
 const toHeroSlide = (record) => ({ id: record.id, ...record.payload })
 const toTrendingCard = (record) => ({ id: record.id, ...record.payload })
-const toBooking = (record) => ({ id: record.id, ...record.payload })
+const toBooking = (record) => ({ id: record.id, bookingDbId: record.id, ...record.payload })
 const publicUser = ({ passwordHash, ...user }) => user
 const hashPassword = (password) => {
   const salt = randomBytes(16).toString('hex')
@@ -275,6 +275,20 @@ app.post('/api/users/:id/bookings', async (req, res, next) => {
   try {
     const booking = await prisma.booking.create({ data: { userId: req.params.id, payload: req.body } })
     res.status(201).json(toBooking(booking))
+  } catch (error) { next(error) }
+})
+
+app.put('/api/bookings/:bookingId/cancel', async (req, res, next) => {
+  try {
+    const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId } })
+    if (!booking) return res.status(404).json({ message: 'Booking not found' })
+    
+    const updatedPayload = { ...booking.payload, status: 'Cancelled', cancelledOn: new Date().toLocaleDateString('en-IN') }
+    const updated = await prisma.booking.update({ 
+      where: { id: req.params.bookingId }, 
+      data: { payload: updatedPayload } 
+    })
+    res.json(toBooking(updated))
   } catch (error) { next(error) }
 })
 
