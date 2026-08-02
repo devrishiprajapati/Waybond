@@ -20,7 +20,7 @@ const BookedTripsPage = () => {
     const parsedUser = JSON.parse(savedUser)
     
     // Verify that the userId in URL matches the logged-in user
-    if (userId && userId !== parsedUser.email?.replace(/[^a-z0-9]/g, '')) {
+    if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
       return
     }

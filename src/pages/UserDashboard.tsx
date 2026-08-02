@@ -42,14 +42,13 @@ const UserDashboard = () => {
     }
 
     const parsedUser = JSON.parse(savedUser)
-    if (userId && userId !== parsedUser.email?.replace(/[^a-z0-9]/g, '')) {
+    if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
       return
     }
     
     if (!userId) {
-      const newUserId = parsedUser.email?.replace(/[^a-z0-9]/g, '')
-      navigate(`/dashboard/${newUserId}`, { replace: true })
+      navigate(`/dashboard/${parsedUser.id}`, { replace: true })
       return
     }
 
