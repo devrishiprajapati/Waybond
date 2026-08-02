@@ -39,14 +39,62 @@ const TripDetails = () => {
     navigate(`/trip/${slug}?departure=${date}`, { replace: true })
   }
 
-  /** Auth-gate: open WhatsApp if logged in, else go to login with redirect back */
-  const handleBookSlot = () => {
+  /** Create booking in DB, show alert, redirect to dashboard */
+  const handleBookSlot = async () => {
     haptics.medium()
-    const waUrl = getWhatsAppLink(`Hi! I'm interested in booking the ${trip?.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)
-    if (isLoggedIn()) {
-      window.open(waUrl, '_blank')
-    } else {
+    
+    // Check if user is logged in
+    const savedUser = localStorage.getItem('user')
+    if (!savedUser) {
       navigate(`/login?redirect=${encodeURIComponent(`/trip/${slug}`)}`)
+      return
+    }
+
+    try {
+      const user = JSON.parse(savedUser)
+      if (!user.id) throw new Error('User ID not found')
+
+      // Create booking payload (spread trip first, then override specific fields)
+      const bookingPayload = {
+        id: trip.id,
+        title: trip.title,
+        location: trip.location,
+        duration: trip.duration,
+        price: trip.price,
+        image: trip.image,
+        rating: trip.rating,
+        reviews: trip.reviews,
+        description: trip.description,
+        highlights: trip.highlights || [],
+        itinerary: trip.itinerary || [],
+        inclusions: trip.inclusions || [],
+        exclusions: trip.exclusions || [],
+        departureDates: trip.departureDates || [],
+        bookingId: `WB-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
+        status: 'Payment Pending',
+        travelers: 1,
+        bookedOn: new Date().toLocaleDateString('en-IN'),
+        nextBatch: selectedDeparture || trip.departureDates?.[0] || 'TBD'
+      }
+
+      // Save to database
+      const response = await fetch(`/api/users/${user.id}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingPayload)
+      })
+
+      if (!response.ok) throw new Error('Failed to create booking')
+
+      // Show success alert
+      alert(`Booking confirmed! Your booking ID will be assigned shortly.`)
+
+      // Redirect to dashboard
+      const userId = user.email?.replace(/[^a-z0-9]/g, '')
+      navigate(`/dashboard/${userId}`)
+    } catch (error) {
+      console.error('Booking failed:', error)
+      alert('Failed to create booking. Please try again.')
     }
   }
 
