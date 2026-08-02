@@ -33,6 +33,13 @@ model HeroSlide {
   updatedAt DateTime @updatedAt
 }
 
+model TrendingCard {
+  id        Int      @id @default(autoincrement())
+  position  Int      @unique
+  payload   Json
+  updatedAt DateTime @updatedAt
+}
+
 model Testimonial {
   id        String   @id @default(cuid())
   name      String

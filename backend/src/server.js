@@ -12,6 +12,7 @@ app.use(express.json({ limit: '20mb' }))
 
 const toTrip = (record) => ({ id: record.id, ...record.payload })
 const toHeroSlide = (record) => ({ id: record.id, ...record.payload })
+const toTrendingCard = (record) => ({ id: record.id, ...record.payload })
 const toBooking = (record) => ({ id: record.id, ...record.payload })
 const publicUser = ({ passwordHash, ...user }) => user
 const hashPassword = (password) => {
@@ -105,6 +106,22 @@ app.post('/api/heroSlides', async (req, res, next) => {
     await prisma.$transaction([
       prisma.heroSlide.deleteMany(),
       ...req.body.map((slide, position) => prisma.heroSlide.create({ data: { position, payload: slide } }))
+    ])
+    res.json({ success: true })
+  } catch (error) { next(error) }
+})
+
+app.get('/api/trending-cards', async (_req, res, next) => {
+  try { res.json((await prisma.trendingCard.findMany({ orderBy: { position: 'asc' } })).map(toTrendingCard)) } catch (error) { next(error) }
+})
+
+app.post('/api/trending-cards', async (req, res, next) => {
+  try {
+    if (!Array.isArray(req.body)) return res.status(400).json({ message: 'Trending cards must be an array' })
+    if (req.body.length > 6) return res.status(400).json({ message: 'A maximum of 6 Trending Adventure cards is allowed.' })
+    await prisma.$transaction([
+      prisma.trendingCard.deleteMany(),
+      ...req.body.map((card, position) => prisma.trendingCard.create({ data: { position, payload: card } }))
     ])
     res.json({ success: true })
   } catch (error) { next(error) }

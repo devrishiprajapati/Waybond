@@ -1,12 +1,15 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
-import { ALL_TRIPS } from '../../lib/trips'
-import { optimizeImageUrl } from '../../lib/dataService'
+import { getTrendingCards, optimizeImageUrl, TrendingCard } from '../../lib/dataService'
 
 export default function TrendingDestinations() {
-  // Get top 6 trips to display as trending destinations
-  const trendingTrips = ALL_TRIPS.slice(0, 6)
+  const [trendingCards, setTrendingCards] = useState<TrendingCard[]>([])
+
+  useEffect(() => {
+    getTrendingCards().then(setTrendingCards)
+  }, [])
 
   return (
     <section className="py-20 md:py-32 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
@@ -43,9 +46,9 @@ export default function TrendingDestinations() {
 
         {/* Trips Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 mb-16">
-          {trendingTrips.map((trip, idx) => (
+          {trendingCards.map((card, idx) => (
             <motion.div
-              key={trip.id}
+              key={card.id ?? `${card.title}-${idx}`}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.12, duration: 0.7, type: 'spring', stiffness: 100 }}
@@ -59,8 +62,8 @@ export default function TrendingDestinations() {
                 {/* Image Container */}
                 <div className="relative z-0 w-full h-full overflow-hidden bg-gray-200">
                   <img
-                    src={optimizeImageUrl(trip.image, 900, 85)}
-                    alt={trip.title}
+                    src={optimizeImageUrl(card.image, 900, 85)}
+                    alt={card.title}
                     loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-1000 will-change-transform"
                   />
@@ -78,7 +81,7 @@ export default function TrendingDestinations() {
                     viewport={{ once: true }}
                     className="inline-block bg-gradient-to-r from-secondary to-blue-400 text-white text-[10px] md:text-xs font-black uppercase px-4 md:px-5 py-2 md:py-2.5 rounded-full tracking-widest shadow-2xl shadow-secondary/50 transform group-hover:scale-110 transition-transform duration-500 border border-white/30 capitalize"
                   >
-                    {trip.experience}
+                    {card.badge}
                   </motion.span>
                 </div>
 
@@ -95,13 +98,13 @@ export default function TrendingDestinations() {
                       className="text-3xl sm:text-4xl md:text-5xl font-display font-black !text-white uppercase tracking-tight leading-tight line-clamp-2"
                       style={{ color: 'white' }}
                     >
-                      {trip.title.split(' ')[0]}
+                      {card.title}
                     </h3>
                     <p
                       className="!text-white text-xs md:text-sm font-semibold tracking-widest uppercase line-clamp-1"
                       style={{ color: 'white' }}
                     >
-                      {trip.location.split(',')[0]}
+                      {card.subtitle}
                     </p>
                   </motion.div>
                 </div>
