@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Star, Users, Globe } from 'lucide-react'
+import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Star, Users, Globe, Upload } from 'lucide-react'
 import { getTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
 
@@ -48,6 +48,7 @@ const EditTrip = () => {
     },
     itinerary: []
   })
+  const [mediaError, setMediaError] = useState('')
 
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
@@ -59,6 +60,55 @@ const EditTrip = () => {
       })
     }
   }, [id, navigate])
+
+  const readImage = (file: File) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(new Error('Unable to read the selected image.'))
+    reader.readAsDataURL(file)
+  })
+
+  const validateImage = (file: File) => {
+    if (!file.type.startsWith('image/')) throw new Error('Please select an image file.')
+    if (file.size > 4 * 1024 * 1024) throw new Error('Each image must be smaller than 4 MB.')
+  }
+
+  const handleCoverUpload = async (file?: File) => {
+    if (!file) return
+    try {
+      validateImage(file)
+      const image = await readImage(file)
+      setFormData((current) => ({ ...current, image, images: [image, ...(current.images || []).filter((item) => item !== current.image)] }))
+      setMediaError('')
+    } catch (error) {
+      setMediaError(error instanceof Error ? error.message : 'Unable to upload image.')
+    }
+  }
+
+  const handleGalleryUpload = async (files: FileList | null) => {
+    if (!files?.length) return
+    try {
+      const selected = Array.from(files)
+      selected.forEach(validateImage)
+      const images = await Promise.all(selected.map(readImage))
+      setFormData((current) => ({ ...current, images: [...(current.images || []), ...images] }))
+      setMediaError('')
+    } catch (error) {
+      setMediaError(error instanceof Error ? error.message : 'Unable to upload images.')
+    }
+  }
+
+  const handleCaptainUpload = async (file?: File) => {
+    if (!file) return
+    try {
+      validateImage(file)
+      const avatar = await readImage(file)
+      setFormData((current) => ({ ...current, captain: { ...current.captain!, avatar } }))
+      setMediaError('')
+    } catch (error) {
+      setMediaError(error instanceof Error ? error.message : 'Unable to upload image.')
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -224,27 +274,18 @@ const EditTrip = () => {
               </div>
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <label className={labelClass}>Main Cover Image URL</label>
-                  <input
-                    type="text"
-                    value={formData.image}
-                    onChange={e => setFormData({ ...formData, image: e.target.value })}
-                    placeholder="https://images.unsplash.com/..."
-                    className={`${inputClass} text-sm`}
-                    required
-                  />
+                  <label className={labelClass}>Main Cover Image</label>
+                  <label className="h-14 rounded-2xl border border-secondary/35 bg-secondary/10 text-secondary font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:bg-secondary hover:text-white transition-all"><Upload size={16} /> Upload Cover Image<input type="file" accept="image/*" className="sr-only" onChange={(event) => handleCoverUpload(event.target.files?.[0])} /></label>
                 </div>
                 <div className="space-y-2">
-                  <label className={labelClass}>Gallery Images (Comma separated URLs)</label>
-                  <textarea
-                    value={formData.images?.join(', ')}
-                    onChange={e => setFormData({ ...formData, images: e.target.value.split(',').map(url => url.trim()).filter(url => url) })}
-                    placeholder="https://img1.jpg, https://img2.jpg"
-                    className={`${textareaClass} min-h-[95px] text-sm`}
-                  />
+                  <label className={labelClass}>Gallery Images</label>
+                  <label className="min-h-[96px] rounded-2xl border border-dashed border-white/20 bg-white/[0.03] text-white/55 font-black text-[10px] uppercase tracking-[0.16em] flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-secondary hover:text-secondary transition-all"><Upload size={18} /> Upload one or more images<input type="file" accept="image/*" multiple className="sr-only" onChange={(event) => handleGalleryUpload(event.target.files)} /></label>
+                  {formData.images && formData.images.length > 0 && <div className="flex flex-wrap gap-2 pt-2">{formData.images.map((image, index) => <div key={`${image.slice(0, 24)}-${index}`} className="relative w-16 h-16 rounded-xl overflow-hidden border border-white/10"><img src={image} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" /><button type="button" onClick={() => setFormData((current) => ({ ...current, images: (current.images || []).filter((_, imageIndex) => imageIndex !== index) }))} className="absolute top-0.5 right-0.5 w-5 h-5 rounded-md bg-black/70 text-white flex items-center justify-center" aria-label="Remove gallery image"><Trash2 size={11} /></button></div>)}</div>}
                 </div>
               </div>
             </div>
+
+            {mediaError && <p className="text-sm font-bold text-red-300">{mediaError}</p>}
 
             <div className="space-y-2">
               <label className={labelClass}>Highlights (Comma separated)</label>
@@ -431,14 +472,8 @@ const EditTrip = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className={labelClass}>Captain Avatar URL</label>
-                    <input
-                      type="text"
-                      value={formData.captain?.avatar}
-                      onChange={e => setFormData({ ...formData, captain: { ...formData.captain!, avatar: e.target.value } })}
-                      placeholder="https://images.unsplash.com/..."
-                      className={`${inputClass} text-sm`}
-                    />
+                    <label className={labelClass}>Captain Image</label>
+                    <label className="h-14 rounded-2xl border border-secondary/35 bg-secondary/10 text-secondary font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:bg-secondary hover:text-white transition-all"><Upload size={16} /> Upload Captain Image<input type="file" accept="image/*" className="sr-only" onChange={(event) => handleCaptainUpload(event.target.files?.[0])} /></label>
                   </div>
                 </div>
                 <div className="space-y-2">
