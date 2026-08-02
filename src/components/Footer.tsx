@@ -45,8 +45,8 @@ const categoryGroups = [
 const Footer = () => {
   const socialLinks = [
     { label: "Instagram", href: "https://www.instagram.com/", icon: Instagram },
-    { label: "Facebook", href: "https://www.facebook.com/", icon: Facebook },
-    { label: "YouTube", href: "https://www.youtube.com/", icon: Youtube },
+    // { label: "Facebook", href: "https://www.facebook.com/", icon: Facebook },
+    // { label: "YouTube", href: "https://www.youtube.com/", icon: Youtube },
     { label: "LinkedIn", href: "https://www.linkedin.com/", icon: Linkedin },
     { label: "WhatsApp", href: getWhatsAppLink("Hi WayBond! I'd like to join the community."), icon: MessageCircle },
   ];
@@ -199,6 +199,29 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* Google Maps Section */}
+      <section className="w-full relative z-10 mt-16 md:mt-20">
+        <div className="max-w-[1400px] md:max-w-none mx-auto px-6 md:px-0">
+          <div className="liquid-glass-dark rounded-2xl md:rounded-none border border-slate-200 md:border-0 md:border-y p-4 sm:p-6 md:py-8">
+            <h3 className="text-lg md:text-xl font-display font-black text-white tracking-tighter mb-4 md:px-12 lg:px-20">Find Us</h3>
+            <div className="relative w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-xl overflow-hidden shadow-lg md:px-12 lg:px-20">
+              <iframe
+                src="https://maps.google.com/maps?q=23.063877909238336,72.67752775052084&hl=en&z=15&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="WayBond Location"
+                className="w-full h-full rounded-xl"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 mt-24 pt-8 border-t border-white/5 text-center relative z-10">
         <p className="text-white/30 text-[9px] font-black uppercase tracking-[0.3em]">
           © 2026 WayBond Travels. All rights reserved.{" "}
