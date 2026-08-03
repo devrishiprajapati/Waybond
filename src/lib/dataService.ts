@@ -24,7 +24,6 @@ export const optimizeImageUrl = (url: string, width = 1200, quality = 80) => {
   return url;
 };
 
-const STORAGE_KEY = 'waybond_trips'
 const HERO_STORAGE_KEY = 'waybond_hero'
 const TRENDING_STORAGE_KEY = 'waybond_trending_cards'
 const VERSION_KEY = 'waybond_version'
@@ -35,7 +34,6 @@ const syncData = () => {
   const savedVersion = localStorage.getItem(VERSION_KEY);
   if (!savedVersion || parseFloat(savedVersion) < CURRENT_VERSION) {
     console.log("Stale data detected. Syncing with fresh codebase...");
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ALL_TRIPS));
     localStorage.setItem(HERO_STORAGE_KEY, JSON.stringify(heroSlides));
     localStorage.setItem(VERSION_KEY, CURRENT_VERSION.toString());
   }
@@ -43,32 +41,24 @@ const syncData = () => {
 
 syncData();
 
-const mergeTrips = (localTrips: Trip[], liveTrips: Trip[]) => {
-  const byId = new Map<number, Trip>()
-  localTrips.forEach((trip) => byId.set(trip.id, trip))
-  // A live record is authoritative when the same package exists in both places.
-  liveTrips.forEach((trip) => byId.set(trip.id, trip))
-  return Array.from(byId.values()).sort((first, second) => first.id - second.id)
+const notifyTripsUpdated = () => window.dispatchEvent(new Event('waybond:trips-updated'))
+
+const fetchWithTimeout = async (input: RequestInfo | URL, init?: RequestInit, timeout = 8000) => {
+  const controller = new AbortController()
+  const timer = window.setTimeout(() => controller.abort(), timeout)
+  try {
+    return await fetch(input, { ...init, signal: controller.signal })
+  } finally {
+    window.clearTimeout(timer)
+  }
 }
 
 export const getTrips = async (): Promise<Trip[]> => {
-  const localData = localStorage.getItem(STORAGE_KEY);
-  const localTrips = localData ? JSON.parse(localData) as Trip[] : ALL_TRIPS;
-  try {
-    const res = await fetch('/api/trips');
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        const trips = mergeTrips(localTrips, data)
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(trips))
-        return trips
-      }
-    }
-  } catch (e) {
-    console.warn("Backend not running. Using local storage/codebase.");
-  }
-
-  return localTrips;
+  const res = await fetchWithTimeout('/api/trips', undefined, 8000)
+  if (!res.ok) throw new Error('Unable to load trips from the database.')
+  const data = await res.json()
+  if (!Array.isArray(data)) throw new Error('The database returned an invalid trips response.')
+  return data
 }
 
 export const getTripById = async (id: number): Promise<Trip | undefined> => {
@@ -93,60 +83,33 @@ export const getTripBySlug = async (slug: string): Promise<Trip | undefined> => 
 }
 
 export const updateTrip = async (updatedTrip: Trip) => {
-  try {
-    await fetch(`/api/trips/${updatedTrip.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedTrip),
-    });
-  } catch (e) {
-    console.error(e);
-  }
-  // Also update localStorage so it's not lost
-  const trips = await getTrips();
-  const index = trips.findIndex(t => t.id === updatedTrip.id);
-  if (index !== -1) {
-    trips[index] = updatedTrip;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(trips));
-  }
+  const response = await fetchWithTimeout(`/api/trips/${updatedTrip.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedTrip),
+  })
+  if (!response.ok) throw new Error('Unable to update the package in the database.')
+  const trip = await response.json() as Trip
+  notifyTripsUpdated()
+  return trip
 }
 
 export const addTrip = async (newTrip: Omit<Trip, 'id'>) => {
-  try {
-    const res = await fetch('/api/trips', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newTrip),
-    });
-    if (res.ok) {
-      const addedTrip = await res.json();
-      const trips = await getTrips();
-      // sync local
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...trips, addedTrip]));
-      return addedTrip;
-    }
-  } catch (e) {
-    console.error(e);
-  }
-
-  // Fallback local addition
-  const trips = await getTrips();
-  const id = Math.max(...trips.map(t => t.id), 0) + 1;
-  const trip = { ...newTrip, id } as Trip;
-  trips.push(trip);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(trips));
-  return trip;
+  const response = await fetchWithTimeout('/api/trips', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newTrip),
+  })
+  if (!response.ok) throw new Error('Unable to save the package to the database.')
+  const trip = await response.json() as Trip
+  notifyTripsUpdated()
+  return trip
 }
 
 export const deleteTrip = async (id: number) => {
-  try {
-    await fetch(`/api/trips/${id}`, { method: 'DELETE' });
-  } catch (e) {
-    console.error(e);
-  }
-  const trips = await getTrips();
-  const newTrips = trips.filter(t => t.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(newTrips));
+  const response = await fetchWithTimeout(`/api/trips/${id}`, { method: 'DELETE' })
+  if (!response.ok) throw new Error('Unable to delete the package from the database.')
+  notifyTripsUpdated()
 }
 
 export const getHeroSlides = async (): Promise<HeroSlide[]> => {

@@ -120,12 +120,16 @@ const EditTrip = () => {
       itinerary: formData.itinerary || []
     }
 
-    if (id && id !== 'new') {
-      await updateTrip(finalData as Trip)
-    } else {
-      await addTrip(finalData as Omit<Trip, 'id'>)
+    try {
+      if (id && id !== 'new') {
+        await updateTrip(finalData as Trip)
+      } else {
+        await addTrip(finalData as Omit<Trip, 'id'>)
+      }
+      navigate('/admin/dashboard')
+    } catch (error) {
+      setMediaError(error instanceof Error ? error.message : 'Unable to save the package.')
     }
-    navigate('/admin/dashboard')
   }
 
   return (
