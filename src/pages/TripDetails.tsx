@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MapPin, Users, Star, ArrowLeft,
   CheckCircle2, Clock, ShieldCheck, ChevronDown,
-  ChevronUp, PlayCircle, Instagram, MessageCircle
+  ChevronUp, PlayCircle, Instagram, MessageCircle, FileText, Download
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
@@ -64,7 +64,7 @@ const TripDetails = () => {
   /** Create a pending booking, then confirm it only after Razorpay verifies payment. */
   const handleBookSlot = async () => {
     haptics.medium()
-    
+
     // Check if user is logged in
     const savedUser = localStorage.getItem('user')
     if (!savedUser) {
@@ -414,6 +414,16 @@ const TripDetails = () => {
               <div className="flex items-center text-xs font-black tracking-widest uppercase text-white/60">
                 <CheckCircle2 size={18} className="text-green-400 mr-3" /> Secure Payments
               </div>
+              {trip.pdfUrl && (
+                <a
+                  href={trip.pdfUrl}
+                  download={`${trip.title.replace(/\s+/g, '_')}_Itinerary.pdf`}
+                  className="flex items-center justify-center gap-2 w-full h-11 rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary font-black text-[10px] uppercase tracking-[0.16em] hover:bg-secondary hover:text-white transition-all"
+                  onClick={() => haptics.light()}
+                >
+                  <Download size={15} /> Download Itinerary
+                </a>
+              )}
             </div>
           </div>
         </div>

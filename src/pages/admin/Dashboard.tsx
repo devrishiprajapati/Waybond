@@ -49,7 +49,7 @@ const AdminDashboard = () => {
         setTrips(data.trips)
         setLiveStats(data.stats)
       } catch {
-        setTrips(await getTrips())
+        setTrips([])
       }
     }
 
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
         setTrips(data.trips)
         setLiveStats(data.stats)
       } else {
-        getTrips().then(setTrips)
+        setTrips([])
       }
     }
   }

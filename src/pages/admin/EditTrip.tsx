@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Star, Users, Globe, Upload } from 'lucide-react'
+import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Star, Users, Globe, Upload, FileText } from 'lucide-react'
 import { getTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
 
@@ -46,7 +46,8 @@ const EditTrip = () => {
       rating: 5.0,
       trips: 0
     },
-    itinerary: []
+    itinerary: [],
+    pdfUrl: ''
   })
   const [mediaError, setMediaError] = useState('')
 
@@ -110,22 +111,46 @@ const EditTrip = () => {
     }
   }
 
+  const handlePdfUpload = async (file?: File) => {
+    if (!file) return
+    try {
+      if (file.type !== 'application/pdf') throw new Error('Please select a PDF file.')
+      if (file.size > 10 * 1024 * 1024) throw new Error('PDF must be smaller than 10 MB.')
+      const pdfUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(String(reader.result))
+        reader.onerror = () => reject(new Error('Unable to read the selected PDF.'))
+        reader.readAsDataURL(file)
+      })
+      setFormData((current) => ({ ...current, pdfUrl, _pdfName: file.name } as any))
+      setMediaError('')
+    } catch (error) {
+      setMediaError(error instanceof Error ? error.message : 'Unable to upload PDF.')
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { _pdfName, ...cleanData } = formData as any
     const finalData = {
-      ...formData,
+      ...cleanData,
       images: formData.images && formData.images.length > 0 ? formData.images : [formData.image || ''],
       highlights: formData.highlights || [],
       departureDates: formData.departureDates?.filter(Boolean) || [],
       itinerary: formData.itinerary || []
     }
 
-    if (id && id !== 'new') {
-      await updateTrip(finalData as Trip)
-    } else {
-      await addTrip(finalData as Omit<Trip, 'id'>)
+    try {
+      if (id && id !== 'new') {
+        await updateTrip(finalData as Trip)
+      } else {
+        await addTrip(finalData as Omit<Trip, 'id'>)
+      }
+      navigate('/admin/dashboard')
+    } catch (error) {
+      setMediaError(error instanceof Error ? error.message : 'Unable to save the package.')
     }
-    navigate('/admin/dashboard')
   }
 
   return (
@@ -281,6 +306,29 @@ const EditTrip = () => {
                   <label className={labelClass}>Gallery Images</label>
                   <label className="min-h-[96px] rounded-2xl border border-dashed border-white/20 bg-white/[0.03] text-white/55 font-black text-[10px] uppercase tracking-[0.16em] flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-secondary hover:text-secondary transition-all"><Upload size={18} /> Upload one or more images<input type="file" accept="image/*" multiple className="sr-only" onChange={(event) => handleGalleryUpload(event.target.files)} /></label>
                   {formData.images && formData.images.length > 0 && <div className="flex flex-wrap gap-2 pt-2">{formData.images.map((image, index) => <div key={`${image.slice(0, 24)}-${index}`} className="relative w-16 h-16 rounded-xl overflow-hidden border border-white/10"><img src={image} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" /><button type="button" onClick={() => setFormData((current) => ({ ...current, images: (current.images || []).filter((_, imageIndex) => imageIndex !== index) }))} className="absolute top-0.5 right-0.5 w-5 h-5 rounded-md bg-black/70 text-white flex items-center justify-center" aria-label="Remove gallery image"><Trash2 size={11} /></button></div>)}</div>}
+                </div>
+                <div className="space-y-2">
+                  <label className={labelClass}><FileText size={13} className="mr-1 text-secondary" /> PDF Brochure</label>
+                  {formData.pdfUrl ? (
+                    <div className="flex items-center gap-3 h-14 px-5 rounded-2xl border border-green-400/30 bg-green-400/10">
+                      <FileText size={18} className="text-green-400 shrink-0" />
+                      <span className="text-green-300 font-black text-[10px] uppercase tracking-[0.14em] truncate flex-1">{(formData as any)._pdfName || 'Brochure.pdf'}</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData((current) => ({ ...current, pdfUrl: '', _pdfName: '' } as any))}
+                        className="shrink-0 w-7 h-7 rounded-xl bg-red-400/15 text-red-300 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"
+                        aria-label="Remove PDF"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="h-14 rounded-2xl border border-dashed border-white/20 bg-white/[0.03] text-white/55 font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:border-secondary hover:text-secondary transition-all">
+                      <Upload size={16} /> Upload PDF Brochure
+                      <input type="file" accept="application/pdf" className="sr-only" onChange={(event) => handlePdfUpload(event.target.files?.[0])} />
+                    </label>
+                  )}
+                  <p className="text-[10px] text-white/30 ml-2">PDF only · max 10 MB · users can download from the trip page</p>
                 </div>
               </div>
             </div>

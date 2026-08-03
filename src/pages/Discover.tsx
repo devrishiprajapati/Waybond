@@ -22,7 +22,20 @@ const Discover = () => {
   const [selectedDepartures, setSelectedDepartures] = useState<Record<number, string>>({})
 
   useEffect(() => {
-    getTrips().then(setTrips);
+    let isMounted = true
+    const loadTrips = () => {
+      void getTrips()
+        .then((data) => { if (isMounted) setTrips(data) })
+        .catch((error) => console.error('Unable to load database trips:', error))
+    }
+    loadTrips()
+    window.addEventListener('waybond:trips-updated', loadTrips)
+    const refreshInterval = window.setInterval(loadTrips, 15000)
+    return () => {
+      isMounted = false
+      window.removeEventListener('waybond:trips-updated', loadTrips)
+      window.clearInterval(refreshInterval)
+    }
   }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
