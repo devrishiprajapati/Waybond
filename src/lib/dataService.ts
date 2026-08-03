@@ -24,10 +24,10 @@ export const optimizeImageUrl = (url: string, width = 1200, quality = 80) => {
   return url;
 };
 
-const STORAGE_KEY = 'infi_yatra_trips'
-const HERO_STORAGE_KEY = 'infi_yatra_hero'
+const STORAGE_KEY = 'waybond_trips'
+const HERO_STORAGE_KEY = 'waybond_hero'
 const TRENDING_STORAGE_KEY = 'waybond_trending_cards'
-const VERSION_KEY = 'infi_yatra_version'
+const VERSION_KEY = 'waybond_version'
 const CURRENT_VERSION = 6.0; // Increment this when making hardcoded data changes
 
 // Sync logic: Clear stale cache if version mismatch
@@ -43,19 +43,32 @@ const syncData = () => {
 
 syncData();
 
+const mergeTrips = (localTrips: Trip[], liveTrips: Trip[]) => {
+  const byId = new Map<number, Trip>()
+  localTrips.forEach((trip) => byId.set(trip.id, trip))
+  // A live record is authoritative when the same package exists in both places.
+  liveTrips.forEach((trip) => byId.set(trip.id, trip))
+  return Array.from(byId.values()).sort((first, second) => first.id - second.id)
+}
+
 export const getTrips = async (): Promise<Trip[]> => {
+  const localData = localStorage.getItem(STORAGE_KEY);
+  const localTrips = localData ? JSON.parse(localData) as Trip[] : ALL_TRIPS;
   try {
     const res = await fetch('/api/trips');
     if (res.ok) {
       const data = await res.json();
-      if (data && data.length > 0) return data;
+      if (Array.isArray(data)) {
+        const trips = mergeTrips(localTrips, data)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(trips))
+        return trips
+      }
     }
   } catch (e) {
     console.warn("Backend not running. Using local storage/codebase.");
   }
-  
-  const localData = localStorage.getItem(STORAGE_KEY);
-  return localData ? JSON.parse(localData) : ALL_TRIPS;
+
+  return localTrips;
 }
 
 export const getTripById = async (id: number): Promise<Trip | undefined> => {
@@ -115,7 +128,7 @@ export const addTrip = async (newTrip: Omit<Trip, 'id'>) => {
   } catch (e) {
     console.error(e);
   }
-  
+
   // Fallback local addition
   const trips = await getTrips();
   const id = Math.max(...trips.map(t => t.id), 0) + 1;
@@ -157,7 +170,7 @@ export const updateHeroSlides = async (slides: HeroSlide[]) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(slides),
     });
-  } catch(e) { console.error(e); }
+  } catch (e) { console.error(e); }
   localStorage.setItem(HERO_STORAGE_KEY, JSON.stringify(slides));
   // Ensure we mark this data as up-to-date with the current version
   localStorage.setItem(VERSION_KEY, CURRENT_VERSION.toString());

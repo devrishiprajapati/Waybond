@@ -76,8 +76,8 @@ const BookingConfirmation = () => {
   const handleMyTrips = () => {
     const user = localStorage.getItem('user')
     if (user) {
-      const userId = JSON.parse(user).email?.replace(/[^a-z0-9]/g, '')
-      navigate(`/dashboard/${userId}/booked-trips`)
+      const userId = JSON.parse(user).id
+      navigate(userId ? `/dashboard/${userId}/booked-trips` : '/login')
     } else {
       navigate('/login')
     }
