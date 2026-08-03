@@ -12,6 +12,27 @@ import { getTripBySlug, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
 
+type RazorpayPaymentResponse = {
+  razorpay_order_id: string
+  razorpay_payment_id: string
+  razorpay_signature: string
+}
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void; on: (event: string, callback: () => void) => void }
+  }
+}
+
+const loadRazorpay = () => new Promise<boolean>((resolve) => {
+  if (window.Razorpay) return resolve(true)
+  const script = document.createElement('script')
+  script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+  script.onload = () => resolve(true)
+  script.onerror = () => resolve(false)
+  document.body.appendChild(script)
+})
+
 const TripDetails = () => {
   const { slug } = useParams()
   const navigate = useNavigate()
@@ -22,6 +43,7 @@ const TripDetails = () => {
   const [activeImage, setActiveImage] = useState(0)
   const [expandedDay, setExpandedDay] = useState<number | null>(1)
   const [selectedDeparture, setSelectedDeparture] = useState('')
+  const [paying, setPaying] = useState(false)
 
   useEffect(() => {
     if (slug) {
@@ -39,7 +61,11 @@ const TripDetails = () => {
     navigate(`/trip/${slug}?departure=${date}`, { replace: true })
   }
 
+<<<<<<< HEAD
   /** Create booking in DB, show alert, redirect to dashboard */
+=======
+  /** Create a pending booking, then confirm it only after Razorpay verifies payment. */
+>>>>>>> dd29617bf48e95f5bbdf45f41aa01fe1323d9657
   const handleBookSlot = async () => {
     haptics.medium()
     
@@ -85,6 +111,7 @@ const TripDetails = () => {
       })
 
       if (!response.ok) throw new Error('Failed to create booking')
+<<<<<<< HEAD
 
       // Show success alert
       alert(`Booking confirmed! Your booking ID will be assigned shortly.`)
@@ -95,6 +122,57 @@ const TripDetails = () => {
     } catch (error) {
       console.error('Booking failed:', error)
       alert('Failed to create booking. Please try again.')
+=======
+      const booking = await response.json()
+      const priceInRupees = Number(String(trip.price || '').replace(/[^\d.]/g, ''))
+      const amount = Math.round(priceInRupees * 100)
+      if (!Number.isInteger(amount) || amount < 100) throw new Error('Trip price is invalid')
+
+      setPaying(true)
+      const orderResponse = await fetch('/api/payments/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: booking.bookingDbId, userId: user.id, amount })
+      })
+      const order = await orderResponse.json()
+      if (!orderResponse.ok) throw new Error(order.message || 'Unable to start payment')
+      if (!(await loadRazorpay()) || !window.Razorpay) throw new Error('Razorpay checkout could not be loaded')
+
+      const razorpay = new window.Razorpay({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'WayBond',
+        description: trip.title,
+        order_id: order.orderId,
+        prefill: { name: user.name, email: user.email },
+        theme: { color: '#6495ED' },
+        handler: async (payment: RazorpayPaymentResponse) => {
+          try {
+            const verifyResponse = await fetch('/api/payments/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payment)
+            })
+            const verified = await verifyResponse.json()
+            if (!verifyResponse.ok || !verified.success) throw new Error(verified.message || 'Payment verification failed')
+            alert('Payment successful. Your trip is confirmed!')
+            navigate(`/dashboard/${user.id}`)
+          } catch (error) {
+            console.error('Payment verification failed:', error)
+            alert('Payment was received but verification failed. Please contact support.')
+          } finally {
+            setPaying(false)
+          }
+        },
+        modal: { ondismiss: () => setPaying(false) }
+      })
+      razorpay.open()
+    } catch (error) {
+      console.error('Booking failed:', error)
+      setPaying(false)
+      alert(error instanceof Error ? error.message : 'Unable to start payment. Please try again.')
+>>>>>>> dd29617bf48e95f5bbdf45f41aa01fe1323d9657
     }
   }
 
@@ -334,9 +412,10 @@ const TripDetails = () => {
 
             <button
               onClick={handleBookSlot}
+              disabled={paying}
               className="w-full bg-secondary text-white py-6 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20"
             >
-              Book Your Slot
+              {paying ? 'Opening Secure Payment...' : 'Book Your Slot'}
             </button>
             <p className="text-center text-[10px] text-white/40 font-bold uppercase tracking-widest">No cancellation fee up to 15 days before departure</p>
 

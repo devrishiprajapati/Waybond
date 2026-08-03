@@ -51,6 +51,22 @@ model PasswordResetOtp {
   @@index([email])
 }
 
+model Payment {
+  id                String   @id @default(cuid())
+  bookingId         String
+  userId            String
+  amount            Int
+  currency          String   @default("INR")
+  razorpayOrderId   String   @unique
+  razorpayPaymentId String?  @unique
+  status            String   @default("CREATED")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([bookingId])
+  @@index([userId])
+}
+
 model Testimonial {
   id        String   @id @default(cuid())
   name      String

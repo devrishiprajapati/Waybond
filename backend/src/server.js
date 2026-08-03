@@ -2,7 +2,7 @@ import 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
 import nodemailer from 'nodemailer'
-import { randomBytes, randomInt, scryptSync, timingSafeEqual } from 'node:crypto'
+import { createHmac, randomBytes, randomInt, scryptSync, timingSafeEqual } from 'node:crypto'
 import { prisma } from './prisma.js'
 
 const app = express()
@@ -123,13 +123,10 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
   try {
     const email = process.env.ADMIN_EMAIL || 'admin@waybond.local'
     const password = process.env.ADMIN_PASSWORD || 'admin123'
-    const admin = await prisma.user.upsert({
-      where: { email },
-      create: { name: 'WayBond Admin', email, passwordHash: hashPassword(password), role: 'ADMIN' },
-      update: { role: 'ADMIN' }
-    })
-    if (!passwordMatches(String(req.body.password || ''), admin.passwordHash)) return res.status(401).json({ message: 'Invalid admin credentials.' })
-    res.json({ user: publicUser(admin) })
+    if (String(req.body.password || '') !== password) return res.status(401).json({ message: 'Invalid admin credentials.' })
+    // Admin access is configured through environment variables. Do not block sign-in
+    // on a database write, especially when the shared database is temporarily offline.
+    res.json({ user: { id: 'waybond-admin', name: 'WayBond Admin', email, role: 'ADMIN' } })
   } catch (error) { next(error) }
 })
 
@@ -289,6 +286,83 @@ app.put('/api/bookings/:bookingId/cancel', async (req, res, next) => {
       data: { payload: updatedPayload } 
     })
     res.json(toBooking(updated))
+  } catch (error) { next(error) }
+})
+
+app.post('/api/payments/create-order', async (req, res, next) => {
+  try {
+    const { bookingId, userId, amount } = req.body
+    const amountInPaise = Math.round(Number(amount))
+    if (!bookingId || !userId || !Number.isInteger(amountInPaise) || amountInPaise < 100) {
+      return res.status(400).json({ message: 'A valid booking and payment amount are required.' })
+    }
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(503).json({ message: 'Razorpay is not configured. Add Razorpay keys to backend/.env.' })
+    }
+
+    const booking = await prisma.booking.findUnique({ where: { id: bookingId } })
+    if (!booking || booking.userId !== userId) return res.status(404).json({ message: 'Booking not found.' })
+
+    const authorization = Buffer.from(`${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`).toString('base64')
+    const razorpayResponse = await fetch('https://api.razorpay.com/v1/orders', {
+      method: 'POST',
+      headers: { Authorization: `Basic ${authorization}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: amountInPaise,
+        currency: 'INR',
+        receipt: `wb_${bookingId}`.slice(0, 40),
+        payment_capture: 1
+      })
+    })
+    const order = await razorpayResponse.json()
+    if (!razorpayResponse.ok) {
+      if (razorpayResponse.status === 401 || razorpayResponse.status === 403) {
+        return res.status(503).json({
+          message: 'Razorpay authentication failed. Update RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET with a matching active key pair, then restart the backend.'
+        })
+      }
+      return res.status(502).json({ message: order.error?.description || 'Unable to create Razorpay order.' })
+    }
+
+    await prisma.payment.create({
+      data: { bookingId, userId, amount: amountInPaise, currency: 'INR', razorpayOrderId: order.id }
+    })
+    res.status(201).json({ orderId: order.id, amount: order.amount, currency: order.currency, keyId: process.env.RAZORPAY_KEY_ID })
+  } catch (error) { next(error) }
+})
+
+app.post('/api/payments/verify', async (req, res, next) => {
+  try {
+    const { razorpay_order_id: orderId, razorpay_payment_id: paymentId, razorpay_signature: signature } = req.body
+    if (!orderId || !paymentId || !signature || !process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(400).json({ message: 'Invalid payment verification request.' })
+    }
+
+    const expectedSignature = createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(`${orderId}|${paymentId}`)
+      .digest('hex')
+    const isValid = signature.length === expectedSignature.length
+      && timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
+    if (!isValid) return res.status(400).json({ message: 'Payment verification failed.' })
+
+    const payment = await prisma.payment.findUnique({ where: { razorpayOrderId: orderId } })
+    if (!payment) return res.status(404).json({ message: 'Payment order not found.' })
+    if (payment.status === 'PAID') return res.json({ success: true })
+
+    const booking = await prisma.booking.findUnique({ where: { id: payment.bookingId } })
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' })
+    const payload = {
+      ...booking.payload,
+      status: 'Confirmed',
+      paymentStatus: 'Paid',
+      paymentId,
+      razorpayOrderId: orderId
+    }
+    await prisma.$transaction([
+      prisma.payment.update({ where: { id: payment.id }, data: { razorpayPaymentId: paymentId, status: 'PAID' } }),
+      prisma.booking.update({ where: { id: booking.id }, data: { payload } })
+    ])
+    res.json({ success: true, booking: toBooking({ ...booking, payload }) })
   } catch (error) { next(error) }
 })
 
