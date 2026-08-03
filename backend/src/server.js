@@ -316,6 +316,11 @@ app.post('/api/payments/create-order', async (req, res, next) => {
     })
     const order = await razorpayResponse.json()
     if (!razorpayResponse.ok) {
+      if (razorpayResponse.status === 401 || razorpayResponse.status === 403) {
+        return res.status(503).json({
+          message: 'Razorpay authentication failed. Update RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET with a matching active key pair, then restart the backend.'
+        })
+      }
       return res.status(502).json({ message: order.error?.description || 'Unable to create Razorpay order.' })
     }
 
