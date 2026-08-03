@@ -3,10 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CheckCircle2, MapPin, Clock, ArrowLeft, Package } from 'lucide-react'
 
-const BOOKINGS_KEY = 'waybond_user_bookings'
-
 const ConfirmedTripsPage = () => {
   const [confirmedTrips, setConfirmedTrips] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const { userId } = useParams()
   const navigate = useNavigate()
 
@@ -19,18 +18,30 @@ const ConfirmedTripsPage = () => {
 
     const parsedUser = JSON.parse(savedUser)
     
-    // Verify that the userId in URL matches the logged-in user
+    // Verify that the userId in URL matches the logged-in user's database ID
     if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
       return
     }
 
-    const savedBookings = localStorage.getItem(BOOKINGS_KEY)
-    if (savedBookings) {
-      const allTrips = JSON.parse(savedBookings)
-      const confirmed = allTrips.filter((trip: any) => trip.status === 'Confirmed')
-      setConfirmedTrips(confirmed)
+    const loadConfirmedTrips = async () => {
+      try {
+        if (!parsedUser.id) throw new Error('No database user')
+        const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
+        if (!response.ok) throw new Error('Dashboard unavailable')
+        const data = await response.json()
+        
+        // Filter only confirmed bookings
+        const confirmed = data.bookings.filter((booking: any) => booking.status === 'Confirmed')
+        setConfirmedTrips(confirmed)
+      } catch (error) {
+        console.error('Failed to load confirmed trips:', error)
+      } finally {
+        setLoading(false)
+      }
     }
+    
+    loadConfirmedTrips()
   }, [navigate, userId])
 
   return (
@@ -58,8 +69,13 @@ const ConfirmedTripsPage = () => {
         </header>
 
         {/* Content */}
-        <div className="space-y-8">
-          {confirmedTrips.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-white/40 font-medium">Loading confirmed trips...</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {confirmedTrips.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -141,6 +157,7 @@ const ConfirmedTripsPage = () => {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   )

@@ -23,28 +23,48 @@ const AllTripsPage = () => {
   const [bookedTrips, setBookedTrips] = useState<Trip[]>([])
   const [cancelledTrips, setCancelledTrips] = useState<Trip[]>([])
   const [allTrips, setAllTrips] = useState<Trip[]>([])
+  const [loading, setLoading] = useState(true)
   const { userId } = useParams()
   const navigate = useNavigate()
 
   useEffect(() => {
-    const savedBookings = localStorage.getItem('waybond_user_bookings')
-    const savedCancelled = localStorage.getItem('waybond_user_cancelled_trips')
-
-    if (savedBookings) {
-      const booked = JSON.parse(savedBookings)
-      setBookedTrips(booked)
+    const savedUser = localStorage.getItem('user')
+    if (!savedUser) {
+      navigate('/login')
+      return
     }
 
-    if (savedCancelled) {
-      const cancelled = JSON.parse(savedCancelled)
-      setCancelledTrips(cancelled)
+    const parsedUser = JSON.parse(savedUser)
+    
+    // Verify that the userId in URL matches the logged-in user's database ID
+    if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
+      navigate('/login')
+      return
     }
 
-    // Combine all trips
-    const booked = savedBookings ? JSON.parse(savedBookings) : []
-    const cancelled = savedCancelled ? JSON.parse(savedCancelled) : []
-    setAllTrips([...booked, ...cancelled])
-  }, [])
+    const loadAllTrips = async () => {
+      try {
+        if (!parsedUser.id) throw new Error('No database user')
+        const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
+        if (!response.ok) throw new Error('Dashboard unavailable')
+        const data = await response.json()
+        
+        // Separate booked and cancelled trips
+        const booked = data.bookings.filter((booking: any) => booking.status !== 'Cancelled')
+        const cancelled = data.bookings.filter((booking: any) => booking.status === 'Cancelled')
+        
+        setBookedTrips(booked)
+        setCancelledTrips(cancelled)
+        setAllTrips(data.bookings)
+      } catch (error) {
+        console.error('Failed to load trips:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadAllTrips()
+  }, [navigate, userId])
 
   const handleDownloadInvoice = (bookingId: string) => {
     navigate(`/booking-confirmation/${bookingId}`)
@@ -107,7 +127,11 @@ const AllTripsPage = () => {
 
         {/* Trips List */}
         <div className="space-y-6">
-          {allTrips.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-white/40 font-medium">Loading trips...</p>
+            </div>
+          ) : allTrips.length === 0 ? (
             <div className="text-center py-16">
               <Package className="text-white/15 mx-auto mb-4" size={48} />
               <p className="text-lg text-white/40 font-medium italic">No trips yet. Start your adventure!</p>

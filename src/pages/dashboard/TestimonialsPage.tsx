@@ -3,10 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { MessageCircle, Star, ArrowLeft, Package } from 'lucide-react'
 
-const TESTIMONIALS_KEY = 'waybond_user_testimonials'
-
 const TestimonialsPage = () => {
   const [testimonials, setTestimonials] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const { userId } = useParams()
   const navigate = useNavigate()
 
@@ -19,16 +18,29 @@ const TestimonialsPage = () => {
 
     const parsedUser = JSON.parse(savedUser)
     
-    // Verify that the userId in URL matches the logged-in user
+    // Verify that the userId in URL matches the logged-in user's database ID
     if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
       return
     }
 
-    const savedTestimonials = localStorage.getItem(TESTIMONIALS_KEY)
-    if (savedTestimonials) {
-      setTestimonials(JSON.parse(savedTestimonials))
+    const loadTestimonials = async () => {
+      try {
+        if (!parsedUser.id) throw new Error('No database user')
+        const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
+        if (!response.ok) throw new Error('Dashboard unavailable')
+        const data = await response.json()
+        
+        // Get user's testimonials
+        setTestimonials(data.testimonials || [])
+      } catch (error) {
+        console.error('Failed to load testimonials:', error)
+      } finally {
+        setLoading(false)
+      }
     }
+    
+    loadTestimonials()
   }, [navigate, userId])
 
   return (
@@ -56,8 +68,13 @@ const TestimonialsPage = () => {
         </header>
 
         {/* Content */}
-        <div className="space-y-8">
-          {testimonials.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-white/40 font-medium">Loading testimonials...</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {testimonials.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -85,10 +102,16 @@ const TestimonialsPage = () => {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[10px] text-secondary font-black uppercase tracking-[0.18em]">{testimonial.tripTitle}</p>
-                      <p className="text-xs text-white/40 font-medium mt-1">{testimonial.userName}</p>
+                      <p className="text-[10px] text-secondary font-black uppercase tracking-[0.18em]">{testimonial.trip}</p>
+                      <p className="text-xs text-white/40 font-medium mt-1">{testimonial.name}</p>
                     </div>
-                    <span className="text-[9px] text-white/30 font-bold whitespace-nowrap">{testimonial.createdAt}</span>
+                    <span className="text-[9px] text-white/30 font-bold whitespace-nowrap">
+                      {new Date(testimonial.createdAt).toLocaleDateString('en-IN', { 
+                        day: 'numeric', 
+                        month: 'short', 
+                        year: 'numeric' 
+                      })}
+                    </span>
                   </div>
 
                   <div className="flex gap-1">
@@ -102,12 +125,13 @@ const TestimonialsPage = () => {
                     ))}
                   </div>
 
-                  <p className="text-sm text-white/70 leading-relaxed italic">{testimonial.text}</p>
+                  <p className="text-sm text-white/70 leading-relaxed italic">{testimonial.review}</p>
                 </motion.article>
               ))}
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   )

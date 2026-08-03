@@ -3,10 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { MapPin, Clock, ArrowLeft, Package } from 'lucide-react'
 
-const BOOKINGS_KEY = 'waybond_user_bookings'
-
 const BookedTripsPage = () => {
   const [bookedTrips, setBookedTrips] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const { userId } = useParams()
   const navigate = useNavigate()
 
@@ -19,16 +18,30 @@ const BookedTripsPage = () => {
 
     const parsedUser = JSON.parse(savedUser)
     
-    // Verify that the userId in URL matches the logged-in user
+    // Verify that the userId in URL matches the logged-in user's database ID
     if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
       return
     }
 
-    const savedBookings = localStorage.getItem(BOOKINGS_KEY)
-    if (savedBookings) {
-      setBookedTrips(JSON.parse(savedBookings))
+    const loadBookedTrips = async () => {
+      try {
+        if (!parsedUser.id) throw new Error('No database user')
+        const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
+        if (!response.ok) throw new Error('Dashboard unavailable')
+        const data = await response.json()
+        
+        // Filter only non-cancelled bookings
+        const booked = data.bookings.filter((booking: any) => booking.status !== 'Cancelled')
+        setBookedTrips(booked)
+      } catch (error) {
+        console.error('Failed to load booked trips:', error)
+      } finally {
+        setLoading(false)
+      }
     }
+    
+    loadBookedTrips()
   }, [navigate, userId])
 
   return (
@@ -56,8 +69,13 @@ const BookedTripsPage = () => {
         </header>
 
         {/* Content */}
-        <div className="space-y-8">
-          {bookedTrips.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-white/40 font-medium">Loading booked trips...</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {bookedTrips.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -138,6 +156,7 @@ const BookedTripsPage = () => {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   )
