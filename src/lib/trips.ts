@@ -32,6 +32,7 @@ export interface Trip {
     title: string;
     description: string;
   }[];
+  pdfUrl?: string;
 }
 
 const DEFAULT_CAPTAIN = {
