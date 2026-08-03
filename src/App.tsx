@@ -27,6 +27,7 @@ import EditHero from './pages/admin/EditHero'
 import AdminLogin from './pages/admin/Login'
 import AdminTestimonials from './pages/admin/Testimonials'
 import AdminUsers from './pages/admin/Users'
+import AdminUserDetail from './pages/admin/UserDetail'
 import AdminGallery from './pages/admin/Gallery'
 import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
@@ -115,6 +116,7 @@ function App() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/testimonials" element={<AdminTestimonials />} />
             <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/users/:id" element={<AdminUserDetail />} />
             <Route path="/admin/gallery" element={<AdminGallery />} />
             <Route path="/admin/hero" element={<EditHero />} />
             <Route path="/admin/edit/:id" element={<EditTrip />} />

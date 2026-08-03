@@ -15,12 +15,7 @@ import {
   Star,
   User
 } from 'lucide-react'
-import { getTrips } from '../lib/dataService'
 import { registerUser } from '../lib/adminStorage'
-
-const BOOKINGS_KEY = 'waybond_user_bookings'
-const TESTIMONIALS_KEY = 'waybond_user_testimonials'
-const CANCELLED_TRIPS_KEY = 'waybond_user_cancelled_trips'
 
 const UserDashboard = () => {
   const [user, setUser] = useState<any>(null)
@@ -42,14 +37,13 @@ const UserDashboard = () => {
     }
 
     const parsedUser = JSON.parse(savedUser)
-    if (userId && userId !== parsedUser.email?.replace(/[^a-z0-9]/g, '')) {
+    if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
       return
     }
     
     if (!userId) {
-      const newUserId = parsedUser.email?.replace(/[^a-z0-9]/g, '')
-      navigate(`/dashboard/${newUserId}`, { replace: true })
+      navigate(`/dashboard/${parsedUser.id}`, { replace: true })
       return
     }
 
@@ -63,20 +57,23 @@ const UserDashboard = () => {
         const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
         if (!response.ok) throw new Error('Dashboard unavailable')
         const data = await response.json()
-        setTestimonials(data.testimonials.map((item: any) => ({ ...item, tripTitle: item.trip, text: item.review, createdAt: new Date(item.createdAt).toLocaleDateString('en-IN') })))
-        if (data.bookings.length) {
-          setBookedTrips(data.bookings)
-          return
-        }
-        const trips = await getTrips()
-        const starterBookings = trips.slice(0, 2).map((trip, index) => ({ ...trip, bookingId: `WB-${new Date().getFullYear()}-${String(index + 1).padStart(3, '0')}`, status: index === 0 ? 'Confirmed' : 'Payment Pending', travelers: index === 0 ? 2 : 1, bookedOn: index === 0 ? 'Jul 12, 2026' : 'Jul 18, 2026' }))
-        await Promise.all(starterBookings.map((booking) => fetch(`/api/users/${parsedUser.id}/bookings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(booking) })))
-        setBookedTrips(starterBookings)
-      } catch {
-        const savedTestimonials = localStorage.getItem(TESTIMONIALS_KEY)
-        if (savedTestimonials) setTestimonials(JSON.parse(savedTestimonials))
-        const savedBookings = localStorage.getItem(BOOKINGS_KEY)
-        if (savedBookings) setBookedTrips(JSON.parse(savedBookings))
+        
+        // Load testimonials
+        setTestimonials(data.testimonials.map((item: any) => ({ 
+          ...item, 
+          tripTitle: item.trip, 
+          text: item.review, 
+          createdAt: new Date(item.createdAt).toLocaleDateString('en-IN') 
+        })))
+        
+        // Separate active and cancelled bookings
+        const activeBookings = data.bookings.filter((booking: any) => booking.status !== 'Cancelled')
+        const cancelledBookings = data.bookings.filter((booking: any) => booking.status === 'Cancelled')
+        
+        setBookedTrips(activeBookings)
+        setCancelledTrips(cancelledBookings)
+      } catch (error) {
+        console.error('Failed to load dashboard:', error)
       }
     }
     loadDashboard()
@@ -99,54 +96,77 @@ const UserDashboard = () => {
     navigate('/login')
   }
 
-  const handleCancelTrip = (tripId: string | number) => {
-    const tripToCancel = bookedTrips.find((trip) => trip.id === tripId || trip.bookingId === tripId)
-    if (!tripToCancel) return
-
-    const updatedBookedTrips = bookedTrips.filter((trip) => trip.id !== tripId && trip.bookingId !== tripId)
-    const cancelledTrip = { ...tripToCancel, status: 'Cancelled', cancelledOn: new Date().toLocaleDateString('en-IN') }
-
-    setBookedTrips(updatedBookedTrips)
-    setCancelledTrips([...cancelledTrips, cancelledTrip])
-
-    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(updatedBookedTrips))
-    localStorage.setItem(CANCELLED_TRIPS_KEY, JSON.stringify([...cancelledTrips, cancelledTrip]))
+  const handleCancelTrip = async (bookingDbId: string) => {
+    try {
+      const response = await fetch(`/api/bookings/${bookingDbId}/cancel`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      
+      if (!response.ok) throw new Error('Failed to cancel booking')
+      
+      // Move booking from active to cancelled
+      const tripToCancel = bookedTrips.find((trip) => trip.bookingDbId === bookingDbId)
+      if (tripToCancel) {
+        const cancelledTrip = { 
+          ...tripToCancel, 
+          status: 'Cancelled', 
+          cancelledOn: new Date().toLocaleDateString('en-IN') 
+        }
+        setBookedTrips((prev) => prev.filter((trip) => trip.bookingDbId !== bookingDbId))
+        setCancelledTrips((prev) => [...prev, cancelledTrip])
+      }
+    } catch (error) {
+      console.error('Failed to cancel trip:', error)
+      alert('Failed to cancel trip. Please try again.')
+    }
   }
 
   const handleTestimonialSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!testimonialText.trim()) return
 
-    const selectedTrip = bookedTrips.find((trip) => String(trip.id) === testimonialTripId) || bookedTrips[0]
-    const nextTestimonials = [
-      {
-        id: Date.now(),
-        userName: user.name,
-        tripTitle: selectedTrip?.title || 'WayBond Trip',
-        rating: testimonialRating,
-        text: testimonialText.trim(),
-        createdAt: new Date().toLocaleDateString('en-IN', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        })
-      },
-      ...testimonials
-    ]
+    // Only allow testimonials for confirmed trips
+    const confirmedTrips = bookedTrips.filter((trip) => trip.status === 'Confirmed')
+    if (confirmedTrips.length === 0) {
+      alert('You can only add testimonials for confirmed trips.')
+      return
+    }
+
+    const selectedTrip = confirmedTrips.find((trip) => String(trip.id) === testimonialTripId) || confirmedTrips[0]
 
     try {
       if (!user.id) throw new Error('No database user')
-      const response = await fetch('/api/testimonials', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: user.name, email: user.email, trip: selectedTrip?.title || 'WayBond Trip', review: testimonialText.trim(), rating: testimonialRating, userId: user.id }) })
+      const response = await fetch('/api/testimonials', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ 
+          name: user.name, 
+          email: user.email, 
+          trip: selectedTrip?.title || 'WayBond Trip', 
+          review: testimonialText.trim(), 
+          rating: testimonialRating, 
+          userId: user.id 
+        }) 
+      })
+      
       if (!response.ok) throw new Error('Unable to publish')
+      
       const saved = await response.json()
-      setTestimonials((current) => [{ ...saved, tripTitle: saved.trip, text: saved.review, createdAt: new Date(saved.createdAt).toLocaleDateString('en-IN') }, ...current])
-    } catch {
-      setTestimonials(nextTestimonials)
-      localStorage.setItem(TESTIMONIALS_KEY, JSON.stringify(nextTestimonials))
+      setTestimonials((current) => [{ 
+        ...saved, 
+        tripTitle: saved.trip, 
+        text: saved.review, 
+        createdAt: new Date(saved.createdAt).toLocaleDateString('en-IN') 
+      }, ...current])
+      
+      setTestimonialText('')
+      setTestimonialRating(5)
+      setTestimonialTripId('')
+    } catch (error) {
+      console.error('Failed to add testimonial:', error)
+      alert('Failed to add testimonial. Please try again.')
     }
-    setTestimonialText('')
-    setTestimonialRating(5)
-    setTestimonialTripId('')
   }
 
   if (!user) return null
@@ -248,55 +268,63 @@ const UserDashboard = () => {
                 </div>
               </section>
 
-              {/* Testimonials Form on Desktop ONLY */}
               <section id="testimonial-form" className="hidden lg:block liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">
                 <div>
                   <p className="text-secondary text-[9px] font-black uppercase tracking-[0.3em]">Your Voice</p>
                   <h2 className="text-2xl font-display font-black uppercase italic tracking-tighter mt-2">Add Testimonial</h2>
                 </div>
 
-                <form onSubmit={handleTestimonialSubmit} className="space-y-4">
-                  <select
-                    value={testimonialTripId}
-                    onChange={(event) => setTestimonialTripId(event.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white outline-none focus:border-secondary"
-                  >
-                    <option className="text-slate-800" value="">Select booked trip</option>
-                    {bookedTrips.map((trip) => (
-                      <option className="text-slate-800" key={trip.id} value={trip.id}>{trip.title}</option>
-                    ))}
-                  </select>
-
-                  <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-4">
-                    <span className="text-[9px] text-white/40 font-black uppercase tracking-[0.2em]">Rating</span>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((rating) => (
-                        <button
-                          key={rating}
-                          type="button"
-                          onClick={() => setTestimonialRating(rating)}
-                          className={rating <= testimonialRating ? 'text-secondary' : 'text-white/20'}
-                        >
-                          <Star size={18} fill="currentColor" />
-                        </button>
-                      ))}
-                    </div>
+                {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageCircle className="text-white/15 mx-auto mb-4" size={34} />
+                    <p className="text-sm text-white/40 font-medium italic">Testimonials are only available for confirmed trips.</p>
                   </div>
+                ) : (
+                  <form onSubmit={handleTestimonialSubmit} className="space-y-4">
+                    <select
+                      value={testimonialTripId}
+                      onChange={(event) => setTestimonialTripId(event.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white outline-none focus:border-secondary"
+                    >
+                      <option className="text-slate-800" value="">Select confirmed trip</option>
+                      {bookedTrips
+                        .filter((trip) => trip.status === 'Confirmed')
+                        .map((trip) => (
+                          <option className="text-slate-800" key={trip.id} value={trip.id}>{trip.title}</option>
+                        ))}
+                    </select>
 
-                  <textarea
-                    value={testimonialText}
-                    onChange={(event) => setTestimonialText(event.target.value)}
-                    placeholder="Share your trip experience..."
-                    className="w-full min-h-[140px] bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-medium text-white placeholder:text-white/25 outline-none focus:border-secondary resize-none"
-                  />
+                    <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-4">
+                      <span className="text-[9px] text-white/40 font-black uppercase tracking-[0.2em]">Rating</span>
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((rating) => (
+                          <button
+                            key={rating}
+                            type="button"
+                            onClick={() => setTestimonialRating(rating)}
+                            className={rating <= testimonialRating ? 'text-secondary' : 'text-white/20'}
+                          >
+                            <Star size={18} fill="currentColor" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                  <button
-                    type="submit"
-                    className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-slate-800 transition-all"
-                  >
-                    Publish Testimonial
-                  </button>
-                </form>
+                    <textarea
+                      value={testimonialText}
+                      onChange={(event) => setTestimonialText(event.target.value)}
+                      placeholder="Share your trip experience..."
+                      className="w-full min-h-[140px] bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-medium text-white placeholder:text-white/25 outline-none focus:border-secondary resize-none"
+                    />
+
+                    <button
+                      type="submit"
+                      className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-slate-800 transition-all"
+                    >
+                      Publish Testimonial
+                    </button>
+                  </form>
+                )}
               </section>
 
               {/* Testimonials List on Desktop ONLY */}
@@ -416,16 +444,23 @@ const UserDashboard = () => {
                           )}
                           <button
                             onClick={() => {
-                              setTestimonialTripId(String(trip.id))
-                              document.getElementById('testimonial-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                              if (trip.status === 'Confirmed') {
+                                setTestimonialTripId(String(trip.id))
+                                document.getElementById('testimonial-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                              }
                             }}
-                            className="bg-white/5 text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-white/10 hover:bg-white hover:text-slate-800 transition-all"
+                            disabled={trip.status !== 'Confirmed'}
+                            className={`h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border transition-all ${
+                              trip.status === 'Confirmed'
+                                ? 'bg-white/5 text-white border-white/10 hover:bg-white hover:text-slate-800 cursor-pointer'
+                                : 'bg-white/5 text-white/30 border-white/10 cursor-not-allowed opacity-50'
+                            }`}
                           >
                             Add Testimonial
                           </button>
                           {trip.status !== 'Confirmed' && (
                             <button
-                              onClick={() => handleCancelTrip(trip.id || trip.bookingId)}
+                              onClick={() => handleCancelTrip(trip.bookingDbId)}
                               className="bg-red-500/10 text-red-300 h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"
                             >
                               Cancel Trip
@@ -522,48 +557,57 @@ const UserDashboard = () => {
                 <h2 className="text-2xl font-display font-black uppercase italic tracking-tighter mt-2">Add Testimonial</h2>
               </div>
 
-              <form onSubmit={handleTestimonialSubmit} className="space-y-4">
-                <select
-                  value={testimonialTripId}
-                  onChange={(event) => setTestimonialTripId(event.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white outline-none focus:border-secondary"
-                >
-                  <option className="text-slate-800" value="">Select booked trip</option>
-                  {bookedTrips.map((trip) => (
-                    <option className="text-slate-800" key={trip.id} value={trip.id}>{trip.title}</option>
-                  ))}
-                </select>
-
-                <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-4">
-                  <span className="text-[9px] text-white/40 font-black uppercase tracking-[0.2em]">Rating</span>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((rating) => (
-                      <button
-                        key={rating}
-                        type="button"
-                        onClick={() => setTestimonialRating(rating)}
-                        className={rating <= testimonialRating ? 'text-secondary' : 'text-white/20'}
-                      >
-                        <Star size={18} fill="currentColor" />
-                      </button>
-                    ))}
-                  </div>
+              {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageCircle className="text-white/15 mx-auto mb-4" size={34} />
+                  <p className="text-sm text-white/40 font-medium italic">Testimonials are only available for confirmed trips.</p>
                 </div>
+              ) : (
+                <form onSubmit={handleTestimonialSubmit} className="space-y-4">
+                  <select
+                    value={testimonialTripId}
+                    onChange={(event) => setTestimonialTripId(event.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white outline-none focus:border-secondary"
+                  >
+                    <option className="text-slate-800" value="">Select confirmed trip</option>
+                    {bookedTrips
+                      .filter((trip) => trip.status === 'Confirmed')
+                      .map((trip) => (
+                        <option className="text-slate-800" key={trip.id} value={trip.id}>{trip.title}</option>
+                      ))}
+                  </select>
 
-                <textarea
-                  value={testimonialText}
-                  onChange={(event) => setTestimonialText(event.target.value)}
-                  placeholder="Share your trip experience..."
-                  className="w-full min-h-[140px] bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-medium text-white placeholder:text-white/25 outline-none focus:border-secondary resize-none"
-                />
+                  <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-4">
+                    <span className="text-[9px] text-white/40 font-black uppercase tracking-[0.2em]">Rating</span>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <button
+                          key={rating}
+                          type="button"
+                          onClick={() => setTestimonialRating(rating)}
+                          className={rating <= testimonialRating ? 'text-secondary' : 'text-white/20'}
+                        >
+                          <Star size={18} fill="currentColor" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-                <button
-                  type="submit"
-                  className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-slate-800 transition-all"
-                >
-                  Publish Testimonial
-                </button>
-              </form>
+                  <textarea
+                    value={testimonialText}
+                    onChange={(event) => setTestimonialText(event.target.value)}
+                    placeholder="Share your trip experience..."
+                    className="w-full min-h-[140px] bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-medium text-white placeholder:text-white/25 outline-none focus:border-secondary resize-none"
+                  />
+
+                  <button
+                    type="submit"
+                    className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-slate-800 transition-all"
+                  >
+                    Publish Testimonial
+                  </button>
+                </form>
+              )}
             </section>
 
             <section className="liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">

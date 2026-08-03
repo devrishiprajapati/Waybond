@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import { CheckCircle2, ShieldCheck, MapPin, Star, UserCheck, MessageCircle, Heart, Users, Share2, Compass } from 'lucide-react'
-import { communityGalleries } from '../lib/communityGalleries'
+import { communityGalleries, loadCommunityGalleries } from '../lib/communityGalleries'
 
 const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, className = "" }: { children: React.ReactNode, title: React.ReactNode, subtitle?: string, seoTitle?: string, seoDescription?: string, className?: string }) => (
   <motion.div
@@ -108,7 +108,14 @@ const About = () => (
   </PageLayout>
 )
 
-const Community = () => (
+const Community = () => {
+  const [galleries, setGalleries] = React.useState(communityGalleries)
+
+  React.useEffect(() => {
+    loadCommunityGalleries().then(setGalleries)
+  }, [])
+
+  return (
   <PageLayout
     seoTitle="Community & Socials — Join the WAYBOND Tribe"
     seoDescription="Connect with 45K+ fellow travelers. Share stories, find expedition partners, and access local intel."
@@ -122,7 +129,7 @@ const Community = () => (
         <p className="text-white/40 italic mt-4 text-sm font-medium tracking-wide">Real smiles, real connections.</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {communityGalleries.map((gallery, index) => (
+        {galleries.map((gallery, index) => (
           <motion.div
             key={gallery.destination}
             initial={{ opacity: 0, y: 30 }}
@@ -192,7 +199,8 @@ const Community = () => (
       </div>
     </div>
   </PageLayout>
-)
+  )
+}
 
 const Wishlist = () => (
   <PageLayout

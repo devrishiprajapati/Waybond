@@ -99,7 +99,7 @@ const AdminDashboard = () => {
 
   const navItems = [
     { label: 'Inventory', path: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Homepage Hero', path: '/admin/hero', icon: ImageIcon },
+    { label: 'Trending Adventures', path: '/admin/hero', icon: ImageIcon },
     { label: 'New Package', path: '/admin/new', icon: Plus },
     { label: 'Testimonials', path: '/admin/testimonials', icon: MessageSquareText },
     { label: 'Users', path: '/admin/users', icon: UsersRound },
@@ -159,7 +159,7 @@ const AdminDashboard = () => {
               to="/admin/hero"
               className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all"
             >
-              <ImageIcon size={16} /> Edit Hero
+              <ImageIcon size={16} /> Edit Trending Cards
             </Link>
             <Link
               to="/admin/testimonials"

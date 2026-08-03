@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react'
-
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Clock, MapPin, ArrowLeft, Package, AlertCircle } from 'lucide-react'
 
-const CANCELLED_TRIPS_KEY = 'waybond_user_cancelled_trips'
-
 const CancelledTripsPage = () => {
   const [cancelledTrips, setCancelledTrips] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const { userId } = useParams()
   const navigate = useNavigate()
 
@@ -20,16 +18,30 @@ const CancelledTripsPage = () => {
 
     const parsedUser = JSON.parse(savedUser)
     
-    // Verify that the userId in URL matches the logged-in user
-    if (userId && userId !== parsedUser.email?.replace(/[^a-z0-9]/g, '')) {
+    // Verify that the userId in URL matches the logged-in user's database ID
+    if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
       return
     }
 
-    const savedCancelledTrips = localStorage.getItem(CANCELLED_TRIPS_KEY)
-    if (savedCancelledTrips) {
-      setCancelledTrips(JSON.parse(savedCancelledTrips))
+    const loadCancelledTrips = async () => {
+      try {
+        if (!parsedUser.id) throw new Error('No database user')
+        const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
+        if (!response.ok) throw new Error('Dashboard unavailable')
+        const data = await response.json()
+        
+        // Filter only cancelled bookings
+        const cancelled = data.bookings.filter((booking: any) => booking.status === 'Cancelled')
+        setCancelledTrips(cancelled)
+      } catch (error) {
+        console.error('Failed to load cancelled trips:', error)
+      } finally {
+        setLoading(false)
+      }
     }
+    
+    loadCancelledTrips()
   }, [navigate, userId])
 
   return (
@@ -57,8 +69,13 @@ const CancelledTripsPage = () => {
         </header>
 
         {/* Content */}
-        <div className="space-y-8">
-          {cancelledTrips.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-white/40 font-medium">Loading cancelled trips...</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {cancelledTrips.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -140,6 +157,7 @@ const CancelledTripsPage = () => {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   )

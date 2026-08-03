@@ -15,6 +15,12 @@ const Login = () => {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [resetMode, setResetMode] = useState(false)
+  const [otpSent, setOtpSent] = useState(false)
+  const [otp, setOtp] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [message, setMessage] = useState('')
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/dashboard'
@@ -27,8 +33,39 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setMessage('')
     setSubmitting(true)
     try {
+      if (resetMode) {
+        if (!otpSent) {
+          const response = await fetch('/api/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          })
+          const data = await response.json().catch(() => ({}))
+          if (!response.ok) throw new Error(data.message || 'Unable to send the OTP.')
+          setOtpSent(true)
+          setMessage(data.message || 'OTP sent. Check your email.')
+          return
+        }
+        if (newPassword !== confirmNewPassword) throw new Error('Passwords do not match.')
+        const response = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp, password: newPassword })
+        })
+        const data = await response.json().catch(() => ({}))
+        if (!response.ok) throw new Error(data.message || 'Unable to reset password.')
+        setResetMode(false)
+        setOtpSent(false)
+        setOtp('')
+        setPassword('')
+        setNewPassword('')
+        setConfirmNewPassword('')
+        setMessage(data.message || 'Password updated. You can now sign in.')
+        return
+      }
       const endpoint = mode === 'admin' ? '/api/auth/admin/login' : isLogin ? '/api/auth/login' : '/api/auth/signup'
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -129,6 +166,8 @@ const Login = () => {
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-slate-800 uppercase italic tracking-tighter mb-2">
                 {mode === 'admin' ? (
                   <>Admin <span className="text-primary">Basecamp</span></>
+                ) : resetMode ? (
+                  <>Reset <span className="text-secondary">Password</span></>
                 ) : (
                   <>{isLogin ? 'Welcome' : 'Join the'} <span className="text-secondary">Community</span></>
                 )}
@@ -136,6 +175,8 @@ const Login = () => {
               <p className="text-slate-500 font-medium text-xs italic tracking-wide">
                 {mode === 'admin'
                   ? 'Authorized access for organizers'
+                  : resetMode
+                    ? (otpSent ? 'Enter the OTP from your email and choose a new password' : 'We will send a secure OTP to your email')
                   : (isLogin ? 'Sign in to your curated expeditions' : "Ahmedabad's premier travel collective")}
               </p>
             </motion.div>
@@ -179,7 +220,7 @@ const Login = () => {
               </div>
             )}
 
-            <div className="space-y-1">
+            {!resetMode && <div className="space-y-1">
               <label className="text-[8px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">
                 {mode === 'admin' ? 'Access Key' : 'Password'}
               </label>
@@ -199,7 +240,24 @@ const Login = () => {
                   {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
-            </div>
+            </div>}
+
+            {mode === 'user' && resetMode && otpSent && (
+              <>
+                <div className="space-y-1">
+                  <label className="text-[8px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Email OTP</label>
+                  <input type="text" inputMode="numeric" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, ''))} placeholder="6-digit OTP" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base tracking-[0.3em]" required />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[8px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">New Password</label>
+                  <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} placeholder="At least 6 characters" autoComplete="new-password" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base" required />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[8px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Confirm New Password</label>
+                  <input type="password" value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} placeholder="Repeat new password" autoComplete="new-password" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base" required />
+                </div>
+              </>
+            )}
 
             <button
               type="submit"
@@ -207,11 +265,20 @@ const Login = () => {
               className={`w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center active:scale-95 touch-manipulation ${mode === 'admin' ? 'bg-primary shadow-primary/20' : 'bg-secondary shadow-secondary/20'
                 } text-white`}
             >
-              {submitting ? 'Please wait' : mode === 'admin' ? 'Authorize' : (isLogin ? 'Sign In' : 'Join')}
+              {submitting ? 'Please wait' : resetMode ? (otpSent ? 'Reset Password' : 'Send OTP') : mode === 'admin' ? 'Authorize' : (isLogin ? 'Sign In' : 'Join')}
               <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={14} />
             </button>
             {error && <p className="text-center text-xs font-bold text-red-500">{error}</p>}
+            {message && <p className="text-center text-xs font-bold text-emerald-600">{message}</p>}
           </form>
+
+          {mode === 'user' && isLogin && (
+            <div className="mt-4 text-center">
+              <button type="button" onClick={() => { setResetMode((current) => !current); setOtpSent(false); setError(''); setMessage('') }} className="text-secondary text-[9px] font-black uppercase tracking-[0.2em] hover:text-secondary/80">
+                {resetMode ? 'Back to sign in' : 'Forgot password?'}
+              </button>
+            </div>
+          )}
 
           {mode === 'user' && (
             <>

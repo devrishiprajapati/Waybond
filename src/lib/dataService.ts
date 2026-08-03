@@ -7,6 +7,14 @@ export interface HeroSlide {
   subtitle: string;
 }
 
+export interface TrendingCard {
+  id?: number;
+  image: string;
+  badge: string;
+  title: string;
+  subtitle: string;
+}
+
 // Utility to optimize Unsplash images for performance
 export const optimizeImageUrl = (url: string, width = 1200, quality = 80) => {
   if (url.includes('images.unsplash.com')) {
@@ -18,6 +26,7 @@ export const optimizeImageUrl = (url: string, width = 1200, quality = 80) => {
 
 const STORAGE_KEY = 'infi_yatra_trips'
 const HERO_STORAGE_KEY = 'infi_yatra_hero'
+const TRENDING_STORAGE_KEY = 'waybond_trending_cards'
 const VERSION_KEY = 'infi_yatra_version'
 const CURRENT_VERSION = 6.0; // Increment this when making hardcoded data changes
 
@@ -152,4 +161,42 @@ export const updateHeroSlides = async (slides: HeroSlide[]) => {
   localStorage.setItem(HERO_STORAGE_KEY, JSON.stringify(slides));
   // Ensure we mark this data as up-to-date with the current version
   localStorage.setItem(VERSION_KEY, CURRENT_VERSION.toString());
+}
+
+const defaultTrendingCards = (): TrendingCard[] => ALL_TRIPS.slice(0, 6).map((trip) => ({
+  id: trip.id,
+  image: trip.image,
+  badge: trip.experience,
+  title: trip.title,
+  subtitle: trip.location.split(',')[0]
+}))
+
+export const getTrendingCards = async (): Promise<TrendingCard[]> => {
+  try {
+    const response = await fetch('/api/trending-cards')
+    if (response.ok) {
+      const cards = await response.json()
+      if (Array.isArray(cards) && cards.length > 0) return cards
+    }
+  } catch {
+    // Static builds keep the last saved cards in local storage.
+  }
+
+  try {
+    const savedCards = JSON.parse(localStorage.getItem(TRENDING_STORAGE_KEY) || '[]')
+    if (Array.isArray(savedCards) && savedCards.length > 0) return savedCards
+  } catch {
+    // Fall through to starter cards.
+  }
+  return defaultTrendingCards()
+}
+
+export const updateTrendingCards = async (cards: TrendingCard[]): Promise<void> => {
+  const response = await fetch('/api/trending-cards', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cards.map(({ id, ...card }) => card))
+  })
+  if (!response.ok) throw new Error('Unable to save Trending Adventures.')
+  localStorage.setItem(TRENDING_STORAGE_KEY, JSON.stringify(cards))
 }
