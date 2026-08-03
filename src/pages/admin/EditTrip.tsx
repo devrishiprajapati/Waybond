@@ -115,7 +115,7 @@ const EditTrip = () => {
     if (!file) return
     try {
       if (file.type !== 'application/pdf') throw new Error('Please select a PDF file.')
-      if (file.size > 10 * 1024 * 1024) throw new Error('PDF must be smaller than 10 MB.')
+      if (file.size > 50 * 1024 * 1024) throw new Error('PDF must be smaller than 50 MB.')
       const pdfUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader()
         reader.onload = () => resolve(String(reader.result))
