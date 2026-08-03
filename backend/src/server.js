@@ -349,7 +349,7 @@ app.post('/api/payments/verify', async (req, res, next) => {
     if (!payment) return res.status(404).json({ message: 'Payment order not found.' })
     if (payment.status === 'PAID') return res.json({ success: true })
 
-    const booking = await prisma.booking.findUnique({ where: { id: payment.bookingId } })
+    const booking = await prisma.booking.findUnique({ where: { id: payment.bookingId }, include: { user: true } })
     if (!booking) return res.status(404).json({ message: 'Booking not found.' })
     const payload = {
       ...booking.payload,
@@ -362,6 +362,75 @@ app.post('/api/payments/verify', async (req, res, next) => {
       prisma.payment.update({ where: { id: payment.id }, data: { razorpayPaymentId: paymentId, status: 'PAID' } }),
       prisma.booking.update({ where: { id: booking.id }, data: { payload } })
     ])
+    
+    // Send invoice email
+    if (mailTransport && booking.user?.email) {
+      try {
+        const bookingData = toBooking({ ...booking, payload })
+        await mailTransport.sendMail({
+          from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+          to: booking.user.email,
+          subject: `WayBond Booking Confirmation - ${bookingData.bookingId}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); padding: 40px 20px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 32px; font-weight: bold;">WAYBOND</h1>
+                <p style="color: white; margin: 10px 0 0 0; font-size: 14px;">Your Journey, Our Passion</p>
+              </div>
+              
+              <div style="background: #f8fafc; padding: 40px 20px;">
+                <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                  <h2 style="color: #10b981; margin: 0 0 20px 0; font-size: 24px;">✓ Booking Confirmed!</h2>
+                  
+                  <p style="color: #475569; margin: 0 0 20px 0; font-size: 16px;">
+                    Dear ${booking.user.name},
+                  </p>
+                  
+                  <p style="color: #475569; margin: 0 0 30px 0; line-height: 1.6;">
+                    Your booking for <strong>${bookingData.title}</strong> has been confirmed! 
+                    Get ready for an unforgettable adventure with WayBond.
+                  </p>
+                  
+                  <div style="background: #f1f5f9; border-left: 4px solid #0ea5e9; padding: 20px; margin: 0 0 30px 0;">
+                    <p style="margin: 0 0 10px 0; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Booking Details</p>
+                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Booking ID:</strong> ${bookingData.bookingId}</p>
+                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Trip:</strong> ${bookingData.title}</p>
+                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Departure:</strong> ${bookingData.nextBatch}</p>
+                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Travelers:</strong> ${bookingData.travelers}</p>
+                    <p style="margin: 0; color: #1e293b;"><strong>Amount Paid:</strong> ₹${Number(bookingData.price || 0).toLocaleString('en-IN')}</p>
+                  </div>
+                  
+                  <p style="color: #475569; margin: 0 0 20px 0; line-height: 1.6;">
+                    You can view your complete booking details and download your invoice anytime from your dashboard.
+                  </p>
+                  
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${process.env.CORS_ORIGIN || 'http://localhost:5173'}/dashboard/${booking.userId}" 
+                       style="display: inline-block; background: #0ea5e9; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+                      VIEW MY DASHBOARD
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="background: #1e293b; padding: 30px 20px; text-align: center;">
+                <p style="color: #94a3b8; margin: 0 0 10px 0; font-size: 14px;">
+                  Need help? Contact us at <a href="mailto:support@waybond.com" style="color: #0ea5e9;">support@waybond.com</a>
+                </p>
+                <p style="color: #64748b; margin: 0; font-size: 12px;">
+                  © ${new Date().getFullYear()} WayBond. All rights reserved.
+                </p>
+              </div>
+            </div>
+          `
+        })
+        console.log(`Invoice email sent to ${booking.user.email}`)
+      } catch (emailError) {
+        console.error('Failed to send invoice email:', emailError)
+        // Don't fail the payment verification if email fails
+      }
+    }
+    
     res.json({ success: true, booking: toBooking({ ...booking, payload }) })
   } catch (error) { next(error) }
 })

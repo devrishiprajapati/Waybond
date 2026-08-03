@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, CheckCircle, Calendar, Users, CreditCard, Download, Share2, MapPin } from 'lucide-react'
+import jsPDF from 'jspdf'
 
 interface BookingData {
   bookingId: string
@@ -26,37 +27,238 @@ const BookingConfirmation = () => {
   const { bookingId } = useParams()
 
   useEffect(() => {
-    // Try to get booking data from location state or localStorage
-    const savedBookings = localStorage.getItem('waybond_user_bookings')
-    if (savedBookings && bookingId) {
-      const bookings = JSON.parse(savedBookings)
-      const booking = bookings.find((b: any) => b.bookingId === bookingId || b.id === bookingId)
-      
-      if (booking) {
-        setBookingData({
-          bookingId: booking.bookingId || `WB-${booking.id}`,
-          tripTitle: booking.title,
-          tripImage: booking.image,
-          category: booking.category || 'ADVENTURE SERIES',
-          startDate: booking.startDate || 'Oct 12, 2024',
-          endDate: booking.endDate || 'Oct 20, 2024',
-          guests: booking.travelers || 2,
-          guestName: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).name : 'Guest',
-          guestEmail: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).email : 'guest@example.com',
-          baseFare: booking.price || 2450,
-          upgrade: Math.round(booking.price * 0.18) || 450,
-          taxes: Math.round((booking.price + Math.round(booking.price * 0.18)) * 0.07) || 182.40,
-          totalPaid: booking.price ? Math.round(booking.price * 1.25) : 3082.40,
-          cardLast4: '1234',
-          issueDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' })
-        })
+    const loadBooking = async () => {
+      if (!bookingId) return
+
+      try {
+        // First try to get booking from API
+        const user = localStorage.getItem('user')
+        if (user) {
+          const parsedUser = JSON.parse(user)
+          if (parsedUser.id) {
+            const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
+            if (response.ok) {
+              const data = await response.json()
+              const booking = data.bookings.find((b: any) => 
+                b.bookingId === bookingId || b.id === bookingId || b.bookingDbId === bookingId
+              )
+              
+              if (booking) {
+                setBookingData({
+                  bookingId: booking.bookingId || `WB-${booking.id}`,
+                  tripTitle: booking.title,
+                  tripImage: booking.image,
+                  category: booking.category || 'ADVENTURE SERIES',
+                  startDate: booking.nextBatch || booking.startDate || 'TBD',
+                  endDate: booking.endDate || 'TBD',
+                  guests: booking.travelers || 1,
+                  guestName: parsedUser.name,
+                  guestEmail: parsedUser.email,
+                  baseFare: booking.price || 0,
+                  upgrade: Math.round((booking.price || 0) * 0.18),
+                  taxes: Math.round((booking.price || 0) * 1.18 * 0.07),
+                  totalPaid: Math.round((booking.price || 0) * 1.25),
+                  cardLast4: '1234',
+                  issueDate: booking.bookedOn || new Date().toLocaleDateString('en-IN')
+                })
+                return
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load booking from API:', error)
+      }
+
+      // Fallback: Try localStorage
+      const savedBookings = localStorage.getItem('waybond_user_bookings')
+      if (savedBookings) {
+        const bookings = JSON.parse(savedBookings)
+        const booking = bookings.find((b: any) => b.bookingId === bookingId || b.id === bookingId)
+        
+        if (booking) {
+          setBookingData({
+            bookingId: booking.bookingId || `WB-${booking.id}`,
+            tripTitle: booking.title,
+            tripImage: booking.image,
+            category: booking.category || 'ADVENTURE SERIES',
+            startDate: booking.startDate || 'TBD',
+            endDate: booking.endDate || 'TBD',
+            guests: booking.travelers || 1,
+            guestName: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).name : 'Guest',
+            guestEmail: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).email : 'guest@example.com',
+            baseFare: booking.price || 0,
+            upgrade: Math.round((booking.price || 0) * 0.18),
+            taxes: Math.round((booking.price || 0) * 1.18 * 0.07),
+            totalPaid: Math.round((booking.price || 0) * 1.25),
+            cardLast4: '1234',
+            issueDate: booking.bookedOn || new Date().toLocaleDateString('en-IN')
+          })
+        }
       }
     }
+
+    loadBooking()
   }, [bookingId])
 
   const handleDownloadPDF = () => {
-    // In a real app, this would generate and download a PDF
-    alert('PDF download feature coming soon!')
+    if (!bookingData) return
+
+    try {
+      const doc = new jsPDF()
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      
+      // Colors
+      const primaryColor = '#0ea5e9' // sky-500
+      const darkColor = '#1e293b' // slate-800
+      const lightGray = '#f1f5f9' // slate-100
+      
+      // Header with company branding
+      doc.setFillColor(14, 165, 233) // Primary color
+      doc.rect(0, 0, pageWidth, 40, 'F')
+      
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(24)
+      doc.setFont('helvetica', 'bold')
+      doc.text('WAYBOND', 20, 25)
+      
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.text('Your Journey, Our Passion', 20, 32)
+      
+      // Invoice title and number
+      doc.setTextColor(30, 41, 59)
+      doc.setFontSize(20)
+      doc.setFont('helvetica', 'bold')
+      doc.text('BOOKING INVOICE', pageWidth - 20, 25, { align: 'right' })
+      
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`Invoice #${bookingData.bookingId}`, pageWidth - 20, 32, { align: 'right' })
+      
+      // Invoice date
+      let yPos = 55
+      doc.setFontSize(10)
+      doc.text(`Issue Date: ${bookingData.issueDate}`, pageWidth - 20, yPos, { align: 'right' })
+      
+      // Customer information section
+      yPos = 65
+      doc.setFillColor(241, 245, 249)
+      doc.rect(15, yPos, pageWidth - 30, 25, 'F')
+      
+      yPos += 8
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(11)
+      doc.text('CUSTOMER INFORMATION', 20, yPos)
+      
+      yPos += 7
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.text(`Name: ${bookingData.guestName}`, 20, yPos)
+      
+      yPos += 6
+      doc.text(`Email: ${bookingData.guestEmail}`, 20, yPos)
+      
+      // Trip details section
+      yPos += 15
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(12)
+      doc.setTextColor(14, 165, 233)
+      doc.text('TRIP DETAILS', 20, yPos)
+      
+      yPos += 8
+      doc.setTextColor(30, 41, 59)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(14)
+      doc.text(bookingData.tripTitle, 20, yPos)
+      
+      yPos += 8
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.text(`Category: ${bookingData.category}`, 20, yPos)
+      
+      yPos += 6
+      doc.text(`Departure Date: ${bookingData.startDate}`, 20, yPos)
+      
+      yPos += 6
+      doc.text(`Number of Travelers: ${bookingData.guests}`, 20, yPos)
+      
+      // Payment breakdown section
+      yPos += 15
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(12)
+      doc.setTextColor(14, 165, 233)
+      doc.text('PAYMENT BREAKDOWN', 20, yPos)
+      
+      // Table header
+      yPos += 10
+      doc.setFillColor(241, 245, 249)
+      doc.rect(15, yPos - 5, pageWidth - 30, 8, 'F')
+      
+      doc.setTextColor(30, 41, 59)
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10)
+      doc.text('Description', 20, yPos)
+      doc.text('Amount', pageWidth - 20, yPos, { align: 'right' })
+      
+      // Table rows
+      yPos += 8
+      doc.setFont('helvetica', 'normal')
+      doc.text('Base Fare', 20, yPos)
+      doc.text(`₹${bookingData.baseFare.toLocaleString('en-IN')}`, pageWidth - 20, yPos, { align: 'right' })
+      
+      yPos += 7
+      doc.text('Service Charges (18%)', 20, yPos)
+      doc.text(`₹${bookingData.upgrade.toLocaleString('en-IN')}`, pageWidth - 20, yPos, { align: 'right' })
+      
+      yPos += 7
+      doc.text('Taxes & Fees (7%)', 20, yPos)
+      doc.text(`₹${bookingData.taxes.toLocaleString('en-IN')}`, pageWidth - 20, yPos, { align: 'right' })
+      
+      // Total line
+      yPos += 10
+      doc.setDrawColor(14, 165, 233)
+      doc.setLineWidth(0.5)
+      doc.line(15, yPos, pageWidth - 15, yPos)
+      
+      yPos += 7
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(12)
+      doc.text('TOTAL PAID', 20, yPos)
+      doc.text(`₹${bookingData.totalPaid.toLocaleString('en-IN')}`, pageWidth - 20, yPos, { align: 'right' })
+      
+      // Payment method
+      yPos += 10
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9)
+      doc.setTextColor(100, 116, 139)
+      doc.text(`Payment Method: Card ending in ****${bookingData.cardLast4}`, 20, yPos)
+      
+      // Footer
+      yPos = pageHeight - 30
+      doc.setDrawColor(226, 232, 240)
+      doc.setLineWidth(0.3)
+      doc.line(15, yPos, pageWidth - 15, yPos)
+      
+      yPos += 7
+      doc.setTextColor(100, 116, 139)
+      doc.setFontSize(9)
+      doc.text('Thank you for choosing WayBond!', pageWidth / 2, yPos, { align: 'center' })
+      
+      yPos += 5
+      doc.setFontSize(8)
+      doc.text('For support, contact us at support@waybond.com | +91 1800-123-4567', pageWidth / 2, yPos, { align: 'center' })
+      
+      yPos += 5
+      doc.text('Terms & Conditions apply. Visit www.waybond.com for more details.', pageWidth / 2, yPos, { align: 'center' })
+      
+      // Save the PDF
+      doc.save(`WayBond-Invoice-${bookingData.bookingId}.pdf`)
+    } catch (error) {
+      console.error('PDF generation error:', error)
+      alert('Unable to generate PDF. Please try again or contact support.')
+    }
   }
 
   const handleShare = () => {
@@ -139,10 +341,10 @@ const BookingConfirmation = () => {
               <img alt={bookingData.tripTitle} className="w-full h-full object-cover" src={bookingData.tripImage} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-5">
                 <div className="text-white">
-                  <span className="text-[9px] font-black uppercase tracking-[0.18em] bg-blue-500/30 backdrop-blur-md px-3 py-1.5 rounded-full inline-block mb-3">
+                  <span className="text-[9px] font-black uppercase tracking-[0.18em] bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full inline-block mb-3 text-white">
                     {bookingData.category}
                   </span>
-                  <h2 className="text-2xl md:text-3xl font-display font-black tracking-tight">{bookingData.tripTitle}</h2>
+                  <h2 className="text-2xl md:text-3xl font-display font-black tracking-tight text-white">{bookingData.tripTitle}</h2>
                 </div>
               </div>
             </div>
@@ -232,7 +434,7 @@ const BookingConfirmation = () => {
         <div className="px-6 md:px-12 py-8 space-y-4">
           <button
             onClick={handleDownloadPDF}
-            className="w-full bg-slate-800 text-white py-4 rounded-xl font-white text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-900 transition-colors active:scale-95"
+            className="w-full bg-slate-800 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-900 transition-colors active:scale-95"
           >
             <Download size={16} />
             Download PDF Invoice

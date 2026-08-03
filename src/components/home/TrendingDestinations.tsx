@@ -95,14 +95,14 @@ export default function TrendingDestinations() {
                     className="text-center space-y-1 md:space-y-2 mt-10"
                   >
                     <h3
-                      className="text-3xl sm:text-4xl md:text-5xl font-display font-black !text-white uppercase tracking-tight leading-tight line-clamp-2"
-                      style={{ color: 'white' }}
+                      className="text-3xl sm:text-4xl md:text-5xl font-display font-black uppercase tracking-tight leading-tight line-clamp-2"
+                      style={{ color: '#ffffff !important' }}
                     >
                       {card.title}
                     </h3>
                     <p
-                      className="!text-white text-xs md:text-sm font-semibold tracking-widest uppercase line-clamp-1"
-                      style={{ color: 'white' }}
+                      className="text-xs md:text-sm font-semibold tracking-widest uppercase line-clamp-1"
+                      style={{ color: '#ffffff !important' }}
                     >
                       {card.subtitle}
                     </p>
