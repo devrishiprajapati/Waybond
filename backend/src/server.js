@@ -9,7 +9,7 @@ const app = express()
 const port = Number(process.env.PORT || 3001)
 
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',').map((origin) => origin.trim()) || true }))
-app.use(express.json({ limit: '20mb' }))
+app.use(express.json({ limit: '100mb' }))
 
 const toTrip = (record) => ({ id: record.id, ...record.payload })
 const toHeroSlide = (record) => ({ id: record.id, ...record.payload })
@@ -28,11 +28,11 @@ const passwordMatches = (password, storedHash) => {
 }
 const mailTransport = process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS
   ? nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT || 465),
-      secure: Number(process.env.EMAIL_PORT || 465) === 465,
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-    })
+    host: process.env.EMAIL_HOST,
+    port: Number(process.env.EMAIL_PORT || 465),
+    secure: Number(process.env.EMAIL_PORT || 465) === 465,
+    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+  })
   : null
 
 app.get('/', (_req, res) => res.json({ service: 'WayBond API', status: 'running', health: '/api/health' }))
@@ -279,11 +279,11 @@ app.put('/api/bookings/:bookingId/cancel', async (req, res, next) => {
   try {
     const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId } })
     if (!booking) return res.status(404).json({ message: 'Booking not found' })
-    
+
     const updatedPayload = { ...booking.payload, status: 'Cancelled', cancelledOn: new Date().toLocaleDateString('en-IN') }
-    const updated = await prisma.booking.update({ 
-      where: { id: req.params.bookingId }, 
-      data: { payload: updatedPayload } 
+    const updated = await prisma.booking.update({
+      where: { id: req.params.bookingId },
+      data: { payload: updatedPayload }
     })
     res.json(toBooking(updated))
   } catch (error) { next(error) }
@@ -362,7 +362,7 @@ app.post('/api/payments/verify', async (req, res, next) => {
       prisma.payment.update({ where: { id: payment.id }, data: { razorpayPaymentId: paymentId, status: 'PAID' } }),
       prisma.booking.update({ where: { id: booking.id }, data: { payload } })
     ])
-    
+
     // Send invoice email
     if (mailTransport && booking.user?.email) {
       try {
@@ -430,7 +430,7 @@ app.post('/api/payments/verify', async (req, res, next) => {
         // Don't fail the payment verification if email fails
       }
     }
-    
+
     res.json({ success: true, booking: toBooking({ ...booking, payload }) })
   } catch (error) { next(error) }
 })

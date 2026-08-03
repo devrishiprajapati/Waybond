@@ -7,7 +7,12 @@ export default defineConfig({
         host: "0.0.0.0",
         allowedHosts: true,
         proxy: {
-            '/api': 'http://localhost:3002'
+            '/api': {
+                target: 'http://localhost:3002',
+                changeOrigin: true,
+                proxyTimeout: 300_000, // 5 minutes — needed for large PDF uploads
+                timeout: 300_000,
+            }
         },
         hmr: {
             clientPort: 443,

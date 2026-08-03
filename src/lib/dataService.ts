@@ -87,7 +87,7 @@ export const updateTrip = async (updatedTrip: Trip) => {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatedTrip),
-  })
+  }, 300_000) // 5 min — needed for large PDF payloads
   if (!response.ok) throw new Error('Unable to update the package in the database.')
   const trip = await response.json() as Trip
   notifyTripsUpdated()
@@ -99,7 +99,7 @@ export const addTrip = async (newTrip: Omit<Trip, 'id'>) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(newTrip),
-  })
+  }, 300_000) // 5 min — needed for large PDF payloads
   if (!response.ok) throw new Error('Unable to save the package to the database.')
   const trip = await response.json() as Trip
   notifyTripsUpdated()
