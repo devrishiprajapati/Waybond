@@ -29,20 +29,36 @@ const Login = () => {
   const redirectTo = searchParams.get('redirect') || '/dashboard'
   const existingUser = getUser()
 
-  // Mount/reset Turnstile widget whenever the user-mode login form is shown
+  // Mount Turnstile widget — poll until the async script has loaded
+  // Only active in production; Cloudflare site keys don't accept localhost
   useEffect(() => {
+    if (!import.meta.env.PROD) return
     if (mode !== 'user' || resetMode) return
-    const win = window as any
-    if (!win.turnstile) return
-    // Render widget
-    widgetIdRef.current = win.turnstile.render(turnstileRef.current, {
-      sitekey: '0x4AAAAAAEGYxQ3dRBI9J_s3',
-      callback: (token: string) => setTurnstileToken(token),
-      'expired-callback': () => setTurnstileToken(''),
-      'error-callback': () => setTurnstileToken(''),
-      theme: 'light',
-    })
+    let cancelled = false
+
+    const mount = () => {
+      const win = window as any
+      if (!win.turnstile || !turnstileRef.current) return false
+      widgetIdRef.current = win.turnstile.render(turnstileRef.current, {
+        sitekey: '0x4AAAAAAEGYxQ3dRBI9J_s3',
+        callback: (token: string) => setTurnstileToken(token),
+        'expired-callback': () => setTurnstileToken(''),
+        'error-callback': () => setTurnstileToken(''),
+        theme: 'light',
+      })
+      return true
+    }
+
+    if (!mount()) {
+      const interval = setInterval(() => {
+        if (cancelled) { clearInterval(interval); return }
+        if (mount()) clearInterval(interval)
+      }, 100)
+    }
+
     return () => {
+      cancelled = true
+      const win = window as any
       if (widgetIdRef.current !== undefined) {
         win.turnstile?.remove(widgetIdRef.current)
         widgetIdRef.current = undefined
@@ -284,8 +300,8 @@ const Login = () => {
               </>
             )}
 
-            {/* Cloudflare Turnstile — only for user login/signup, not reset or admin */}
-            {mode === 'user' && !resetMode && (
+            {/* Cloudflare Turnstile — production only */}
+            {import.meta.env.PROD && mode === 'user' && !resetMode && (
               <div ref={turnstileRef} className="flex justify-center" />
             )}
 
