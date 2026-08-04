@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, ArrowRight, Compass, Phone, MapPin, AlertCircle, Upload, Droplet, Eye, EyeOff } from 'lucide-react'
+import { User, Mail, Lock, ArrowRight, Compass, Phone, MapPin, AlertCircle, Upload, Droplet, Eye, EyeOff, Check, X } from 'lucide-react'
 import { haptics } from '../lib/haptics'
 import { getUser } from '../lib/auth'
 
@@ -23,11 +23,112 @@ const SignUp = () => {
   const [submitting, setSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
   const navigate = useNavigate()
   const existingUser = getUser()
 
   if (existingUser) {
     return <Navigate to={sessionStorage.getItem('isAdmin') === 'true' ? '/admin/dashboard' : '/dashboard'} replace />
+  }
+
+  // Validation functions
+  const validateFullName = (name: string): string => {
+    if (!name.trim()) return 'Full name is required'
+    if (name.trim().length < 3) return 'Name must be at least 3 characters'
+    if (!/^[a-zA-Z\s]+$/.test(name)) return 'Name can only contain letters and spaces'
+    return ''
+  }
+
+  const validateEmail = (email: string): string => {
+    if (!email.trim()) return 'Email is required'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Invalid email format'
+    return ''
+  }
+
+  const validateMobileNumber = (number: string): string => {
+    if (!number.trim()) return 'Mobile number is required'
+    if (!/^\d{10}$/.test(number)) return 'Mobile number must be exactly 10 digits'
+    return ''
+  }
+
+  const validateEmergencyContact = (number: string): string => {
+    if (!number.trim()) return 'Emergency contact is required'
+    if (!/^\d{10}$/.test(number)) return 'Emergency contact must be exactly 10 digits'
+    return ''
+  }
+
+  const validateDateOfBirth = (dob: string): string => {
+    if (!dob) return 'Date of birth is required'
+    const birthDate = new Date(dob)
+    const today = new Date()
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+    if (age < 18) return 'You must be at least 18 years old'
+    return ''
+  }
+
+  const validatePassword = (pwd: string): string => {
+    if (!pwd) return 'Password is required'
+    if (pwd.length < 8) return 'Password must be at least 8 characters'
+    if (!/[A-Z]/.test(pwd)) return 'Password must contain at least one uppercase letter'
+    if (!/[a-z]/.test(pwd)) return 'Password must contain at least one lowercase letter'
+    if (!/[0-9]/.test(pwd)) return 'Password must contain at least one number'
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) return 'Password must contain at least one special character'
+    return ''
+  }
+
+  const validateConfirmPassword = (pwd: string, confirmPwd: string): string => {
+    if (!confirmPwd) return 'Please confirm your password'
+    if (pwd !== confirmPwd) return 'Passwords do not match'
+    return ''
+  }
+
+  const validateAddress = (addr: string): string => {
+    if (!addr.trim()) return 'Address is required'
+    if (addr.trim().length < 10) return 'Please provide a complete address'
+    return ''
+  }
+
+  // Handle field blur to mark as touched
+  const handleBlur = (fieldName: string) => {
+    setTouched((prev) => ({ ...prev, [fieldName]: true }))
+  }
+
+  // Validate field and update errors
+  const validateField = (fieldName: string, value: string) => {
+    let error = ''
+    switch (fieldName) {
+      case 'fullName':
+        error = validateFullName(value)
+        break
+      case 'email':
+        error = validateEmail(value)
+        break
+      case 'mobileNumber':
+        error = validateMobileNumber(value)
+        break
+      case 'emergencyContact':
+        error = validateEmergencyContact(value)
+        break
+      case 'dateOfBirth':
+        error = validateDateOfBirth(value)
+        break
+      case 'password':
+        error = validatePassword(value)
+        break
+      case 'confirmPassword':
+        error = validateConfirmPassword(password, value)
+        break
+      case 'address':
+        error = validateAddress(value)
+        break
+    }
+    setFieldErrors((prev) => ({ ...prev, [fieldName]: error }))
+    return error
   }
 
   const toDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
@@ -41,64 +142,43 @@ const SignUp = () => {
     e.preventDefault()
     setError('')
 
-    // Validation
-    if (!fullName.trim()) {
-      setError('Full name is required')
-      haptics.error()
-      return
-    }
-    if (!dateOfBirth) {
-      setError('Date of birth is required')
-      haptics.error()
-      return
-    }
-    if (!gender) {
-      setError('Gender is required')
-      haptics.error()
-      return
-    }
-    if (!mobileNumber.trim() || mobileNumber.length < 10) {
-      setError('Valid mobile number is required (min 10 digits)')
-      haptics.error()
-      return
-    }
-    if (!email.trim()) {
-      setError('Email is required')
-      haptics.error()
-      return
-    }
-    if (!address.trim()) {
-      setError('Address is required')
-      haptics.error()
-      return
-    }
-    if (!emergencyContact.trim()) {
-      setError('Emergency contact is required')
-      haptics.error()
-      return
-    }
-    if (!governmentID) {
-      setError('Government ID upload is required')
-      haptics.error()
-      return
-    }
-    if (!bloodGroup) {
-      setError('Blood group is required')
-      haptics.error()
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      haptics.error()
-      return
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      haptics.error()
-      return
-    }
-    if (!termsAccepted) {
-      setError('You must accept the Terms & Conditions')
+    // Mark all fields as touched
+    setTouched({
+      fullName: true,
+      dateOfBirth: true,
+      gender: true,
+      mobileNumber: true,
+      email: true,
+      address: true,
+      emergencyContact: true,
+      bloodGroup: true,
+      password: true,
+      confirmPassword: true
+    })
+
+    // Validate all fields
+    const errors: Record<string, string> = {}
+    errors.fullName = validateFullName(fullName)
+    errors.dateOfBirth = validateDateOfBirth(dateOfBirth)
+    errors.email = validateEmail(email)
+    errors.mobileNumber = validateMobileNumber(mobileNumber)
+    errors.emergencyContact = validateEmergencyContact(emergencyContact)
+    errors.address = validateAddress(address)
+    errors.password = validatePassword(password)
+    errors.confirmPassword = validateConfirmPassword(password, confirmPassword)
+
+    if (!gender) errors.gender = 'Gender is required'
+    if (!governmentID) errors.governmentID = 'Government ID upload is required'
+    if (!bloodGroup) errors.bloodGroup = 'Blood group is required'
+    if (!termsAccepted) errors.terms = 'You must accept the Terms & Conditions'
+
+    setFieldErrors(errors)
+
+    // Check if any errors exist
+    const hasErrors = Object.values(errors).some((err) => err !== '')
+    if (hasErrors) {
+      const firstError = Object.values(errors).find((err) => err !== '')
+      setError(firstError || 'Please fix all validation errors')
       haptics.error()
       return
     }
@@ -188,13 +268,38 @@ const SignUp = () => {
                 <input
                   type="text"
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => {
+                    setFullName(e.target.value)
+                    if (touched.fullName) validateField('fullName', e.target.value)
+                  }}
+                  onBlur={() => {
+                    handleBlur('fullName')
+                    validateField('fullName', fullName)
+                  }}
                   placeholder="Your Full Name"
                   autoComplete="name"
-                  className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
+                    touched.fullName && fieldErrors.fullName
+                      ? 'border-red-500 bg-red-50'
+                      : touched.fullName && !fieldErrors.fullName && fullName
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
+                  }`}
                   required
                 />
+                {touched.fullName && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    {fieldErrors.fullName ? (
+                      <X size={18} className="text-red-500" />
+                    ) : fullName ? (
+                      <Check size={18} className="text-green-500" />
+                    ) : null}
+                  </div>
+                )}
               </div>
+              {touched.fullName && fieldErrors.fullName && (
+                <p className="text-red-600 text-[8px] font-black uppercase tracking-[0.2em] ml-4 mt-1">{fieldErrors.fullName}</p>
+              )}
             </div>
 
             {/* Date of Birth */}
@@ -203,10 +308,26 @@ const SignUp = () => {
               <input
                 type="date"
                 value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 p-4 px-4 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors text-base"
+                onChange={(e) => {
+                  setDateOfBirth(e.target.value)
+                  if (touched.dateOfBirth) validateField('dateOfBirth', e.target.value)
+                }}
+                onBlur={() => {
+                  handleBlur('dateOfBirth')
+                  validateField('dateOfBirth', dateOfBirth)
+                }}
+                className={`w-full bg-slate-50 border p-4 px-4 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors text-base ${
+                  touched.dateOfBirth && fieldErrors.dateOfBirth
+                    ? 'border-red-500 bg-red-50'
+                    : touched.dateOfBirth && !fieldErrors.dateOfBirth && dateOfBirth
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-slate-200'
+                }`}
                 required
               />
+              {touched.dateOfBirth && fieldErrors.dateOfBirth && (
+                <p className="text-red-600 text-[8px] font-black uppercase tracking-[0.2em] ml-4 mt-1">{fieldErrors.dateOfBirth}</p>
+              )}
             </div>
 
             {/* Gender */}
@@ -234,14 +355,40 @@ const SignUp = () => {
                 <input
                   type="tel"
                   value={mobileNumber}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  placeholder="+91 98765 43210"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 10)
+                    setMobileNumber(value)
+                    if (touched.mobileNumber) validateField('mobileNumber', value)
+                  }}
+                  onBlur={() => {
+                    handleBlur('mobileNumber')
+                    validateField('mobileNumber', mobileNumber)
+                  }}
+                  placeholder="10 digit mobile number"
                   autoComplete="tel"
-                  inputMode="tel"
-                  className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
+                  inputMode="numeric"
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
+                    touched.mobileNumber && fieldErrors.mobileNumber
+                      ? 'border-red-500 bg-red-50'
+                      : touched.mobileNumber && !fieldErrors.mobileNumber && mobileNumber
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
+                  }`}
                   required
                 />
+                {touched.mobileNumber && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    {fieldErrors.mobileNumber ? (
+                      <X size={18} className="text-red-500" />
+                    ) : mobileNumber.length === 10 ? (
+                      <Check size={18} className="text-green-500" />
+                    ) : null}
+                  </div>
+                )}
               </div>
+              {touched.mobileNumber && fieldErrors.mobileNumber && (
+                <p className="text-red-600 text-[8px] font-black uppercase tracking-[0.2em] ml-4 mt-1">{fieldErrors.mobileNumber}</p>
+              )}
             </div>
 
             {/* Email Address */}
@@ -252,14 +399,39 @@ const SignUp = () => {
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    if (touched.email) validateField('email', e.target.value)
+                  }}
+                  onBlur={() => {
+                    handleBlur('email')
+                    validateField('email', email)
+                  }}
                   placeholder="hello@example.com"
                   autoComplete="email"
                   inputMode="email"
-                  className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
+                    touched.email && fieldErrors.email
+                      ? 'border-red-500 bg-red-50'
+                      : touched.email && !fieldErrors.email && email
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
+                  }`}
                   required
                 />
+                {touched.email && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    {fieldErrors.email ? (
+                      <X size={18} className="text-red-500" />
+                    ) : email ? (
+                      <Check size={18} className="text-green-500" />
+                    ) : null}
+                  </div>
+                )}
               </div>
+              {touched.email && fieldErrors.email && (
+                <p className="text-red-600 text-[8px] font-black uppercase tracking-[0.2em] ml-4 mt-1">{fieldErrors.email}</p>
+              )}
             </div>
 
             {/* Address */}
@@ -269,13 +441,29 @@ const SignUp = () => {
                 <MapPin className="absolute left-5 top-5 text-slate-400 pointer-events-none" size={16} />
                 <textarea
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  onChange={(e) => {
+                    setAddress(e.target.value)
+                    if (touched.address) validateField('address', e.target.value)
+                  }}
+                  onBlur={() => {
+                    handleBlur('address')
+                    validateField('address', address)
+                  }}
                   placeholder="Street, City, State, Postal Code"
-                  className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base resize-none"
+                  className={`w-full bg-slate-50 border p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base resize-none ${
+                    touched.address && fieldErrors.address
+                      ? 'border-red-500 bg-red-50'
+                      : touched.address && !fieldErrors.address && address
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
+                  }`}
                   rows={2}
                   required
                 />
               </div>
+              {touched.address && fieldErrors.address && (
+                <p className="text-red-600 text-[8px] font-black uppercase tracking-[0.2em] ml-4 mt-1">{fieldErrors.address}</p>
+              )}
             </div>
 
             {/* Emergency Contact */}
@@ -286,13 +474,39 @@ const SignUp = () => {
                 <input
                   type="tel"
                   value={emergencyContact}
-                  onChange={(e) => setEmergencyContact(e.target.value)}
-                  placeholder="Emergency Contact Number"
-                  inputMode="tel"
-                  className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 10)
+                    setEmergencyContact(value)
+                    if (touched.emergencyContact) validateField('emergencyContact', value)
+                  }}
+                  onBlur={() => {
+                    handleBlur('emergencyContact')
+                    validateField('emergencyContact', emergencyContact)
+                  }}
+                  placeholder="10 digit emergency contact"
+                  inputMode="numeric"
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
+                    touched.emergencyContact && fieldErrors.emergencyContact
+                      ? 'border-red-500 bg-red-50'
+                      : touched.emergencyContact && !fieldErrors.emergencyContact && emergencyContact
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
+                  }`}
                   required
                 />
+                {touched.emergencyContact && (
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    {fieldErrors.emergencyContact ? (
+                      <X size={18} className="text-red-500" />
+                    ) : emergencyContact.length === 10 ? (
+                      <Check size={18} className="text-green-500" />
+                    ) : null}
+                  </div>
+                )}
               </div>
+              {touched.emergencyContact && fieldErrors.emergencyContact && (
+                <p className="text-red-600 text-[8px] font-black uppercase tracking-[0.2em] ml-4 mt-1">{fieldErrors.emergencyContact}</p>
+              )}
             </div>
 
             {/* Government ID Upload */}
@@ -352,16 +566,47 @@ const SignUp = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    if (touched.password) validateField('password', e.target.value)
+                    if (touched.confirmPassword && confirmPassword) validateField('confirmPassword', confirmPassword)
+                  }}
+                  onBlur={() => {
+                    handleBlur('password')
+                    validateField('password', password)
+                  }}
                   placeholder="••••••••"
                   autoComplete="new-password"
-                  className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-24 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
+                    touched.password && fieldErrors.password
+                      ? 'border-red-500 bg-red-50'
+                      : touched.password && !fieldErrors.password && password
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
+                  }`}
                   required
                 />
+                <div className="absolute right-12 top-1/2 -translate-y-1/2">
+                  {touched.password && (
+                    fieldErrors.password ? (
+                      <X size={18} className="text-red-500" />
+                    ) : password ? (
+                      <Check size={18} className="text-green-500" />
+                    ) : null
+                  )}
+                </div>
                 <button type="button" onClick={() => setShowPassword((current) => !current)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-secondary" aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
+              {touched.password && fieldErrors.password && (
+                <p className="text-red-600 text-[8px] font-black uppercase tracking-[0.2em] ml-4 mt-1">{fieldErrors.password}</p>
+              )}
+              {touched.password && !fieldErrors.password && password && (
+                <div className="ml-4 mt-2 space-y-1">
+                  <p className="text-green-600 text-[7px] font-black uppercase tracking-[0.2em]">✓ Strong password</p>
+                </div>
+              )}
             </div>
 
             {/* Confirm Password */}
@@ -372,16 +617,41 @@ const SignUp = () => {
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value)
+                    if (touched.confirmPassword) validateField('confirmPassword', e.target.value)
+                  }}
+                  onBlur={() => {
+                    handleBlur('confirmPassword')
+                    validateField('confirmPassword', confirmPassword)
+                  }}
                   placeholder="••••••••"
                   autoComplete="new-password"
-                  className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-24 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
+                    touched.confirmPassword && fieldErrors.confirmPassword
+                      ? 'border-red-500 bg-red-50'
+                      : touched.confirmPassword && !fieldErrors.confirmPassword && confirmPassword
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
+                  }`}
                   required
                 />
+                <div className="absolute right-12 top-1/2 -translate-y-1/2">
+                  {touched.confirmPassword && (
+                    fieldErrors.confirmPassword ? (
+                      <X size={18} className="text-red-500" />
+                    ) : confirmPassword && password === confirmPassword ? (
+                      <Check size={18} className="text-green-500" />
+                    ) : null
+                  )}
+                </div>
                 <button type="button" onClick={() => setShowConfirmPassword((current) => !current)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-secondary" aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
                   {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
+              {touched.confirmPassword && fieldErrors.confirmPassword && (
+                <p className="text-red-600 text-[8px] font-black uppercase tracking-[0.2em] ml-4 mt-1">{fieldErrors.confirmPassword}</p>
+              )}
             </div>
 
             {/* Terms & Conditions Checkbox */}

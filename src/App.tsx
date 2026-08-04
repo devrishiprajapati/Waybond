@@ -46,7 +46,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowSplash(false);
-    }, 15000); // 15 seconds
+    }, 6000); // 6 seconds
 
     return () => clearTimeout(timer);
   }, []);
