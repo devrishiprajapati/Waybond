@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Star, Users, Globe, Upload, FileText } from 'lucide-react'
+import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Star, Users, Globe, Upload, FileText, CheckCircle } from 'lucide-react'
 import { getTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
 
@@ -50,6 +50,12 @@ const EditTrip = () => {
     pdfUrl: ''
   })
   const [mediaError, setMediaError] = useState('')
+  const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false })
+
+  const showToast = (message: string) => {
+    setToast({ message, visible: true })
+    setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000)
+  }
 
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
@@ -115,7 +121,7 @@ const EditTrip = () => {
     if (!file) return
     try {
       if (file.type !== 'application/pdf') throw new Error('Please select a PDF file.')
-      if (file.size > 10 * 1024 * 1024) throw new Error('PDF must be smaller than 10 MB.')
+      if (file.size > 50 * 1024 * 1024) throw new Error('PDF must be smaller than 50 MB.')
       const pdfUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader()
         reader.onload = () => resolve(String(reader.result))
@@ -124,6 +130,7 @@ const EditTrip = () => {
       })
       setFormData((current) => ({ ...current, pdfUrl, _pdfName: file.name } as any))
       setMediaError('')
+      showToast('PDF uploaded successfully')
     } catch (error) {
       setMediaError(error instanceof Error ? error.message : 'Unable to upload PDF.')
     }
@@ -144,10 +151,12 @@ const EditTrip = () => {
     try {
       if (id && id !== 'new') {
         await updateTrip(finalData as Trip)
+        showToast('Package updated successfully')
       } else {
         await addTrip(finalData as Omit<Trip, 'id'>)
+        showToast('Package created successfully')
       }
-      navigate('/admin/dashboard')
+      setTimeout(() => navigate('/admin/dashboard'), 1200)
     } catch (error) {
       setMediaError(error instanceof Error ? error.message : 'Unable to save the package.')
     }
@@ -328,7 +337,7 @@ const EditTrip = () => {
                       <input type="file" accept="application/pdf" className="sr-only" onChange={(event) => handlePdfUpload(event.target.files?.[0])} />
                     </label>
                   )}
-                  <p className="text-[10px] text-white/30 ml-2">PDF only · max 10 MB · users can download from the trip page</p>
+                  <p className="text-[10px] text-white/30 ml-2">PDF only · max 50 MB · users can download from the trip page</p>
                 </div>
               </div>
             </div>
@@ -553,6 +562,13 @@ const EditTrip = () => {
             </button>
           </div>
         </form>
+      </div>
+      {/* Toast Notification */}
+      <div
+        className={`fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl bg-green-500/90 backdrop-blur-md text-white font-black text-sm uppercase tracking-widest shadow-2xl shadow-green-500/30 border border-green-400/40 transition-all duration-500 ${toast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'}`}
+      >
+        <CheckCircle size={18} className="shrink-0" />
+        {toast.message}
       </div>
     </div>
   )
