@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link, Navigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Github, Chrome, Shield, Compass, Eye, EyeOff } from 'lucide-react'
@@ -21,10 +21,35 @@ const Login = () => {
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [message, setMessage] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const turnstileRef = useRef<HTMLDivElement>(null)
+  const widgetIdRef = useRef<string | undefined>(undefined)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/dashboard'
   const existingUser = getUser()
+
+  // Mount/reset Turnstile widget whenever the user-mode login form is shown
+  useEffect(() => {
+    if (mode !== 'user' || resetMode) return
+    const win = window as any
+    if (!win.turnstile) return
+    // Render widget
+    widgetIdRef.current = win.turnstile.render(turnstileRef.current, {
+      sitekey: '0x4AAAAAAEGYxQ3dRBI9J_s3',
+      callback: (token: string) => setTurnstileToken(token),
+      'expired-callback': () => setTurnstileToken(''),
+      'error-callback': () => setTurnstileToken(''),
+      theme: 'light',
+    })
+    return () => {
+      if (widgetIdRef.current !== undefined) {
+        win.turnstile?.remove(widgetIdRef.current)
+        widgetIdRef.current = undefined
+        setTurnstileToken('')
+      }
+    }
+  }, [mode, resetMode])
 
   if (existingUser) {
     return <Navigate to={sessionStorage.getItem('isAdmin') === 'true' ? '/admin/dashboard' : redirectTo} replace />
@@ -70,10 +95,10 @@ const Login = () => {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify({ name, email, password, ...(mode === 'user' ? { turnstileToken } : {}) })
       })
       const responseText = await response.text()
-      let data: { user?: { id?: string; name: string; email: string; [key: string]: unknown }; message?: string } = {}
+      let data: { user?: { id?: string; name: string; email: string;[key: string]: unknown }; message?: string } = {}
       try { data = responseText ? JSON.parse(responseText) : {} } catch { /* Non-JSON server responses are handled below. */ }
       if (!response.ok && !data.message) throw new Error(`Authentication service returned ${response.status}. Restart the backend and try again.`)
       if (!response.ok) throw new Error(data.message || 'Unable to continue.')
@@ -177,7 +202,7 @@ const Login = () => {
                   ? 'Authorized access for organizers'
                   : resetMode
                     ? (otpSent ? 'Enter the OTP from your email and choose a new password' : 'We will send a secure OTP to your email')
-                  : (isLogin ? 'Sign in to your curated expeditions' : "Ahmedabad's premier travel collective")}
+                    : (isLogin ? 'Sign in to your curated expeditions' : "Ahmedabad's premier travel collective")}
               </p>
             </motion.div>
           </div>
@@ -257,6 +282,11 @@ const Login = () => {
                   <input type="password" value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} placeholder="Repeat new password" autoComplete="new-password" className="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base" required />
                 </div>
               </>
+            )}
+
+            {/* Cloudflare Turnstile — only for user login/signup, not reset or admin */}
+            {mode === 'user' && !resetMode && (
+              <div ref={turnstileRef} className="flex justify-center" />
             )}
 
             <button
