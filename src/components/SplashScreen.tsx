@@ -81,9 +81,9 @@ const SplashScreen: React.FC = () => {
           {/* Glow background */}
           <motion.div
             initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 0.4, scale: 1 }}
+            animate={{ opacity: 0.3, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="absolute inset-0 blur-3xl bg-secondary/40 rounded-full scale-150"
+            className="absolute inset-0 blur-3xl bg-white/20 rounded-full scale-150"
           ></motion.div>
           
           {/* Main Lottie Animation or Fallback */}
@@ -103,7 +103,7 @@ const SplashScreen: React.FC = () => {
                 autoplay={true}
                 className="w-full h-full drop-shadow-2xl"
                 style={{
-                  filter: 'drop-shadow(0 20px 60px rgba(14, 165, 233, 0.5))'
+                  filter: 'brightness(0) saturate(100%) invert(100%) drop-shadow(0 20px 60px rgba(255, 255, 255, 0.3))'
                 }}
               />
             </motion.div>
@@ -134,7 +134,7 @@ const SplashScreen: React.FC = () => {
                     repeat: Infinity,
                     ease: "linear"
                   }}
-                  className="absolute inset-0 border-4 border-secondary/30 border-t-secondary rounded-full"
+                  className="absolute inset-0 border-4 border-white/30 border-t-white rounded-full"
                 ></motion.div>
                 
                 {/* Inner content */}
@@ -150,7 +150,7 @@ const SplashScreen: React.FC = () => {
                     }}
                     className="text-center"
                   >
-                    <div className="text-5xl md:text-6xl font-display font-black text-secondary tracking-tighter">
+                    <div className="text-5xl md:text-6xl font-display font-black text-white tracking-tighter">
                       W
                     </div>
                   </motion.div>

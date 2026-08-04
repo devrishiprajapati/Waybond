@@ -42,20 +42,13 @@ function App() {
   const location = useLocation();
   const [showSplash, setShowSplash] = useState(true);
 
-  // Handle splash screen
+  // Handle splash screen - show on every reload
   useEffect(() => {
-    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
-    
-    if (!hasSeenSplash) {
-      const timer = setTimeout(() => {
-        setShowSplash(false);
-        sessionStorage.setItem('hasSeenSplash', 'true');
-      }, 5000); // 5 seconds
-
-      return () => clearTimeout(timer);
-    } else {
+    const timer = setTimeout(() => {
       setShowSplash(false);
-    }
+    }, 15000); // 15 seconds
+
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
