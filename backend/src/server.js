@@ -15,36 +15,40 @@ app.use(express.json({ limit: '100mb' }))
 const toTrip = (record) => ({ id: record.id, ...record.payload })
 const toHeroSlide = (record) => ({ id: record.id, ...record.payload })
 
-// Cloudflare Turnstile server-side verification (node:https — works on all Node versions)
-const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY || ''
-const IS_PROD = process.env.NODE_ENV === 'production'
-const verifyTurnstile = (token) => {
-  // Skip in dev — Cloudflare site keys only accept registered domains, not localhost
-  if (!IS_PROD) { console.log('[Turnstile] dev mode — skipping verification'); return Promise.resolve(true) }
-  return new Promise((resolve) => {
-    if (!token) return resolve(false)
-    const body = `secret=${encodeURIComponent(TURNSTILE_SECRET)}&response=${encodeURIComponent(token)}`
-    const req = https.request({
-      hostname: 'challenges.cloudflare.com',
-      path: '/turnstile/v0/siteverify',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(body) }
-    }, (res) => {
-      let data = ''
-      res.on('data', (chunk) => { data += chunk })
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data)
-          if (!json.success) console.warn('[Turnstile] verification failed:', json['error-codes'])
-          resolve(json.success === true)
-        } catch { resolve(false) }
-      })
+// Cloudflare Turnstile server-side verification
+// Dev uses always-pass test keys from env; production uses real keys from env
+const TURNSTILE_SECRET = process.env.NODE_ENV === 'development'
+  ? (process.env.TURNSTILE_TEST_SECRET_KEY || '1x0000000000000000000000000000000AA')
+  : (process.env.TURNSTILE_SECRET_KEY || '')
+const verifyTurnstile = (token) => new Promise((resolve) => {
+  const isDev = process.env.NODE_ENV === 'development'
+  // In dev: pass if token is empty/missing or is the frontend bypass signal
+  if (isDev && (!token || token === 'dev-no-sitekey')) {
+    console.log('[Turnstile] dev bypass — skipping verification')
+    return resolve(true)
+  }
+  if (!token) return resolve(false)
+  const body = `secret=${encodeURIComponent(TURNSTILE_SECRET)}&response=${encodeURIComponent(token)}`
+  const req = https.request({
+    hostname: 'challenges.cloudflare.com',
+    path: '/turnstile/v0/siteverify',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(body) }
+  }, (res) => {
+    let data = ''
+    res.on('data', (chunk) => { data += chunk })
+    res.on('end', () => {
+      try {
+        const json = JSON.parse(data)
+        if (!json.success) console.warn('[Turnstile] verification failed:', json['error-codes'])
+        resolve(json.success === true)
+      } catch { resolve(false) }
     })
-    req.on('error', (err) => { console.error('[Turnstile] request error:', err.message); resolve(false) })
-    req.write(body)
-    req.end()
   })
-}
+  req.on('error', (err) => { console.error('[Turnstile] request error:', err.message); resolve(false) })
+  req.write(body)
+  req.end()
+})
 const toTrendingCard = (record) => ({ id: record.id, ...record.payload })
 const toBooking = (record) => ({ id: record.id, bookingDbId: record.id, ...record.payload })
 const publicUser = ({ passwordHash, ...user }) => user

@@ -60,8 +60,13 @@ const SignUp = () => {
 
   const validateDateOfBirth = (dob: string): string => {
     if (!dob) return 'Date of birth is required'
+    // Reject years that are not exactly 4 digits (e.g. 20000 or 200)
+    const yearPart = dob.split('-')[0]
+    if (!yearPart || yearPart.length !== 4) return 'Please enter a valid 4-digit year'
     const birthDate = new Date(dob)
+    if (isNaN(birthDate.getTime())) return 'Please enter a valid date'
     const today = new Date()
+    if (birthDate > today) return 'Date of birth cannot be in the future'
     let age = today.getFullYear() - birthDate.getFullYear()
     const monthDiff = today.getMonth() - birthDate.getMonth()
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
@@ -193,7 +198,7 @@ const SignUp = () => {
         body: JSON.stringify({ name: fullName, email, password, profile: { dateOfBirth, gender, mobileNumber, address, emergencyContact, medicalInfo, bloodGroup, governmentId: { name: governmentID.name, type: governmentID.type, data: governmentIdData } } })
       })
       const responseText = await response.text()
-      let data: { user?: { id?: string; name: string; email: string; [key: string]: unknown }; message?: string } = {}
+      let data: { user?: { id?: string; name: string; email: string;[key: string]: unknown }; message?: string } = {}
       try { data = responseText ? JSON.parse(responseText) : {} } catch { /* Non-JSON server responses are handled below. */ }
       if (!response.ok && !data.message) throw new Error(`Signup service returned ${response.status}. Restart the backend and try again.`)
       if (!response.ok) throw new Error(data.message || 'Unable to create account.')
@@ -278,13 +283,12 @@ const SignUp = () => {
                   }}
                   placeholder="Your Full Name"
                   autoComplete="name"
-                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
-                    touched.fullName && fieldErrors.fullName
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.fullName && fieldErrors.fullName
                       ? 'border-red-500 bg-red-50'
                       : touched.fullName && !fieldErrors.fullName && fullName
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-slate-200'
-                  }`}
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-slate-200'
+                    }`}
                   required
                 />
                 {touched.fullName && (
@@ -308,21 +312,25 @@ const SignUp = () => {
               <input
                 type="date"
                 value={dateOfBirth}
+                max={new Date().toISOString().split('T')[0]}
                 onChange={(e) => {
-                  setDateOfBirth(e.target.value)
-                  if (touched.dateOfBirth) validateField('dateOfBirth', e.target.value)
+                  const val = e.target.value
+                  // Only commit value when the year part is exactly 4 digits
+                  const year = val.split('-')[0]
+                  if (year && year.length > 4) return
+                  setDateOfBirth(val)
+                  if (touched.dateOfBirth) validateField('dateOfBirth', val)
                 }}
                 onBlur={() => {
                   handleBlur('dateOfBirth')
                   validateField('dateOfBirth', dateOfBirth)
                 }}
-                className={`w-full bg-slate-50 border p-4 px-4 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors text-base ${
-                  touched.dateOfBirth && fieldErrors.dateOfBirth
+                className={`w-full bg-slate-50 border p-4 px-4 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors text-base ${touched.dateOfBirth && fieldErrors.dateOfBirth
                     ? 'border-red-500 bg-red-50'
                     : touched.dateOfBirth && !fieldErrors.dateOfBirth && dateOfBirth
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-slate-200'
-                }`}
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
+                  }`}
                 required
               />
               {touched.dateOfBirth && fieldErrors.dateOfBirth && (
@@ -367,13 +375,12 @@ const SignUp = () => {
                   placeholder="10 digit mobile number"
                   autoComplete="tel"
                   inputMode="numeric"
-                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
-                    touched.mobileNumber && fieldErrors.mobileNumber
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.mobileNumber && fieldErrors.mobileNumber
                       ? 'border-red-500 bg-red-50'
                       : touched.mobileNumber && !fieldErrors.mobileNumber && mobileNumber
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-slate-200'
-                  }`}
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-slate-200'
+                    }`}
                   required
                 />
                 {touched.mobileNumber && (
@@ -410,13 +417,12 @@ const SignUp = () => {
                   placeholder="hello@example.com"
                   autoComplete="email"
                   inputMode="email"
-                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
-                    touched.email && fieldErrors.email
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.email && fieldErrors.email
                       ? 'border-red-500 bg-red-50'
                       : touched.email && !fieldErrors.email && email
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-slate-200'
-                  }`}
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-slate-200'
+                    }`}
                   required
                 />
                 {touched.email && (
@@ -450,13 +456,12 @@ const SignUp = () => {
                     validateField('address', address)
                   }}
                   placeholder="Street, City, State, Postal Code"
-                  className={`w-full bg-slate-50 border p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base resize-none ${
-                    touched.address && fieldErrors.address
+                  className={`w-full bg-slate-50 border p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base resize-none ${touched.address && fieldErrors.address
                       ? 'border-red-500 bg-red-50'
                       : touched.address && !fieldErrors.address && address
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-slate-200'
-                  }`}
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-slate-200'
+                    }`}
                   rows={2}
                   required
                 />
@@ -485,13 +490,12 @@ const SignUp = () => {
                   }}
                   placeholder="10 digit emergency contact"
                   inputMode="numeric"
-                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
-                    touched.emergencyContact && fieldErrors.emergencyContact
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.emergencyContact && fieldErrors.emergencyContact
                       ? 'border-red-500 bg-red-50'
                       : touched.emergencyContact && !fieldErrors.emergencyContact && emergencyContact
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-slate-200'
-                  }`}
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-slate-200'
+                    }`}
                   required
                 />
                 {touched.emergencyContact && (
@@ -577,13 +581,12 @@ const SignUp = () => {
                   }}
                   placeholder="••••••••"
                   autoComplete="new-password"
-                  className={`w-full bg-slate-50 border p-4 pl-12 pr-24 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
-                    touched.password && fieldErrors.password
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-24 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.password && fieldErrors.password
                       ? 'border-red-500 bg-red-50'
                       : touched.password && !fieldErrors.password && password
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-slate-200'
-                  }`}
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-slate-200'
+                    }`}
                   required
                 />
                 <div className="absolute right-12 top-1/2 -translate-y-1/2">
@@ -627,13 +630,12 @@ const SignUp = () => {
                   }}
                   placeholder="••••••••"
                   autoComplete="new-password"
-                  className={`w-full bg-slate-50 border p-4 pl-12 pr-24 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${
-                    touched.confirmPassword && fieldErrors.confirmPassword
+                  className={`w-full bg-slate-50 border p-4 pl-12 pr-24 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.confirmPassword && fieldErrors.confirmPassword
                       ? 'border-red-500 bg-red-50'
                       : touched.confirmPassword && !fieldErrors.confirmPassword && confirmPassword
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-slate-200'
-                  }`}
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-slate-200'
+                    }`}
                   required
                 />
                 <div className="absolute right-12 top-1/2 -translate-y-1/2">
