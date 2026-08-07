@@ -30,14 +30,11 @@ export default function WhyChooseUs() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-16 space-y-3"
         >
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-gray-900 tracking-tight mb-3">
-            What makes us different
+          <h2 className="text-3xl md:text-6xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
+            What Makes Us <span className="text-primary">Different</span>
           </h2>
-          {/* <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto font-medium">
-            Experience travel reimagined with authentic local expertise, genuine human connections, and your safety as our priority.
-          </p> */}
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

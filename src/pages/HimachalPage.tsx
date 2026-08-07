@@ -25,7 +25,7 @@ export default function HimachalPage() {
           alt="Himachal"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-slate-900"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-[#003d6a]"></div>
 
         <div className="absolute inset-0 flex items-center justify-center pt-20">
           <div className="text-center px-6 max-w-5xl">

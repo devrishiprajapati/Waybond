@@ -100,7 +100,7 @@ const About = () => (
         className="relative rounded-[4rem] overflow-hidden group shadow-2xl h-[600px] lg:h-[700px] border border-white/10"
       >
         <img src="/assets/LBK.jpeg" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-black/20 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a] via-black/20 to-transparent"></div>
         <div className="absolute bottom-12 left-12 right-12">
           <div className="liquid-glass p-8 rounded-[3rem] border border-white/20 text-center shadow-2xl backdrop-blur-xl">
             <p className="text-4xl lg:text-5xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
@@ -143,7 +143,7 @@ const Community = () => {
             className="relative rounded-[3rem] overflow-hidden group keep-light-text shadow-[0_15px_40px_rgba(0,0,0,0.5)] h-[400px] md:h-[500px] border border-white/10"
           >
             <img src={gallery.images[0].src} alt={`${gallery.destination} travel memories`} loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-black/20 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent"></div>
             <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination} gallery`} className="absolute inset-0 z-10" />
             <div className="absolute bottom-10 left-10">
               <p className="text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
@@ -270,7 +270,7 @@ const Wishlist = () => {
                 {/* Image Section */}
                 <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
                   <img src={trip.image} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/55 via-transparent to-transparent" />
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                     {Array.from({ length: 4 }).map((_, dot) => (
                       <span key={dot} className={`h-2 w-2 rounded-full border border-white/60 ${dot === 0 ? 'bg-secondary' : 'bg-white/70'}`} />

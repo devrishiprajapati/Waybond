@@ -29,7 +29,7 @@ const SplashScreen: React.FC = () => {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 overflow-hidden"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-[#003d6a] via-[#005a9e] to-[#003d6a] overflow-hidden"
     >
       {/* Animated Background Gradients */}
       <div className="absolute inset-0 overflow-hidden">
@@ -86,55 +86,65 @@ const SplashScreen: React.FC = () => {
             className="absolute inset-0 blur-3xl bg-white/20 rounded-full scale-150"
           ></motion.div>
           
-          {/* Main WayBond Icon/Logo */}
+          {/* Lottie Animation or Fallback Logo */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ 
               scale: [0, 1, 1.05, 1],
-              opacity: 1,
-              rotate: [0, 0, 5, -5, 0]
+              opacity: 1
             }}
             transition={{
               scale: { duration: 0.8, ease: [0.34, 1.56, 0.64, 1] },
-              opacity: { duration: 0.5 },
-              rotate: { duration: 2, repeat: Infinity, ease: "easeInOut", delay: 1 }
+              opacity: { duration: 0.5 }
             }}
             className="relative w-32 h-32 md:w-40 md:h-40"
           >
-            {/* Animated WayBond Icon/Logo */}
-            <div className="relative w-full h-full">
-              {/* Outer circle */}
-              <motion.div
-                animate={{
-                  rotate: 360
+            {!isLoading && athleteAnimation ? (
+              // Show Lottie animation if loaded - with white filter
+              <Lottie
+                animationData={athleteAnimation}
+                loop={true}
+                className="w-full h-full"
+                style={{
+                  filter: 'brightness(0) invert(1)'
                 }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                className="absolute inset-0 border-4 border-white/30 border-t-white rounded-full"
-              ></motion.div>
-              
-              {/* Inner content */}
-              <div className="absolute inset-0 flex items-center justify-center">
+              />
+            ) : (
+              // Fallback: Animated WayBond Icon/Logo
+              <div className="relative w-full h-full">
+                {/* Outer circle */}
                 <motion.div
                   animate={{
-                    scale: [1, 1.1, 1]
+                    rotate: 360
                   }}
                   transition={{
-                    duration: 1.5,
+                    duration: 3,
                     repeat: Infinity,
-                    ease: "easeInOut"
+                    ease: "linear"
                   }}
-                  className="text-center"
-                >
-                  <div className="text-5xl md:text-6xl font-display font-black text-white tracking-tighter">
-                    W
-                  </div>
-                </motion.div>
+                  className="absolute inset-0 border-4 border-white/30 border-t-white rounded-full"
+                ></motion.div>
+                
+                {/* Inner content */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="text-center"
+                  >
+                    <div className="text-5xl md:text-6xl font-display font-black text-white tracking-tighter">
+                      W
+                    </div>
+                  </motion.div>
+                </div>
               </div>
-            </div>
+            )}
           </motion.div>
         </div>
 

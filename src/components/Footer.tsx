@@ -57,13 +57,13 @@ const Footer = () => {
       
       <section className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 relative z-10 mb-16 md:mb-20">
         <div className="bg-gradient-to-br from-white to-slate-50 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 p-6 sm:p-8 md:p-10 shadow-xl">
-          <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight mb-6 md:mb-8 uppercase">Events by Category</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight mb-6 md:mb-8">Events by Category</h2>
           
           {/* Mobile: 2 columns, Desktop: 4 columns */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {categoryGroups.map((group) => (
               <div key={group.title} className="min-w-0">
-                <h3 className="text-secondary text-sm md:text-base font-black mb-3 md:mb-4 uppercase">
+                <h3 className="text-secondary text-sm md:text-base font-bold mb-3 md:mb-4">
                   {group.title}
                 </h3>
                 <ul className="space-y-2 md:space-y-2.5">
@@ -71,7 +71,7 @@ const Footer = () => {
                     <li key={link.label}>
                       <Link 
                         to={link.to} 
-                        className="text-xs md:text-sm font-bold text-slate-700 hover:text-secondary transition-colors block"
+                        className="text-xs md:text-sm font-medium text-slate-600 hover:text-secondary transition-colors block"
                       >
                         {link.label}
                       </Link>

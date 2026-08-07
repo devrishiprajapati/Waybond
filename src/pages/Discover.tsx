@@ -249,7 +249,7 @@ const Discover = () => {
                       {/* Image Section - Fixed */}
                       <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
                         <img src={trip.image} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/55 via-transparent to-transparent" />
                         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">{Array.from({ length: 4 }).map((_, dot) => <span key={dot} className={`h-2 w-2 rounded-full border border-white/60 ${dot === 0 ? 'bg-secondary' : 'bg-white/70'}`} />)}</div>
                       </div>
 

@@ -61,7 +61,7 @@ export default function FeaturedPackages() {
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
         <div className="text-center mb-10 md:mb-12">
           <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-4">WayBond adventures</p>
-          <h2 className="text-4xl md:text-6xl font-display font-black text-white tracking-tighter uppercase italic leading-none liquid-text">Choose Your <span className="text-secondary">Experience</span></h2>
+          <h2 className="text-3xl md:text-6xl font-display font-black text-white tracking-tighter uppercase italic leading-none liquid-text">Choose Your <span className="text-secondary">Experience</span></h2>
           <p className="text-white/45 font-medium text-base md:text-lg mt-5">Pick the perfect adventure for you.</p>
         </div>
 
@@ -124,7 +124,7 @@ export default function FeaturedPackages() {
                     {/* Image Section */}
                     <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
                       <img src={optimizeImageUrl(trip.image, 800, 80)} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/55 via-transparent to-transparent" />
                     </div>
 
                     {/* Content Section */}
