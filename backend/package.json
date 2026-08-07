@@ -1,0 +1,26 @@
+{
+  "name": "waybond-backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "prisma generate && node --watch src/server.js",
+    "start": "prisma generate && node src/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "seed": "node src/seed.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "nodemailer": "^9.0.3",
+    "pg": "^8.13.3"
+  },
+  "devDependencies": {
+    "prisma": "^7.9.1"
+  }
+}

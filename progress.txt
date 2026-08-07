@@ -1,0 +1,7 @@
+- Updated tailwind.config.js with custom animations (fadeIn, slideUp, float) and keyframes.
+- Wrapped App component in BrowserRouter within src/main.tsx as per PRD.
+- Refactored infiland.tsx to remove redundant Router and cleanup imports.
+- Implemented "Featured Trips" section in src/pages/Home.tsx with mock data, responsive grid, and hover animations.
+- Implemented src/pages/Discover.tsx with multi-filter sidebar, search functionality, and information-dense trip cards.
+- Integrated Discover page into the main routing system in infiland.tsx.
+- Implemented src/pages/TripDetails.tsx with gallery, interactive itinerary, captain profile, and sticky booking widget; integrated it into the routing in infiland.tsx.

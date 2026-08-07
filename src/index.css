@@ -1,0 +1,411 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #0D7377;
+  --secondary: #6495ED;
+  --accent: #FFD700;
+}
+
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  @apply font-sans antialiased bg-white;
+  font-family: 'Google Sans', Arial, sans-serif;
+  color: #333333;
+  /* Smooth momentum scrolling on iOS Safari & Chrome */
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+input,
+textarea,
+select {
+  max-width: 100%;
+}
+
+/* Shared light surface theme. Applied at the app root so every route uses the
+   same white canvas without duplicating background rules in each page. */
+.light-theme .text-white {
+  color: #333333 !important;
+}
+
+.light-theme [class*="text-white/"] {
+  color: rgba(51, 51, 51, 0.64) !important;
+}
+
+.light-theme [class*="border-white/"] {
+  border-color: rgba(51, 51, 51, 0.12) !important;
+}
+
+.light-theme .liquid-glass {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(51, 51, 51, 0.14) !important;
+  box-shadow: 0 10px 30px rgba(51, 51, 51, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+.light-theme .liquid-glass-dark {
+  background: rgba(248, 250, 252, 0.94) !important;
+  border-color: rgba(51, 51, 51, 0.12) !important;
+  box-shadow: 0 10px 32px rgba(51, 51, 51, 0.1) !important;
+}
+
+.light-theme .bg-secondary.text-white,
+.light-theme .bg-primary.text-white,
+.light-theme .bg-accent.text-white {
+  color: #ffffff !important;
+}
+
+/* Image-led areas keep high-contrast copy over photography. */
+.light-theme .keep-light-text .text-white {
+  color: #ffffff !important;
+}
+
+.light-theme .keep-light-text [class*="text-white/"] {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.light-theme .keep-light-text .liquid-glass {
+  background: rgba(20, 20, 20, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Ensure tap targets don't get delayed or cancelled on iOS */
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.safe-area-padding {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 2rem);
+}
+
+@media (max-width: 768px) {
+  .safe-area-padding {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+  }
+}
+
+/* Keep the mobile navigation readable over every image and scroll position. */
+@media (max-width: 1023px) {
+  .mobile-navbar-surface {
+    background: rgba(255, 255, 255, 0.96) !important;
+    border-color: rgba(17, 24, 39, 0.16) !important;
+    backdrop-filter: blur(16px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+  }
+
+  .mobile-brand,
+  .mobile-menu-icon {
+    color: #111111 !important;
+    opacity: 1 !important;
+  }
+
+  .mobile-brand {
+    text-shadow: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  main {
+    min-width: 0;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  .liquid-glass,
+  .liquid-glass-dark {
+    backdrop-filter: blur(10px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(150%) !important;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-sans font-bold uppercase tracking-tight;
+}
+
+button,
+input,
+textarea,
+select,
+label {
+  @apply font-sans;
+}
+
+
+/* 🧊 Master-Grade Liquid Glass System */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 8px 0px rgba(255, 255, 255, 0.1) !important;
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.liquid-glass-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 80%);
+  transform: rotate(-45deg) translateX(-100%);
+  transition: transform 0.8s ease-in-out;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.liquid-glass-shine:hover::after {
+  transform: rotate(-45deg) translateX(100%);
+}
+
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.liquid-glass::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.8),
+      transparent,
+      rgba(255, 255, 255, 0.3));
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* 🧬 Ultra-Subtle Frosted Grain */
+.liquid-glass-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.01;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+
+.liquid-glass-dark {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4) !important;
+  /* Removed will-change: backdrop-filter — causes GPU memory pressure on iOS */
+}
+
+.liquid-text {
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.02em;
+}
+
+.liquid-text-glow {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+/* 🚫 Hide Scrollbars globally for immersive feel */
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* ✨ Horizontal scroll container with optional visible scrollbar */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Optional: Add visible thin scrollbar for horizontal scroll */
+.show-thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 149, 237, 0.5) transparent;
+}
+
+.show-thin-scrollbar::-webkit-scrollbar {
+  display: block;
+  height: 6px;
+}
+
+.show-thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.show-thin-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(100, 149, 237, 0.5);
+  border-radius: 3px;
+}
+
+.show-thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 149, 237, 0.8);
+}
+
+
+/* 🎚️ Premium Range Slider — from liquid-glass-react reference */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
+  cursor: pointer;
+  height: 24px;
+}
+
+input[type="range"]::-webkit-slider-track {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.3), rgba(168, 85, 247, 0.3));
+  height: 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(96, 165, 250, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  transform: scale(1.15);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 0 8px rgba(96, 165, 250, 0.2);
+  border-color: white;
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 0 12px rgba(96, 165, 250, 0.3);
+}
+
+input[type="range"]::-moz-range-track {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.3), rgba(168, 85, 247, 0.3));
+  height: 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+input[type="range"]::-moz-range-thumb {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  transform: scale(1.15);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  border-color: white;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 4px rgba(96, 165, 250, 0.3);
+}
+
+/* ── Marquee (reviews ticker) ─────────────────────────────────────────────── */
+
+/*
+ * Smooth, jitter-free marquee:
+ *  - translateZ(0) on the wrapper promotes it to its own GPU compositing layer
+ *  - We animate only `transform` (compositor-only property — no layout, no paint)
+ *  - -50% = exactly one complete set of cards (array is doubled), so the
+ *    instantaneous reset from -50% → 0 is invisible: cards align perfectly.
+ */
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  /* translateZ forces a compositing layer so the browser never drops frames */
+  transform: translateZ(0);
+  animation: marquee 40s linear infinite;
+  /* will-change hints the GPU to keep this layer resident */
+  will-change: transform;
+  /* Prevent sub-pixel jitter on retina displays */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.marquee-track:hover,
+.marquee-track:focus-within {
+  animation-play-state: paused;
+}
