@@ -5,10 +5,7 @@ import { MapPin, Search, Menu, Phone, User, Heart, X, Plane } from 'lucide-react
 import { getWhatsAppLink } from '../lib/data'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
-<<<<<<< HEAD
 import { useWishlist } from '../lib/wishlist'
-=======
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false)
@@ -17,10 +14,7 @@ const Navbar = () => {
   const [lastScrollY, setLastScrollY] = useState(0)
   const location = useLocation()
   const navigate = useNavigate()
-<<<<<<< HEAD
   const { count } = useWishlist()
-=======
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
   /** Auth-gate: navigate to /discover if logged in, else go to login with redirect back */
   const handleBookNow = (redirect = '/discover') => {
@@ -95,7 +89,6 @@ const Navbar = () => {
                 <Link to={isLoggedIn() ? '/dashboard' : '/login'} onClick={() => haptics.light()} className="transition-colors duration-500 text-white hover:text-secondary">
                   <User size={18} />
                 </Link>
-<<<<<<< HEAD
                 <Link to="/wishlist" onClick={() => haptics.light()} className="transition-colors duration-500 text-white hover:text-secondary relative">
                   <Heart size={18} />
                   {count > 0 && (
@@ -103,10 +96,6 @@ const Navbar = () => {
                       {count > 9 ? '9+' : count}
                     </span>
                   )}
-=======
-                <Link to="/wishlist" onClick={() => haptics.light()} className="transition-colors duration-500 text-white hover:text-secondary">
-                  <Heart size={18} />
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                 </Link>
                 <button
                   onClick={() => handleBookNow('/discover')}
@@ -195,7 +184,6 @@ const Navbar = () => {
                   <Link to="/dashboard" onClick={() => haptics.light()} className="text-white p-3 liquid-glass border border-white/20 rounded-2xl hover:bg-white/10 transition-all">
                     <User size={22} />
                   </Link>
-<<<<<<< HEAD
                   <Link to="/wishlist" onClick={() => haptics.light()} className="text-white p-3 liquid-glass border border-white/20 rounded-2xl hover:bg-white/10 transition-all relative">
                     <Heart size={22} />
                     {count > 0 && (
@@ -203,10 +191,6 @@ const Navbar = () => {
                         {count > 9 ? '9+' : count}
                       </span>
                     )}
-=======
-                  <Link to="/wishlist" onClick={() => haptics.light()} className="text-white p-3 liquid-glass border border-white/20 rounded-2xl hover:bg-white/10 transition-all">
-                    <Heart size={22} />
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                   </Link>
                 </div>
               </div>

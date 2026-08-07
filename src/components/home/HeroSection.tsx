@@ -122,35 +122,11 @@ export default function HeroSection() {
                 onClick={() => haptics.medium()}
                 className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-6 sm:px-10 py-4 bg-secondary text-white rounded-full font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 shadow-2xl shadow-secondary/30 sm:min-w-[220px]"
               >
-                Explore Packages
+                Explore
               </Link>
-              <a
-                href={getWhatsAppLink()}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => haptics.medium()}
-                className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-6 sm:px-10 py-4 liquid-glass text-white font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 sm:min-w-[220px] !rounded-full before:!rounded-full after:!rounded-full"
-              >
-                Contact Us
-              </a>
             </motion.div>
           </div>
         </div>
-      </div>
-
-      {/* Dot Navigation */}
-      <div className="absolute bottom-5 sm:bottom-9 left-1/2 -translate-x-1/2 md:left-12 md:translate-x-0 lg:left-20 flex gap-3 z-30">
-        {heroSlides.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => {
-              haptics.light();
-              goTo(i);
-            }}
-            className={`h-1.5 rounded-full transition-all duration-500 ${i === index ? "w-10 bg-secondary" : "w-1.5 bg-white/30 hover:bg-white/60"
-              }`}
-          />
-        ))}
       </div>
 
     </section>

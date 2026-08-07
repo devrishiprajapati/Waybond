@@ -2,17 +2,12 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
-<<<<<<< HEAD
 import { CheckCircle2, ShieldCheck, MapPin, Star, UserCheck, MessageCircle, Heart, Users, Share2, Compass, Calendar, CircleHelp, Download, Trash2 } from 'lucide-react'
 import { communityGalleries, loadCommunityGalleries } from '../lib/communityGalleries'
 import { useWishlist } from '../lib/wishlist'
 import { haptics } from '../lib/haptics'
 import { getTripWhatsAppLink } from '../lib/trips'
 import { createSlug } from '../lib/dataService'
-=======
-import { CheckCircle2, ShieldCheck, MapPin, Star, UserCheck, MessageCircle, Heart, Users, Share2, Compass } from 'lucide-react'
-import { communityGalleries, loadCommunityGalleries } from '../lib/communityGalleries'
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
 const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, className = "" }: { children: React.ReactNode, title: React.ReactNode, subtitle?: string, seoTitle?: string, seoDescription?: string, className?: string }) => (
   <motion.div
@@ -211,7 +206,6 @@ const Community = () => {
   )
 }
 
-<<<<<<< HEAD
 const Wishlist = () => {
   const { wishlist, remove, isLoading } = useWishlist()
 
@@ -350,29 +344,5 @@ const Wishlist = () => {
     </PageLayout>
   )
 }
-=======
-const Wishlist = () => (
-  <PageLayout
-    seoTitle="Your Wishlist — Future Expeditions with WAYBOND"
-    seoDescription="Your personal vault of saved travel adventures. Keep track of trips you want to conquer."
-    title={<>YOUR<br /><span className="text-primary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>DREAMS</span></>}
-    subtitle="The vault of adventures awaiting your signal. Keep track of the soul-stirring voyages you're planning to conquer."
-  >
-    <div className="liquid-glass-dark py-32 md:py-40 rounded-[4rem] border border-white/10 text-center shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-      <div className="relative inline-block mb-10">
-        <Heart size={80} className="mx-auto text-white/10 fill-white/10 group-hover:fill-secondary/20 transition-all scale-110" />
-        <Star size={32} className="absolute -top-4 -right-4 text-secondary animate-pulse" />
-      </div>
-      <h3 className="text-3xl md:text-4xl font-display font-black uppercase italic tracking-tighter text-white/30 mb-10">Your Expedition Vault is Empty</h3>
-      {/* <a
-        href="/discover"
-        className="inline-block bg-white text-slate-800 px-12 py-5 rounded-full font-black text-[10px] uppercase tracking-[0.3em] hover:bg-secondary hover:text-white transition-all shadow-xl shadow-black/40 active:scale-95 duration-500"
-      >
-        UNCOVER DESTINATIONS
-      </a> */}
-    </div>
-  </PageLayout>
-)
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
 export { About, Community, Wishlist }

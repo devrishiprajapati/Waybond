@@ -1,7 +1,6 @@
 import React, { Suspense, lazy } from 'react'
 import { Helmet } from 'react-helmet-async'
 import HeroSection from "../components/home/HeroSection";
-import StatsSection from "../components/home/StatsSection";
 
 // Lazy load sections that are below the fold
 const TrendingDestinations = lazy(() => import("../components/home/TrendingDestinations"));
@@ -40,7 +39,6 @@ export default function Home() {
       
       {/* Above the fold - load immediately */}
       <HeroSection />
-      <StatsSection />
       
       {/* Below the fold - lazy load with fallback */}
       <Suspense fallback={<SectionSkeleton />}>

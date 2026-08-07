@@ -76,9 +76,9 @@ async function build() {
     bulb:    await iconPng(FaLightbulb,   "#FFFFFF"),
     rocket:  await iconPng(FaRocket,      "#FFFFFF"),
     // dark versions
-    routeD:  await iconPng(FaRoute,       "#0D7377"),
-    codeD:   await iconPng(FaCode,        "#0D7377"),
-    checkD:  await iconPng(FaCheck,       "#0D7377"),
+    routeD:  await iconPng(FaRoute,       "#003d6a"),
+    codeD:   await iconPng(FaCode,        "#003d6a"),
+    checkD:  await iconPng(FaCheck,       "#003d6a"),
   };
 
   // ============================================================

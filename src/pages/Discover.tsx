@@ -2,18 +2,11 @@ import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
-<<<<<<< HEAD
 import { Filter, Search, MapPin, Calendar, Star, ChevronDown, CheckCircle2, MessageCircle, ShieldCheck, CircleHelp, Download, Heart } from 'lucide-react'
 import { CATEGORIES, getTripWhatsAppLink } from '../lib/trips'
 import { getTrips, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 import { useWishlist } from '../lib/wishlist'
-=======
-import { Filter, Search, MapPin, Calendar, Star, ChevronDown, CheckCircle2, MessageCircle, ShieldCheck, CircleHelp, Download } from 'lucide-react'
-import { CATEGORIES, getTripWhatsAppLink } from '../lib/trips'
-import { getTrips, createSlug } from '../lib/dataService'
-import { haptics } from '../lib/haptics'
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
 const experienceFilters = [
   { key: 'monsoon', label: 'Monsoon Treks', icon: '⛰️' },
@@ -28,10 +21,7 @@ const Discover = () => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedDepartures, setSelectedDepartures] = useState<Record<number, string>>({})
-<<<<<<< HEAD
   const { toggle, isInList } = useWishlist()
-=======
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
   useEffect(() => {
     let isMounted = true
@@ -228,11 +218,8 @@ const Discover = () => {
               <AnimatePresence mode="popLayout">
                 {filteredTrips.map((trip) => {
                   const selectedDeparture = selectedDepartures[trip.id] || trip.departureDates?.[0]
-<<<<<<< HEAD
                   const isWishlisted = isInList(trip.id)
                   
-=======
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                   return (
                     <motion.div
                       key={trip.id}
@@ -240,7 +227,6 @@ const Discover = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-<<<<<<< HEAD
                       className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col relative"
                     >
                       {/* Wishlist Button - Top Right */}
@@ -260,10 +246,6 @@ const Discover = () => {
                         />
                       </button>
                       
-=======
-                      className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col"
-                    >
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                       {/* Image Section - Fixed */}
                       <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
                         <img src={trip.image} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />

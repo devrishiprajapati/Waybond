@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --primary: #0D7377;
-  --secondary: #6495ED;
+  --primary: #6495ED;
+  --secondary: #003d6a;
   --accent: #FFD700;
 }
 
@@ -263,7 +263,6 @@ label {
   display: none;
 }
 
-<<<<<<< HEAD
 /* ✨ Horizontal scroll container with optional visible scrollbar */
 .hide-scrollbar {
   -ms-overflow-style: none;
@@ -299,8 +298,6 @@ label {
 }
 
 
-=======
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 /* 🎚️ Premium Range Slider — from liquid-glass-react reference */
 input[type="range"] {
   -webkit-appearance: none;

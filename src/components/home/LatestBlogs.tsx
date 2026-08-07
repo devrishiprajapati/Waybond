@@ -103,7 +103,6 @@ export default function LatestBlogs() {
           </p>
         </motion.div>
 
-<<<<<<< HEAD
         {/* Blog Cards - Horizontal Scroll on Mobile, Grid on Desktop */}
         {/* Mobile: Horizontal Scroll */}
         <div className="lg:hidden flex gap-4 overflow-x-auto pb-8 px-6 snap-x snap-mandatory scroll-smooth hide-scrollbar mb-10 -mx-6">
@@ -116,10 +115,6 @@ export default function LatestBlogs() {
 
         {/* Desktop: Grid Layout */}
         <div className="hidden lg:grid lg:grid-cols-3 gap-6 mb-10">
-=======
-        {/* Blog Cards Grid - 3 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
           {blogs.map((blog, index) => (
             <BlogCard key={blog.id} blog={blog} index={index} />
           ))}

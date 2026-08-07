@@ -9,15 +9,20 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#0D7377',
-          light: '#14b1b9',
-          dark: '#0a5a5e',
+          DEFAULT: '#003d6a',
+          light: '#005a9e',
+          dark: '#002b4d',
         },
         secondary: {
-          DEFAULT: '#6495ED',
-          light: '#60a5fa',
-          dark: '#1d4ed8',
+          DEFAULT: '#003d6a',
+          light: '#005a9e',
+          dark: '#002b4d',
         },
+        //  secondary: {
+        //   DEFAULT: '#6495ED',
+        //   light: '#60a5fa',
+        //   dark: '#1d4ed8',
+        // },
         accent: {
           DEFAULT: '#FFD700',
           light: '#ffeb33',
@@ -28,13 +33,10 @@ export default {
         sans: ['Google Sans', 'Arial', 'sans-serif'],
         serif: ['Google Sans', 'Arial', 'sans-serif'],
         display: ['Google Sans', 'Arial', 'sans-serif'],
-<<<<<<< HEAD
         handwriting: ['Pacifico', 'Dancing Script', 'cursive'],
         script: ['Great Vibes', 'Allura', 'Dancing Script', 'cursive'],
         elegant: ['Allura', 'Great Vibes', 'cursive'],
         caveat: ['Caveat', 'cursive'],
-=======
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
       },
       keyframes: {
         fadeIn: {
