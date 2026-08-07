@@ -86,6 +86,7 @@ const SplashScreen: React.FC = () => {
             className="absolute inset-0 blur-3xl bg-white/20 rounded-full scale-150"
           ></motion.div>
           
+<<<<<<< HEAD
           {/* Main WayBond Icon/Logo */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -136,6 +137,80 @@ const SplashScreen: React.FC = () => {
               </div>
             </div>
           </motion.div>
+=======
+          {/* Main Lottie Animation or Fallback */}
+          {!isLoading && athleteAnimation ? (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{
+                duration: 0.8,
+                ease: [0.34, 1.56, 0.64, 1]
+              }}
+              className="relative w-48 h-48 md:w-64 md:h-64"
+            >
+              <Lottie
+                animationData={athleteAnimation}
+                loop={true}
+                autoplay={true}
+                className="w-full h-full drop-shadow-2xl"
+                style={{
+                  filter: 'brightness(0) saturate(100%) invert(100%) drop-shadow(0 20px 60px rgba(255, 255, 255, 0.3))'
+                }}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ 
+                scale: [0, 1, 1.05, 1],
+                opacity: 1,
+                rotate: [0, 0, 5, -5, 0]
+              }}
+              transition={{
+                scale: { duration: 0.8, ease: [0.34, 1.56, 0.64, 1] },
+                opacity: { duration: 0.5 },
+                rotate: { duration: 2, repeat: Infinity, ease: "easeInOut", delay: 1 }
+              }}
+              className="relative w-32 h-32 md:w-40 md:h-40"
+            >
+              {/* Animated WayBond Icon/Logo */}
+              <div className="relative w-full h-full">
+                {/* Outer circle */}
+                <motion.div
+                  animate={{
+                    rotate: 360
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                  className="absolute inset-0 border-4 border-white/30 border-t-white rounded-full"
+                ></motion.div>
+                
+                {/* Inner content */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.1, 1]
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                    className="text-center"
+                  >
+                    <div className="text-5xl md:text-6xl font-display font-black text-white tracking-tighter">
+                      W
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
         </div>
 
         {/* Brand Name with Stagger Animation */}

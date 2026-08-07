@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+<<<<<<< HEAD
 import { CalendarDays, CircleHelp, Download, MapPin, Heart } from 'lucide-react'
+=======
+import { CalendarDays, CircleHelp, Download, MapPin } from 'lucide-react'
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 import { Link } from 'react-router-dom'
 import { getTripWhatsAppLink } from '../../lib/trips'
 import { getTrips, optimizeImageUrl, createSlug } from '../../lib/dataService'
 import { haptics } from '../../lib/haptics'
+<<<<<<< HEAD
 import { useWishlist } from '../../lib/wishlist'
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
 type Experience = 'monsoon' | 'weekend' | 'road' | 'snow'
 
@@ -23,7 +30,10 @@ export default function FeaturedPackages() {
   const [trips, setTrips] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDepartures, setSelectedDepartures] = useState<Record<number, string>>({})
+<<<<<<< HEAD
   const { toggle, isInList } = useWishlist()
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
   useEffect(() => {
     let isMounted = true
@@ -83,6 +93,7 @@ export default function FeaturedPackages() {
 
         <AnimatePresence mode="wait">
           {experience ? (
+<<<<<<< HEAD
             <motion.div 
               key={experience} 
               initial={{ opacity: 0, y: 16 }} 
@@ -137,6 +148,21 @@ export default function FeaturedPackages() {
                     </div>
 
                     {/* Content Section */}
+=======
+            <motion.div key={experience} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.28 }} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-7 md:gap-9">
+              {selectedTrips.map(trip => {
+                const selectedDeparture = selectedDepartures[trip.id] || trip.departureDates?.[0]
+                return (
+                  <article key={trip.id} className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col">
+                    {/* Image Section - Fixed */}
+                    <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
+                      <img src={optimizeImageUrl(trip.image, 800, 80)} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/55 via-transparent to-transparent" />
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">{Array.from({ length: 4 }).map((_, dot) => <span key={dot} className={`h-2 w-2 rounded-full border border-white/60 ${dot === 0 ? 'bg-secondary' : 'bg-white/70'}`} />)}</div>
+                    </div>
+
+                    {/* Content Section - Flexible */}
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                     <div className="p-5 md:p-6 flex-grow flex flex-col">
                       <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[10px] font-bold text-white/55 mb-3">
                         <span className="inline-flex items-center gap-1.5 whitespace-nowrap"><CalendarDays size={13} className="text-secondary" /> {trip.duration}</span>
@@ -147,7 +173,11 @@ export default function FeaturedPackages() {
                       <p className="text-xs md:text-sm text-white/55 line-clamp-3 flex-grow">{trip.description}</p>
                     </div>
 
+<<<<<<< HEAD
                     {/* Bottom Section */}
+=======
+                    {/* Bottom Section - Fixed, Independent */}
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                     <div className="border-t border-white/10 p-5 md:p-6 flex-shrink-0 space-y-3">
                       {/* Price & Difficulty */}
                       <div className="grid grid-cols-2 gap-3 items-end">
@@ -170,41 +200,80 @@ export default function FeaturedPackages() {
                           const dates = trip.departureDates || []
                           if (!dates.length) return <p className="text-[7px] text-white/30">No dates available</p>
 
+<<<<<<< HEAD
                           const monthGroups: Record<string, string[]> = {}
                           dates.forEach(date => {
                             const monthKey = date.slice(0, 7)
+=======
+                          // Create month groups: { "2026-08": ["2026-08-05", "2026-08-10", ...] }
+                          const monthGroups: Record<string, string[]> = {}
+                          dates.forEach(date => {
+                            const monthKey = date.slice(0, 7) // "2026-08"
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                             if (!monthGroups[monthKey]) {
                               monthGroups[monthKey] = []
                             }
                             monthGroups[monthKey].push(date)
                           })
 
+<<<<<<< HEAD
+=======
+                          // Sort each month's dates
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                           Object.keys(monthGroups).forEach(month => {
                             monthGroups[month].sort()
                           })
 
+<<<<<<< HEAD
                           const sortedMonths = Object.keys(monthGroups).sort()
                           const firstMonth = sortedMonths[0]
 
+=======
+                          // Get sorted month keys
+                          const sortedMonths = Object.keys(monthGroups).sort()
+                          const firstMonth = sortedMonths[0]
+
+                          // Get or set current selected month
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                           let currentSelectedMonth = firstMonth
                           let currentSelectedDate = selectedDepartures[trip.id]
                           
                           if (currentSelectedDate) {
                             const dateMonthKey = currentSelectedDate.slice(0, 7)
+<<<<<<< HEAD
                             if (monthGroups[dateMonthKey]) {
                               currentSelectedMonth = dateMonthKey
                             } else {
+=======
+                            // Make sure month exists in data
+                            if (monthGroups[dateMonthKey]) {
+                              currentSelectedMonth = dateMonthKey
+                            } else {
+                              // If stored date month doesn't exist, use first month
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                               currentSelectedMonth = firstMonth
                               currentSelectedDate = monthGroups[firstMonth]?.[0]
                             }
                           } else {
+<<<<<<< HEAD
                             currentSelectedDate = monthGroups[firstMonth]?.[0]
                           }
 
+=======
+                            // Initialize with first date of first month
+                            currentSelectedDate = monthGroups[firstMonth]?.[0]
+                          }
+
+                          // Get dates in current month
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                           const datesInMonth = monthGroups[currentSelectedMonth] || []
 
                           return (
                             <div className="space-y-2">
+<<<<<<< HEAD
+=======
+                              {/* Month tabs */}
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                               <div className="flex gap-1 flex-wrap">
                                 {sortedMonths.map(monthKey => {
                                   const isActive = monthKey === currentSelectedMonth
@@ -216,6 +285,10 @@ export default function FeaturedPackages() {
                                       key={monthKey}
                                       type="button"
                                       onClick={() => {
+<<<<<<< HEAD
+=======
+                                        // Select first date of this month
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                                         const firstDate = monthGroups[monthKey]?.[0]
                                         if (firstDate) {
                                           setSelectedDepartures(prev => ({
@@ -236,10 +309,18 @@ export default function FeaturedPackages() {
                                 })}
                               </div>
 
+<<<<<<< HEAD
                               <div className="flex gap-1.5 flex-wrap">
                                 {datesInMonth && datesInMonth.length > 0 ? (
                                   datesInMonth.map(date => {
                                     const day = date.slice(8, 10)
+=======
+                              {/* Date circles for selected month */}
+                              <div className="flex gap-1.5 flex-wrap">
+                                {datesInMonth && datesInMonth.length > 0 ? (
+                                  datesInMonth.map(date => {
+                                    const day = date.slice(8, 10) // Get DD from YYYY-MM-DD
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                                     const isSelected = currentSelectedDate === date
 
                                     return (
@@ -272,6 +353,7 @@ export default function FeaturedPackages() {
                         })()}
                       </div>
 
+<<<<<<< HEAD
                       {/* Single Explore Button */}
                       <Link 
                         to={`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} 
@@ -281,11 +363,29 @@ export default function FeaturedPackages() {
                       >
                         <span>Explore</span>
                       </Link>
+=======
+                      {/* Action Buttons */}
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <Link to={`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 rounded-full bg-white/10 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors" title="More details">
+                          <CircleHelp size={12} /> 
+                          <span className="hidden sm:inline">Details</span>
+                          <span className="sm:hidden">View</span>
+                        </Link>
+                        <a href={getTripWhatsAppLink(`${trip.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)} target="_blank" rel="noopener noreferrer" onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 rounded-full bg-secondary/15 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-secondary hover:bg-secondary hover:text-white transition-colors" title="Get PDF">
+                          <Download size={12} /> 
+                          <span className="hidden sm:inline">PDF</span>
+                          <span className="sm:hidden">Get</span>
+                        </a>
+                      </div>
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                     </div>
                   </article>
                 )
               })}
+<<<<<<< HEAD
               </div>
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
             </motion.div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28 }} className="text-center py-12">

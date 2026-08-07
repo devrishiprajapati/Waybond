@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react'
+<<<<<<< HEAD
 import { useNavigate, useParams, Link } from 'react-router-dom'
+=======
+import { useNavigate, useParams } from 'react-router-dom'
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 import { motion } from 'framer-motion'
 import {
   User,
@@ -17,7 +21,10 @@ import {
   Star
 } from 'lucide-react'
 import { haptics } from '../../lib/haptics'
+<<<<<<< HEAD
 import { useWishlist } from '../../lib/wishlist'
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
 interface UserData {
   fullName: string
@@ -40,7 +47,10 @@ const ProfilePage = () => {
   const [formData, setFormData] = useState<UserData | null>(null)
   const { userId } = useParams()
   const navigate = useNavigate()
+<<<<<<< HEAD
   const { count: wishlistCount } = useWishlist()
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
@@ -229,6 +239,7 @@ const ProfilePage = () => {
                 <p className="text-white/45 text-xs font-medium italic">{user.email}</p>
               </div>
 
+<<<<<<< HEAD
               {/* Stats - Now clickable links */}
               <div className="grid grid-cols-2 gap-3 pt-6 border-t border-white/10">
                 <Link
@@ -249,6 +260,20 @@ const ProfilePage = () => {
                   <p className="text-[8px] text-white/35 font-black uppercase tracking-[0.18em]">Wishlist</p>
                   <p className="text-xl font-black mt-1">{wishlistCount}</p>
                 </Link>
+=======
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-3 pt-6 border-t border-white/10">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+                  <Heart size={18} className="text-secondary mx-auto mb-2" />
+                  <p className="text-[8px] text-white/35 font-black uppercase tracking-[0.18em]">Wishlist</p>
+                  <p className="text-xl font-black mt-1">12</p>
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+                  <Star size={18} className="text-secondary mx-auto mb-2" />
+                  <p className="text-[8px] text-white/35 font-black uppercase tracking-[0.18em]">XP</p>
+                  <p className="text-xl font-black mt-1">850</p>
+                </div>
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
               </div>
             </div>
           </motion.div>

@@ -7,7 +7,10 @@ import {
   Clock,
   Compass,
   Heart,
+<<<<<<< HEAD
   Image as ImageIcon,
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
   LogOut,
   MapPin,
   MessageCircle,
@@ -17,7 +20,10 @@ import {
   User
 } from 'lucide-react'
 import { registerUser } from '../lib/adminStorage'
+<<<<<<< HEAD
 import { useWishlist } from '../lib/wishlist'
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
 const UserDashboard = () => {
   const [user, setUser] = useState<any>(null)
@@ -28,11 +34,16 @@ const UserDashboard = () => {
   const [testimonialText, setTestimonialText] = useState('')
   const [testimonialTripId, setTestimonialTripId] = useState('')
   const [testimonialRating, setTestimonialRating] = useState(5)
+<<<<<<< HEAD
   const [testimonialImage, setTestimonialImage] = useState<string>('')
   const [testimonialImageFile, setTestimonialImageFile] = useState<File | null>(null)
   const { userId } = useParams()
   const navigate = useNavigate()
   const { count: wishlistCount } = useWishlist()
+=======
+  const { userId } = useParams()
+  const navigate = useNavigate()
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
@@ -127,6 +138,7 @@ const UserDashboard = () => {
     }
   }
 
+<<<<<<< HEAD
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
@@ -143,6 +155,8 @@ const UserDashboard = () => {
     }
   }
 
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
   const handleTestimonialSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!testimonialText.trim()) return
@@ -167,9 +181,13 @@ const UserDashboard = () => {
           trip: selectedTrip?.title || 'WayBond Trip', 
           review: testimonialText.trim(), 
           rating: testimonialRating, 
+<<<<<<< HEAD
           userId: user.id,
           media: testimonialImage || undefined,
           mediaType: testimonialImage ? 'image' : undefined
+=======
+          userId: user.id 
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
         }) 
       })
       
@@ -186,8 +204,11 @@ const UserDashboard = () => {
       setTestimonialText('')
       setTestimonialRating(5)
       setTestimonialTripId('')
+<<<<<<< HEAD
       setTestimonialImage('')
       setTestimonialImageFile(null)
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
     } catch (error) {
       console.error('Failed to add testimonial:', error)
       alert('Failed to add testimonial. Please try again.')
@@ -279,6 +300,7 @@ const UserDashboard = () => {
                     <p className="text-white/45 text-xs font-medium italic mt-1">{user.email}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
+<<<<<<< HEAD
                     <Link
                       to={`/dashboard/${userId}/profile`}
                       className="bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/10 hover:border-secondary/30 transition-all duration-300 group"
@@ -295,6 +317,18 @@ const UserDashboard = () => {
                       <p className="text-[8px] text-white/35 font-black uppercase tracking-[0.18em]">Wishlist</p>
                       <p className="text-xl font-black">{wishlistCount}</p>
                     </Link>
+=======
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                      <Heart size={18} className="text-secondary mb-3" />
+                      <p className="text-[8px] text-white/35 font-black uppercase tracking-[0.18em]">Wishlist</p>
+                      <p className="text-xl font-black">12</p>
+                    </div>
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                      <Star size={18} className="text-secondary mb-3" />
+                      <p className="text-[8px] text-white/35 font-black uppercase tracking-[0.18em]">XP</p>
+                      <p className="text-xl font-black">850</p>
+                    </div>
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                   </div>
                 </div>
               </section>
@@ -348,6 +382,7 @@ const UserDashboard = () => {
                       className="w-full min-h-[140px] bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-medium text-white placeholder:text-white/25 outline-none focus:border-secondary resize-none"
                     />
 
+<<<<<<< HEAD
                     {/* Image Upload */}
                     <div className="space-y-3">
                       <label className="block">
@@ -388,6 +423,8 @@ const UserDashboard = () => {
                       )}
                     </div>
 
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                     <button
                       type="submit"
                       className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-slate-800 transition-all"

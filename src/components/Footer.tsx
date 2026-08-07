@@ -7,36 +7,62 @@ const categoryGroups = [
   {
     title: "Trending",
     links: [
+<<<<<<< HEAD
       { label: "Kedarkantha Trek", to: "/discover?trending=kedarkantha" },
       { label: "Valley of Flowers", to: "/discover?trending=valley-of-flowers" },
       { label: "Hampta Pass", to: "/discover?trending=hampta-pass" },
       { label: "Sar Pass Trek", to: "/discover?trending=sar-pass" },
+=======
+      { label: "Spiti & Ladakh", to: "/discover?region=himalayas" },
+      { label: "Kashmir Winter", to: "/discover?experience=snow" },
+      { label: "Backpacking Meghalaya", to: "/discover?region=northeast" },
+      { label: "Island Escapes", to: "/discover?region=islands" },
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
     ],
   },
   {
     title: "Region",
     links: [
       { label: "Himalayas", to: "/discover?region=himalayas" },
+<<<<<<< HEAD
       { label: "Himachal Pradesh", to: "/discover?region=himachal" },
       { label: "Uttarakhand", to: "/discover?region=uttarakhand" },
+=======
+      { label: "North East", to: "/discover?region=northeast" },
+      { label: "South India", to: "/discover?region=south-india" },
+      { label: "Island Getaways", to: "/discover?region=islands" },
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
     ],
   },
   {
     title: "Experience",
     links: [
+<<<<<<< HEAD
       { label: "High Altitude Trek", to: "/discover?experience=high-altitude" },
       { label: "Snow Trek", to: "/discover?experience=snow" },
       { label: "Backpacking", to: "/discover?category=Backpacking" },
       { label: "Camping", to: "/discover?experience=camping" },
+=======
+      { label: "Adventure", to: "/discover?category=Adventure" },
+      { label: "Nature", to: "/discover?category=Nature" },
+      { label: "Backpacking", to: "/discover?category=Backpacking" },
+      { label: "Beach Escapes", to: "/discover?category=Beach" },
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
     ],
   },
   {
     title: "Duration",
     links: [
       { label: "Weekend Getaways", to: "/discover?duration=weekend" },
+<<<<<<< HEAD
       { label: "Long Expeditions", to: "/discover?duration=extended" },
       { label: "Day Hikes", to: "/discover?duration=day" },
       { label: "Summer Camps", to: "/discover?duration=summer" },
+=======
+      { label: "Week-long Trips", to: "/discover?duration=week-long" },
+      { label: "Long Expeditions", to: "/discover?duration=extended" },
+      { label: "All Adventures", to: "/discover" },
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
     ],
   },
 ];
@@ -54,6 +80,7 @@ const Footer = () => {
     <footer className="bg-white text-white pt-24 pb-8 relative overflow-hidden border-t border-white/10">
       <div className="absolute inset-0 liquid-glass-grain pointer-events-none"></div>
       <section className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 relative z-10 mb-16 md:mb-20">
+<<<<<<< HEAD
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-[1.5rem] md:rounded-[2rem] border border-slate-700 p-6 sm:p-8 md:p-10 shadow-2xl">
           <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight mb-6 md:mb-8">Events by Category</h2>
           
@@ -73,6 +100,18 @@ const Footer = () => {
                       >
                         {link.label}
                       </Link>
+=======
+        <div className="liquid-glass-dark rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 p-6 sm:p-8 md:p-10">
+          <h2 className="text-2xl md:text-3xl font-display font-black text-white tracking-tighter mb-8 md:mb-10">Explore by Category</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-0">
+            {categoryGroups.map((group, index) => (
+              <div key={group.title} className={`min-w-0 ${index > 0 ? 'lg:border-l lg:border-slate-200 lg:pl-7 xl:pl-10' : ''} ${index < 2 ? 'sm:border-b sm:border-slate-200 sm:pb-8 lg:border-b-0 lg:pb-0' : ''} ${index % 2 === 1 ? 'sm:pl-7 lg:pl-7 xl:pl-10' : ''}`}>
+                <h3 className="text-secondary text-sm font-black mb-4 border-b border-secondary/25 pb-2 w-fit">{group.title}</h3>
+                <ul className="space-y-3">
+                  {group.links.map(link => (
+                    <li key={link.label}>
+                      <Link to={link.to} className="text-sm font-semibold text-white/60 hover:text-secondary transition-colors">{link.label}</Link>
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
                     </li>
                   ))}
                 </ul>

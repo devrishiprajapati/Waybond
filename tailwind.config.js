@@ -28,10 +28,13 @@ export default {
         sans: ['Google Sans', 'Arial', 'sans-serif'],
         serif: ['Google Sans', 'Arial', 'sans-serif'],
         display: ['Google Sans', 'Arial', 'sans-serif'],
+<<<<<<< HEAD
         handwriting: ['Pacifico', 'Dancing Script', 'cursive'],
         script: ['Great Vibes', 'Allura', 'Dancing Script', 'cursive'],
         elegant: ['Allura', 'Great Vibes', 'cursive'],
         caveat: ['Caveat', 'cursive'],
+=======
+>>>>>>> 1aca7f6039490df9267044138899bc557af3e730
       },
       keyframes: {
         fadeIn: {
