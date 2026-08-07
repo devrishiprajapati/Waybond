@@ -87,7 +87,7 @@ const About = () => (
                 <item.icon className="text-secondary" size={24} />
               </div>
               <h4 className="font-display font-black text-xl uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{item.title}</h4>
-              <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-loose">{item.desc}</p>
+              <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-loose">{item.desc}</p> 
             </div>
           ))}
         </div>
@@ -97,14 +97,14 @@ const About = () => (
         initial={{ opacity: 0, scale: 0.9 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
-        className="relative rounded-[4rem] overflow-hidden group shadow-2xl h-[600px] lg:h-[700px] border border-white/10"
+        className="relative rounded-[2rem] md:rounded-[4rem] overflow-hidden group shadow-2xl aspect-square w-full border border-white/10"
       >
         <img src="/assets/LBK.jpeg" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a] via-black/20 to-transparent"></div>
-        <div className="absolute bottom-12 left-12 right-12">
-          <div className="liquid-glass p-8 rounded-[3rem] border border-white/20 text-center shadow-2xl backdrop-blur-xl">
-            <p className="text-4xl lg:text-5xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
-            <p className="text-[9px] text-white/50 uppercase font-black tracking-[0.4em] mt-3">Founded for the Ahmedabad Spirit</p>
+        <div className="absolute bottom-6 md:bottom-12 left-6 right-6 md:left-12 md:right-12">
+          <div className="liquid-glass p-4 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-white/20 text-center shadow-2xl backdrop-blur-xl">
+            <p className="text-2xl md:text-4xl lg:text-5xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
+            {/* <p className="text-[8px] md:text-[9px] text-white/50 uppercase font-black tracking-[0.3em] md:tracking-[0.4em] mt-2 md:mt-3">Founded for the Ahmedabad Spirit</p> */}
           </div>
         </div>
       </motion.div>
@@ -140,14 +140,14 @@ const Community = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: index * 0.1 }}
-            className="relative rounded-[3rem] overflow-hidden group keep-light-text shadow-[0_15px_40px_rgba(0,0,0,0.5)] h-[400px] md:h-[500px] border border-white/10"
+            className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden group keep-light-text shadow-[0_15px_40px_rgba(0,0,0,0.5)] aspect-square w-full border border-white/10"
           >
             <img src={gallery.images[0].src} alt={`${gallery.destination} travel memories`} loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent"></div>
             <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination} gallery`} className="absolute inset-0 z-10" />
-            <div className="absolute bottom-10 left-10">
-              <p className="text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
-              <p className="text-[10px] text-white uppercase font-black tracking-[0.3em] mt-2">{gallery.label}</p>
+            <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
+              <p className="text-2xl md:text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
+              <p className="text-[9px] md:text-[10px] text-white uppercase font-black tracking-[0.25em] md:tracking-[0.3em] mt-2">{gallery.label}</p>
             </div>
           </motion.div>
         ))}
