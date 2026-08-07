@@ -44,7 +44,6 @@ export default function TrendingDestinations() {
           </p>
         </motion.div>
 
-<<<<<<< HEAD
         {/* Horizontal Scrolling Cards - All Devices with Responsiveness */}
         <div className="relative mb-16">
           <div 
@@ -118,76 +117,6 @@ export default function TrendingDestinations() {
               </motion.div>
             ))}
           </div>
-=======
-        {/* Trips Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 mb-16">
-          {trendingCards.map((card, idx) => (
-            <motion.div
-              key={card.id ?? `${card.title}-${idx}`}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.12, duration: 0.7, type: 'spring', stiffness: 100 }}
-              viewport={{ once: true }}
-              className="group h-full"
-            >
-              <Link
-                to="/discover"
-                className="block relative h-96 sm:h-[420px] md:h-[480px] rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 border border-white/20 backdrop-blur-sm group"
-              >
-                {/* Image Container */}
-                <div className="relative z-0 w-full h-full overflow-hidden bg-gray-200">
-                  <img
-                    src={optimizeImageUrl(card.image, 900, 85)}
-                    alt={card.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-1000 will-change-transform"
-                  />
-
-                  {/* Premium Dark Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/20 opacity-85 group-hover:opacity-90 transition-opacity duration-500" />
-                </div>
-
-                {/* Top Right - Experience Type Badge */}
-                <div className="absolute top-5 md:top-6 right-5 md:right-6 z-10">
-                  <motion.span
-                    initial={{ opacity: 0, scale: 0.8, y: -20 }}
-                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: idx * 0.12 + 0.15, duration: 0.5 }}
-                    viewport={{ once: true }}
-                    className="inline-block bg-gradient-to-r from-secondary to-blue-400 text-white text-[10px] md:text-xs font-black uppercase px-4 md:px-5 py-2 md:py-2.5 rounded-full tracking-widest shadow-2xl shadow-secondary/50 transform group-hover:scale-110 transition-transform duration-500 border border-white/30 capitalize"
-                  >
-                    {card.badge}
-                  </motion.span>
-                </div>
-
-                {/* Center - Destination Title */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center px-4 z-10">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: idx * 0.12 + 0.1, duration: 0.6 }}
-                    viewport={{ once: true }}
-                    className="text-center space-y-1 md:space-y-2 mt-10"
-                  >
-                    <h3
-                      className="text-3xl sm:text-4xl md:text-5xl font-display font-black uppercase tracking-tight leading-tight line-clamp-2"
-                      style={{ color: '#ffffff !important' }}
-                    >
-                      {card.title}
-                    </h3>
-                    <p
-                      className="text-xs md:text-sm font-semibold tracking-widest uppercase line-clamp-1"
-                      style={{ color: '#ffffff !important' }}
-                    >
-                      {card.subtitle}
-                    </p>
-                  </motion.div>
-                </div>
-
-              </Link>
-            </motion.div>
-          ))}
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
         </div>
 
         {/* View All Button */}

@@ -32,21 +32,12 @@ export default function WhyChooseUs() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-<<<<<<< HEAD
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-gray-900 tracking-tight mb-3">
             What makes us different
           </h2>
           {/* <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto font-medium">
             Experience travel reimagined with authentic local expertise, genuine human connections, and your safety as our priority.
           </p> */}
-=======
-          <h2 className="text-4xl md:text-5xl font-display font-black text-gray-900 uppercase tracking-tight mb-4">
-            Why Choose Us?
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
-            Experience travel reimagined with authentic local expertise, genuine human connections, and your safety as our priority.
-          </p>
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -57,7 +48,6 @@ export default function WhyChooseUs() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.6 }}
               viewport={{ once: true }}
-<<<<<<< HEAD
               className="bg-white border-2 border-gray-100 p-8 md:p-10 rounded-[2.5rem] hover:border-blue-300 hover:shadow-lg transition-all duration-500 group"
             >
               {/* Icon - Centered on mobile, left-aligned on desktop */}
@@ -74,17 +64,6 @@ export default function WhyChooseUs() {
                 </h3>
                 <p className="text-sm text-gray-600 font-medium leading-relaxed">{reason.desc}</p>
               </div>
-=======
-              className="bg-white border-2 border-gray-100 p-12 rounded-[2.5rem] hover:border-blue-300 hover:shadow-lg transition-all duration-500 group"
-            >
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl w-fit mb-8 group-hover:scale-110 transition-transform duration-500 border border-blue-200">
-                <reason.icon className="text-blue-600 group-hover:text-blue-700 transition-colors" size={36} />
-              </div>
-              <h3 className="text-2xl font-display font-black text-gray-900 uppercase tracking-tight mb-3">
-                {reason.title}
-              </h3>
-              <p className="text-gray-600 font-medium leading-relaxed">{reason.desc}</p>
->>>>>>> 1aca7f6039490df9267044138899bc557af3e730
             </motion.div>
           ))}
         </div>
