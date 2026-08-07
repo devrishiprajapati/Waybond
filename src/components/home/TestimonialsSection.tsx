@@ -13,12 +13,22 @@ type Testimonial = {
 }
 
 const STORAGE_KEY = 'waybond_testimonials'
-const fallbackTestimonials: Testimonial[] = [
 
+function readLocalTestimonials(): Testimonial[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+const fallbackTestimonials: Testimonial[] = [
   { 
     id: 1, 
     name: 'Riya Shah', 
     trip: 'Spiti Valley Expedition', 
+    review: 'Every detail felt thoughtful, from the group energy to the unforgettable mountain views. I came home with stories and new friends.', 
     rating: 5,
     media: '/assets/spiti.jpg',
     mediaType: 'image'
@@ -55,20 +65,21 @@ const fallbackTestimonials: Testimonial[] = [
     name: 'Priya Nair', 
     trip: 'Kerala Backwaters', 
     review: 'The houseboat experience was magical. WayBond took care of every detail — all I had to do was enjoy.', 
-    rating: 5 
+    rating: 5,
+    media: '/assets/kerelabeach.jpg',
+    mediaType: 'image'
   },
   { 
     id: 6, 
     name: 'Karan Joshi', 
     trip: 'Rajasthan Royal Trail', 
     review: 'Heritage forts, vibrant bazaars, and an incredible group. Easily one of the best trips of my life.', 
-    rating: 5 
+    rating: 5,
+    media: '/assets/hadimba.jpg',
+    mediaType: 'image'
   },
-  { id: 1, name: 'Riya Shah', trip: 'Spiti Valley Expedition', review: 'Every detail felt thoughtful, from the group energy to the unforgettable mountain views. I came home with stories and new friends.', rating: 5 },
-  { id: 2, name: 'Dev Mehta', trip: 'Himachal Escape', review: 'WayBond made travelling as a solo explorer feel easy and exciting. The trip leader was fantastic and the itinerary was beautifully paced.', rating: 5 },
-  { id: 3, name: 'Aarav Patel', trip: 'Bali Getaway', review: 'A perfect mix of adventure, comfort, and great people. It was the kind of holiday that stays with you long after you return.', rating: 5 },
-  { id: 4, name: 'Priya Nair', trip: 'Kerala Backwaters', review: 'The houseboat experience was magical. WayBond took care of every detail — all I had to do was enjoy.', rating: 5 },
 ]
+
 function TestimonialCard({ test }: { test: Testimonial }) {
   const [isExpanded, setIsExpanded] = useState(false)
   const truncatedReview = test.review.length > 100 ? test.review.slice(0, 100) + '...' : test.review
@@ -172,7 +183,11 @@ export default function TestimonialsSection() {
   return (
     <section className="py-24 bg-white relative overflow-hidden">
       {/* Soft decorative glow — no dark colours */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/5 blur-[100px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+
+      {/* Header */}
+      <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 text-center mb-14 space-y-3">
         <Heart className="text-secondary mx-auto drop-shadow-lg" size={40} />
         <h2 className="text-4xl md:text-6xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
           Traveler <span className="text-secondary">Love</span>
@@ -199,5 +214,10 @@ export default function TestimonialsSection() {
         */}
         <div ref={trackRef} className="marquee-track py-4">
           {doubled.map((test, i) => (
+            <TestimonialCard key={`${test.id}-${i}`} test={test} />
           ))}
         </div>
+      </div>
+    </section>
+  )
+}
