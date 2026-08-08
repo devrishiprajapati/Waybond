@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MapPin, Users, Star, ArrowLeft,
   CheckCircle2, Clock, ShieldCheck, ChevronDown,
-  ChevronUp, PlayCircle, Instagram, MessageCircle, FileText, Download, X,
+  ChevronUp, Instagram, MessageCircle, FileText, Download, X,
   Share2, Link2, Check, Calendar
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
@@ -281,18 +281,6 @@ const TripDetails = () => {
           </div>
           <div className="flex flex-wrap gap-2.5 sm:gap-3">
             <button
-              type="button"
-              onClick={() => {
-                haptics.light()
-                setShareOpen(true)
-              }}
-              className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 text-white/80 shadow-xl transition-colors hover:bg-white/10 sm:h-auto sm:w-auto sm:gap-2 sm:rounded-2xl sm:px-4 sm:py-4 sm:text-[10px] sm:font-black sm:uppercase sm:tracking-[0.18em]"
-              aria-label="Share trip"
-            >
-              <Share2 size={18} />
-              <span className="hidden sm:inline">Share</span>
-            </button>
-            <button
               onClick={() => haptics.light()}
               className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 shadow-xl transition-colors hover:bg-white/10 sm:h-auto sm:w-auto sm:rounded-2xl sm:p-4"
             >
@@ -325,10 +313,15 @@ const TripDetails = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/60 via-transparent to-transparent"></div>
             <div className="absolute right-4 top-4 sm:right-8 sm:top-8">
               <button
-                onClick={() => haptics.light()}
+                type="button"
+                onClick={() => {
+                  haptics.light()
+                  setShareOpen(true)
+                }}
                 className="liquid-glass rounded-full border border-white/20 p-3 shadow-2xl transition-all hover:scale-110 hover:bg-secondary/20 sm:p-5"
+                aria-label="Share trip"
               >
-                <PlayCircle size={24} className="text-white sm:size-8" />
+                <Share2 size={24} className="text-white sm:size-8" />
               </button>
             </div>
           </motion.div>
