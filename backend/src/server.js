@@ -74,6 +74,53 @@ const mailTransport = process.env.EMAIL_HOST && process.env.EMAIL_USER && proces
 app.get('/', (_req, res) => res.json({ service: 'WayBond API', status: 'running', health: '/api/health' }))
 app.get('/api/health', (_req, res) => res.json({ ok: true }))
 
+app.post('/api/enquiry', async (req, res, next) => {
+  try {
+    const { name, phone, email, travelDate, travellers, message, tripTitle, tripLocation, tripDuration } = req.body
+    if (!name?.trim() || !phone?.trim()) return res.status(400).json({ message: 'Name and phone are required.' })
+
+    const adminEmail = 'prajapatirishi748@gmail.com'
+    const formattedDate = travelDate ? new Date(travelDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not specified'
+
+    if (mailTransport) {
+      await mailTransport.sendMail({
+        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+        to: adminEmail,
+        subject: `New Enquiry: ${tripTitle || 'Trip'} — ${name}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0f172a; color: #f8fafc; border-radius: 16px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #6495ED 0%, #3b82f6 100%); padding: 32px 28px;">
+              <h1 style="margin: 0; font-size: 26px; font-weight: 900; color: white; letter-spacing: -0.5px;">WAYBOND</h1>
+              <p style="margin: 8px 0 0; color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">New Trip Enquiry</p>
+            </div>
+            <div style="padding: 28px;">
+              ${tripTitle ? `
+              <div style="background: rgba(100,149,237,0.12); border: 1px solid rgba(100,149,237,0.3); border-radius: 12px; padding: 16px 18px; margin-bottom: 24px;">
+                <p style="margin: 0 0 4px; color: rgba(255,255,255,0.5); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">Trip of Interest</p>
+                <p style="margin: 0; color: #6495ED; font-size: 18px; font-weight: 900;">${tripTitle}</p>
+                ${tripLocation ? `<p style="margin: 4px 0 0; color: rgba(255,255,255,0.5); font-size: 12px;">${tripLocation}${tripDuration ? ` &nbsp;·&nbsp; ${tripDuration}` : ''}</p>` : ''}
+              </div>` : ''}
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; width: 40%;">Name</td><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: #f8fafc; font-size: 14px; font-weight: 700;">${name}</td></tr>
+                <tr><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Phone</td><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: #f8fafc; font-size: 14px; font-weight: 700;">+91 ${phone}</td></tr>
+                ${email ? `<tr><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Email</td><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: #6495ED; font-size: 14px; font-weight: 700;"><a href="mailto:${email}" style="color: #6495ED;">${email}</a></td></tr>` : ''}
+                <tr><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Travel Date</td><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: #f8fafc; font-size: 14px; font-weight: 700;">${formattedDate}</td></tr>
+                <tr><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Travellers</td><td style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: #f8fafc; font-size: 14px; font-weight: 700;">${travellers}</td></tr>
+                ${message ? `<tr><td style="padding: 10px 0; color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; vertical-align: top;">Message</td><td style="padding: 10px 0; color: #f8fafc; font-size: 14px;">${message}</td></tr>` : ''}
+              </table>
+              <div style="margin-top: 28px; padding: 14px 18px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 11px; color: rgba(255,255,255,0.35);">Received ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</div>
+            </div>
+          </div>
+        `
+      })
+    } else {
+      console.log('[Enquiry] Email not configured — logging enquiry:', { name, phone, email, travelDate, travellers, tripTitle })
+    }
+
+    res.json({ success: true })
+  } catch (error) { next(error) }
+})
+
 app.post('/api/auth/signup', async (req, res, next) => {
   try {
     const turnstileOk = await verifyTurnstile(req.body.turnstileToken)

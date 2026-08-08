@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
-import { Filter, Search, MapPin, Calendar, Star, ChevronDown, CheckCircle2, MessageCircle, ShieldCheck, CircleHelp, Download, Heart } from 'lucide-react'
-import { CATEGORIES, getTripWhatsAppLink } from '../lib/trips'
+import { Filter, Search, MapPin, Calendar, Star, ChevronDown, CheckCircle2, ShieldCheck, Heart } from 'lucide-react'
+import { CATEGORIES } from '../lib/trips'
 import { getTrips, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 import { useWishlist } from '../lib/wishlist'
@@ -227,7 +227,8 @@ const Discover = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col relative"
+                      className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col relative cursor-pointer"
+                      onClick={() => { haptics.medium(); window.location.href = `/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}` }}
                     >
                       {/* Wishlist Button - Top Right */}
                       <button
@@ -341,7 +342,8 @@ const Discover = () => {
                                       <button
                                         key={monthKey}
                                         type="button"
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                          e.stopPropagation()
                                           // Select first date of this month
                                           const firstDate = monthGroups[monthKey]?.[0]
                                           if (firstDate) {
@@ -373,7 +375,8 @@ const Discover = () => {
                                         <button
                                           key={date}
                                           type="button"
-                                          onClick={() => {
+                                          onClick={(e) => {
+                                            e.stopPropagation()
                                             setSelectedDepartures(prev => ({
                                               ...prev,
                                               [trip.id]: date
@@ -398,33 +401,6 @@ const Discover = () => {
                           })()}
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="grid grid-cols-2 gap-2 pt-1">
-                          <Link to={`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 rounded-full bg-white/10 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors" title="More details">
-                            <CircleHelp size={12} />
-                            <span className="hidden sm:inline">Details</span>
-                            <span className="sm:hidden">View</span>
-                          </Link>
-                          {trip.pdfUrl ? (
-                            <a
-                              href={trip.pdfUrl}
-                              download={`${trip.title.replace(/\s+/g, '_')}_Itinerary.pdf`}
-                              onClick={(e) => { e.stopPropagation(); haptics.medium(); }}
-                              className="inline-flex justify-center items-center gap-1 rounded-full bg-secondary/15 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-secondary hover:bg-secondary hover:text-white transition-colors"
-                              title="Download PDF"
-                            >
-                              <Download size={12} />
-                              <span className="hidden sm:inline">PDF</span>
-                              <span className="sm:hidden">Get</span>
-                            </a>
-                          ) : (
-                            <a href={getTripWhatsAppLink(`${trip.title}${selectedDeparture ? ` on ${selectedDeparture}` : ''}`)} target="_blank" rel="noopener noreferrer" onClick={() => haptics.medium()} className="inline-flex justify-center items-center gap-1 rounded-full bg-secondary/15 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-secondary hover:bg-secondary hover:text-white transition-colors" title="Enquire on WhatsApp">
-                              <MessageCircle size={12} />
-                              <span className="hidden sm:inline">Enquire</span>
-                              <span className="sm:hidden">Chat</span>
-                            </a>
-                          )}
-                        </div>
                       </div>
                     </motion.div>
                   )

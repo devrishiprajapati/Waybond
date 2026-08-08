@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MapPin, Users, Star, ArrowLeft,
   CheckCircle2, Clock, ShieldCheck, ChevronDown,
-  ChevronUp, PlayCircle, Instagram, MessageCircle, FileText, Download
+  ChevronUp, PlayCircle, Instagram, MessageCircle, FileText, Download, X,
+  Share2, Link2, Check
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
@@ -44,6 +45,13 @@ const TripDetails = () => {
   const [expandedDay, setExpandedDay] = useState<number | null>(1)
   const [selectedDeparture, setSelectedDeparture] = useState('')
   const [paying, setPaying] = useState(false)
+  const [enquiryOpen, setEnquiryOpen] = useState(false)
+  const [enquiryForm, setEnquiryForm] = useState({ name: '', phone: '', email: '', travelDate: '', travellers: '', message: '' })
+  const [enquiryErrors, setEnquiryErrors] = useState<Record<string, string>>({})
+  const [enquirySubmitting, setEnquirySubmitting] = useState(false)
+  const [enquiryDone, setEnquiryDone] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
 
   useEffect(() => {
     if (slug) {
@@ -54,6 +62,70 @@ const TripDetails = () => {
       })
     }
   }, [slug, departureParam])
+
+  const validateEnquiry = () => {
+    const errs: Record<string, string> = {}
+    if (!enquiryForm.name.trim()) errs.name = 'Name is required.'
+    if (!/^\d{10}$/.test(enquiryForm.phone.trim())) errs.phone = 'Enter a valid 10-digit mobile number.'
+    if (enquiryForm.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(enquiryForm.email.trim())) errs.email = 'Enter a valid email address.'
+    if (!enquiryForm.travelDate) errs.travelDate = 'Select a travel date.'
+    if (!enquiryForm.travellers.trim() || isNaN(Number(enquiryForm.travellers)) || Number(enquiryForm.travellers) < 1) errs.travellers = 'Enter number of travellers.'
+    return errs
+  }
+
+  const handleEnquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const errs = validateEnquiry()
+    if (Object.keys(errs).length) { setEnquiryErrors(errs); return }
+    setEnquiryErrors({})
+    setEnquirySubmitting(true)
+    try {
+      await fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: enquiryForm.name,
+          phone: enquiryForm.phone,
+          email: enquiryForm.email,
+          travelDate: enquiryForm.travelDate,
+          travellers: enquiryForm.travellers,
+          message: enquiryForm.message,
+          tripTitle: trip?.title,
+          tripLocation: trip?.location,
+          tripDuration: trip?.duration,
+        })
+      })
+    } catch (err) {
+      console.error('Enquiry email failed:', err)
+    }
+    haptics.medium()
+    setEnquirySubmitting(false)
+    setEnquiryDone(true)
+    setTimeout(() => {
+      setEnquiryDone(false)
+      setEnquiryOpen(false)
+      setEnquiryForm({ name: '', phone: '', email: '', travelDate: '', travellers: '', message: '' })
+    }, 2500)
+  }
+
+  const getTripShareLink = () => {
+    const origin = window.location.origin
+    const path = `/trip/${slug || (trip ? createSlug(trip.title) : '')}`
+    const params = selectedDeparture ? `?departure=${encodeURIComponent(selectedDeparture)}` : ''
+    return `${origin}${path}${params}`
+  }
+
+  const handleCopyShareLink = async () => {
+    const shareLink = getTripShareLink()
+    try {
+      await navigator.clipboard.writeText(shareLink)
+      setShareCopied(true)
+      haptics.medium()
+      window.setTimeout(() => setShareCopied(false), 1600)
+    } catch (err) {
+      console.error('Copy link failed:', err)
+    }
+  }
 
   // Update URL when date changes
   const handleDateChange = (date: string) => {
@@ -177,7 +249,8 @@ const TripDetails = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen pt-28 pb-12">
+    <>
+    <div className="bg-white min-h-screen pt-28 pb-28 relative">
       <Helmet>
         <title>{trip.title} | WAYBOND</title>
         <meta name="description" content={trip.description.substring(0, 160)} />
@@ -206,7 +279,19 @@ const TripDetails = () => {
               <MapPin size={16} className="mr-2 text-secondary shrink-0" /> <span className="break-words">{trip.location}</span>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                haptics.light()
+                setShareOpen(true)
+              }}
+              className="liquid-glass-dark px-4 py-4 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors shadow-xl flex items-center justify-center gap-2 text-white/80 font-black text-[10px] uppercase tracking-[0.18em]"
+              aria-label="Share trip"
+            >
+              <Share2 size={18} />
+              <span className="hidden sm:inline">Share</span>
+            </button>
             <button
               onClick={() => haptics.light()}
               className="liquid-glass-dark p-4 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors shadow-xl"
@@ -262,6 +347,7 @@ const TripDetails = () => {
               </button>
             ))}
           </div>
+
         </div>
 
         {/* Desktop Booking Widget */}
@@ -417,11 +503,11 @@ const TripDetails = () => {
               {trip.pdfUrl && (
                 <a
                   href={trip.pdfUrl}
-                  download={`${trip.title.replace(/\s+/g, '_')}_Itinerary.pdf`}
+                  download={`${trip.title.replace(/\s+/g, '_')}_Brochure.pdf`}
                   className="flex items-center justify-center gap-2 w-full h-11 rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary font-black text-[10px] uppercase tracking-[0.16em] hover:bg-secondary hover:text-white transition-all"
                   onClick={() => haptics.light()}
                 >
-                  <Download size={15} /> Download Itinerary
+                  <Download size={15} /> Download Brochure
                 </a>
               )}
             </div>
@@ -551,6 +637,175 @@ const TripDetails = () => {
         </div>
       </section>
     </div>
+
+    <AnimatePresence>
+      {shareOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[130] flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setShareOpen(false) }}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 36, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.96 }}
+            transition={{ type: 'spring', damping: 24, stiffness: 320 }}
+            className="w-full max-w-3xl rounded-[2rem] bg-white p-6 text-[#171717] shadow-2xl sm:rounded-[2.5rem] sm:p-10"
+          >
+            <div className="mb-8 flex items-start justify-between gap-4">
+              <h2 className="text-3xl font-black tracking-tight sm:text-4xl">Share this Page</h2>
+              <button
+                type="button"
+                onClick={() => setShareOpen(false)}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-black transition-colors hover:bg-black/5"
+                aria-label="Close share card"
+              >
+                <X size={34} strokeWidth={3} />
+              </button>
+            </div>
+
+            <div className="mb-8 flex items-center gap-5 sm:gap-6">
+              <img
+                src={trip.image}
+                alt={trip.title}
+                className="h-20 w-20 shrink-0 rounded-2xl object-cover sm:h-24 sm:w-24"
+              />
+              <div className="min-w-0">
+                <h3 className="text-2xl font-black leading-tight tracking-tight sm:text-4xl">{trip.title}</h3>
+                <p className="mt-1 text-base font-black leading-tight sm:text-2xl">{trip.location}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={handleCopyShareLink}
+                className="flex h-16 items-center justify-center gap-4 rounded-2xl border border-black/10 bg-white px-5 text-base font-semibold transition-all hover:border-secondary/30 hover:bg-secondary/5 sm:text-lg"
+              >
+                {shareCopied ? <Check size={28} className="text-green-600" /> : <Link2 size={30} />}
+                {shareCopied ? 'Copied' : 'Copy Link'}
+              </button>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Check out this trip: ${trip.title} ${getTripShareLink()}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => haptics.medium()}
+                className="flex h-16 items-center justify-center gap-4 rounded-2xl border border-black/10 bg-white px-5 text-base font-semibold transition-all hover:border-secondary/30 hover:bg-secondary/5 sm:text-lg"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black text-white">
+                  <MessageCircle size={23} />
+                </span>
+                Whatsapp
+              </a>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* Enquiry Modal — outside page div to avoid stacking context issues */}
+    <AnimatePresence>
+      {enquiryOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setEnquiryOpen(false) }}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 60, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 40, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="w-full max-w-2xl max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2rem)] bg-[#0f172a] border border-white/10 rounded-t-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl"
+          >
+            {/* Modal layout: image top (mobile) / left (desktop) */}
+            <div className="flex max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2rem)] flex-col sm:flex-row">
+              {/* Image panel */}
+              <div className="sm:w-52 shrink-0 h-28 min-[380px]:h-32 sm:h-auto relative">
+                <img
+                  src={trip.image}
+                  alt={trip.title}
+                  className="w-full h-full object-cover"
+                  style={{ display: 'block' }}
+                />
+                {/* Only darken the bottom for the caption — no side fade */}
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
+                <div className="absolute bottom-3 left-3 right-3 z-10">
+                  <p className="text-[9px] text-white/80 font-black uppercase tracking-widest drop-shadow">{trip.duration}</p>
+                  <p className="text-sm font-black text-white leading-tight drop-shadow">{trip.title}</p>
+                  <p className="text-[10px] text-white/70 drop-shadow">{trip.location}</p>
+                </div>
+              </div>
+
+              {/* Form panel */}
+              <div className="flex-1 min-h-0 overflow-y-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6">
+                <div className="sticky top-0 z-10 -mx-4 -mt-4 mb-3 flex items-center justify-between bg-[#0f172a]/95 px-4 py-3 backdrop-blur sm:static sm:m-0 sm:mb-4 sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
+                  <h2 className="text-sm sm:text-base font-black text-white tracking-tight uppercase">Plan Your Next Trip</h2>
+                  <button type="button" onClick={() => setEnquiryOpen(false)} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition-all shrink-0" aria-label="Close enquiry form">
+                    <X size={17} />
+                  </button>
+                </div>
+                {enquiryDone ? (
+                  <div className="py-10 text-center space-y-3">
+                    <div className="text-4xl">🎉</div>
+                    <p className="text-white font-black text-lg">Enquiry Sent!</p>
+                    <p className="text-white/50 text-sm">Our team will reach out to you shortly.</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleEnquirySubmit} noValidate className="space-y-2.5">
+                    <div>
+                      <input type="text" placeholder="Your Name" value={enquiryForm.name} onChange={e => setEnquiryForm(f => ({ ...f, name: e.target.value }))} className={`w-full bg-white/5 border ${enquiryErrors.name ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors`} />
+                      {enquiryErrors.name && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.name}</p>}
+                    </div>
+                    <div>
+                      <div className="flex gap-2">
+                        <span className="flex items-center px-3 bg-white/5 border border-white/10 rounded-xl text-white/60 text-sm font-bold shrink-0">+91</span>
+                        <input type="tel" placeholder="Mobile No." value={enquiryForm.phone} onChange={e => setEnquiryForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))} className={`min-w-0 flex-1 bg-white/5 border ${enquiryErrors.phone ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors`} />
+                      </div>
+                      {enquiryErrors.phone && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.phone}</p>}
+                    </div>
+                    <div>
+                      <input type="email" placeholder="Email (optional)" value={enquiryForm.email} onChange={e => setEnquiryForm(f => ({ ...f, email: e.target.value }))} className={`w-full bg-white/5 border ${enquiryErrors.email ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors`} />
+                      {enquiryErrors.email && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.email}</p>}
+                    </div>
+                    <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-2">
+                      <div>
+                        <input type="date" value={enquiryForm.travelDate} min={new Date().toISOString().split('T')[0]} onChange={e => setEnquiryForm(f => ({ ...f, travelDate: e.target.value }))} className={`w-full bg-white/5 border ${enquiryErrors.travelDate ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white/80 focus:outline-none focus:border-secondary transition-colors [color-scheme:dark]`} />
+                        {enquiryErrors.travelDate && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.travelDate}</p>}
+                      </div>
+                      <div>
+                        <input type="number" placeholder="Travellers" min={1} value={enquiryForm.travellers} onChange={e => setEnquiryForm(f => ({ ...f, travellers: e.target.value }))} className={`w-full bg-white/5 border ${enquiryErrors.travellers ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors`} />
+                        {enquiryErrors.travellers && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.travellers}</p>}
+                      </div>
+                    </div>
+                    <textarea placeholder="Message (optional)" rows={2} value={enquiryForm.message} onChange={e => setEnquiryForm(f => ({ ...f, message: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors resize-none" />
+                    <button type="submit" disabled={enquirySubmitting} className="w-full bg-secondary text-white py-3.5 sm:py-3 rounded-xl font-black text-[11px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.25em] hover:bg-secondary/90 active:scale-95 transition-all shadow-lg shadow-secondary/30 flex items-center justify-center gap-2">
+                      <MessageCircle size={15} />
+                      {enquirySubmitting ? 'Connecting...' : 'Connect with Expert'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    {/* Floating Enquiry Button — fixed bottom center, outside any stacking context */}
+    <button
+      onClick={() => { haptics.medium(); setEnquiryOpen(true) }}
+      className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] sm:bottom-6 left-1/2 -translate-x-1/2 z-[110] flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2.5 whitespace-nowrap bg-secondary text-white px-5 sm:px-7 py-3 sm:py-3.5 rounded-full shadow-2xl shadow-secondary/50 hover:shadow-secondary/70 hover:scale-105 active:scale-95 transition-all duration-200 font-black text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] border border-secondary/60"
+      aria-label="Open enquiry form"
+    >
+      <MessageCircle size={16} />
+      Enquire Now
+    </button>
+    </>
   )
 }
 
