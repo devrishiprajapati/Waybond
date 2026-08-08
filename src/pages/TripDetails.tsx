@@ -5,7 +5,7 @@ import {
   MapPin, Users, Star, ArrowLeft,
   CheckCircle2, Clock, ShieldCheck, ChevronDown,
   ChevronUp, PlayCircle, Instagram, MessageCircle, FileText, Download, X,
-  Share2, Link2, Check
+  Share2, Link2, Check, Calendar
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
@@ -644,7 +644,7 @@ const TripDetails = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[130] flex items-center justify-center bg-black/65 px-4 py-6 backdrop-blur-sm"
+          className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShareOpen(false) }}
         >
           <motion.div
@@ -652,39 +652,39 @@ const TripDetails = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ type: 'spring', damping: 24, stiffness: 320 }}
-            className="w-full max-w-3xl rounded-[2rem] bg-white p-6 text-[#171717] shadow-2xl sm:rounded-[2.5rem] sm:p-10"
+            className="w-full max-w-xl rounded-[1.5rem] bg-white p-5 text-[#171717] shadow-2xl sm:rounded-[2rem] sm:p-7"
           >
-            <div className="mb-8 flex items-start justify-between gap-4">
-              <h2 className="text-3xl font-black tracking-tight sm:text-4xl">Share this Page</h2>
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <h2 className="text-2xl font-black tracking-tight sm:text-3xl">Share this Page</h2>
               <button
                 type="button"
                 onClick={() => setShareOpen(false)}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-black transition-colors hover:bg-black/5"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-black transition-colors hover:bg-black/5"
                 aria-label="Close share card"
               >
-                <X size={34} strokeWidth={3} />
+                <X size={27} strokeWidth={3} />
               </button>
             </div>
 
-            <div className="mb-8 flex items-center gap-5 sm:gap-6">
+            <div className="mb-6 flex items-center gap-4">
               <img
                 src={trip.image}
                 alt={trip.title}
-                className="h-20 w-20 shrink-0 rounded-2xl object-cover sm:h-24 sm:w-24"
+                className="h-16 w-16 shrink-0 rounded-2xl object-cover sm:h-20 sm:w-20"
               />
               <div className="min-w-0">
-                <h3 className="text-2xl font-black leading-tight tracking-tight sm:text-4xl">{trip.title}</h3>
-                <p className="mt-1 text-base font-black leading-tight sm:text-2xl">{trip.location}</p>
+                <h3 className="text-xl font-black leading-tight tracking-tight sm:text-2xl">{trip.title}</h3>
+                <p className="mt-1 text-sm font-black leading-tight sm:text-base">{trip.location}</p>
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
                 onClick={handleCopyShareLink}
-                className="flex h-16 items-center justify-center gap-4 rounded-2xl border border-black/10 bg-white px-5 text-base font-semibold transition-all hover:border-secondary/30 hover:bg-secondary/5 sm:text-lg"
+                className="flex h-12 items-center justify-center gap-3 rounded-xl border border-black/10 bg-white px-4 text-sm font-semibold transition-all hover:border-secondary/30 hover:bg-secondary/5 sm:text-base"
               >
-                {shareCopied ? <Check size={28} className="text-green-600" /> : <Link2 size={30} />}
+                {shareCopied ? <Check size={21} className="text-green-600" /> : <Link2 size={22} />}
                 {shareCopied ? 'Copied' : 'Copy Link'}
               </button>
               <a
@@ -692,10 +692,10 @@ const TripDetails = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => haptics.medium()}
-                className="flex h-16 items-center justify-center gap-4 rounded-2xl border border-black/10 bg-white px-5 text-base font-semibold transition-all hover:border-secondary/30 hover:bg-secondary/5 sm:text-lg"
+                className="flex h-12 items-center justify-center gap-3 rounded-xl border border-black/10 bg-white px-4 text-sm font-semibold transition-all hover:border-secondary/30 hover:bg-secondary/5 sm:text-base"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-black text-white">
-                  <MessageCircle size={23} />
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-black text-white">
+                  <MessageCircle size={18} />
                 </span>
                 Whatsapp
               </a>
@@ -712,7 +712,7 @@ const TripDetails = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-[120] flex items-end justify-center bg-secondary/45 p-0 backdrop-blur-[3px] sm:items-center sm:p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setEnquiryOpen(false) }}
         >
           <motion.div
@@ -720,71 +720,75 @@ const TripDetails = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="w-full max-w-2xl max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2rem)] bg-[#0f172a] border border-white/10 rounded-t-[1.5rem] sm:rounded-[2rem] overflow-hidden shadow-2xl"
+            className="w-full max-w-4xl max-h-[calc(100dvh-1rem)] overflow-hidden rounded-t-[1.5rem] border border-secondary/10 bg-slate-50 p-3 text-[#1f2933] shadow-2xl shadow-secondary/20 sm:max-h-[calc(100dvh-2rem)] sm:rounded-[2rem] sm:p-4"
           >
-            {/* Modal layout: image top (mobile) / left (desktop) */}
-            <div className="flex max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2rem)] flex-col sm:flex-row">
+            <div className="flex max-h-[calc(100dvh-2.5rem)] flex-col gap-4 overflow-y-auto sm:max-h-[calc(100dvh-4rem)] lg:grid lg:grid-cols-[0.95fr_1.05fr] lg:gap-6 lg:overflow-hidden">
               {/* Image panel */}
-              <div className="sm:w-52 shrink-0 h-28 min-[380px]:h-32 sm:h-auto relative">
+              <div className="keep-light-text relative h-40 shrink-0 overflow-hidden rounded-[1.25rem] shadow-xl shadow-secondary/15 sm:h-60 lg:h-auto lg:min-h-[470px]">
                 <img
                   src={trip.image}
                   alt={trip.title}
                   className="w-full h-full object-cover"
                   style={{ display: 'block' }}
                 />
-                {/* Only darken the bottom for the caption — no side fade */}
-                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3 z-10">
-                  <p className="text-[9px] text-white/80 font-black uppercase tracking-widest drop-shadow">{trip.duration}</p>
-                  <p className="text-sm font-black text-white leading-tight drop-shadow">{trip.title}</p>
-                  <p className="text-[10px] text-white/70 drop-shadow">{trip.location}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-secondary/95 via-secondary/25 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4 z-10 text-white sm:bottom-5 sm:left-5 sm:right-5">
+                  <p className="inline-flex rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-xs font-black leading-none shadow-sm backdrop-blur sm:text-sm">{trip.duration}</p>
+                  <p className="mt-2 text-xl font-black leading-tight tracking-tight drop-shadow sm:text-3xl">{trip.title}</p>
+                  <p className="mt-1.5 text-sm font-semibold leading-tight text-white/85 drop-shadow sm:text-lg">{trip.location}</p>
                 </div>
               </div>
 
               {/* Form panel */}
-              <div className="flex-1 min-h-0 overflow-y-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6">
-                <div className="sticky top-0 z-10 -mx-4 -mt-4 mb-3 flex items-center justify-between bg-[#0f172a]/95 px-4 py-3 backdrop-blur sm:static sm:m-0 sm:mb-4 sm:bg-transparent sm:p-0 sm:backdrop-blur-0">
-                  <h2 className="text-sm sm:text-base font-black text-white tracking-tight uppercase">Plan Your Next Trip</h2>
-                  <button type="button" onClick={() => setEnquiryOpen(false)} className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:bg-white/20 hover:text-white transition-all shrink-0" aria-label="Close enquiry form">
-                    <X size={17} />
+              <div className="min-h-0 pb-[calc(0.25rem+env(safe-area-inset-bottom))] lg:overflow-y-auto lg:py-2 lg:pr-1">
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="mb-1.5 text-[9px] font-black uppercase tracking-[0.24em] text-secondary/70">WayBond Enquiry</p>
+                    <h2 className="text-2xl font-black tracking-tight text-[#1f2933] sm:text-3xl">Plan Your Next Trip</h2>
+                  </div>
+                  <button type="button" onClick={() => setEnquiryOpen(false)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-secondary transition-colors hover:bg-secondary/10" aria-label="Close enquiry form">
+                    <X size={26} strokeWidth={3} />
                   </button>
                 </div>
                 {enquiryDone ? (
-                  <div className="py-10 text-center space-y-3">
-                    <div className="text-4xl">🎉</div>
-                    <p className="text-white font-black text-lg">Enquiry Sent!</p>
-                    <p className="text-white/50 text-sm">Our team will reach out to you shortly.</p>
+                  <div className="py-10 text-center">
+                    <p className="text-xl font-black text-secondary">Enquiry Sent!</p>
+                    <p className="mt-2 text-sm font-medium text-slate-500">Our team will reach out to you shortly.</p>
                   </div>
                 ) : (
-                  <form onSubmit={handleEnquirySubmit} noValidate className="space-y-2.5">
+                  <form onSubmit={handleEnquirySubmit} noValidate className="space-y-3.5">
                     <div>
-                      <input type="text" placeholder="Your Name" value={enquiryForm.name} onChange={e => setEnquiryForm(f => ({ ...f, name: e.target.value }))} className={`w-full bg-white/5 border ${enquiryErrors.name ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors`} />
-                      {enquiryErrors.name && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.name}</p>}
+                      <input type="text" placeholder="Your Name" value={enquiryForm.name} onChange={e => setEnquiryForm(f => ({ ...f, name: e.target.value }))} className={`h-[50px] w-full rounded-xl border ${enquiryErrors.name ? 'border-red-500' : 'border-secondary/15'} bg-white px-4 text-base font-semibold text-[#1f2933] shadow-sm shadow-secondary/5 outline-none transition-colors placeholder:text-slate-400 focus:border-secondary/60`} />
+                      {enquiryErrors.name && <p className="mt-1.5 text-xs font-bold text-red-500">{enquiryErrors.name}</p>}
                     </div>
                     <div>
-                      <div className="flex gap-2">
-                        <span className="flex items-center px-3 bg-white/5 border border-white/10 rounded-xl text-white/60 text-sm font-bold shrink-0">+91</span>
-                        <input type="tel" placeholder="Mobile No." value={enquiryForm.phone} onChange={e => setEnquiryForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))} className={`min-w-0 flex-1 bg-white/5 border ${enquiryErrors.phone ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors`} />
+                      <div className={`flex h-[50px] overflow-hidden rounded-xl border ${enquiryErrors.phone ? 'border-red-500' : 'border-secondary/15'} bg-white shadow-sm shadow-secondary/5 transition-colors focus-within:border-secondary/60`}>
+                        <span className="flex w-14 shrink-0 items-center justify-center border-r border-secondary/15 bg-secondary/5 text-sm font-black text-secondary">+91</span>
+                        <input type="tel" placeholder="Mobile No." value={enquiryForm.phone} onChange={e => setEnquiryForm(f => ({ ...f, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))} className="min-w-0 flex-1 bg-white px-4 text-base font-semibold text-[#1f2933] outline-none placeholder:text-slate-400" />
                       </div>
-                      {enquiryErrors.phone && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.phone}</p>}
+                      {enquiryErrors.phone && <p className="mt-1.5 text-xs font-bold text-red-500">{enquiryErrors.phone}</p>}
                     </div>
                     <div>
-                      <input type="email" placeholder="Email (optional)" value={enquiryForm.email} onChange={e => setEnquiryForm(f => ({ ...f, email: e.target.value }))} className={`w-full bg-white/5 border ${enquiryErrors.email ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors`} />
-                      {enquiryErrors.email && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.email}</p>}
+                      <input type="email" placeholder="Email (optional)" value={enquiryForm.email} onChange={e => setEnquiryForm(f => ({ ...f, email: e.target.value }))} className={`h-[50px] w-full rounded-xl border ${enquiryErrors.email ? 'border-red-500' : 'border-secondary/15'} bg-white px-4 text-base font-semibold text-[#1f2933] shadow-sm shadow-secondary/5 outline-none transition-colors placeholder:text-slate-400 focus:border-secondary/60`} />
+                      {enquiryErrors.email && <p className="mt-1.5 text-xs font-bold text-red-500">{enquiryErrors.email}</p>}
                     </div>
-                    <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 gap-3 min-[520px]:grid-cols-2">
                       <div>
-                        <input type="date" value={enquiryForm.travelDate} min={new Date().toISOString().split('T')[0]} onChange={e => setEnquiryForm(f => ({ ...f, travelDate: e.target.value }))} className={`w-full bg-white/5 border ${enquiryErrors.travelDate ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white/80 focus:outline-none focus:border-secondary transition-colors [color-scheme:dark]`} />
-                        {enquiryErrors.travelDate && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.travelDate}</p>}
+                        <div className={`relative h-[50px] rounded-xl border ${enquiryErrors.travelDate ? 'border-red-500' : 'border-secondary/15'} bg-white shadow-sm shadow-secondary/5 transition-colors focus-within:border-secondary/60`}>
+                          {!enquiryForm.travelDate && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base font-semibold text-slate-400">Date of Travel</span>}
+                          <input type="date" value={enquiryForm.travelDate} min={new Date().toISOString().split('T')[0]} onChange={e => setEnquiryForm(f => ({ ...f, travelDate: e.target.value }))} className={`h-full w-full rounded-xl bg-transparent px-4 pr-11 text-base font-semibold outline-none [color-scheme:light] ${enquiryForm.travelDate ? 'text-[#1f2933]' : 'text-transparent'}`} />
+                          <Calendar size={19} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-secondary/45" />
+                        </div>
+                        {enquiryErrors.travelDate && <p className="mt-1.5 text-xs font-bold text-red-500">{enquiryErrors.travelDate}</p>}
                       </div>
                       <div>
-                        <input type="number" placeholder="Travellers" min={1} value={enquiryForm.travellers} onChange={e => setEnquiryForm(f => ({ ...f, travellers: e.target.value }))} className={`w-full bg-white/5 border ${enquiryErrors.travellers ? 'border-red-400' : 'border-white/10'} rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors`} />
-                        {enquiryErrors.travellers && <p className="text-red-400 text-[10px] mt-1 font-bold">{enquiryErrors.travellers}</p>}
+                        <input type="number" placeholder="Traveller Count" min={1} value={enquiryForm.travellers} onChange={e => setEnquiryForm(f => ({ ...f, travellers: e.target.value }))} className={`h-[50px] w-full rounded-xl border ${enquiryErrors.travellers ? 'border-red-500' : 'border-secondary/15'} bg-white px-4 text-base font-semibold text-[#1f2933] shadow-sm shadow-secondary/5 outline-none transition-colors placeholder:text-slate-400 focus:border-secondary/60`} />
+                        {enquiryErrors.travellers && <p className="mt-1.5 text-xs font-bold text-red-500">{enquiryErrors.travellers}</p>}
                       </div>
                     </div>
-                    <textarea placeholder="Message (optional)" rows={2} value={enquiryForm.message} onChange={e => setEnquiryForm(f => ({ ...f, message: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 sm:py-2.5 text-sm text-white placeholder-white/30 focus:outline-none focus:border-secondary transition-colors resize-none" />
-                    <button type="submit" disabled={enquirySubmitting} className="w-full bg-secondary text-white py-3.5 sm:py-3 rounded-xl font-black text-[11px] sm:text-xs uppercase tracking-[0.18em] sm:tracking-[0.25em] hover:bg-secondary/90 active:scale-95 transition-all shadow-lg shadow-secondary/30 flex items-center justify-center gap-2">
-                      <MessageCircle size={15} />
+                    <textarea placeholder="Message (optional)" rows={2} value={enquiryForm.message} onChange={e => setEnquiryForm(f => ({ ...f, message: e.target.value }))} className="min-h-[82px] w-full resize-y rounded-xl border border-secondary/15 bg-white px-4 py-3 text-base font-semibold text-[#1f2933] shadow-sm shadow-secondary/5 outline-none transition-colors placeholder:text-slate-400 focus:border-secondary/60" />
+                    <button type="submit" disabled={enquirySubmitting} className="flex h-[56px] w-full items-center justify-center gap-2.5 rounded-xl bg-secondary px-5 text-sm font-black uppercase tracking-[0.12em] text-white shadow-xl shadow-secondary/25 transition-all hover:bg-secondary-dark active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:text-base">
+                      <MessageCircle size={18} />
                       {enquirySubmitting ? 'Connecting...' : 'Connect with Expert'}
                     </button>
                   </form>
