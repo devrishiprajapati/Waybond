@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Heart, Star } from 'lucide-react'
 import { isTestimonialHidden } from '../../lib/adminStorage'
+import { haptics } from '../../lib/haptics'
 
 type Testimonial = {
   id: number
@@ -85,17 +87,21 @@ function TestimonialCard({ test }: { test: Testimonial }) {
   const truncatedReview = test.review.length > 100 ? test.review.slice(0, 100) + '...' : test.review
 
   return (
-    <div className="block shrink-0 w-[280px] sm:w-[300px] md:w-[320px] mx-3 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 bg-white">
+    <Link 
+      to="/testimonials"
+      onClick={() => haptics.light()}
+      className="block shrink-0 w-[280px] sm:w-[300px] md:w-[320px] mx-3 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-lg hover:shadow-xl transition-all duration-500 bg-white cursor-pointer hover:-translate-y-1"
+    >
       {/* Trip Photo - Large at top */}
       {test.media && (
         <div className="h-48 sm:h-52 md:h-56 overflow-hidden bg-slate-100 relative">
           {test.mediaType === 'video' ? (
-            <video src={test.media} controls className="w-full h-full object-cover" />
+            <video src={test.media} className="w-full h-full object-cover pointer-events-none" />
           ) : (
             <img 
               src={test.media} 
               alt={`${test.name}'s ${test.trip}`} 
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
             />
           )}
         </div>
@@ -118,7 +124,11 @@ function TestimonialCard({ test }: { test: Testimonial }) {
         {/* Read More Link */}
         {test.review.length > 100 && (
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setIsExpanded(!isExpanded)
+            }}
             className="text-slate-400 text-xs font-medium hover:text-secondary transition-colors mb-4"
           >
             {isExpanded ? 'Show less' : 'Read more...'}
@@ -153,7 +163,7 @@ function TestimonialCard({ test }: { test: Testimonial }) {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   )
 }
 
@@ -189,7 +199,7 @@ export default function TestimonialsSection() {
       {/* Header */}
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 text-center mb-14 space-y-3">
         <Heart className="text-secondary mx-auto drop-shadow-lg" size={40} />
-        <h2 className="text-4xl md:text-6xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
+        <h2 className="text-3xl md:text-6xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
           Traveler <span className="text-secondary">Love</span>
         </h2>
       </div>

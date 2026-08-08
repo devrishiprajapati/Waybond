@@ -22,7 +22,7 @@ export default function BackupHome() {
         >
           <source src="/assets/best.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-slate-900/90"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-[#003d6a]/90"></div>
 
         {/* Hero Text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pointer-events-none">

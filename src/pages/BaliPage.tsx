@@ -25,7 +25,7 @@ export default function BaliPage() {
           alt="Bali"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-slate-900"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/10 to-[#003d6a]"></div>
 
         <div className="absolute inset-0 flex items-center justify-center pt-20">
           <div className="text-center px-6 max-w-5xl">

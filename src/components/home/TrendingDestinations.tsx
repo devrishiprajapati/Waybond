@@ -27,14 +27,14 @@ export default function TrendingDestinations() {
           className="mb-16 md:mb-24 text-center"
         >
           <div className="inline-block mb-6">
-            <span className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] md:text-[11px] drop-shadow-sm bg-gradient-to-r from-secondary to-blue-400 bg-clip-text text-transparent">
+            <span className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] md:text-[11px] drop-shadow-sm bg-gradient-to-r from-secondary to-[#003d6a] bg-clip-text text-transparent">
               ✨ Destinations In Demand
             </span>
           </div>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-black text-gray-900 tracking-tight uppercase leading-tight mb-6 max-w-4xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-black text-gray-900 tracking-tight uppercase leading-tight mb-6 max-w-4xl mx-auto">
             Trending <span className="relative inline-block">
-              <span className="absolute inset-0 bg-gradient-to-r from-secondary to-blue-400 blur-lg opacity-30" />
-              <span className="relative bg-gradient-to-r from-secondary to-blue-400 bg-clip-text text-transparent">
+              <span className="absolute inset-0 bg-gradient-to-r from-secondary to[#003d6a] blur-lg opacity-30" />
+              <span className="relative bg-gradient-to-r from-secondary to-[#003d6a] bg-clip-text text-transparent">
                 Adventures
               </span>
             </span>
@@ -129,10 +129,10 @@ export default function TrendingDestinations() {
         >
           <Link
             to="/discover"
-            className="inline-flex items-center space-x-3 px-8 md:px-10 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-[0.2em] text-white bg-gradient-to-r from-secondary to-blue-400 hover:shadow-2xl hover:shadow-secondary/40 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl shadow-secondary/30 border border-white/20"
+            className="inline-flex items-center space-x-3 px-8 md:px-10 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-[0.2em] text-white bg-gradient-to-r from-secondary to-[#003d6a] hover:shadow-2xl hover:shadow-secondary/40 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl shadow-secondary/30 border border-white/20"
           >
-            <span>View All Experiences</span>
-            <ArrowUpRight size={20} />
+            <span className="!text-white">View All Experiences</span>
+            <ArrowUpRight size={20} className='!text-white' />
           </Link>
         </motion.div>
       </div>
