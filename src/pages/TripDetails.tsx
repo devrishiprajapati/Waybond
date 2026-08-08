@@ -256,7 +256,7 @@ const TripDetails = () => {
         <meta name="description" content={trip.description.substring(0, 160)} />
       </Helmet>
       {/* Navigation & Header */}
-      <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 py-8">
+      <div className="max-w-[1920px] mx-auto px-4 py-6 md:px-12 md:py-8 lg:px-20">
         <Link
           to="/discover"
           onClick={() => haptics.light()}
@@ -274,19 +274,19 @@ const TripDetails = () => {
                 <span className="ml-1.5 text-xs font-black text-white">{trip.rating} ({trip.reviews} reviews)</span>
               </div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-display font-black text-white liquid-text italic uppercase tracking-tighter">{trip.title}</h1>
+            <h1 className="text-3xl md:text-6xl font-display font-black text-white liquid-text italic uppercase tracking-tighter">{trip.title}</h1>
             <div className="flex items-center text-white/60 mt-4 font-black uppercase tracking-widest text-xs min-w-0">
               <MapPin size={16} className="mr-2 text-secondary shrink-0" /> <span className="break-words">{trip.location}</span>
             </div>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2.5 sm:gap-3">
             <button
               type="button"
               onClick={() => {
                 haptics.light()
                 setShareOpen(true)
               }}
-              className="liquid-glass-dark px-4 py-4 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors shadow-xl flex items-center justify-center gap-2 text-white/80 font-black text-[10px] uppercase tracking-[0.18em]"
+              className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 text-white/80 shadow-xl transition-colors hover:bg-white/10 sm:h-auto sm:w-auto sm:gap-2 sm:rounded-2xl sm:px-4 sm:py-4 sm:text-[10px] sm:font-black sm:uppercase sm:tracking-[0.18em]"
               aria-label="Share trip"
             >
               <Share2 size={18} />
@@ -294,7 +294,7 @@ const TripDetails = () => {
             </button>
             <button
               onClick={() => haptics.light()}
-              className="liquid-glass-dark p-4 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors shadow-xl"
+              className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 shadow-xl transition-colors hover:bg-white/10 sm:h-auto sm:w-auto sm:rounded-2xl sm:p-4"
             >
               <Instagram size={20} className="text-white/80" />
             </button>
@@ -302,7 +302,7 @@ const TripDetails = () => {
               href={getWhatsAppLink(`Hi! I'm interested in the ${trip.title}`)}
               target="_blank" rel="noopener noreferrer"
               onClick={() => haptics.medium()}
-              className="liquid-glass-dark p-4 border border-white/10 rounded-2xl hover:bg-secondary hover:border-secondary transition-colors flex items-center justify-center shadow-xl group"
+              className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 shadow-xl transition-colors hover:border-secondary hover:bg-secondary sm:h-auto sm:w-auto sm:rounded-2xl sm:p-4 group"
             >
               <MessageCircle size={20} className="text-secondary group-hover:text-white transition-colors" />
             </a>
@@ -311,11 +311,11 @@ const TripDetails = () => {
       </div>
 
       {/* Gallery Section */}
-      <section className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
-        <div className="lg:col-span-8 space-y-6">
+      <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-12 lg:mb-16">
+        <div className="lg:col-span-8 space-y-4 sm:space-y-6">
           <motion.div
             layoutId="main-image"
-            className="relative h-[350px] md:h-[500px] rounded-[3rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10"
+            className="relative h-[230px] overflow-hidden rounded-3xl border border-white/10 shadow-[0_14px_32px_rgba(0,0,0,0.24)] sm:h-[350px] sm:rounded-[3rem] md:h-[500px] md:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
           >
             <img
               src={trip.images[activeImage] || trip.image}
@@ -323,12 +323,12 @@ const TripDetails = () => {
               className="w-full h-full object-cover transition-transform duration-[2s] hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/60 via-transparent to-transparent"></div>
-            <div className="absolute top-8 right-8">
+            <div className="absolute right-4 top-4 sm:right-8 sm:top-8">
               <button
                 onClick={() => haptics.light()}
-                className="liquid-glass p-5 rounded-full shadow-2xl hover:scale-110 hover:bg-secondary/20 transition-all border border-white/20"
+                className="liquid-glass rounded-full border border-white/20 p-3 shadow-2xl transition-all hover:scale-110 hover:bg-secondary/20 sm:p-5"
               >
-                <PlayCircle size={32} className="text-white" />
+                <PlayCircle size={24} className="text-white sm:size-8" />
               </button>
             </div>
           </motion.div>
@@ -352,21 +352,21 @@ const TripDetails = () => {
 
         {/* Desktop Booking Widget */}
         <div className="lg:col-span-4">
-          <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-[3rem] p-8 md:p-10 shadow-[0_15px_60px_rgba(0,0,0,0.5)] space-y-8">
-            <div className="flex justify-between items-center gap-4 pb-8 border-b border-white/10">
+          <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-3xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] space-y-5 md:rounded-[3rem] md:p-10 md:space-y-8 md:shadow-[0_15px_60px_rgba(0,0,0,0.5)]">
+            <div className="flex justify-between items-center gap-4 pb-5 border-b border-white/10 md:pb-8">
               <div className="min-w-0 flex-1 overflow-hidden">
                 <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em] drop-shadow-sm">Price per person</span>
-                <div className="text-4xl font-display font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
+                <div className="text-3xl md:text-4xl font-display font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
               </div>
-              <div className="liquid-glass p-4 rounded-2xl text-center shrink-0 min-w-[72px] border border-white/5">
-                <div className="text-white font-black text-2xl drop-shadow-md">{trip.duration.split(' ')[0]}</div>
-                <div className="text-[9px] text-white/60 font-black uppercase tracking-[0.2em] mt-1">Days</div>
+              <div className="liquid-glass p-3 md:p-4 rounded-2xl text-center shrink-0 min-w-[64px] md:min-w-[72px] border border-white/5">
+                <div className="text-white font-black text-xl md:text-2xl drop-shadow-md">{trip.duration.split(' ')[0]}</div>
+                <div className="text-[8px] md:text-[9px] text-white/60 font-black uppercase tracking-[0.2em] mt-1">Days</div>
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {/* Date Picker - Same as Discover */}
-              <div className="p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+              <div className="p-4 md:p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
                 <div className="space-y-2">
                   <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
 
@@ -476,7 +476,7 @@ const TripDetails = () => {
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 md:p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
                 <div className="flex items-center text-white/80 font-black uppercase tracking-widest text-xs">
                   <Users size={18} className="mr-3 text-secondary" /> Group Size
                 </div>
@@ -487,13 +487,13 @@ const TripDetails = () => {
             <button
               onClick={handleBookSlot}
               disabled={paying}
-              className="w-full bg-secondary text-white py-6 rounded-2xl font-black text-xs uppercase tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20"
+              className="w-full bg-secondary text-white py-4 md:py-6 rounded-2xl font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20"
             >
               {paying ? 'Opening Secure Payment...' : 'Book Your Slot'}
             </button>
-            <p className="text-center text-[10px] text-white/40 font-bold uppercase tracking-widest">No cancellation fee up to 15 days before departure</p>
+            <p className="text-center text-[9px] md:text-[10px] text-white/40 font-bold uppercase tracking-widest">No cancellation fee up to 15 days before departure</p>
 
-            <div className="pt-6 space-y-4 border-t border-white/10">
+            <div className="pt-5 md:pt-6 space-y-3 md:space-y-4 border-t border-white/10">
               <div className="flex items-center text-xs font-black tracking-widest uppercase text-white/60">
                 <ShieldCheck size={18} className="text-green-400 mr-3" /> Verified Captains
               </div>
@@ -516,19 +516,19 @@ const TripDetails = () => {
       </section>
 
       {/* Details Grid */}
-      <section className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-12 pb-24">
-        <div className="lg:col-span-8 space-y-20">
+      <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pb-24">
+        <div className="lg:col-span-8 space-y-12 md:space-y-20">
           {/* Overview */}
           <div>
-            <h2 className="text-3xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic mb-8 liquid-text">Trip Overview</h2>
-            <p className="text-lg text-white/60 leading-relaxed font-medium italic">
+            <h2 className="text-2xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic mb-5 md:mb-8 liquid-text">Trip Overview</h2>
+            <p className="text-base md:text-lg text-white/60 leading-relaxed font-medium italic">
               {trip.description}
             </p>
 
-            <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mt-6 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {trip.highlights.map((highlight: string, idx: number) => (
-                <div key={idx} className="flex items-center gap-4 p-5 liquid-glass-dark border border-white/10 rounded-2xl shadow-lg">
-                  <CheckCircle2 className="text-secondary shrink-0" size={20} />
+                <div key={idx} className="flex items-center gap-3 p-4 md:gap-4 md:p-5 liquid-glass-dark border border-white/10 rounded-2xl shadow-lg">
+                  <CheckCircle2 className="text-secondary shrink-0" size={18} />
                   <span className="text-white font-bold text-sm tracking-wide">{highlight}</span>
                 </div>
               ))}
@@ -537,8 +537,8 @@ const TripDetails = () => {
 
           {/* Itinerary */}
           <div>
-            <div className="flex justify-between items-end mb-10">
-              <h2 className="text-3xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
+            <div className="flex justify-between items-end gap-4 mb-6 md:mb-10">
+              <h2 className="text-2xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
               <button
                 onClick={() => {
                   haptics.light();
@@ -554,19 +554,19 @@ const TripDetails = () => {
               {trip.itinerary.map((item: any) => (
                 <div
                   key={item.day}
-                  className={`border rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
+                  className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
                   onClick={() => {
                     haptics.light();
                     setExpandedDay(expandedDay === item.day ? null : item.day);
                   }}
                 >
-                  <div className="p-6 md:p-8 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                      <div className={`w-16 h-16 rounded-2xl flex flex-col items-center justify-center font-display transition-colors duration-500 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
+                  <div className="p-4 md:p-8 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 md:gap-6 min-w-0">
+                      <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-display transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
                         <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
-                        <span className="text-2xl font-black italic">0{item.day}</span>
+                        <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
                       </div>
-                      <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight">{item.title}</h3>
+                      <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
                     </div>
                     {expandedDay === item.day ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
                   </div>
@@ -580,7 +580,7 @@ const TripDetails = () => {
                         transition={{ duration: 0.4, ease: "easeInOut" }}
                         className="overflow-hidden"
                       >
-                        <div className="px-6 md:px-8 pb-8 pl-[6.5rem] md:pl-[7.5rem] pr-6">
+                        <div className="px-4 md:px-8 pb-6 md:pb-8 md:pl-[7.5rem]">
                           <div className="w-full h-px bg-white/10 mb-6"></div>
                           <p className="text-white/60 font-medium leading-relaxed italic">
                             {item.description}
@@ -598,7 +598,7 @@ const TripDetails = () => {
           </div>
 
           {/* Captain Profile */}
-          <div className="p-8 md:p-12 liquid-glass-dark border border-white/10 rounded-[3rem] text-white overflow-hidden relative group shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
+          <div className="p-5 md:p-12 liquid-glass-dark border border-white/10 rounded-3xl md:rounded-[3rem] text-white overflow-hidden relative group shadow-[0_12px_36px_rgba(0,0,0,0.18)] md:shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
             <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-transform duration-1000 group-hover:scale-150"></div>
 
             <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
