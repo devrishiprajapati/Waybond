@@ -1,29 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Lottie from 'lottie-react';
+import React from 'react';
+import { motion } from 'framer-motion';
 
 const SplashScreen: React.FC = () => {
-  const [athleteAnimation, setAthleteAnimation] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Load animation from public folder
-    const loadAnimation = async () => {
-      try {
-        const response = await fetch('/athlete-animation.json');
-        if (!response.ok) throw new Error('Failed to load animation');
-        const data = await response.json();
-        setAthleteAnimation(data);
-      } catch (error) {
-        console.error('Animation load error:', error);
-        // If animation fails to load, we'll show the WayBond logo instead
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadAnimation();
-  }, []);
   return (
     <motion.div
       initial={{ opacity: 1 }}
@@ -76,7 +54,7 @@ const SplashScreen: React.FC = () => {
 
       {/* Main Content */}
       <div className="relative z-10 text-center px-6">
-        {/* Animated Athlete with Glow Effect */}
+        {/* Animated Camper with Glow Effect */}
         <div className="relative mb-8 flex justify-center">
           {/* Glow background */}
           <motion.div
@@ -86,7 +64,6 @@ const SplashScreen: React.FC = () => {
             className="absolute inset-0 blur-3xl bg-white/20 rounded-full scale-150"
           ></motion.div>
           
-          {/* Lottie Animation or Fallback Logo */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ 
@@ -97,54 +74,13 @@ const SplashScreen: React.FC = () => {
               scale: { duration: 0.8, ease: [0.34, 1.56, 0.64, 1] },
               opacity: { duration: 0.5 }
             }}
-            className="relative w-32 h-32 md:w-40 md:h-40"
+            className="relative w-48 h-48 md:w-64 md:h-64"
           >
-            {!isLoading && athleteAnimation ? (
-              // Show Lottie animation if loaded - with white filter
-              <Lottie
-                animationData={athleteAnimation}
-                loop={true}
-                className="w-full h-full"
-                style={{
-                  filter: 'brightness(0) invert(1)'
-                }}
-              />
-            ) : (
-              // Fallback: Animated WayBond Icon/Logo
-              <div className="relative w-full h-full">
-                {/* Outer circle */}
-                <motion.div
-                  animate={{
-                    rotate: 360
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "linear"
-                  }}
-                  className="absolute inset-0 border-4 border-white/30 border-t-white rounded-full"
-                ></motion.div>
-                
-                {/* Inner content */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.1, 1]
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                    className="text-center"
-                  >
-                    <div className="text-5xl md:text-6xl font-display font-black text-white tracking-tighter">
-                      W
-                    </div>
-                  </motion.div>
-                </div>
-              </div>
-            )}
+            <img
+              src="/camper-van.svg"
+              alt="WayBond camper van"
+              className="w-full h-full object-contain"
+            />
           </motion.div>
         </div>
 
