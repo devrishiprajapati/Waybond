@@ -3,13 +3,17 @@ import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import { Search, Calendar, User, BookOpen, ArrowRight, X } from 'lucide-react'
-import { getAllBlogs, Blog } from '../lib/blogs'
+import { getAllBlogs, Blog, getYouTubeThumbnailUrl } from '../lib/blogs'
 
 export default function Blogs() {
   const allBlogs = getAllBlogs()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
+
+  const openYouTube = (url?: string) => {
+    if (url) window.open(url, '_blank', 'noopener,noreferrer')
+  }
 
   // Get unique categories and tags
   const categories = Array.from(new Set(allBlogs.map(blog => blog.category)))
@@ -200,24 +204,34 @@ export default function Blogs() {
                   </p>
                   
                   <AnimatePresence mode="popLayout">
-                    {filteredBlogs.map((blog, index) => (
-                      <motion.div
-                        key={blog.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ delay: index * 0.1, duration: 0.4 }}
-                        className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-secondary/30 flex flex-col md:flex-row"
-                      >
+                    {filteredBlogs.map((blog, index) => {
+                      const imageSrc = getYouTubeThumbnailUrl(blog.youtubeUrl) || blog.image
+                      return (
+                        <motion.div
+                          key={blog.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ delay: index * 0.1, duration: 0.4 }}
+                          className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-secondary/30 flex flex-col md:flex-row"
+                        >
                         {/* Blog Image */}
-                        <div className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative">
+                        <button
+                          type="button"
+                          onClick={() => openYouTube(blog.youtubeUrl)}
+                          disabled={!blog.youtubeUrl}
+                          className={`md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative text-left ${
+                            blog.youtubeUrl ? 'cursor-pointer' : 'cursor-default'
+                          }`}
+                          title={blog.youtubeUrl ? `Open video for ${blog.title}` : undefined}
+                        >
                           <img
-                            src={blog.image}
+                            src={imageSrc}
                             alt={blog.title}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           />
                           <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        </div>
+                        </button>
 
                         {/* Blog Content */}
                         <div className="flex-grow p-8 flex flex-col justify-between">
@@ -277,8 +291,9 @@ export default function Blogs() {
                             </Link>
                           </div>
                         </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      )
+                    })}
                   </AnimatePresence>
                 </div>
               ) : (

@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import { Calendar, User, BookOpen, ArrowLeft, ArrowRight, Clock, Twitter, Facebook, Linkedin } from 'lucide-react'
-import { getBlogBySlug, getAllBlogs, Blog } from '../lib/blogs'
+import { getBlogBySlug, getAllBlogs, Blog, getYouTubeEmbedUrl } from '../lib/blogs'
 
 const WhatsAppIcon = () => (
   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -63,6 +63,7 @@ export default function BlogDetail() {
 
   const shareUrl = `${window.location.origin}/blog/${blog.slug}`
   const shareText = `Check out this travel story: ${blog.title}`
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(blog.youtubeUrl)
 
   const handleShare = (platform: string) => {
     let url = ''
@@ -231,6 +232,25 @@ export default function BlogDetail() {
             </div>
           </div>
         </motion.div>
+
+        {youtubeEmbedUrl && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.6 }}
+            className="max-w-4xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mb-20"
+          >
+            <div className="aspect-video rounded-3xl overflow-hidden shadow-2xl bg-gray-900">
+              <iframe
+                src={youtubeEmbedUrl}
+                title={`${blog.title} video`}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </motion.div>
+        )}
 
         {/* Author Bio */}
         <motion.div

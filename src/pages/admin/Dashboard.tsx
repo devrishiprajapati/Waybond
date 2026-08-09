@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   BarChart3,
+  BookOpen,
   Calendar,
   Edit2,
   Image as ImageIcon,
@@ -101,6 +102,7 @@ const AdminDashboard = () => {
     { label: 'Inventory', path: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Trending Adventures', path: '/admin/hero', icon: ImageIcon },
     { label: 'New Package', path: '/admin/new', icon: Plus },
+    { label: 'Travel Stories', path: '/admin/travel-stories', icon: BookOpen },
     { label: 'Testimonials', path: '/admin/testimonials', icon: MessageSquareText },
     { label: 'Users', path: '/admin/users', icon: UsersRound },
     { label: 'Gallery', path: '/admin/gallery', icon: Images }

@@ -1,32 +1,39 @@
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, Calendar, BookOpen } from 'lucide-react'
-import { getLatestBlogs } from '../../lib/blogs'
+import { getLatestBlogs, getYouTubeThumbnailUrl } from '../../lib/blogs'
 
 // Simplified, ultra-fast blog card component
 const BlogCard = React.memo(({ blog, index }: any) => {
   const formattedDate = useMemo(() => {
     return new Date(blog.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }, [blog.date])
+  const imageSrc = getYouTubeThumbnailUrl(blog.youtubeUrl) || blog.image
+
+  const openYouTube = () => {
+    if (blog.youtubeUrl) window.open(blog.youtubeUrl, '_blank', 'noopener,noreferrer')
+  }
 
   return (
-    <Link
-      to={`/blog/${blog.slug}`}
-      className="block"
+    <motion.div
+      key={blog.id}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.4 }}
+      viewport={{ once: true }}
+      className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:-translate-y-1"
     >
-      <motion.div
-        key={blog.id}
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.1, duration: 0.4 }}
-        viewport={{ once: true }}
-        className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer hover:-translate-y-1"
-      >
-        {/* Blog Image - Optimized */}
-        <div className="relative h-48 overflow-hidden bg-gray-200">
+      {/* Blog Image - Optimized */}
+      {blog.youtubeUrl ? (
+        <button
+          type="button"
+          onClick={openYouTube}
+          className="relative h-48 w-full overflow-hidden bg-gray-200 block text-left cursor-pointer"
+          title={`Open video for ${blog.title}`}
+        >
           <img
-            src={blog.image}
+            src={imageSrc}
             alt={blog.title}
             loading="lazy"
             decoding="async"
@@ -47,10 +54,37 @@ const BlogCard = React.memo(({ blog, index }: any) => {
               <span>{blog.readTime}m</span>
             </div>
           </div>
-        </div>
+        </button>
+      ) : (
+        <Link to={`/blog/${blog.slug}`} className="relative h-48 overflow-hidden bg-gray-200 block">
+          <img
+            src={imageSrc}
+            alt={blog.title}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+          
+          {/* Category Badge */}
+          <div className="absolute top-3 left-3">
+            <span className="bg-secondary text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-md">
+              {blog.category}
+            </span>
+          </div>
 
+          {/* Read Time Badge */}
+          <div className="absolute top-3 right-3">
+            <div className="bg-white/95 text-gray-900 px-2.5 py-0.5 rounded-full text-xs font-bold flex items-center space-x-1 shadow-md">
+              <BookOpen size={12} />
+              <span>{blog.readTime}m</span>
+            </div>
+          </div>
+        </Link>
+      )}
+
+      <Link to={`/blog/${blog.slug}`} className="block">
         {/* Content - Simplified */}
-        <div className="p-5">
+        <div className="p-5 cursor-pointer">
           {/* Meta Info - Compact */}
           <div className="flex items-center gap-3 mb-3 text-xs text-gray-500">
             <div className="flex items-center gap-1">
@@ -75,16 +109,25 @@ const BlogCard = React.memo(({ blog, index }: any) => {
             <ArrowRight size={14} className="group-hover/link:translate-x-1 transition-transform duration-300" />
           </div>
         </div>
-      </motion.div>
-    </Link>
+      </Link>
+    </motion.div>
   )
 })
 
 BlogCard.displayName = 'BlogCard'
 
 export default function LatestBlogs() {
-  // Display 3 blogs
-  const blogs = useMemo(() => getLatestBlogs(3), [])
+  const [blogs, setBlogs] = useState(() => getLatestBlogs(3))
+
+  useEffect(() => {
+    const refreshBlogs = () => setBlogs(getLatestBlogs(3))
+    window.addEventListener('waybond-travel-stories-updated', refreshBlogs)
+    window.addEventListener('storage', refreshBlogs)
+    return () => {
+      window.removeEventListener('waybond-travel-stories-updated', refreshBlogs)
+      window.removeEventListener('storage', refreshBlogs)
+    }
+  }, [])
 
   return (
     <section className="py-16 md:py-20 bg-gradient-to-b from-white to-blue-50">

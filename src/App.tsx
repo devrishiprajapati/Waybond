@@ -29,6 +29,7 @@ import AdminTestimonials from './pages/admin/Testimonials'
 import AdminUsers from './pages/admin/Users'
 import AdminUserDetail from './pages/admin/UserDetail'
 import AdminGallery from './pages/admin/Gallery'
+import AdminTravelStories from './pages/admin/TravelStories'
 import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
 import SafetyGuidelines from './pages/SafetyGuidelines'
@@ -108,6 +109,7 @@ function App() {
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+            <Route path="/admin/travel-stories" element={<AdminTravelStories />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/users/:id" element={<AdminUserDetail />} />
             <Route path="/admin/gallery" element={<AdminGallery />} />

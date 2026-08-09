@@ -5,6 +5,7 @@ export interface Blog {
   content: string;
   author: string;
   image: string;
+  youtubeUrl?: string;
   category: string;
   date: string;
   readTime: number;
@@ -165,27 +166,106 @@ Reduce your carbon footprint by choosing eco-friendly accommodations, using publ
   }
 ];
 
+const TRAVEL_STORIES_KEY = 'waybond_travel_stories';
+
+const canUseStorage = () => typeof window !== 'undefined' && Boolean(window.localStorage);
+
+const normalizeSlug = (value: string): string =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || `story-${Date.now()}`;
+
+const readStoredBlogs = (): Blog[] | null => {
+  if (!canUseStorage()) return null;
+  try {
+    const value = JSON.parse(localStorage.getItem(TRAVEL_STORIES_KEY) || 'null');
+    return Array.isArray(value) ? value : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeStoredBlogs = (blogs: Blog[]) => {
+  if (!canUseStorage()) return;
+  localStorage.setItem(TRAVEL_STORIES_KEY, JSON.stringify(blogs));
+};
+
+export const getStoredBlogs = (): Blog[] => readStoredBlogs() || blogsData;
+
+export const saveBlogUpdates = (id: string, updates: Omit<Blog, 'id'>): Blog => {
+  const currentBlogs = getStoredBlogs();
+  const target = currentBlogs.find((blog) => blog.id === id);
+  const nextBlog: Blog = {
+    id,
+    ...updates,
+    slug: normalizeSlug(updates.slug || updates.title),
+    tags: updates.tags.map((tag) => tag.trim()).filter(Boolean),
+    readTime: Math.max(1, Number(updates.readTime) || 1),
+    youtubeUrl: updates.youtubeUrl?.trim() || undefined
+  };
+
+  const nextBlogs = target
+    ? currentBlogs.map((blog) => blog.id === id ? nextBlog : blog)
+    : [nextBlog, ...currentBlogs];
+
+  writeStoredBlogs(nextBlogs);
+  window.dispatchEvent(new Event('waybond-travel-stories-updated'));
+  return nextBlog;
+};
+
 export const getLatestBlogs = (count: number = 3): Blog[] => {
-  return blogsData.slice(0, count);
+  return getStoredBlogs().slice(0, count);
 };
 
 export const getAllBlogs = (): Blog[] => {
-  return blogsData;
+  return getStoredBlogs();
 };
 
 export const getBlogBySlug = (slug: string): Blog | undefined => {
-  return blogsData.find(blog => blog.slug === slug);
+  return getStoredBlogs().find(blog => blog.slug === slug);
 };
 
 export const getBlogsByCategory = (category: string): Blog[] => {
-  return blogsData.filter(blog => blog.category === category);
+  return getStoredBlogs().filter(blog => blog.category === category);
 };
 
 export const searchBlogs = (query: string): Blog[] => {
   const lowerQuery = query.toLowerCase();
-  return blogsData.filter(blog =>
+  return getStoredBlogs().filter(blog =>
     blog.title.toLowerCase().includes(lowerQuery) ||
     blog.excerpt.toLowerCase().includes(lowerQuery) ||
     blog.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
   );
+};
+
+const getYouTubeVideoId = (url?: string): string => {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, '');
+    let videoId = '';
+
+    if (host === 'youtu.be') videoId = parsed.pathname.slice(1);
+    if (host.endsWith('youtube.com')) {
+      videoId = parsed.searchParams.get('v') || '';
+      if (!videoId && parsed.pathname.startsWith('/shorts/')) videoId = parsed.pathname.split('/')[2] || '';
+      if (!videoId && parsed.pathname.startsWith('/embed/')) videoId = parsed.pathname.split('/')[2] || '';
+    }
+
+    return videoId;
+  } catch {
+    return '';
+  }
+};
+
+export const getYouTubeEmbedUrl = (url?: string): string => {
+  const videoId = getYouTubeVideoId(url);
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+};
+
+export const getYouTubeThumbnailUrl = (url?: string): string => {
+  const videoId = getYouTubeVideoId(url);
+  return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
 };
