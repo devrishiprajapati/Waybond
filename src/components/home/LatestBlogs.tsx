@@ -140,7 +140,7 @@ export default function LatestBlogs() {
           viewport={{ once: true }}
           className="text-center mb-12 space-y-3"
         >
-          <h2 className="text-3xl md:text-6xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
+          <h2 className="text-2xl md:text-5xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
             Travel <span className="text-primary">Stories</span>
           </h2>
         </motion.div>
@@ -154,7 +154,7 @@ export default function LatestBlogs() {
             </div>
           ))}
         </div>
-
+       
         {/* Desktop: Grid Layout */}
         <div className="hidden lg:grid lg:grid-cols-3 gap-6 mb-10">
           {blogs.map((blog, index) => (

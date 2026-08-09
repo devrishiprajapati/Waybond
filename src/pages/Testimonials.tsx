@@ -51,8 +51,9 @@ const Testimonials = () => {
       <div className="absolute top-24 right-[-10%] h-[34rem] w-[34rem] rounded-full bg-secondary/10 blur-[140px] pointer-events-none" />
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
         <div className="max-w-4xl mb-16 md:mb-20 space-y-6">
-          <div className="liquid-glass inline-flex items-center gap-3 px-5 py-2 rounded-full border-white/10 shadow-lg"><Quote size={14} className="text-secondary" /><span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">Stories from the tribe</span></div>
-          <h1 className="text-5xl md:text-7xl lg:text-[6rem] font-display font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic">TRAVELLER<br /><span className="text-secondary">REVIEWS</span></h1>
+          {/* <div className="liquid-glass inline-flex items-center gap-3 px-5 py-2 rounded-full border-white/10 shadow-lg"><Quote size={14} className="text-secondary" /><span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">Stories from the tribe</span></div> */}
+          <h1 className="text-2xl md:text-4xl lg:text-5xl
+           font-display font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic">TRAVELLER<br /><span className="text-secondary">REVIEWS</span></h1>
           <p className="text-lg text-white/50 font-medium max-w-2xl italic leading-relaxed">Real journeys, shared memories, and the people who made the WayBond experience their own.</p>
           <p className="text-sm text-white/40 italic mt-4">Add your testimonial from your dashboard after booking a trip.</p>
         </div>

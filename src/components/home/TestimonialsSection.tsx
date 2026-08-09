@@ -37,7 +37,7 @@ const fallbackTestimonials: Testimonial[] = [
   },
   { 
     id: 2, 
-    name: 'Dev Mehta', 
+    name: 'Dev Mehta',  
     trip: 'Himachal Escape', 
     review: 'WayBond made travelling as a solo explorer feel easy and exciting. The trip leader was fantastic and the itinerary was beautifully paced.', 
     rating: 5,
@@ -199,7 +199,7 @@ export default function TestimonialsSection() {
       {/* Header */}
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 text-center mb-14 space-y-3">
         <Heart className="text-secondary mx-auto drop-shadow-lg" size={40} />
-        <h2 className="text-3xl md:text-6xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
+        <h2 className="text-2xl md:text-5xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
           Traveler <span className="text-secondary">Love</span>
         </h2>
       </div>

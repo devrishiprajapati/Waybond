@@ -32,7 +32,7 @@ export default function WhyChooseUs() {
           viewport={{ once: true }}
           className="text-center mb-16 space-y-3"
         >
-          <h2 className="text-3xl md:text-6xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
+          <h2 className="text-2xl md:text-5xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
             What Makes Us <span className="text-primary">Different</span>
           </h2>
         </motion.div>
