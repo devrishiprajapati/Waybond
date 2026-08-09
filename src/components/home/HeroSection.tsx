@@ -115,12 +115,12 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4"
+              className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4"
             >
               <Link
                 to="/discover"
                 onClick={() => haptics.medium()}
-                className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-5 sm:px-7 py-2.5 sm:py-3 bg-secondary text-white rounded-full font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 shadow-2xl shadow-secondary/30"
+                className="inline-block px-6 sm:px-8 py-2.5 sm:py-3 bg-secondary text-white rounded-full font-black text-xs sm:text-sm uppercase tracking-wider text-center transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg"
               >
                 Explore
               </Link>
