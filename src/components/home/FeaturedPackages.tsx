@@ -92,13 +92,18 @@ export default function FeaturedPackages() {
               className="relative"
             >
               {/* Horizontal Scroll Container */}
-              <div className="flex gap-7 md:gap-9 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <div className="flex gap-4 md:gap-7 lg:gap-9 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-1">
                 {selectedTrips.map(trip => {
                 const selectedDeparture = selectedDepartures[trip.id] || trip.departureDates?.[0]
                 const isWishlisted = isInList(trip.id)
                 
                 return (
-                  <article key={trip.id} className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col relative min-w-[320px] sm:min-w-[380px] snap-start">
+                  <Link 
+                    key={trip.id}
+                    to={`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`}
+                    onClick={() => haptics.medium()}
+                    className="group overflow-hidden rounded-2xl md:rounded-[2rem] liquid-glass text-white border border-white/10 shadow-xl md:shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col relative min-w-[280px] max-w-[280px] sm:min-w-[340px] sm:max-w-[340px] md:min-w-[380px] md:max-w-[380px] snap-start cursor-pointer"
+                  >
                     {/* Wishlist Button - Top Right */}
                     <button
                       onClick={(e) => {
@@ -107,54 +112,54 @@ export default function FeaturedPackages() {
                         haptics.light()
                         toggle(trip)
                       }}
-                      className="absolute top-4 right-4 z-10 h-10 w-10 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-secondary hover:border-secondary hover:text-white transition-all duration-300 hover:scale-110 active:scale-95 group/wishlist"
+                      className="absolute top-3 right-3 md:top-4 md:right-4 z-10 h-9 w-9 md:h-10 md:w-10 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-secondary hover:border-secondary hover:text-white transition-all duration-300 hover:scale-110 active:scale-95 group/wishlist"
                       title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                       aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                     >
                       <Heart 
-                        className={`w-5 h-5 transition-all duration-300 ${isWishlisted ? 'fill-secondary text-secondary' : 'fill-none'}`}
+                        className={`w-4 h-4 md:w-5 md:h-5 transition-all duration-300 ${isWishlisted ? 'fill-secondary text-secondary' : 'fill-none'}`}
                       />
                     </button>
                     
                     {/* Experience Badge - Top Left */}
-                    <span className="absolute top-4 left-4 z-10 bg-secondary text-white rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.18em] shadow-lg">
+                    <span className="absolute top-3 left-3 md:top-4 md:left-4 z-10 bg-secondary text-white rounded-full px-3 py-1.5 md:px-4 md:py-2 text-[8px] md:text-[9px] font-black uppercase tracking-[0.18em] shadow-lg">
                       {trip.experience}
                     </span>
                     
                     {/* Image Section */}
-                    <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
+                    <div className="relative h-44 sm:h-52 md:h-60 overflow-hidden bg-white flex-shrink-0">
                       <img src={optimizeImageUrl(trip.image, 800, 80)} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/55 via-transparent to-transparent" />
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-5 md:p-6 flex-grow flex flex-col">
-                      <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[10px] font-bold text-white/55 mb-3">
+                    <div className="p-4 md:p-5 lg:p-6 flex-grow flex flex-col">
+                      <div className="grid grid-cols-[auto_1fr] gap-x-3 md:gap-x-4 gap-y-1.5 md:gap-y-2 text-[9px] md:text-[10px] font-bold text-white/55 mb-2.5 md:mb-3">
                         <span className="inline-flex items-center gap-1.5 whitespace-nowrap"><CalendarDays size={13} className="text-secondary" /> {trip.duration}</span>
                         <span className="inline-flex items-center gap-1.5 min-w-0"><MapPin size={13} className="text-secondary shrink-0" /><span className="truncate">{trip.location}</span></span>
                       </div>
-                      <div className="h-px bg-white/10 mb-3" />
-                      <h3 className="text-lg md:text-xl font-display font-black tracking-tight text-white leading-snug line-clamp-2 mb-2">{trip.title}</h3>
-                      <p className="text-xs md:text-sm text-white/55 line-clamp-3 flex-grow">{trip.description}</p>
+                      <div className="h-px bg-white/10 mb-2.5 md:mb-3" />
+                      <h3 className="text-base md:text-lg lg:text-xl font-display font-black tracking-tight text-white leading-snug line-clamp-2 mb-1.5 md:mb-2">{trip.title}</h3>
+                      <p className="text-xs md:text-sm text-white/55 line-clamp-2 md:line-clamp-3 flex-grow leading-relaxed">{trip.description}</p>
                     </div>
 
                     {/* Bottom Section */}
-                    <div className="border-t border-white/10 p-5 md:p-6 flex-shrink-0 space-y-3">
+                    <div className="border-t border-white/10 p-4 md:p-5 lg:p-6 flex-shrink-0 space-y-2.5 md:space-y-3">
                       {/* Price & Difficulty */}
-                      <div className="grid grid-cols-2 gap-3 items-end">
+                      <div className="grid grid-cols-2 gap-2.5 md:gap-3 items-end">
                         <div>
-                          <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Starting from</p>
-                          <p className="text-xl md:text-2xl font-display font-black text-secondary leading-none">₹{trip.price}</p>
+                          <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white/45 mb-0.5 md:mb-1">Starting from</p>
+                          <p className="text-lg md:text-xl lg:text-2xl font-display font-black text-secondary leading-none">₹{trip.price}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Difficulty</p>
-                          <div className="flex justify-end gap-1">{[0, 1, 2].map(level => <span key={level} className={`h-1 w-4 rounded-full ${level === 0 ? 'bg-secondary' : 'bg-white/20'}`} />)}</div>
+                          <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white/45 mb-0.5 md:mb-1">Difficulty</p>
+                          <div className="flex justify-end gap-1">{[0, 1, 2].map(level => <span key={level} className={`h-1 w-3 md:w-4 rounded-full ${level === 0 ? 'bg-secondary' : 'bg-white/20'}`} />)}</div>
                         </div>
                       </div>
 
                       {/* Date Selection */}
-                      <div className="space-y-2">
-                        <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
+                      <div className="space-y-1.5 md:space-y-2">
+                        <p className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
                         
                         {/* Month tabs and dates */}
                         {(() => {
@@ -195,7 +200,7 @@ export default function FeaturedPackages() {
                           const datesInMonth = monthGroups[currentSelectedMonth] || []
 
                           return (
-                            <div className="space-y-2">
+                            <div className="space-y-1.5 md:space-y-2">
                               <div className="flex gap-1 flex-wrap">
                                 {sortedMonths.map(monthKey => {
                                   const isActive = monthKey === currentSelectedMonth
@@ -206,7 +211,9 @@ export default function FeaturedPackages() {
                                     <button
                                       key={monthKey}
                                       type="button"
-                                      onClick={() => {
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        e.stopPropagation()
                                         const firstDate = monthGroups[monthKey]?.[0]
                                         if (firstDate) {
                                           setSelectedDepartures(prev => ({
@@ -215,7 +222,7 @@ export default function FeaturedPackages() {
                                           }))
                                         }
                                       }}
-                                      className={`px-2 py-1 text-[7px] font-black uppercase tracking-wider rounded transition-colors ${
+                                      className={`px-1.5 md:px-2 py-0.5 md:py-1 text-[6px] md:text-[7px] font-black uppercase tracking-wider rounded transition-colors ${
                                         isActive
                                           ? 'bg-secondary text-white'
                                           : 'bg-transparent text-white/50 hover:text-white'
@@ -227,7 +234,7 @@ export default function FeaturedPackages() {
                                 })}
                               </div>
 
-                              <div className="flex gap-1.5 flex-wrap">
+                              <div className="flex gap-1 md:gap-1.5 flex-wrap">
                                 {datesInMonth && datesInMonth.length > 0 ? (
                                   datesInMonth.map(date => {
                                     const day = date.slice(8, 10)
@@ -237,13 +244,15 @@ export default function FeaturedPackages() {
                                       <button
                                         key={date}
                                         type="button"
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                          e.preventDefault()
+                                          e.stopPropagation()
                                           setSelectedDepartures(prev => ({
                                             ...prev,
                                             [trip.id]: date
                                           }))
                                         }}
-                                        className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${
+                                        className={`w-6 h-6 md:w-7 md:h-7 rounded-full font-black text-[10px] md:text-xs flex items-center justify-center transition-all ${
                                           isSelected
                                             ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
                                             : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
@@ -263,7 +272,7 @@ export default function FeaturedPackages() {
                         })()}
                       </div>
 
-                      {/* Single Explore Button */}
+                      {/* Single Explore Button
                       <Link 
                         to={`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} 
                         onClick={() => haptics.medium()} 
@@ -271,9 +280,9 @@ export default function FeaturedPackages() {
                         title="Explore package"
                       >
                         <span>Explore</span>
-                      </Link>
+                      </Link> */}
                     </div>
-                  </article>
+                  </Link>
                 )
               })}
               </div>

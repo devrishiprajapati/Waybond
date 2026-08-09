@@ -52,6 +52,7 @@ const TripDetails = () => {
   const [enquiryDone, setEnquiryDone] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
+  const [showStickyBar, setShowStickyBar] = useState(false)
 
   useEffect(() => {
     if (slug) {
@@ -62,6 +63,24 @@ const TripDetails = () => {
       })
     }
   }, [slug, departureParam])
+
+  // Scroll handler for sticky booking bar
+  useEffect(() => {
+    const handleScroll = () => {
+      // Get the main image element
+      const mainImage = document.querySelector('[data-main-image]')
+      if (mainImage) {
+        const imageRect = mainImage.getBoundingClientRect()
+        // Show sticky bar when image is scrolled past (top is above viewport)
+        // Hide it when image bottom is still visible in viewport
+        const imageScrolledPast = imageRect.bottom < 100
+        setShowStickyBar(imageScrolledPast)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const validateEnquiry = () => {
     const errs: Record<string, string> = {}
@@ -256,7 +275,7 @@ const TripDetails = () => {
         <meta name="description" content={trip.description.substring(0, 160)} />
       </Helmet>
       {/* Navigation & Header */}
-      <div className="max-w-[1920px] mx-auto px-4 py-6 md:px-12 md:py-8 lg:px-20">
+      <div className="max-w-[1920px] mx-auto px-4 md:px-12 md:py-8 lg:px-20">
         <Link
           to="/discover"
           onClick={() => haptics.light()}
@@ -274,7 +293,7 @@ const TripDetails = () => {
                 <span className="ml-1.5 text-xs font-black text-white">{trip.rating} ({trip.reviews} reviews)</span>
               </div>
             </div>
-            <h1 className="text-3xl md:text-6xl font-display font-black text-white liquid-text italic uppercase tracking-tighter">{trip.title}</h1>
+            <h1 className="text-2xl md:text-4xl font-display font-black text-white liquid-text italic uppercase tracking-tighter">{trip.title}</h1>
             <div className="flex items-center text-white/60 mt-4 font-black uppercase tracking-widest text-xs min-w-0">
               <MapPin size={16} className="mr-2 text-secondary shrink-0" /> <span className="break-words">{trip.location}</span>
             </div>
@@ -303,6 +322,7 @@ const TripDetails = () => {
         <div className="lg:col-span-8 space-y-4 sm:space-y-6">
           <motion.div
             layoutId="main-image"
+            data-main-image
             className="relative h-[230px] overflow-hidden rounded-3xl border border-white/10 shadow-[0_14px_32px_rgba(0,0,0,0.24)] sm:h-[350px] sm:rounded-[3rem] md:h-[500px] md:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
           >
             <img
@@ -802,6 +822,47 @@ const TripDetails = () => {
       <MessageCircle size={16} />
       Enquire Now
     </button>
+
+    {/* Sticky Booking Bar - Appears when scrolling past main image */}
+    <motion.div
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ 
+        y: showStickyBar ? 0 : -100,
+        opacity: showStickyBar ? 1 : 0
+      }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="fixed top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-lg"
+    >
+      <div className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 py-3 md:py-4">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 md:gap-6 min-w-0">
+            <img 
+              src={trip?.image} 
+              alt={trip?.title}
+              className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover shrink-0 border border-gray-200"
+            />
+            <div className="min-w-0">
+              <h3 className="text-sm md:text-lg font-black text-gray-900 truncate">{trip?.title}</h3>
+              <p className="text-xs md:text-sm text-gray-500 font-semibold">{trip?.location}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3 md:gap-6 shrink-0">
+            <div className="text-right">
+              <p className="text-xs text-gray-500 font-semibold">per person</p>
+              <p className="text-lg md:text-2xl font-black text-gray-900">₹{trip?.price?.toLocaleString('en-IN')}</p>
+            </div>
+            <button
+              onClick={handleBookSlot}
+              disabled={paying}
+              className="bg-secondary text-white px-4 md:px-8 py-2.5 md:py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap"
+            >
+              {paying ? 'Processing...' : 'Book Now'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
     </>
   )
 }
