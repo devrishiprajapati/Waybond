@@ -61,7 +61,7 @@ export default function FeaturedPackages() {
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
         <div className="text-center mb-10 md:mb-12">
           <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-4">WayBond adventures</p>
-          <h2 className="text-3xl md:text-6xl font-display font-black text-white tracking-tighter uppercase italic leading-none liquid-text">Choose Your <span className="text-secondary">Experience</span></h2>
+          <h2 className="text-2xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic leading-none liquid-text">Choose Your <span className="text-secondary">Experience</span></h2>
           <p className="text-white/45 font-medium text-base md:text-lg mt-5">Pick the perfect adventure for you.</p>
         </div>
 

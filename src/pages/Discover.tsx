@@ -83,7 +83,7 @@ const Discover = () => {
     <div className="min-h-screen bg-white text-white pt-28 pb-12">
       <Helmet>
         <title>Explore Adventures — WAYBOND Trips Catalog</title>
-        <meta name="description" content="Browse curated domestic and international travel packages. From Himachal to Bali — find your next adventure with Infi Yatra." />
+        <meta name="description" content="Browse curated domestic and international travel packages. From Himachal to Bali — find your next adventure with WayBond." />
       </Helmet>
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20">
 
@@ -96,7 +96,7 @@ const Discover = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">
               <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px] drop-shadow-lg">COLLECTIONS 2024</span>
-              <h1 className="text-4xl md:text-5xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
+              <h1 className="text-2xl md:text-4xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
                 The <span className="text-primary" style={{ WebkitTextStroke: '1px white' }}>Adventures</span> Hub
               </h1>
               <p className="text-white/40 font-medium text-sm max-w-xl italic leading-relaxed">Curated escapes for the Ahmedabad spirit. From the rugged north to tropical islands.</p>

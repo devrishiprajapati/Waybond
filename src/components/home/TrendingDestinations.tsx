@@ -31,7 +31,7 @@ export default function TrendingDestinations() {
               ✨ Destinations In Demand
             </span>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-display font-black text-gray-900 tracking-tight uppercase leading-tight mb-6 max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black text-gray-900 tracking-tight uppercase leading-tight mb-6 max-w-4xl mx-auto">
             Trending <span className="relative inline-block">
               <span className="absolute inset-0 bg-gradient-to-r from-secondary to[#003d6a] blur-lg opacity-30" />
               <span className="relative bg-gradient-to-r from-secondary to-[#003d6a] bg-clip-text text-transparent">
@@ -136,6 +136,6 @@ export default function TrendingDestinations() {
           </Link>
         </motion.div>
       </div>
-    </section>
+    </section> 
   )
 }

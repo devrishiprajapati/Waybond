@@ -48,10 +48,10 @@ export default function Blogs() {
           className="bg-gradient-to-br from-secondary/10 to-blue-50 py-16 md:py-20 border-b-2 border-secondary/10"
         >
           <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20">
-            <h1 className="text-5xl md:text-6xl font-display font-black text-gray-900 uppercase tracking-tight mb-4">
+            <h1 className="text-2xl md:text-4xl font-display font-black text-gray-900 uppercase tracking-tight mb-4">
               Travel Stories
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl font-medium">
+            <p className="text-xl text-xs text-gray-600 max-w-3xl font-medium">
               Explore inspiring travel stories, expert tips, and adventure guides from our community of travelers and local experts.
             </p>
           </div>

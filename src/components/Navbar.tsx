@@ -56,11 +56,11 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className={`fixed left-0 right-0 z-50 transition-all duration-700 transform flex justify-center w-full px-4 md:px-12 pt-4 md:pt-6 safe-area-padding ${visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      <nav className={`fixed left-0 right-0 z-50 transition-all duration-700 transform flex justify-center w-full px-0 pt-0 ${visible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
         }`}>
-        <div className={`navbar-glass mobile-navbar-surface w-full max-w-[1920px] mx-auto rounded-full liquid-glass shadow-2xl transition-all duration-500 relative group/nav ${scrolled ? 'py-1.5 scale-[0.98]' : 'py-2.5 md:py-3'}`}>
+        <div className={`navbar-glass mobile-navbar-surface w-full mx-auto rounded-none liquid-glass shadow-2xl transition-all duration-500 relative group/nav ${scrolled ? 'py-1.5 scale-100' : 'py-2.5 md:py-3'}`}>
 
-          <div className="flex justify-between items-center h-10 relative z-10 px-4 md:px-10">
+          <div className="flex justify-between items-center h-10 relative z-10 px-6 md:px-12 lg:px-20">
             <Link to="/" onClick={() => haptics.light()} className="flex items-center space-x-2 group">
               <span className="mobile-brand text-base md:text-2xl font-display font-black tracking-tighter text-white liquid-text">
                 WAYBond<span className="text-secondary tracking-tighter uppercase text-[10px] md:text-base ml-0.5 font-black">Explorers</span>
@@ -144,7 +144,7 @@ const Navbar = () => {
                 <Link to="/" onClick={() => haptics.light()} className="flex items-center" aria-label="Waybond home">
                   <span
                     className="text-2xl font-display text-white tracking-tight"
-                    style={{ color: '#ffffff', opacity: 1, textShadow: 'none', WebkitTextFillColor: '#fffff' , fontWeight:400}}
+                    style={{ color: '#ffffff', opacity: 1, textShadow: 'none', WebkitTextFillColor: '#fffff' , fontWeight:800}}
                   >
                     WAY<span style={{ color: '#003d6a', opacity: 1, WebkitTextFillColor: '#003d6a' }} className="text-sm ml-0.5">BOND</span>
                   </span>
