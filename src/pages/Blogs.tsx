@@ -11,10 +11,6 @@ export default function Blogs() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
-  const openYouTube = (url?: string) => {
-    if (url) window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
   // Get unique categories and tags
   const categories = Array.from(new Set(allBlogs.map(blog => blog.category)))
   const allTags = Array.from(new Set(allBlogs.flatMap(blog => blog.tags)))
@@ -216,22 +212,31 @@ export default function Blogs() {
                           className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-secondary/30 flex flex-col md:flex-row"
                         >
                         {/* Blog Image */}
-                        <button
-                          type="button"
-                          onClick={() => openYouTube(blog.youtubeUrl)}
-                          disabled={!blog.youtubeUrl}
-                          className={`md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative text-left ${
-                            blog.youtubeUrl ? 'cursor-pointer' : 'cursor-default'
-                          }`}
-                          title={blog.youtubeUrl ? `Open video for ${blog.title}` : undefined}
-                        >
-                          <img
-                            src={imageSrc}
-                            alt={blog.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                        </button>
+                        {blog.youtubeUrl ? (
+                          <a
+                            href={blog.youtubeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative block"
+                            title={`Open video for ${blog.title}`}
+                          >
+                            <img
+                              src={imageSrc}
+                              alt={blog.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                          </a>
+                        ) : (
+                          <div className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative">
+                            <img
+                              src={imageSrc}
+                              alt={blog.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                          </div>
+                        )}
 
                         {/* Blog Content */}
                         <div className="flex-grow p-8 flex flex-col justify-between">

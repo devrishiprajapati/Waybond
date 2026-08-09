@@ -11,10 +11,6 @@ const BlogCard = React.memo(({ blog, index }: any) => {
   }, [blog.date])
   const imageSrc = getYouTubeThumbnailUrl(blog.youtubeUrl) || blog.image
 
-  const openYouTube = () => {
-    if (blog.youtubeUrl) window.open(blog.youtubeUrl, '_blank', 'noopener,noreferrer')
-  }
-
   return (
     <motion.div
       key={blog.id}
@@ -26,10 +22,11 @@ const BlogCard = React.memo(({ blog, index }: any) => {
     >
       {/* Blog Image - Optimized */}
       {blog.youtubeUrl ? (
-        <button
-          type="button"
-          onClick={openYouTube}
-          className="relative h-48 w-full overflow-hidden bg-gray-200 block text-left cursor-pointer"
+        <a
+          href={blog.youtubeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="relative h-48 w-full overflow-hidden bg-gray-200 block"
           title={`Open video for ${blog.title}`}
         >
           <img
@@ -54,7 +51,7 @@ const BlogCard = React.memo(({ blog, index }: any) => {
               <span>{blog.readTime}m</span>
             </div>
           </div>
-        </button>
+        </a>
       ) : (
         <Link to={`/blog/${blog.slug}`} className="relative h-48 overflow-hidden bg-gray-200 block">
           <img
