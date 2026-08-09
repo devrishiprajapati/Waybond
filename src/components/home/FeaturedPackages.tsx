@@ -141,7 +141,7 @@ export default function FeaturedPackages() {
                       <div className="h-px bg-white/10 mb-2.5 md:mb-3" />
                       <h3 className="text-base md:text-lg lg:text-xl font-display font-black tracking-tight text-white leading-snug line-clamp-2 mb-1.5 md:mb-2">{trip.title}</h3>
                       <p className="text-xs md:text-sm text-white/55 line-clamp-2 md:line-clamp-3 flex-grow leading-relaxed">{trip.description}</p>
-                    </div>
+                    </div> 
 
                     {/* Bottom Section */}
                     <div className="border-t border-white/10 p-4 md:p-5 lg:p-6 flex-shrink-0 space-y-2.5 md:space-y-3">

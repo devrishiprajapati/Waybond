@@ -120,7 +120,7 @@ export default function HeroSection() {
               <Link
                 to="/discover"
                 onClick={() => haptics.medium()}
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-2 sm:py-2.5 bg-secondary text-white rounded-full font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 shadow-2xl shadow-secondary/30"
+                className="w-full max-w-[280px] sm:w-auto sm:max-w-none px-5 sm:px-7 py-2.5 sm:py-3 bg-secondary text-white rounded-full font-black text-[11px] sm:text-xs uppercase tracking-widest text-center transition-all duration-300 hover:scale-105 shadow-2xl shadow-secondary/30"
               >
                 Explore
               </Link>

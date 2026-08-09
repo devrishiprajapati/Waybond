@@ -9,6 +9,7 @@ const WhyChooseUs = lazy(() => import("../components/home/WhyChooseUs"));
 const LatestBlogs = lazy(() => import("../components/home/LatestBlogs"));
 const TestimonialsSection = lazy(() => import("../components/home/TestimonialsSection"));
 const NewsletterSection = lazy(() => import("../components/home/NewsletterSection"));
+const ContactSocialSection = lazy(() => import("../components/home/ContactSocialSection"));
 
 // Fallback component for lazy loading
 const SectionSkeleton = () => (
@@ -59,6 +60,10 @@ export default function Home() {
 
       <Suspense fallback={<SectionSkeleton />}>
         <TestimonialsSection />
+      </Suspense>
+
+      <Suspense fallback={<SectionSkeleton />}>
+        <ContactSocialSection />
       </Suspense>
 {/* 
       <Suspense fallback={<SectionSkeleton />}>
