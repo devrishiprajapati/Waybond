@@ -202,7 +202,7 @@ const UserDashboard = () => {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-8">
           <div className="space-y-4">
             <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Welcome back, explorer</span>
-            <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
+            <h1 className="text-2xl md:text-5xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
               {user.name}'s <span className="text-primary">Dashboard</span>
             </h1>
             <p className="text-white/50 max-w-2xl font-medium italic">
@@ -275,7 +275,7 @@ const UserDashboard = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-display font-black tracking-tight">{user.name}</h3>
+                    <h3 className="text-xl font-display font-black tracking-tight">{user.name}</h3>
                     <p className="text-white/45 text-xs font-medium italic mt-1">{user.email}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -432,7 +432,7 @@ const UserDashboard = () => {
           <div className="col-span-1 lg:col-span-8 order-2 lg:order-2">
             <section className="space-y-5">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-2xl font-display font-black uppercase italic tracking-tight flex items-center">
+                <h2 className="text-xl font-display font-black uppercase italic tracking-tight flex items-center">
                   <Calendar className="mr-3 text-secondary" /> All Your Trips
                 </h2>
                 <Link

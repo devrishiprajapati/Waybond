@@ -148,7 +148,7 @@ const AdminDashboard = () => {
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8 mb-10">
           <div className="space-y-4">
             <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Control Center</span>
-            <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
+            <h2 className="text-3xl md:text-5xl pt-8 font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
               Package <span className="text-primary">Inventory</span>
             </h2>
             <p className="text-white/45 font-medium italic max-w-2xl">
@@ -178,21 +178,21 @@ const AdminDashboard = () => {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-8">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.06 }}
-              className="liquid-glass-dark border border-white/10 rounded-[2rem] p-6 flex items-center gap-5"
+              className="liquid-glass-dark border border-white/10 rounded-2xl lg:rounded-[2rem] p-4 md:p-6 flex flex-col lg:flex-row items-center gap-3 lg:gap-5"
             >
-              <div className="w-14 h-14 rounded-2xl bg-secondary/15 border border-secondary/20 flex items-center justify-center text-secondary">
-                <stat.icon size={24} />
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl lg:rounded-2xl bg-secondary/15 border border-secondary/20 flex items-center justify-center text-secondary shrink-0">
+                <stat.icon size={20} className="md:w-6 md:h-6" />
               </div>
-              <div>
-                <p className="text-[9px] text-white/35 font-black uppercase tracking-[0.24em]">{stat.label}</p>
-                <p className="text-3xl font-display font-black text-white mt-2 leading-none">{stat.value}</p>
+              <div className="text-center lg:text-left">
+                <p className="text-[8px] md:text-[9px] text-white/35 font-black uppercase tracking-[0.18em] md:tracking-[0.24em]">{stat.label}</p>
+                <p className="text-2xl md:text-3xl font-display font-black text-white mt-1 md:mt-2 leading-none">{stat.value}</p>
               </div>
             </motion.div>
           ))}
