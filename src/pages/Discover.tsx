@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
 import { Filter, Search, MapPin, Calendar, Star, ChevronDown, CheckCircle2, ShieldCheck, Heart } from 'lucide-react'
@@ -18,6 +18,7 @@ const experienceFilters = [
 const Discover = () => {
   const [trips, setTrips] = useState<any[]>([])
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedDepartures, setSelectedDepartures] = useState<Record<number, string>>({})
@@ -228,7 +229,10 @@ const Discover = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col relative cursor-pointer"
-                      onClick={() => { haptics.medium(); window.location.href = `/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}` }}
+                      onClick={() => { 
+                        haptics.medium()
+                        navigate(`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`)
+                      }}
                     >
                       {/* Wishlist Button - Top Right */}
                       <button
