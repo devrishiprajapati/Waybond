@@ -6,6 +6,11 @@ import { getTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
 
 const CATEGORIES = ['Adventure', 'Beach', 'Luxury', 'Nature', 'Honeymoon', 'Backpacking']
+const DIFFICULTY_LEVELS: { value: Trip['difficulty'], label: string, color: string }[] = [
+  { value: 'Easy', label: 'Easy', color: 'bg-green-500/15 text-green-400 border-green-400/30' },
+  { value: 'Medium', label: 'Medium', color: 'bg-yellow-500/15 text-yellow-400 border-yellow-400/30' },
+  { value: 'Difficult', label: 'Difficult', color: 'bg-red-500/15 text-red-400 border-red-400/30' }
+]
 const EXPERIENCES: { value: Trip['experience'], label: string }[] = [
   { value: 'monsoon', label: 'Monsoon Treks' },
   { value: 'weekend', label: 'Weekend Treks' },
@@ -28,6 +33,7 @@ const EditTrip = () => {
     duration: '',
     category: 'Adventure',
     experience: 'weekend',
+    difficulty: 'Medium',
     image: '',
     rating: 4.8,
     reviews: 120,
@@ -275,6 +281,27 @@ const EditTrip = () => {
                 >
                   {EXPERIENCES.map(item => <option key={item.value} value={item.value} className="bg-white text-white">{item.label}</option>)}
                 </select>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className={labelClass}>Difficulty Level</label>
+              <p className="text-xs text-white/45 ml-2 mb-3">Select the physical difficulty level for this package</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {DIFFICULTY_LEVELS.map(level => (
+                  <button
+                    key={level.value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, difficulty: level.value })}
+                    className={`h-14 rounded-2xl border-2 font-black text-xs uppercase tracking-[0.16em] transition-all ${
+                      formData.difficulty === level.value
+                        ? `${level.color} scale-[1.02] shadow-lg`
+                        : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20'
+                    }`}
+                  >
+                    {level.label}
+                  </button>
+                ))}
               </div>
             </div>
 

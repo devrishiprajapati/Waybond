@@ -10,6 +10,7 @@ export interface Trip {
   duration: string;
   category: string;
   experience: 'monsoon' | 'weekend' | 'road' | 'snow';
+  difficulty: 'Easy' | 'Medium' | 'Difficult';
   image: string;
   link: string;
   description: string;
@@ -55,6 +56,7 @@ export const ALL_TRIPS: Trip[] = [
     duration: '8 Days',
     category: 'Adventure',
     experience: 'road',
+    difficulty: 'Difficult',
     image: '/assets/spiti.jpg',
     link: '/spiti-valley',
     description: 'Journey through the rugged landscapes of Spiti Valley. Drive along the Indo-Tibetan highway, visit ancient monasteries, and camp under the starry sky at Chandratal Lake.',
@@ -87,6 +89,7 @@ export const ALL_TRIPS: Trip[] = [
     duration: '7 Days',
     category: 'Adventure',
     experience: 'road',
+    difficulty: 'Difficult',
     image: '/assets/himalayas-bg.jpg',
     link: '/leh-ladakh',
     description: 'Experience the ultimate road trip to the Land of High Passes. Marvel at the changing colors of Pangong Tso, ride camels in Nubra Valley, and conquer Khardung La.',
@@ -118,6 +121,7 @@ export const ALL_TRIPS: Trip[] = [
     duration: '6 Days',
     category: 'Nature',
     experience: 'snow',
+    difficulty: 'Medium',
     image: '/assets/kashmir.jpg',
     link: '/kashmir',
     description: 'Step into paradise on earth. Sail on the tranquil Dal Lake in a Shikara, experience the thrill of the Gulmarg Gondola, and wander through the scenic valleys of Pahalgam.',
@@ -148,6 +152,7 @@ export const ALL_TRIPS: Trip[] = [
     duration: '6 Days',
     category: 'Backpacking',
     experience: 'monsoon',
+    difficulty: 'Medium',
     image: '/assets/meghaa.jpg',
     link: '/meghalaya',
     description: 'Dive into the abode of clouds. Trek to the magical living root bridges, explore the deepest caves, and boat on the crystal-clear waters of the Umngot River.',
@@ -178,6 +183,7 @@ export const ALL_TRIPS: Trip[] = [
     duration: '5 Days',
     category: 'Nature',
     experience: 'monsoon',
+    difficulty: 'Easy',
     image: '/assets/kerelabeach.jpg',
     link: '/kerala',
     description: 'A perfect blend of serene backwaters, lush tea gardens, and rich wildlife. Witness the majestic Western Ghats and cruise through the tranquil waters of Alleppey.',
@@ -207,6 +213,7 @@ export const ALL_TRIPS: Trip[] = [
     duration: '7 Days',
     category: 'Beach',
     experience: 'weekend',
+    difficulty: 'Easy',
     image: '/assets/andaman.jpg',
     link: '/andaman',
     description: 'Unwind on pristine white-sand beaches and dive into crystal clear waters. Discover the rich marine life of the Andaman Sea and the historical significance of Port Blair.',
@@ -238,6 +245,7 @@ export const ALL_TRIPS: Trip[] = [
     duration: '8 Days',
     category: 'Honeymoon',
     experience: 'weekend',
+    difficulty: 'Easy',
     image: '/assets/bali.jpg',
     link: '/bali',
     description: 'A romantic getaway to the island of gods. Pristine beaches and vibrant culture.',
@@ -259,6 +267,7 @@ export const ALL_TRIPS: Trip[] = [
     duration: '7 Days',
     category: 'Beach',
     experience: 'weekend',
+    difficulty: 'Easy',
     image: '/assets/thai.jpg',
     link: '#',
     description: 'Explore the stunning limestone cliffs and crystal clear waters of Thailand.',
@@ -280,6 +289,7 @@ export const ALL_TRIPS: Trip[] = [
     duration: '9 Days',
     category: 'Luxury',
     experience: 'weekend',
+    difficulty: 'Easy',
     image: '/assets/seychelles.jpg',
     link: '#',
     description: 'Luxury island getaway featuring the most beautiful beaches in the world.',
