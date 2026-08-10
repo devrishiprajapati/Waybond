@@ -11,7 +11,7 @@ import { createSlug } from '../lib/dataService'
 
 const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, className = "" }: { children: React.ReactNode, title: React.ReactNode, subtitle?: string, seoTitle?: string, seoDescription?: string, className?: string }) => (
   <motion.div
-    initial={{ opacity: 0 }}
+    initial={{ opacity: 0 ,paddingTop:75 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
     className={`min-h-screen pt-40 pb-24 bg-white text-white ${className}`}
@@ -34,7 +34,7 @@ const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, class
         <motion.h1
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-5xl md:text-7xl lg:text-[7rem] font-display font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
+          className="text-3xl md:text-5xl lg:text-[7rem] font-display font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
         >
           {title}
         </motion.h1>
@@ -129,7 +129,7 @@ const Community = () => {
     {/* Moments / Group Images Section */}
     <div className="mb-24">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-5xl font-display font-black uppercase italic tracking-tighter text-white">Moments <span className="text-primary">Captured</span></h2>
+        <h2 className="text-2xl md:text-4xl font-display font-black uppercase italic tracking-tighter text-white">Moments <span className="text-primary">Captured</span></h2>
         <p className="text-white/40 italic mt-4 text-sm font-medium tracking-wide">Real smiles, real connections.</p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
