@@ -816,10 +816,14 @@ const TripDetails = () => {
     {/* Floating Enquiry Button — fixed bottom center, outside any stacking context */}
     <button
       onClick={() => { haptics.medium(); setEnquiryOpen(true) }}
-      className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] sm:bottom-6 left-1/2 -translate-x-1/2 z-[110] flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2.5 whitespace-nowrap bg-secondary text-white px-5 sm:px-7 py-3 sm:py-3.5 rounded-full shadow-2xl shadow-secondary/50 hover:shadow-secondary/70 hover:scale-105 active:scale-95 transition-all duration-200 font-black text-[11px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] border border-secondary/60"
+      className="fixed bottom-6 sm:bottom-6 left-1/2 -translate-x-1/2 z-[150] flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2.5 whitespace-nowrap bg-secondary text-white px-8 sm:px-7 py-4 sm:py-3.5 rounded-full shadow-[0_8px_30px_rgba(100,149,237,0.6)] hover:shadow-[0_8px_40px_rgba(100,149,237,0.8)] hover:scale-105 active:scale-95 transition-all duration-200 font-black text-sm sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] border-2 border-white/30 backdrop-blur-sm"
       aria-label="Open enquiry form"
+      style={{ 
+        WebkitTapHighlightColor: 'transparent',
+        touchAction: 'manipulation'
+      }}
     >
-      <MessageCircle size={16} />
+      <MessageCircle size={20} className="sm:w-[18px] sm:h-[18px]" />
       Enquire Now
     </button>
 

@@ -95,7 +95,7 @@ const Discover = () => {
           </div>}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">
-              <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px] drop-shadow-lg">COLLECTIONS 2024</span>
+              <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px] drop-shadow-lg">COLLECTIONS 2026</span>
               <h1 className="text-2xl md:text-4xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
                 The <span className="text-primary" style={{ WebkitTextStroke: '1px white' }}>Adventures</span> Hub
               </h1>
