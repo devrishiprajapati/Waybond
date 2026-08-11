@@ -19,7 +19,7 @@ const readDB = () => {
         const data = fs.readFileSync(DB_FILE, 'utf-8');
         return JSON.parse(data);
     } catch (error) {
-        return { trips: [], heroSlides: [], testimonials: [], users: [] };
+        return { trips: [], heroSlides: [], testimonials: [], users: [], teamMembers: [] };
     }
 };
 
@@ -30,7 +30,7 @@ const writeDB = (data) => {
 
 // Initialize DB if empty
 if (!fs.existsSync(DB_FILE)) {
-    writeDB({ trips: [], heroSlides: [], testimonials: [], users: [] });
+    writeDB({ trips: [], heroSlides: [], testimonials: [], users: [], teamMembers: [] });
 }
 
 // REST Routes for Trips
@@ -136,6 +136,46 @@ app.post('/api/users', (req, res) => {
     db.users = users;
     writeDB(db);
     res.json(user);
+});
+
+// REST Routes for Team Members
+app.get('/api/team-members', (req, res) => {
+    const db = readDB();
+    const members = (db.teamMembers || []).sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+    res.json(members);
+});
+
+app.post('/api/team-members', (req, res) => {
+    const db = readDB();
+    const members = db.teamMembers || [];
+    const newMember = {
+        ...req.body,
+        id: Date.now(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    };
+    members.push(newMember);
+    db.teamMembers = members;
+    writeDB(db);
+    res.json(newMember);
+});
+
+app.put('/api/team-members/:id', (req, res) => {
+    const db = readDB();
+    const members = db.teamMembers || [];
+    const index = members.findIndex(m => String(m.id) === String(req.params.id));
+    if (index === -1) return res.status(404).json({ message: 'Not found' });
+    members[index] = { ...members[index], ...req.body, updatedAt: new Date().toISOString() };
+    db.teamMembers = members;
+    writeDB(db);
+    res.json(members[index]);
+});
+
+app.delete('/api/team-members/:id', (req, res) => {
+    const db = readDB();
+    db.teamMembers = (db.teamMembers || []).filter(m => String(m.id) !== String(req.params.id));
+    writeDB(db);
+    res.json({ success: true });
 });
 
 app.get('/api/community-galleries', (req, res) => {

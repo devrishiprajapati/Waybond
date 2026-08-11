@@ -99,3 +99,22 @@ model CommunityGallery {
   images      Json
   updatedAt   DateTime @updatedAt
 }
+
+model TeamMember {
+  id          Int      @id @default(autoincrement())
+  name        String
+  designation String
+  shortBio    String
+  fullBio     String   @db.Text
+  image       String
+  email       String?
+  phone       String?
+  linkedin    String?
+  twitter     String?
+  position    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([position])
+}
