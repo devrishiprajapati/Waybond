@@ -537,6 +537,21 @@ const TripDetails = () => {
               </div>
             </div>
           </div>
+<<<<<<< HEAD
+          
+          {/* Right: Price and Button */}
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-6 shrink-0">
+            {/* Price Section */}
+            <div className="text-right">
+              <p className="text-[9px] sm:text-xs text-gray-400 font-bold uppercase tracking-wide">per person</p>
+              <p className="text-sm sm:text-lg md:text-2xl font-black text-secondary leading-none mt-0.5">₹{trip?.price?.toLocaleString('en-IN')}</p>
+            </div>
+            
+            {/* Book Now Button */}
+            <button
+              onClick={handleBookSlot}
+              className="bg-secondary text-white px-3 sm:px-5 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-full font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap"
+=======
         </section>
       </div>
 
@@ -555,6 +570,7 @@ const TripDetails = () => {
               exit={{ opacity: 0, y: 24, scale: 0.96 }}
               transition={{ type: 'spring', damping: 24, stiffness: 320 }}
               className="w-full max-w-xl rounded-[1.5rem] bg-white p-5 text-[#171717] shadow-2xl sm:rounded-[2rem] sm:p-7"
+>>>>>>> 6d789e10255697d7fead1efb5f1b775e193d3fc0
             >
               <div className="mb-6 flex items-start justify-between gap-4">
                 <h2 className="text-2xl font-black tracking-tight sm:text-3xl">Share this Page</h2>

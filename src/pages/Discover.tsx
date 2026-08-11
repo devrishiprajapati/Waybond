@@ -130,10 +130,10 @@ const Discover = () => {
                   }}
                   className={`px-3 sm:px-5 py-3 rounded-full text-[10px] font-black transition-all duration-500 ${activeExperience === experience.key
                     ? 'bg-secondary text-white shadow-2xl shadow-secondary/40'
-                    : 'bg-white text-white/40 hover:text-white hover:bg-white/10'}`}
+                    : 'liquid-glass text-white/40 hover:text-white hover:bg-white/10'}`}
                   style={activeExperience === experience.key 
-                    ? { border: '1.5px solid var(--secondary)' }
-                    : { border: '1.5px solid #000000' }
+                    ? { border: '2px solid var(--secondary)' }
+                    : { border: '2px solid rgba(0, 0, 0, 0.8)' }
                   }
                 >
                   <span className="mr-1.5" aria-hidden="true">{experience.icon}</span>{experience.label}

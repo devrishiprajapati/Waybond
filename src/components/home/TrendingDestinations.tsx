@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Bus, X, Mountain, Tent, Snowflake } from 'lucide-react'
 import { getTrendingCards, optimizeImageUrl, TrendingCard } from '../../lib/dataService'
 
 export default function TrendingDestinations() {
@@ -97,6 +97,7 @@ export default function TrendingDestinations() {
                   </div>
 
                   {/* Bottom Badge - Experience Type */}
+                  {/* CHIP VERSION - COMMENTED OUT
                   {card.badge && (
                     <div className="absolute bottom-3 sm:bottom-4 md:bottom-5 left-1/2 -translate-x-1/2 z-10">
                       <motion.span
@@ -108,6 +109,35 @@ export default function TrendingDestinations() {
                       >
                         {card.badge}
                       </motion.span>
+                    </div>
+                  )}
+                  */}
+
+                  {/* NEW: Icon Buttons Row */}
+                  {card.badge && (
+                    <div className="absolute bottom-3 sm:bottom-4 md:bottom-5 left-1/2 -translate-x-1/2 z-10">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.12 + 0.3, duration: 0.5 }}
+                        viewport={{ once: true }}
+                        className="flex gap-2 sm:gap-2.5"
+                      >
+                        {/* Bus Icon */}
+                        <Bus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
+
+                        {/* Close/X Icon */}
+                        <X className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
+
+                        {/* Mountain Icon */}
+                        <Mountain className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
+
+                        {/* Tent Icon */}
+                        <Tent className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
+
+                        {/* Snowflake Icon */}
+                        <Snowflake className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
+                      </motion.div>
                     </div>
                   )}
                 </Link>
