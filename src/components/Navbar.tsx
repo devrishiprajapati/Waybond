@@ -50,7 +50,7 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Explore Trips', path: '/discover' },
     { name: 'Travel Stories', path: '/blogs' },
-    { name: 'Community', path: '/community' },
+    { name: 'Gallery', path: '/community' },
     { name: 'About Us', path: '/about' }
   ]
 

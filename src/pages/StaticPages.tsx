@@ -59,7 +59,7 @@ const About = () => (
     seoTitle="About WAYBOND — Ahmedabad's Premier Travel Community"
     seoDescription="Learn about Way Bond's mission to make travel meaningful, accessible, and community-driven for Ahmedabad."
     title={<>THE WAY<br /><span className="text-primary px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>BOND</span> SPIRIT</>}
-    subtitle="Way Bond is Ahmedabad's premier authentic travel community. We don't just book tours; we craft soul-stirring memories that resonate for a lifetime."
+    // subtitle="Way Bond is Ahmedabad's premier authentic travel community. We don't just book tours; we craft soul-stirring memories that resonate for a lifetime."
   >
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
       <motion.div
@@ -124,7 +124,7 @@ const Community = () => {
     seoTitle="Community & Socials — Join the WAYBOND Tribe"
     seoDescription="Connect with 45K+ fellow travelers. Share stories, find expedition partners, and access local intel."
     title={<>TRAVELER<br /><span className="text-secondary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>ELITE</span> HUB</>}
-    subtitle="The digital campfire for our global tribe. Connect with fellow explorers, share road-side epiphanies, and find your next expedition partner."
+    // subtitle="The digital campfire for our global tribe. Connect with fellow explorers, share road-side epiphanies, and find your next expedition partner."
   >
     {/* Moments / Group Images Section */}
     <div className="mb-24">
@@ -144,7 +144,7 @@ const Community = () => {
           >
             <img src={gallery.images[0].src} alt={`${gallery.destination} travel memories`} loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent"></div>
-            <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination} gallery`} className="absolute inset-0 z-10" />
+            <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination}                                                                                                                                                                                                                                                                      gallery`} className="absolute inset-0 z-10" />
             <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
               <p className="text-2xl md:text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
               <p className="text-[9px] md:text-[10px] text-white uppercase font-black tracking-[0.25em] md:tracking-[0.3em] mt-2">{gallery.label}</p>
