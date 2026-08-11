@@ -1,464 +1,304 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CheckCircle, Calendar, Users, CreditCard, Download, Share2, MapPin } from 'lucide-react'
-import jsPDF from 'jspdf'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { Calendar, Users, MapPin, Clock, Check, IndianRupee } from 'lucide-react'
+import { Helmet } from 'react-helmet-async'
+import { haptics } from '../lib/haptics'
+import { isLoggedIn } from '../lib/auth'
 
-interface BookingData {
-  bookingId: string
-  tripTitle: string
-  tripImage: string
-  category: string
-  startDate: string
-  endDate: string
-  guests: number
-  guestName: string
-  guestEmail: string
-  baseFare: number
-  upgrade: number
-  taxes: number
-  totalPaid: number
-  cardLast4: string
-  issueDate: string
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void; on: (event: string, callback: () => void) => void }
+  }
+}
+
+const loadRazorpay = () => new Promise<boolean>((resolve) => {
+  if (window.Razorpay) return resolve(true)
+  const script = document.createElement('script')
+  script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+  script.onload = () => resolve(true)
+  script.onerror = () => resolve(false)
+  document.body.appendChild(script)
+})
+
+type RazorpayPaymentResponse = {
+  razorpay_order_id: string
+  razorpay_payment_id: string
+  razorpay_signature: string
 }
 
 const BookingConfirmation = () => {
-  const [bookingData, setBookingData] = useState<BookingData | null>(null)
   const navigate = useNavigate()
-  const { bookingId } = useParams()
+  const location = useLocation()
+  const bookingData = location.state as any
+  
+  const [paying, setPaying] = useState(false)
 
   useEffect(() => {
-    const loadBooking = async () => {
-      if (!bookingId) return
-
-      try {
-        // First try to get booking from API
-        const user = localStorage.getItem('user')
-        if (user) {
-          const parsedUser = JSON.parse(user)
-          if (parsedUser.id) {
-            const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
-            if (response.ok) {
-              const data = await response.json()
-              const booking = data.bookings.find((b: any) => 
-                b.bookingId === bookingId || b.id === bookingId || b.bookingDbId === bookingId
-              )
-              
-              if (booking) {
-                setBookingData({
-                  bookingId: booking.bookingId || `WB-${booking.id}`,
-                  tripTitle: booking.title,
-                  tripImage: booking.image,
-                  category: booking.category || 'ADVENTURE SERIES',
-                  startDate: booking.nextBatch || booking.startDate || 'TBD',
-                  endDate: booking.endDate || 'TBD',
-                  guests: booking.travelers || 1,
-                  guestName: parsedUser.name,
-                  guestEmail: parsedUser.email,
-                  baseFare: booking.price || 0,
-                  upgrade: Math.round((booking.price || 0) * 0.18),
-                  taxes: Math.round((booking.price || 0) * 1.18 * 0.07),
-                  totalPaid: Math.round((booking.price || 0) * 1.25),
-                  cardLast4: '1234',
-                  issueDate: booking.bookedOn || new Date().toLocaleDateString('en-IN')
-                })
-                return
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load booking from API:', error)
-      }
-
-      // Fallback: Try localStorage
-      const savedBookings = localStorage.getItem('waybond_user_bookings')
-      if (savedBookings) {
-        const bookings = JSON.parse(savedBookings)
-        const booking = bookings.find((b: any) => b.bookingId === bookingId || b.id === bookingId)
-        
-        if (booking) {
-          setBookingData({
-            bookingId: booking.bookingId || `WB-${booking.id}`,
-            tripTitle: booking.title,
-            tripImage: booking.image,
-            category: booking.category || 'ADVENTURE SERIES',
-            startDate: booking.startDate || 'TBD',
-            endDate: booking.endDate || 'TBD',
-            guests: booking.travelers || 1,
-            guestName: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).name : 'Guest',
-            guestEmail: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).email : 'guest@example.com',
-            baseFare: booking.price || 0,
-            upgrade: Math.round((booking.price || 0) * 0.18),
-            taxes: Math.round((booking.price || 0) * 1.18 * 0.07),
-            totalPaid: Math.round((booking.price || 0) * 1.25),
-            cardLast4: '1234',
-            issueDate: booking.bookedOn || new Date().toLocaleDateString('en-IN')
-          })
-        }
-      }
+    if (!bookingData) {
+      navigate('/discover')
     }
+  }, [bookingData, navigate])
 
-    loadBooking()
-  }, [bookingId])
+  if (!bookingData) return null
 
-  const handleDownloadPDF = () => {
-    if (!bookingData) return
+  const { trip, departure, travellers, numTravellers } = bookingData
+  const pricePerPerson = Number(String(trip.price || '').replace(/[^\d.]/g, ''))
+  const subtotal = pricePerPerson * numTravellers
+  const gst = Math.round(subtotal * 0.05) // 5% GST
+  const totalAmount = subtotal + gst
+
+  const handlePayNow = async () => {
+    haptics.medium()
+
+    // Check if user is logged in
+    const savedUser = localStorage.getItem('user')
+    if (!savedUser) {
+      navigate(`/login?redirect=${encodeURIComponent('/booking-confirmation')}`)
+      return
+    }
 
     try {
-      const doc = new jsPDF()
-      const pageWidth = doc.internal.pageSize.getWidth()
-      const pageHeight = doc.internal.pageSize.getHeight()
+      const user = JSON.parse(savedUser)
+      if (!user.id) throw new Error('User ID not found')
+
+      // Create unique booking ID
+      const timestamp = Date.now().toString(36).toUpperCase()
+      const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase()
+      const uniqueBookingId = `WB-${timestamp}-${randomSuffix}`
       
-      // Colors
-      const primaryColor = '#0ea5e9' // sky-500
-      const darkColor = '#1e293b' // slate-800
-      const lightGray = '#f1f5f9' // slate-100
+      // Create booking payload
+      const bookingPayload = {
+        id: trip.id,
+        title: trip.title,
+        location: trip.location,
+        duration: trip.duration,
+        price: trip.price,
+        image: trip.image,
+        rating: trip.rating,
+        reviews: trip.reviews,
+        description: trip.description,
+        highlights: trip.highlights || [],
+        itinerary: trip.itinerary || [],
+        departureDates: trip.departureDates || [],
+        bookingId: uniqueBookingId,
+        status: 'Payment Pending',
+        travelers: numTravellers,
+        travellerDetails: travellers,
+        bookedOn: new Date().toLocaleDateString('en-IN'),
+        nextBatch: departure || trip.departureDates?.[0] || 'TBD'
+      }
+
+      // Save to database
+      const response = await fetch(`/api/users/${user.id}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingPayload)
+      })
+
+      if (!response.ok) throw new Error('Failed to create booking')
+      const booking = await response.json()
       
-      // Header with company branding
-      doc.setFillColor(14, 165, 233) // Primary color
-      doc.rect(0, 0, pageWidth, 40, 'F')
-      
-      doc.setTextColor(255, 255, 255)
-      doc.setFontSize(24)
-      doc.setFont('helvetica', 'bold')
-      doc.text('WAYBOND', 20, 25)
-      
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'normal')
-      doc.text('Your Journey, Our Passion', 20, 32)
-      
-      // Invoice title and number
-      doc.setTextColor(30, 41, 59)
-      doc.setFontSize(20)
-      doc.setFont('helvetica', 'bold')
-      doc.text('BOOKING INVOICE', pageWidth - 20, 25, { align: 'right' })
-      
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'normal')
-      doc.text(`Invoice #${bookingData.bookingId}`, pageWidth - 20, 32, { align: 'right' })
-      
-      // Invoice date
-      let yPos = 55
-      doc.setFontSize(10)
-      doc.text(`Issue Date: ${bookingData.issueDate}`, pageWidth - 20, yPos, { align: 'right' })
-      
-      // Customer information section
-      yPos = 65
-      doc.setFillColor(241, 245, 249)
-      doc.rect(15, yPos, pageWidth - 30, 25, 'F')
-      
-      yPos += 8
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(11)
-      doc.text('CUSTOMER INFORMATION', 20, yPos)
-      
-      yPos += 7
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(10)
-      doc.text(`Name: ${bookingData.guestName}`, 20, yPos)
-      
-      yPos += 6
-      doc.text(`Email: ${bookingData.guestEmail}`, 20, yPos)
-      
-      // Trip details section
-      yPos += 15
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(12)
-      doc.setTextColor(14, 165, 233)
-      doc.text('TRIP DETAILS', 20, yPos)
-      
-      yPos += 8
-      doc.setTextColor(30, 41, 59)
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(14)
-      doc.text(bookingData.tripTitle, 20, yPos)
-      
-      yPos += 8
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(10)
-      doc.text(`Category: ${bookingData.category}`, 20, yPos)
-      
-      yPos += 6
-      doc.text(`Departure Date: ${bookingData.startDate}`, 20, yPos)
-      
-      yPos += 6
-      doc.text(`Number of Travelers: ${bookingData.guests}`, 20, yPos)
-      
-      // Payment breakdown section
-      yPos += 15
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(12)
-      doc.setTextColor(14, 165, 233)
-      doc.text('PAYMENT BREAKDOWN', 20, yPos)
-      
-      // Table header
-      yPos += 10
-      doc.setFillColor(241, 245, 249)
-      doc.rect(15, yPos - 5, pageWidth - 30, 8, 'F')
-      
-      doc.setTextColor(30, 41, 59)
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(10)
-      doc.text('Description', 20, yPos)
-      doc.text('Amount', pageWidth - 20, yPos, { align: 'right' })
-      
-      // Table rows
-      yPos += 8
-      doc.setFont('helvetica', 'normal')
-      doc.text('Base Fare', 20, yPos)
-      doc.text(`₹${bookingData.baseFare.toLocaleString('en-IN')}`, pageWidth - 20, yPos, { align: 'right' })
-      
-      yPos += 7
-      doc.text('Service Charges (18%)', 20, yPos)
-      doc.text(`₹${bookingData.upgrade.toLocaleString('en-IN')}`, pageWidth - 20, yPos, { align: 'right' })
-      
-      yPos += 7
-      doc.text('Taxes & Fees (7%)', 20, yPos)
-      doc.text(`₹${bookingData.taxes.toLocaleString('en-IN')}`, pageWidth - 20, yPos, { align: 'right' })
-      
-      // Total line
-      yPos += 10
-      doc.setDrawColor(14, 165, 233)
-      doc.setLineWidth(0.5)
-      doc.line(15, yPos, pageWidth - 15, yPos)
-      
-      yPos += 7
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(12)
-      doc.text('TOTAL PAID', 20, yPos)
-      doc.text(`₹${bookingData.totalPaid.toLocaleString('en-IN')}`, pageWidth - 20, yPos, { align: 'right' })
-      
-      // Payment method
-      yPos += 10
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(9)
-      doc.setTextColor(100, 116, 139)
-      doc.text(`Payment Method: Card ending in ****${bookingData.cardLast4}`, 20, yPos)
-      
-      // Footer
-      yPos = pageHeight - 30
-      doc.setDrawColor(226, 232, 240)
-      doc.setLineWidth(0.3)
-      doc.line(15, yPos, pageWidth - 15, yPos)
-      
-      yPos += 7
-      doc.setTextColor(100, 116, 139)
-      doc.setFontSize(9)
-      doc.text('Thank you for choosing WayBond!', pageWidth / 2, yPos, { align: 'center' })
-      
-      yPos += 5
-      doc.setFontSize(8)
-      doc.text('For support, contact us at support@waybond.com | +91 1800-123-4567', pageWidth / 2, yPos, { align: 'center' })
-      
-      yPos += 5
-      doc.text('Terms & Conditions apply. Visit www.waybond.com for more details.', pageWidth / 2, yPos, { align: 'center' })
-      
-      // Save the PDF
-      doc.save(`WayBond-Invoice-${bookingData.bookingId}.pdf`)
+      const amount = Math.round(totalAmount * 100)
+      if (!Number.isInteger(amount) || amount < 100) throw new Error('Invalid amount')
+
+      setPaying(true)
+      const orderResponse = await fetch('/api/payments/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: booking.bookingDbId, userId: user.id, amount })
+      })
+      const order = await orderResponse.json()
+      if (!orderResponse.ok) throw new Error(order.message || 'Unable to start payment')
+      if (!(await loadRazorpay()) || !window.Razorpay) throw new Error('Razorpay checkout could not be loaded')
+
+      const razorpay = new window.Razorpay({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'WayBond',
+        description: trip.title,
+        order_id: order.orderId,
+        prefill: { 
+          name: travellers[0]?.name || user.name,
+          email: travellers[0]?.email || user.email,
+          contact: travellers[0]?.phone || ''
+        },
+        theme: { color: '#6495ED' },
+        handler: async (payment: RazorpayPaymentResponse) => {
+          try {
+            const verifyResponse = await fetch('/api/payments/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payment)
+            })
+            const verified = await verifyResponse.json()
+            if (!verifyResponse.ok || !verified.success) throw new Error(verified.message || 'Payment verification failed')
+            alert('Payment successful. Your trip is confirmed!')
+            navigate(`/dashboard/${user.id}`)
+          } catch (error) {
+            console.error('Payment verification failed:', error)
+            alert('Payment was received but verification failed. Please contact support.')
+          } finally {
+            setPaying(false)
+          }
+        },
+        modal: { ondismiss: () => setPaying(false) }
+      })
+      razorpay.open()
     } catch (error) {
-      console.error('PDF generation error:', error)
-      alert('Unable to generate PDF. Please try again or contact support.')
+      console.error('Payment failed:', error)
+      setPaying(false)
+      alert(error instanceof Error ? error.message : 'Unable to start payment. Please try again.')
     }
-  }
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'My Booking Confirmation',
-        text: `Check out my booking for ${bookingData?.tripTitle}!`,
-        url: window.location.href
-      }).catch((err) => console.log('Share failed:', err))
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href)
-      alert('Booking link copied to clipboard!')
-    }
-  }
-
-  const handleMyTrips = () => {
-    const user = localStorage.getItem('user')
-    if (user) {
-      const userId = JSON.parse(user).id
-      navigate(userId ? `/dashboard/${userId}/booked-trips` : '/login')
-    } else {
-      navigate('/login')
-    }
-  }
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-  }
-
-  if (!bookingData) {
-    return (
-      <div className="min-h-screen bg-white text-white pt-32 pb-20 px-6 md:px-12 lg:px-20 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-white/50">Loading booking confirmation...</p>
-        </div>
-      </div>
-    )
   }
 
   return (
-    <div className="min-h-screen bg-white text-white pt-20 pb-20">
-      {/* Header */}
-      <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl shadow-sm">
-        <div className="max-w-6xl mx-auto h-16 px-6 md:px-12 lg:px-20 flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 flex items-center justify-center text-slate-800 hover:bg-slate-100 rounded-full transition-colors"
+    <>
+      <Helmet>
+        <title>Booking Confirmation - {trip.title} | WAYBOND</title>
+      </Helmet>
+      
+      <div className="min-h-screen bg-gray-50 pt-24 pb-20">
+        <div className="max-w-2xl mx-auto px-4">
+          {/* Success Header */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', duration: 0.5 }}
+            className="flex items-center justify-center mb-8"
           >
-            <ArrowLeft size={20} />
-          </button>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-800 font-black text-[10px] uppercase tracking-widest">WayBond</span>
-            <span className="text-slate-800 font-black text-sm">Booking Confirmation</span>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-2xl mx-auto">
-        {/* Success Header */}
-        <div className="flex flex-col items-center px-6 md:px-12 pt-6 pb-8 text-center bg-gradient-to-b from-blue-50 to-transparent">
-          <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mb-4 shadow-lg shadow-green-500/20">
-            <CheckCircle size={40} className="text-white" />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-display font-black uppercase italic text-slate-800 mb-2">
-            Booking Confirmed!
-          </h1>
-          <p className="text-slate-600 font-medium italic">Your adventure with WayBond is ready to begin.</p>
-        </div>
-
-        {/* Hero Card */}
-        <div className="px-6 md:px-12 -mt-2">
-          <div className="relative rounded-2xl overflow-hidden shadow-xl bg-white">
-            {/* Image */}
-            <div className="h-56 md:h-64 w-full relative">
-              <img alt={bookingData.tripTitle} className="w-full h-full object-cover" src={bookingData.tripImage} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-5">
-                <div className="text-white">
-                  <span className="text-[9px] font-black uppercase tracking-[0.18em] bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-full inline-block mb-3 text-white">
-                    {bookingData.category}
-                  </span>
-                  <h2 className="text-2xl md:text-3xl font-display font-black tracking-tight text-white">{bookingData.tripTitle}</h2>
-                </div>
-              </div>
+            <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
+              <Check size={40} className="text-white" strokeWidth={3} />
             </div>
+          </motion.div>
 
-            {/* Quick Info Ribbon */}
-            <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 border-t border-slate-200">
-              <div className="flex items-center gap-3">
-                <Calendar size={20} className="text-blue-600" />
-                <span className="text-sm font-black text-slate-800">
-                  {bookingData.startDate} — {bookingData.endDate}
+          <h1 className="text-3xl font-black text-gray-900 mb-2 text-center">Booking Details</h1>
+          <p className="text-center text-gray-600 mb-8">Review your booking and proceed to payment</p>
+
+          {/* Trip Details Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6"
+          >
+            <div className="flex gap-4 mb-6">
+              <img
+                src={trip.image}
+                alt={trip.title}
+                className="w-24 h-24 rounded-xl object-cover"
+              />
+              <div className="flex-1">
+                <h2 className="font-black text-xl text-gray-900 mb-1">{trip.title}</h2>
+                <p className="text-gray-600 text-sm mb-2">{trip.location}</p>
+                <span className="inline-block bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-bold">
+                  Pending
                 </span>
               </div>
-              <div className="flex items-center gap-3">
-                <Users size={20} className="text-blue-600" />
-                <span className="text-sm font-black text-slate-800">{bookingData.guests} Guests</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Invoice Details Card */}
-        <div className="px-6 md:px-12 mt-8">
-          <div className="p-6 md:p-8 rounded-2xl bg-white shadow-md space-y-6">
-            {/* Header Info */}
-            <div className="grid grid-cols-2 gap-6 pb-6 border-b border-slate-200">
-              <div>
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Booking ID</p>
-                <p className="text-lg font-black text-slate-800">{bookingData.bookingId}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Issue Date</p>
-                <p className="text-lg font-black text-slate-800">{bookingData.issueDate}</p>
-              </div>
             </div>
 
-            {/* Guest Info */}
-            <div>
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Guest Details</p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center text-blue-900 font-black text-sm">
-                  {getInitials(bookingData.guestName)}
-                </div>
-                <div>
-                  <p className="font-black text-slate-800 leading-none">{bookingData.guestName}</p>
-                  <p className="text-sm text-slate-600 font-medium">{bookingData.guestEmail}</p>
-                </div>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center text-gray-700">
+                <Clock size={18} className="mr-3 text-gray-400" />
+                <span className="font-semibold">{trip.duration}</span>
+              </div>
+              <div className="flex items-center text-gray-700">
+                <Calendar size={18} className="mr-3 text-gray-400" />
+                <span className="font-semibold">
+                  {departure ? new Date(departure).toLocaleDateString('en-IN', { 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                  }) : 'Date TBD'}
+                </span>
+              </div>
+              <div className="flex items-center text-gray-700">
+                <Users size={18} className="mr-3 text-gray-400" />
+                <span className="font-semibold">{numTravellers} Traveler{numTravellers > 1 ? 's' : ''}</span>
               </div>
             </div>
 
-            {/* Price Breakdown */}
-            <div className="space-y-4">
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Payment Breakdown</p>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Base Expedition Fare</span>
-                  <span className="font-black text-slate-800">₹{bookingData.baseFare.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Luxury Camp Upgrade</span>
-                  <span className="font-black text-slate-800">₹{bookingData.upgrade.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Taxes & Permits</span>
-                  <span className="font-black text-slate-800">₹{bookingData.taxes.toLocaleString('en-IN')}</span>
-                </div>
-                <div className="pt-3 border-t-2 border-slate-200 flex justify-between items-center">
-                  <span className="font-black text-slate-800">Total Paid</span>
-                  <span className="text-2xl font-display font-black text-blue-600">₹{bookingData.totalPaid.toLocaleString('en-IN')}</span>
-                </div>
+            {/* Traveller Names */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h3 className="font-black text-gray-900 mb-3">Travellers</h3>
+              <div className="space-y-2">
+                {travellers.map((traveller: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between py-2">
+                    <span className="text-gray-700 font-semibold">{traveller.name}</span>
+                    <span className="text-gray-500 text-sm">{traveller.age} years</span>
+                  </div>
+                ))}
               </div>
             </div>
+          </motion.div>
 
-            {/* Payment Method */}
-            <div className="bg-blue-50 p-4 rounded-xl flex items-center justify-between border border-blue-200">
-              <div className="flex items-center gap-3">
-                <CreditCard size={20} className="text-blue-600" />
-                <span className="text-sm font-medium text-blue-900">Paid via Card ending in **** {bookingData.cardLast4}</span>
-              </div>
-              <span className="text-[9px] font-black text-green-700 bg-green-100 px-3 py-1 rounded-full uppercase tracking-widest">
-                Verified
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions Section */}
-        <div className="px-6 md:px-12 py-8 space-y-4">
-          <button
-            onClick={handleDownloadPDF}
-            className="w-full bg-slate-800 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-900 transition-colors active:scale-95"
+          {/* Savings Banner */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-4 mb-6 border border-green-200"
           >
-            <Download size={16} />
-            Download PDF Invoice
-          </button>
+            <p className="text-center text-green-700 font-bold text-sm">
+              🎉 You saved ₹{Math.round(pricePerPerson * 0.15).toLocaleString('en-IN')} on this trip
+            </p>
+          </motion.div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={handleShare}
-              className="bg-white text-slate-800 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border border-slate-300 flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors active:scale-95"
-            >
-              <Share2 size={16} />
-              Share
-            </button>
-            <button
-              onClick={handleMyTrips}
-              className="bg-white text-slate-800 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border border-slate-300 flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors active:scale-95"
-            >
-              <MapPin size={16} />
-              My Trips
-            </button>
-          </div>
+          {/* Amount Details */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6"
+          >
+            <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center">
+              <IndianRupee size={24} className="mr-2" />
+              Amount to Pay: ₹{totalAmount.toLocaleString('en-IN')}
+            </h2>
+
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600">Amount</span>
+                <span className="font-bold text-gray-900">₹{pricePerPerson.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600">No of Participants</span>
+                <span className="font-bold text-gray-900">{numTravellers}</span>
+              </div>
+              <div className="border-t border-gray-200 pt-4 flex justify-between">
+                <span className="text-gray-600">Sub Total</span>
+                <span className="font-bold text-gray-900">₹{subtotal.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600">GST (5%)</span>
+                <span className="font-bold text-gray-900">₹{gst.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="border-t-2 border-gray-300 pt-4 flex justify-between">
+                <span className="text-lg font-black text-gray-900">Amount To Pay</span>
+                <span className="text-lg font-black text-gray-900">₹{totalAmount.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Pay Now Button */}
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            onClick={handlePayNow}
+            disabled={paying}
+            className="w-full bg-secondary hover:bg-secondary/90 text-white py-4 rounded-full font-black text-lg uppercase tracking-wide shadow-xl shadow-secondary/30 transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {paying ? 'Processing Payment...' : 'Pay Now'}
+          </motion.button>
+
+          <p className="text-center text-xs text-gray-500 mt-4">
+            Secure payment powered by Razorpay
+          </p>
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   )
 }
 

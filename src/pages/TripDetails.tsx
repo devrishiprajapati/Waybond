@@ -13,27 +13,6 @@ import { getTripBySlug, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
 
-type RazorpayPaymentResponse = {
-  razorpay_order_id: string
-  razorpay_payment_id: string
-  razorpay_signature: string
-}
-
-declare global {
-  interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void; on: (event: string, callback: () => void) => void }
-  }
-}
-
-const loadRazorpay = () => new Promise<boolean>((resolve) => {
-  if (window.Razorpay) return resolve(true)
-  const script = document.createElement('script')
-  script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-  script.onload = () => resolve(true)
-  script.onerror = () => resolve(false)
-  document.body.appendChild(script)
-})
-
 const TripDetails = () => {
   const { slug } = useParams()
   const navigate = useNavigate()
@@ -44,7 +23,6 @@ const TripDetails = () => {
   const [activeImage, setActiveImage] = useState(0)
   const [expandedDay, setExpandedDay] = useState<number | null>(1)
   const [selectedDeparture, setSelectedDeparture] = useState('')
-  const [paying, setPaying] = useState(false)
   const [enquiryOpen, setEnquiryOpen] = useState(false)
   const [enquiryForm, setEnquiryForm] = useState({ name: '', phone: '', email: '', travelDate: '', travellers: '', message: '' })
   const [enquiryErrors, setEnquiryErrors] = useState<Record<string, string>>({})
@@ -152,7 +130,7 @@ const TripDetails = () => {
     navigate(`/trip/${slug}?departure=${date}`, { replace: true })
   }
 
-  /** Create a pending booking, then confirm it only after Razorpay verifies payment. */
+  /** Navigate to booking form when user clicks Book Your Slot */
   const handleBookSlot = async () => {
     haptics.medium()
 
@@ -163,96 +141,8 @@ const TripDetails = () => {
       return
     }
 
-    try {
-      const user = JSON.parse(savedUser)
-      if (!user.id) throw new Error('User ID not found')
-
-      // Create unique booking ID with timestamp + random suffix
-      const timestamp = Date.now().toString(36).toUpperCase() // Convert timestamp to base36
-      const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase()
-      const uniqueBookingId = `WB-${timestamp}-${randomSuffix}`
-      
-      // Create booking payload (spread trip first, then override specific fields)
-      const bookingPayload = {
-        id: trip.id,
-        title: trip.title,
-        location: trip.location,
-        duration: trip.duration,
-        price: trip.price,
-        image: trip.image,
-        rating: trip.rating,
-        reviews: trip.reviews,
-        description: trip.description,
-        highlights: trip.highlights || [],
-        itinerary: trip.itinerary || [],
-        inclusions: trip.inclusions || [],
-        exclusions: trip.exclusions || [],
-        departureDates: trip.departureDates || [],
-        bookingId: uniqueBookingId,
-        status: 'Payment Pending',
-        travelers: 1,
-        bookedOn: new Date().toLocaleDateString('en-IN'),
-        nextBatch: selectedDeparture || trip.departureDates?.[0] || 'TBD'
-      }
-
-      // Save to database
-      const response = await fetch(`/api/users/${user.id}/bookings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookingPayload)
-      })
-
-      if (!response.ok) throw new Error('Failed to create booking')
-      const booking = await response.json()
-      const priceInRupees = Number(String(trip.price || '').replace(/[^\d.]/g, ''))
-      const amount = Math.round(priceInRupees * 100)
-      if (!Number.isInteger(amount) || amount < 100) throw new Error('Trip price is invalid')
-
-      setPaying(true)
-      const orderResponse = await fetch('/api/payments/create-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookingId: booking.bookingDbId, userId: user.id, amount })
-      })
-      const order = await orderResponse.json()
-      if (!orderResponse.ok) throw new Error(order.message || 'Unable to start payment')
-      if (!(await loadRazorpay()) || !window.Razorpay) throw new Error('Razorpay checkout could not be loaded')
-
-      const razorpay = new window.Razorpay({
-        key: order.keyId,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'WayBond',
-        description: trip.title,
-        order_id: order.orderId,
-        prefill: { name: user.name, email: user.email },
-        theme: { color: '#6495ED' },
-        handler: async (payment: RazorpayPaymentResponse) => {
-          try {
-            const verifyResponse = await fetch('/api/payments/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payment)
-            })
-            const verified = await verifyResponse.json()
-            if (!verifyResponse.ok || !verified.success) throw new Error(verified.message || 'Payment verification failed')
-            alert('Payment successful. Your trip is confirmed!')
-            navigate(`/dashboard/${user.id}`)
-          } catch (error) {
-            console.error('Payment verification failed:', error)
-            alert('Payment was received but verification failed. Please contact support.')
-          } finally {
-            setPaying(false)
-          }
-        },
-        modal: { ondismiss: () => setPaying(false) }
-      })
-      razorpay.open()
-    } catch (error) {
-      console.error('Booking failed:', error)
-      setPaying(false)
-      alert(error instanceof Error ? error.message : 'Unable to start payment. Please try again.')
-    }
+    // Navigate to booking form with trip details
+    navigate(`/booking-form?tripId=${trip.id}&departure=${encodeURIComponent(selectedDeparture)}`)
   }
 
   if (loading) {
@@ -499,10 +389,9 @@ const TripDetails = () => {
 
             <button
               onClick={handleBookSlot}
-              disabled={paying}
               className="w-full bg-secondary text-white py-4 md:py-6 rounded-2xl font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20"
             >
-              {paying ? 'Opening Secure Payment...' : 'Book Your Slot'}
+              Book Your Slot
             </button>
             <p className="text-center text-[9px] md:text-[10px] text-white/40 font-bold uppercase tracking-widest">No cancellation fee up to 15 days before departure</p>
 
@@ -814,18 +703,20 @@ const TripDetails = () => {
     </AnimatePresence>
 
     {/* Floating Enquiry Button — fixed bottom center, outside any stacking context */}
-    <button
-      onClick={() => { haptics.medium(); setEnquiryOpen(true) }}
-      className="fixed bottom-6 sm:bottom-6 left-1/2 -translate-x-1/2 z-[150] flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2.5 whitespace-nowrap bg-secondary text-white px-8 sm:px-7 py-4 sm:py-3.5 rounded-full shadow-[0_8px_30px_rgba(100,149,237,0.6)] hover:shadow-[0_8px_40px_rgba(100,149,237,0.8)] hover:scale-105 active:scale-95 transition-all duration-200 font-black text-sm sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] border-2 border-white/30 backdrop-blur-sm"
-      aria-label="Open enquiry form"
-      style={{ 
-        WebkitTapHighlightColor: 'transparent',
-        touchAction: 'manipulation'
-      }}
-    >
-      <MessageCircle size={20} className="sm:w-[18px] sm:h-[18px]" />
-      Enquire Now
-    </button>
+    {!enquiryOpen && (
+      <button
+        onClick={() => { haptics.medium(); setEnquiryOpen(true) }}
+        className="fixed bottom-6 sm:bottom-6 left-1/2 -translate-x-1/2 z-[150] flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2.5 whitespace-nowrap bg-secondary text-white px-8 sm:px-7 py-4 sm:py-3.5 rounded-full shadow-[0_8px_30px_rgba(100,149,237,0.6)] hover:shadow-[0_8px_40px_rgba(100,149,237,0.8)] hover:scale-105 active:scale-95 transition-all duration-200 font-black text-sm sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] border-2 border-white/30 backdrop-blur-sm"
+        aria-label="Open enquiry form"
+        style={{ 
+          WebkitTapHighlightColor: 'transparent',
+          touchAction: 'manipulation'
+        }}
+      >
+        <MessageCircle size={20} className="sm:w-[18px] sm:h-[18px]" />
+        Enquire Now
+      </button>
+    )}
 
     {/* Sticky Booking Bar - Appears when scrolling past main image */}
     <motion.div
@@ -858,10 +749,9 @@ const TripDetails = () => {
             </div>
             <button
               onClick={handleBookSlot}
-              disabled={paying}
               className="bg-secondary text-white px-4 md:px-8 py-2.5 md:py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap"
             >
-              {paying ? 'Processing...' : 'Book Now'}
+              Book Now
             </button>
           </div>
         </div>

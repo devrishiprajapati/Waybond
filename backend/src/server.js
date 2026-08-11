@@ -121,6 +121,136 @@ app.post('/api/enquiry', async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
+// Send booking details email to host
+app.post('/api/booking-details', async (req, res, next) => {
+  try {
+    const { tripTitle, tripLocation, tripDuration, tripPrice, departureDate, travellers, numTravellers } = req.body
+
+    const travellersList = travellers.map((t, idx) => `
+      <tr style="background-color: ${idx % 2 === 0 ? '#f8fafc' : '#ffffff'};">
+        <td colspan="4" style="padding: 16px; border-bottom: 2px solid #e5e7eb;">
+          <div style="font-weight: 700; color: #0f172a; margin-bottom: 8px; font-size: 15px;">👤 Traveller ${idx + 1}</div>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 35%;">Name:</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${t.name}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Age / Gender:</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 600;">${t.age} years / ${t.gender}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Phone:</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">+91 ${t.phone}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Email:</td>
+              <td style="padding: 6px 0; color: #6495ed; font-weight: 600;"><a href="mailto:${t.email}" style="color: #6495ed; text-decoration: none;">${t.email}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Date of Birth:</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 600;">${new Date(t.dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #64748b; font-weight: 600;">Location:</td>
+              <td style="padding: 6px 0; color: #0f172a; font-weight: 600;">${t.city}, ${t.state}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    `).join('')
+
+    const formattedDeparture = departureDate 
+      ? new Date(departureDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+      : 'Not specified'
+
+    const htmlContent = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -0.5px;">
+            🎉 New Booking Received
+          </h1>
+          <p style="color: #cbd5e1; margin: 12px 0 0 0; font-size: 15px; font-weight: 600;">WayBond Travel</p>
+        </div>
+        
+        <div style="padding: 40px 30px; background-color: #f8fafc;">
+          <div style="background-color: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb;">
+            <h2 style="color: #0f172a; font-size: 22px; margin: 0 0 20px 0; font-weight: 800; border-bottom: 3px solid #6495ed; padding-bottom: 12px; display: flex; align-items: center;">
+              📍 Trip Details
+            </h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 14px 0; color: #64748b; font-weight: 700; width: 35%; font-size: 14px;">Package:</td>
+                <td style="padding: 14px 0; color: #0f172a; font-weight: 800; font-size: 18px;">${tripTitle}</td>
+              </tr>
+              <tr style="background-color: #f8fafc;">
+                <td style="padding: 14px 0; color: #64748b; font-weight: 700; font-size: 14px;">Location:</td>
+                <td style="padding: 14px 0; color: #0f172a; font-weight: 700;">${tripLocation}</td>
+              </tr>
+              <tr>
+                <td style="padding: 14px 0; color: #64748b; font-weight: 700; font-size: 14px;">Duration:</td>
+                <td style="padding: 14px 0; color: #0f172a; font-weight: 700;">${tripDuration}</td>
+              </tr>
+              <tr style="background-color: #f8fafc;">
+                <td style="padding: 14px 0; color: #64748b; font-weight: 700; font-size: 14px;">Price per Person:</td>
+                <td style="padding: 14px 0; color: #10b981; font-weight: 900; font-size: 20px;">₹${tripPrice}</td>
+              </tr>
+              <tr>
+                <td style="padding: 14px 0; color: #64748b; font-weight: 700; font-size: 14px;">Departure Date:</td>
+                <td style="padding: 14px 0; color: #0f172a; font-weight: 700;">${formattedDeparture}</td>
+              </tr>
+              <tr style="background-color: #f8fafc;">
+                <td style="padding: 14px 0; color: #64748b; font-weight: 700; font-size: 14px;">Number of Travellers:</td>
+                <td style="padding: 14px 0; color: #0f172a; font-weight: 900; font-size: 18px;">${numTravellers}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background-color: #ffffff; border-radius: 12px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #e5e7eb;">
+            <h2 style="color: #0f172a; font-size: 22px; margin: 0 0 20px 0; font-weight: 800; border-bottom: 3px solid #6495ed; padding-bottom: 12px;">
+              👥 Traveller Details
+            </h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              ${travellersList}
+            </table>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #6495ed 0%, #4169e1 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 4px 12px rgba(100,149,237,0.3);">
+            <p style="color: #ffffff; margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.5px;">
+              ⏰ Booking received on ${new Date().toLocaleString('en-IN', { 
+                dateStyle: 'long', 
+                timeStyle: 'short' 
+              })}
+            </p>
+          </div>
+
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e2e8f0; text-align: center;">
+            <p style="color: #64748b; font-size: 12px; margin: 0; font-weight: 600;">
+              © ${new Date().getFullYear()} WayBond Travel. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    `
+
+    if (mailTransport) {
+      await mailTransport.sendMail({
+        from: `"WayBond Travel" <${process.env.EMAIL_USER}>`,
+        to: 'prajapatirishi748@gmail.com',
+        subject: `🎉 New Booking: ${tripTitle} - ${numTravellers} Traveller(s)`,
+        html: htmlContent
+      })
+    } else {
+      console.log('[Booking] Email not configured — logging booking details')
+    }
+
+    res.json({ success: true, message: 'Booking details sent successfully' })
+  } catch (error) {
+    console.error('Booking details email error:', error)
+    next(error)
+  }
+})
+
 app.post('/api/auth/signup', async (req, res, next) => {
   try {
     const turnstileOk = await verifyTurnstile(req.body.turnstileToken)

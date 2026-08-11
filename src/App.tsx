@@ -36,6 +36,7 @@ import SafetyGuidelines from './pages/SafetyGuidelines'
 import Testimonials from './pages/Testimonials'
 import Blogs from './pages/Blogs'
 import BlogDetail from './pages/BlogDetail'
+import BookingForm from './pages/BookingForm'
 import BookingConfirmation from './pages/BookingConfirmation'
 import CommunityGallery from './pages/CommunityGallery'
 
@@ -93,7 +94,8 @@ function App() {
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/blog/:slug" element={<BlogDetail />} />
             <Route path="/trip/:slug" element={<TripDetails />} />
-            <Route path="/booking-confirmation/:bookingId" element={<BookingConfirmation />} />
+            <Route path="/booking-form" element={<BookingForm />} />
+            <Route path="/booking-confirmation" element={<BookingConfirmation />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/dashboard/:userId" element={<UserDashboard />} />
             <Route path="/dashboard/:userId/all-trips" element={<AllTripsPage />} />
