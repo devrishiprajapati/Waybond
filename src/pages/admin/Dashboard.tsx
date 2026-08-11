@@ -17,6 +17,7 @@ import {
   Star,
   Trash2,
   UsersRound,
+  Users2,
   Images
 } from 'lucide-react'
 import { getTrips, deleteTrip } from '../../lib/dataService'
@@ -104,6 +105,7 @@ const AdminDashboard = () => {
     { label: 'New Package', path: '/admin/new', icon: Plus },
     { label: 'Travel Stories', path: '/admin/travel-stories', icon: BookOpen },
     { label: 'Testimonials', path: '/admin/testimonials', icon: MessageSquareText },
+    { label: 'Team Members', path: '/admin/team-members', icon: Users2 },
     { label: 'Users', path: '/admin/users', icon: UsersRound },
     { label: 'Gallery', path: '/admin/gallery', icon: Images }
   ]
@@ -123,11 +125,10 @@ const AdminDashboard = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.16em] transition-all ${
-                location.pathname === item.path
+              className={`flex items-center gap-3 p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.16em] transition-all ${location.pathname === item.path
                   ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
                   : 'text-white/55 hover:text-white hover:bg-white/5'
-              }`}
+                }`}
             >
               <item.icon size={18} />
               <span>{item.label}</span>
@@ -215,11 +216,10 @@ const AdminDashboard = () => {
                 <button
                   key={experience}
                   onClick={() => setExperienceFilter(experience)}
-                  className={`h-11 px-5 rounded-2xl font-black text-[9px] uppercase tracking-[0.18em] transition-all ${
-                    experienceFilter === experience
+                  className={`h-11 px-5 rounded-2xl font-black text-[9px] uppercase tracking-[0.18em] transition-all ${experienceFilter === experience
                       ? 'bg-secondary text-white'
                       : 'bg-white/5 text-white/45 border border-white/10 hover:text-white hover:bg-white/10'
-                  }`}
+                    }`}
                 >
                   {experience === 'All' ? 'All' : `${experience} trips`}
                 </button>

@@ -1,17 +1,32 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
-import { CheckCircle2, ShieldCheck, MapPin, Star, UserCheck, MessageCircle, Heart, Users, Share2, Compass, Calendar, CircleHelp, Download, Trash2 } from 'lucide-react'
+import { CheckCircle2, ShieldCheck, MapPin, Star, UserCheck, MessageCircle, Heart, Users, Share2, Compass, Calendar, CircleHelp, Download, Trash2, X, Mail, Phone, Linkedin, Twitter, Users2 } from 'lucide-react'
 import { communityGalleries, loadCommunityGalleries } from '../lib/communityGalleries'
 import { useWishlist } from '../lib/wishlist'
 import { haptics } from '../lib/haptics'
 import { getTripWhatsAppLink } from '../lib/trips'
 import { createSlug } from '../lib/dataService'
 
+type TeamMember = {
+  id: number | string
+  name: string
+  designation: string
+  shortBio: string
+  fullBio: string
+  image: string
+  email?: string
+  phone?: string
+  linkedin?: string
+  twitter?: string
+  isActive: boolean
+  position: number
+}
+
 const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, className = "" }: { children: React.ReactNode, title: React.ReactNode, subtitle?: string, seoTitle?: string, seoDescription?: string, className?: string }) => (
   <motion.div
-    initial={{ opacity: 0 ,paddingTop:75 }}
+    initial={{ opacity: 0, paddingTop: 75 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
     className={`min-h-screen pt-40 pb-24 bg-white text-white ${className}`}
@@ -54,12 +69,169 @@ const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, class
   </motion.div>
 )
 
+// ─── Team Member Modal ──────────────────────────────────────────────────────
+const TeamMemberModal = ({ member, onClose }: { member: TeamMember; onClose: () => void }) => (
+  <AnimatePresence>
+    <motion.div
+      key="overlay"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        key="card"
+        initial={{ scale: 0.9, opacity: 0, y: 24 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 24 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+        className="w-full max-w-xl liquid-glass-dark border border-white/15 rounded-[2.5rem] overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.7)] max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Image */}
+        <div className="relative h-72 w-full bg-white/5">
+          <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent" />
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-11 h-11 rounded-full bg-black/40 border border-white/20 backdrop-blur-sm text-white hover:bg-white/20 flex items-center justify-center transition-all"
+          >
+            <X size={18} />
+          </button>
+          <div className="absolute bottom-6 left-6">
+            <p className="text-3xl font-display font-black text-white italic tracking-tighter drop-shadow-xl">{member.name}</p>
+            <p className="text-[10px] text-secondary font-black uppercase tracking-[0.25em] mt-1">{member.designation}</p>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="p-7 space-y-5">
+          {member.fullBio && (
+            <p className="text-white/70 leading-relaxed text-sm italic">{member.fullBio}</p>
+          )}
+          {!member.fullBio && member.shortBio && (
+            <p className="text-white/70 leading-relaxed text-sm italic">{member.shortBio}</p>
+          )}
+
+          {/* Contact / Social Links */}
+          <div className="flex flex-wrap gap-3 pt-1">
+            {member.email && (
+              <a href={`mailto:${member.email}`} className="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:border-secondary/40 text-white/60 hover:text-secondary px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all">
+                <Mail size={13} />{member.email}
+              </a>
+            )}
+            {member.phone && (
+              <a href={`tel:${member.phone}`} className="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:border-secondary/40 text-white/60 hover:text-secondary px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all">
+                <Phone size={13} />{member.phone}
+              </a>
+            )}
+            {member.linkedin && (
+              <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:border-secondary/40 text-white/60 hover:text-secondary px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all">
+                <Linkedin size={13} />LinkedIn
+              </a>
+            )}
+            {member.twitter && (
+              <a href={member.twitter} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-white/5 border border-white/10 hover:border-secondary/40 text-white/60 hover:text-secondary px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all">
+                <Twitter size={13} />Twitter / X
+              </a>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  </AnimatePresence>
+)
+
+// ─── Team Members Section ────────────────────────────────────────────────────
+const TeamMembersSection = () => {
+  const [members, setMembers] = React.useState<TeamMember[]>([])
+  const [selected, setSelected] = React.useState<TeamMember | null>(null)
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    fetch('/api/team-members')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: TeamMember[]) => {
+        setMembers(data.filter(m => m.isActive))
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  if (loading || members.length === 0) return null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: 0.1 }}
+      className="mt-24"
+    >
+      {/* Section Heading */}
+      <div className="mb-14 text-center">
+        <div className="liquid-glass inline-block px-5 py-2 rounded-full border border-white/10 shadow-lg mb-6">
+          <span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">The People Behind The Adventure</span>
+        </div>
+        <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-display font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
+          Meet The <span className="text-primary px-2 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>Team</span>
+        </h2>
+        <p className="text-white/40 italic mt-6 text-sm font-medium max-w-xl mx-auto leading-relaxed">
+          The passionate explorers and visionaries who make every WayBond journey unforgettable.
+        </p>
+      </div>
+
+      {/* Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {members.map((member, i) => (
+          <motion.button
+            key={member.id}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.07 }}
+            whileHover={{ y: -8 }}
+            onClick={() => setSelected(member)}
+            className="group text-left liquid-glass-dark border border-white/10 rounded-[2.5rem] overflow-hidden hover:border-secondary/30 transition-all shadow-xl w-full"
+          >
+            {/* Image */}
+            <div className="relative h-64 w-full overflow-hidden bg-white/5">
+              <img
+                src={member.image}
+                alt={member.name}
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/80 via-black/10 to-transparent" />
+            </div>
+            {/* Info */}
+            <div className="p-6 space-y-2">
+              <p className="text-xl font-display font-black text-white uppercase italic tracking-tight group-hover:text-secondary transition-colors">{member.name}</p>
+              <p className="text-[9px] text-secondary font-black uppercase tracking-[0.25em]">{member.designation}</p>
+              <p className="text-white/45 text-xs leading-relaxed line-clamp-2 mt-1">{member.shortBio}</p>
+              <p className="text-[8px] font-black uppercase tracking-[0.2em] text-secondary/60 mt-2 flex items-center gap-1">
+                <Users2 size={10} /> View Profile
+              </p>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Modal */}
+      {selected && <TeamMemberModal member={selected} onClose={() => setSelected(null)} />}
+    </motion.div>
+  )
+}
+
+// ─── About Page ──────────────────────────────────────────────────────────────
+
 const About = () => (
   <PageLayout
     seoTitle="About WAYBOND — Ahmedabad's Premier Travel Community"
     seoDescription="Learn about Way Bond's mission to make travel meaningful, accessible, and community-driven for Ahmedabad."
     title={<>THE WAY<br /><span className="text-primary px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>BOND</span> SPIRIT</>}
-    // subtitle="Way Bond is Ahmedabad's premier authentic travel community. We don't just book tours; we craft soul-stirring memories that resonate for a lifetime."
+  // subtitle="Way Bond is Ahmedabad's premier authentic travel community. We don't just book tours; we craft soul-stirring memories that resonate for a lifetime."
   >
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
       <motion.div
@@ -87,7 +259,7 @@ const About = () => (
                 <item.icon className="text-secondary" size={24} />
               </div>
               <h4 className="font-display font-black text-xl uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{item.title}</h4>
-              <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-loose">{item.desc}</p> 
+              <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-loose">{item.desc}</p>
             </div>
           ))}
         </div>
@@ -109,6 +281,7 @@ const About = () => (
         </div>
       </motion.div>
     </div>
+    <TeamMembersSection />
   </PageLayout>
 )
 
@@ -120,89 +293,89 @@ const Community = () => {
   }, [])
 
   return (
-  <PageLayout
-    seoTitle="Community & Socials — Join the WAYBOND Tribe"
-    seoDescription="Connect with 45K+ fellow travelers. Share stories, find expedition partners, and access local intel."
-    title={<>TRAVELER<br /><span className="text-secondary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>ELITE</span> HUB</>}
+    <PageLayout
+      seoTitle="Community & Socials — Join the WAYBOND Tribe"
+      seoDescription="Connect with 45K+ fellow travelers. Share stories, find expedition partners, and access local intel."
+      title={<>TRAVELER<br /><span className="text-secondary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>ELITE</span> HUB</>}
     // subtitle="The digital campfire for our global tribe. Connect with fellow explorers, share road-side epiphanies, and find your next expedition partner."
-  >
-    {/* Moments / Group Images Section */}
-    <div className="mb-24">
-      <div className="text-center mb-12">
-        <h2 className="text-2xl md:text-4xl font-display font-black uppercase italic tracking-tighter text-white">Moments <span className="text-primary">Captured</span></h2>
-        <p className="text-white/40 italic mt-4 text-sm font-medium tracking-wide">Real smiles, real connections.</p>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {galleries.map((gallery, index) => (
-          <motion.div
-            key={gallery.destination}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1 }}
-            className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden group keep-light-text shadow-[0_15px_40px_rgba(0,0,0,0.5)] aspect-square w-full border border-white/10"
-          >
-            <img src={gallery.images[0].src} alt={`${gallery.destination} travel memories`} loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent"></div>
-            <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination}                                                                                                                                                                                                                                                                      gallery`} className="absolute inset-0 z-10" />
-            <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
-              <p className="text-2xl md:text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
-              <p className="text-[9px] md:text-[10px] text-white uppercase font-black tracking-[0.25em] md:tracking-[0.3em] mt-2">{gallery.label}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-
-    {/* Community Features Section */}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-24">
-      {[
-        { title: "Tribe Chat", icon: MessageCircle, color: "bg-blue-500/10", desc: "Instant connectivity with travelers on your upcoming voyage." },
-        { title: "Memory Share", icon: Share2, color: "bg-blue-500/10", desc: "A cinematic gallery of stories told through raw adventurer lenses." },
-        { title: "Local Intel", icon: MapPin, color: "bg-teal-500/10", desc: "Crowdsourced secret spots and authentic local experiences." }
-      ].map((card, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-          whileHover={{ y: -10 }}
-          className="liquid-glass-dark p-10 rounded-[3.5rem] border border-white/10 flex flex-col items-center justify-center text-center space-y-8 h-[450px] group overflow-hidden relative shadow-2xl hover:border-secondary/30"
-        >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 blur-3xl rounded-full"></div>
-          <div className={`${card.color} p-6 rounded-[2rem] group-hover:scale-110 transition-all duration-500 shadow-xl border border-white/5`}>
-            <card.icon className="text-secondary" size={40} />
-          </div>
-          <div className="space-y-3 relative z-10">
-            <h3 className="text-2xl font-display font-black uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{card.title}</h3>
-            <p className="text-xs text-white/50 font-black uppercase tracking-widest leading-loose max-w-[220px] px-2">{card.desc}</p>
-          </div>
-          <button className="bg-white/5 text-white/40 px-8 py-3 rounded-full text-[9px] font-black uppercase tracking-[0.2em] group-hover:bg-secondary group-hover:text-white transition-all shadow-lg border border-white/10">ENTER HUB</button>
-        </motion.div>
-      ))}
-    </div>
-
-    {/* Community Impact Section */}
-    <div className="liquid-glass p-16 md:p-20 rounded-[4rem] border border-white/10 text-center space-y-12 shadow-[0_20px_50px_rgba(0,0,0,0.4)] relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[100px] rounded-full z-0"></div>
-      <div className="relative z-10">
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-black uppercase italic tracking-tighter text-white mb-16 liquid-text">Our Shared <span className="text-primary">Legacy</span></h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
-          {[
-            { value: "45k+", label: "ACTIVE TRIBE" },
-            { value: "180+", label: "EXPEDITIONS" },
-            { value: "92%", label: "RETURNING SOULS" },
-            { value: " #1", label: "RATED IN AHMEDABAD" }
-          ].map((stat, i) => (
-            <div key={i} className="space-y-3">
-              <p className="text-4xl md:text-5xl font-display font-black text-secondary tracking-tighter italic drop-shadow-md">{stat.value}</p>
-              <p className="text-[9px] text-white/50 font-black uppercase tracking-[0.3em]">{stat.label}</p>
-            </div>
+    >
+      {/* Moments / Group Images Section */}
+      <div className="mb-24">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl md:text-4xl font-display font-black uppercase italic tracking-tighter text-white">Moments <span className="text-primary">Captured</span></h2>
+          <p className="text-white/40 italic mt-4 text-sm font-medium tracking-wide">Real smiles, real connections.</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {galleries.map((gallery, index) => (
+            <motion.div
+              key={gallery.destination}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden group keep-light-text shadow-[0_15px_40px_rgba(0,0,0,0.5)] aspect-square w-full border border-white/10"
+            >
+              <img src={gallery.images[0].src} alt={`${gallery.destination} travel memories`} loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent"></div>
+              <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination}                                                                                                                                                                                                                                                                      gallery`} className="absolute inset-0 z-10" />
+              <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
+                <p className="text-2xl md:text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
+                <p className="text-[9px] md:text-[10px] text-white uppercase font-black tracking-[0.25em] md:tracking-[0.3em] mt-2">{gallery.label}</p>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
-    </div>
-  </PageLayout>
+
+      {/* Community Features Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-24">
+        {[
+          { title: "Tribe Chat", icon: MessageCircle, color: "bg-blue-500/10", desc: "Instant connectivity with travelers on your upcoming voyage." },
+          { title: "Memory Share", icon: Share2, color: "bg-blue-500/10", desc: "A cinematic gallery of stories told through raw adventurer lenses." },
+          { title: "Local Intel", icon: MapPin, color: "bg-teal-500/10", desc: "Crowdsourced secret spots and authentic local experiences." }
+        ].map((card, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            whileHover={{ y: -10 }}
+            className="liquid-glass-dark p-10 rounded-[3.5rem] border border-white/10 flex flex-col items-center justify-center text-center space-y-8 h-[450px] group overflow-hidden relative shadow-2xl hover:border-secondary/30"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-secondary/5 blur-3xl rounded-full"></div>
+            <div className={`${card.color} p-6 rounded-[2rem] group-hover:scale-110 transition-all duration-500 shadow-xl border border-white/5`}>
+              <card.icon className="text-secondary" size={40} />
+            </div>
+            <div className="space-y-3 relative z-10">
+              <h3 className="text-2xl font-display font-black uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{card.title}</h3>
+              <p className="text-xs text-white/50 font-black uppercase tracking-widest leading-loose max-w-[220px] px-2">{card.desc}</p>
+            </div>
+            <button className="bg-white/5 text-white/40 px-8 py-3 rounded-full text-[9px] font-black uppercase tracking-[0.2em] group-hover:bg-secondary group-hover:text-white transition-all shadow-lg border border-white/10">ENTER HUB</button>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Community Impact Section */}
+      <div className="liquid-glass p-16 md:p-20 rounded-[4rem] border border-white/10 text-center space-y-12 shadow-[0_20px_50px_rgba(0,0,0,0.4)] relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[100px] rounded-full z-0"></div>
+        <div className="relative z-10">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-black uppercase italic tracking-tighter text-white mb-16 liquid-text">Our Shared <span className="text-primary">Legacy</span></h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+            {[
+              { value: "45k+", label: "ACTIVE TRIBE" },
+              { value: "180+", label: "EXPEDITIONS" },
+              { value: "92%", label: "RETURNING SOULS" },
+              { value: " #1", label: "RATED IN AHMEDABAD" }
+            ].map((stat, i) => (
+              <div key={i} className="space-y-3">
+                <p className="text-4xl md:text-5xl font-display font-black text-secondary tracking-tighter italic drop-shadow-md">{stat.value}</p>
+                <p className="text-[9px] text-white/50 font-black uppercase tracking-[0.3em]">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </PageLayout>
   )
 }
 
