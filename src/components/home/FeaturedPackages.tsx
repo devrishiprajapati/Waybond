@@ -60,8 +60,8 @@ export default function FeaturedPackages() {
       <div className="absolute left-1/2 top-0 h-80 w-2/3 -translate-x-1/2 rounded-full bg-secondary/5 blur-[110px] pointer-events-none" />
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
         <div className="text-center mb-10 md:mb-12">
-          <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-4">WayBond adventures</p>
-          <h2 className="text-2xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic leading-none liquid-text">Choose Your <span className="text-secondary">Experience</span></h2>
+          <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px]mb-4">WayBond adventures</p>
+          <h2 className="text-2xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic leading-none">Choose Your <span className="text-secondary">Experience</span></h2>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-xl md:max-w-none mx-auto mb-14 md:mb-16">
