@@ -51,13 +51,13 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-slate-50 text-slate-800 pt-24 pb-8 relative overflow-hidden border-t border-slate-200">
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-secondary/5 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 blur-[100px] rounded-full pointer-events-none"></div>
+    <footer className="bg-slate-900 text-slate-100 pt-24 pb-8 relative overflow-hidden border-t border-slate-700">
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-secondary/10 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/10 blur-[100px] rounded-full pointer-events-none"></div>
       
       <section className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 relative z-10 mb-16 md:mb-20">
-        <div className="bg-gradient-to-br from-white to-slate-50 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200 p-6 sm:p-8 md:p-10 shadow-xl">
-          <h2 className="text-xl md:text-2xl font-bold text-slate-800 tracking-tight mb-6 md:mb-8">Events by Category</h2>
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-[1.5rem] md:rounded-[2rem] border border-slate-700 p-6 sm:p-8 md:p-10 shadow-xl">
+          <h2 className="text-xl md:text-2xl font-bold text-slate-100 tracking-tight mb-6 md:mb-8">Events by Category</h2>
           
           {/* Mobile: 2 columns, Desktop: 4 columns */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
@@ -71,7 +71,7 @@ const Footer = () => {
                     <li key={link.label}>
                       <Link 
                         to={link.to} 
-                        className="text-xs md:text-sm font-medium text-slate-600 hover:text-secondary transition-colors block"
+                        className="text-xs md:text-sm font-medium text-slate-300 hover:text-secondary transition-colors block"
                       >
                         {link.label}
                       </Link>
@@ -86,11 +86,11 @@ const Footer = () => {
       
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-4 gap-16 relative z-10">
         <div className="space-y-6">
-          <h3 className="text-3xl font-display font-black text-slate-800 tracking-tighter">
+          <h3 className="text-3xl font-display font-black text-slate-100 tracking-tighter">
             WAY
             <span className="text-secondary text-2xl uppercase ml-1">Bond</span>
           </h3>
-          <p className="text-slate-600 leading-relaxed text-sm italic font-medium">
+          <p className="text-slate-300 leading-relaxed text-sm italic font-medium">
             Ahmedabad's premier community travel platform. Connecting curious
             travelers with authentic local and international experiences since
             2026.
@@ -100,7 +100,7 @@ const Footer = () => {
           <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-5 text-secondary">
             Quick Links
           </h4>
-          <ul className="space-y-4 text-slate-600 text-xs font-bold uppercase tracking-widest">
+          <ul className="space-y-4 text-slate-300 text-xs font-bold uppercase tracking-widest">
             <li>
               <a
                 href="/discover"
@@ -144,7 +144,7 @@ const Footer = () => {
           <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-5 text-secondary">
             Support & Safety
           </h4>
-          <ul className="space-y-4 text-slate-600 text-xs font-bold uppercase tracking-widest">
+          <ul className="space-y-4 text-slate-300 text-xs font-bold uppercase tracking-widest">
             <li>
               <a
                 href={getWhatsAppLink(
@@ -190,7 +190,7 @@ const Footer = () => {
           <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-6 text-secondary">
             Contact
           </h4>
-          <ul className="space-y-4 text-slate-600 text-xs font-medium">
+          <ul className="space-y-4 text-slate-300 text-xs font-medium">
             <li className="flex items-start gap-3">
               <MapPin size={16} className="text-secondary shrink-0 mt-0.5" />
               <span>101, University Plaza, Vijay Cross Roads, Navrangpura, Ahmedabad, Gujarat 380009</span>
@@ -224,8 +224,8 @@ const Footer = () => {
       {/* Google Maps Section */}
       <section className="w-full relative z-10 mt-16 md:mt-20">
         <div className="max-w-[1400px] md:max-w-none mx-auto px-6 md:px-0">
-          <div className="bg-white rounded-2xl md:rounded-none border border-slate-200 md:border-0 md:border-y p-4 sm:p-6 md:py-8">
-            <h3 className="text-lg md:text-xl font-display font-black text-slate-800 tracking-tighter mb-4 md:px-12 lg:px-20">Find Us</h3>
+          <div className="bg-slate-800 rounded-2xl md:rounded-none border border-slate-700 md:border-0 md:border-y p-4 sm:p-6 md:py-8">
+            <h3 className="text-lg md:text-xl font-display font-black text-slate-100 tracking-tighter mb-4 md:px-12 lg:px-20">Find Us</h3>
             <div className="relative w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-xl overflow-hidden shadow-lg md:px-12 lg:px-20">
               <iframe
                 src="https://maps.google.com/maps?q=23.063877909238336,72.67752775052084&hl=en&z=15&output=embed"
@@ -243,8 +243,8 @@ const Footer = () => {
         </div>
       </section>
 
-      <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 mt-24 pt-8 border-t border-slate-200 text-center relative z-10">
-        <p className="text-slate-500 text-[9px] font-black uppercase tracking-[0.3em]">
+      <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 mt-24 pt-8 border-t border-slate-700 text-center relative z-10">
+        <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.3em]">
           © 2026 WayBond Travels. All rights reserved.{" "}
           <span className="text-secondary">
             Designed for Ahmedabad, Built for the World.
