@@ -62,9 +62,11 @@ const Navbar = () => {
 
           <div className="flex justify-between items-center h-10 relative z-10 px-6 md:px-12 lg:px-20">
             <Link to="/" onClick={() => haptics.light()} className="flex items-center space-x-2 group">
-              <span className="mobile-brand text-base md:text-2xl font-display font-black tracking-tighter text-white liquid-text">
-                WAYBond<span className="text-secondary tracking-tighter uppercase text-[10px] md:text-base ml-0.5 font-black">Explorers</span>
-              </span>
+              <img 
+                src="/assets/waybond-logo.svg" 
+                alt="Waybond Logo" 
+                className="h-8 md:h-10 w-auto transition-transform duration-300 group-hover:scale-105"
+              />
             </Link>
 
             {/* Desktop Nav */}
@@ -142,12 +144,11 @@ const Navbar = () => {
             >
               <div className="flex justify-between items-center mb-8 relative z-20 sticky top-0 bg-white rounded-2xl px-3 py-2">
                 <Link to="/" onClick={() => haptics.light()} className="flex items-center" aria-label="Waybond home">
-                  <span
-                    className="text-2xl font-display text-white tracking-tight"
-                    style={{ color: '#ffffff', opacity: 1, textShadow: 'none', WebkitTextFillColor: '#fffff' , fontWeight:800}}
-                  >
-                    WAY<span style={{ color: '#003d6a', opacity: 1, WebkitTextFillColor: '#003d6a' }} className="text-sm ml-0.5">BOND</span>
-                  </span>
+                  <img 
+                    src="/assets/waybond-logo.svg" 
+                    alt="Waybond Logo" 
+                    className="h-8 w-auto"
+                  />
                 </Link>
                 <button
                   onClick={() => {

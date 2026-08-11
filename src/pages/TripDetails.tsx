@@ -754,12 +754,7 @@ const TripDetails = () => {
             {/* Book Now Button */}
             <button
               onClick={handleBookSlot}
-<<<<<<< HEAD
-              className="bg-secondary text-white px-4 md:px-8 py-2.5 md:py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap"
-=======
-              disabled={paying}
-              className="bg-secondary text-white px-3 sm:px-5 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-full font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
->>>>>>> 39e68feb6981fa2d23fc3166bc98bdd0e5f16ecd
+              className="bg-secondary text-white px-3 sm:px-5 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-full font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap"
             >
               Book Now
             </button>
