@@ -62,7 +62,6 @@ export default function FeaturedPackages() {
         <div className="text-center mb-10 md:mb-12">
           <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-4">WayBond adventures</p>
           <h2 className="text-2xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic leading-none liquid-text">Choose Your <span className="text-secondary">Experience</span></h2>
-          <p className="text-white/45 font-medium text-base md:text-lg mt-5">Pick the perfect adventure for you.</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-xl md:max-w-none mx-auto mb-14 md:mb-16">
@@ -71,7 +70,11 @@ export default function FeaturedPackages() {
               key={filter.key}
               type="button"
               onClick={() => handleExperienceChange(filter.key)}
-              className={`min-w-0 w-full px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-full border text-[10px] sm:text-xs md:text-sm font-black transition-all duration-300 overflow-hidden ${experience === filter.key ? 'bg-secondary border-secondary text-white shadow-xl shadow-secondary/20' : 'bg-white/5 border-white/15 text-white hover:border-secondary/50 hover:bg-white/10'}`}
+              className={`min-w-0 w-full px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-full text-[10px] sm:text-xs md:text-sm font-black transition-all duration-300 overflow-hidden ${experience === filter.key ? 'bg-secondary text-white shadow-xl shadow-secondary/20' : 'bg-white/5 text-white hover:bg-white/10'}`}
+              style={experience === filter.key
+                ? { border: '2px solid var(--secondary)' }
+                : { border: '2px solid rgba(0, 0, 0, 0.8)' }
+              }
               title={`${filter.label}`}
             >
               <span className="inline-block mr-1 text-sm sm:text-base" aria-hidden="true">{filter.icon}</span>

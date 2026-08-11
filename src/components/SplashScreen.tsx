@@ -85,7 +85,7 @@ const SplashScreen: React.FC = () => {
         </div>
 
         {/* Brand Name with Stagger Animation */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.6 }}
@@ -109,7 +109,7 @@ const SplashScreen: React.FC = () => {
               BOND
             </motion.span>
           </h1>
-        </motion.div>
+        </motion.div> */}
 
         {/* Tagline */}
         <motion.p

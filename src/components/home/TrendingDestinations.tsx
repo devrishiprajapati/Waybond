@@ -26,11 +26,11 @@ export default function TrendingDestinations() {
           viewport={{ once: true }}
           className="mb-16 md:mb-24 text-center"
         >
-          <div className="inline-block mb-6">
+          {/* <div className="inline-block mb-6">
             <span className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] md:text-[11px] drop-shadow-sm bg-gradient-to-r from-secondary to-[#003d6a] bg-clip-text text-transparent">
               ✨ Destinations In Demand
             </span>
-          </div>
+          </div> */}
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black text-gray-900 tracking-tight uppercase leading-tight mb-6 max-w-4xl mx-auto">
             Trending <span className="relative inline-block">
               <span className="absolute inset-0 bg-gradient-to-r from-secondary to[#003d6a] blur-lg opacity-30" />
@@ -39,9 +39,6 @@ export default function TrendingDestinations() {
               </span>
             </span>
           </h2>
-          <p className="text-base md:text-lg text-white font-medium max-w-3xl mx-auto leading-relaxed">
-            Discover our most sought-after curated experiences, hand-picked by our community of adventurers
-          </p>
         </motion.div>
 
         {/* Horizontal Scrolling Cards - All Devices with Responsiveness */}

@@ -105,9 +105,9 @@ export default function HeroSection() {
                 <h1 className="font-display font-black text-[2.5rem] sm:text-5xl lg:text-7xl xl:text-8xl text-white mb-5 leading-[0.95] uppercase tracking-tighter liquid-text">
                   {slide.title}
                 </h1>
-                <p className="text-white/80 text-base sm:text-lg lg:text-xl mb-9 font-medium max-w-2xl leading-relaxed">
+                {/* <p className="text-white/80 text-base sm:text-lg lg:text-xl mb-9 font-medium max-w-2xl leading-relaxed">
                   {slide.subtitle}
-                </p>
+                </p> */}
               </motion.div>
             </AnimatePresence>
 

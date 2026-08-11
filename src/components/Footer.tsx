@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Linkedin, MessageCircle, Youtube } from "lucide-react";
+import { Facebook, Instagram, Linkedin, MessageCircle, Youtube, MapPin, Clock, Phone, Mail } from "lucide-react";
 import { getWhatsAppLink } from "../lib/data";
 
 const categoryGroups = [
@@ -97,7 +97,7 @@ const Footer = () => {
           </p>
         </div>
         <div>
-          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-secondary">
+          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-5 text-secondary">
             Quick Links
           </h4>
           <ul className="space-y-4 text-slate-600 text-xs font-bold uppercase tracking-widest">
@@ -141,7 +141,7 @@ const Footer = () => {
           </ul>
         </div>
         <div>
-          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-secondary">
+          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-5 text-secondary">
             Support & Safety
           </h4>
           <ul className="space-y-4 text-slate-600 text-xs font-bold uppercase tracking-widest">
@@ -187,27 +187,37 @@ const Footer = () => {
           </ul>
         </div>
         <div>
-          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-secondary">
-            Join the Community
+          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-6 text-secondary">
+            Contact
           </h4>
-          <p className="text-slate-600 text-xs mb-5 italic font-medium">
-            Follow along for trip updates, stories and new adventures.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {socialLinks.map(({ label, href, icon: Icon }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`Visit WayBond on ${label}`}
-                title={label}
-                className="group grid h-11 w-11 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-secondary hover:bg-secondary hover:text-white hover:shadow-lg hover:shadow-secondary/20"
-              >
-                <Icon size={19} strokeWidth={2.2} />
+          <ul className="space-y-4 text-slate-600 text-xs font-medium">
+            <li className="flex items-start gap-3">
+              <MapPin size={16} className="text-secondary shrink-0 mt-0.5" />
+              <span>101, University Plaza, Vijay Cross Roads, Navrangpura, Ahmedabad, Gujarat 380009</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <Clock size={16} className="text-secondary shrink-0 mt-0.5" />
+              <span>Mon to Sat • 10 AM to 7 PM</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <Phone size={16} className="text-secondary shrink-0 mt-0.5" />
+              <a href="tel:+919099400699" className="hover:text-secondary transition-colors">
+                +91 90994 00699
               </a>
-            ))}
-          </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <Phone size={16} className="text-secondary shrink-0 mt-0.5" />
+              <a href="tel:+919913800699" className="hover:text-secondary transition-colors">
+                +91 99138 00699
+              </a>
+            </li>
+            <li className="flex items-start gap-3">
+              <Mail size={16} className="text-secondary shrink-0 mt-0.5" />
+              <a href="mailto:info@invinciblengo.org" className="hover:text-secondary transition-colors">
+                info@invinciblengo.org
+              </a>
+            </li>
+          </ul>
         </div>
       </div>
 

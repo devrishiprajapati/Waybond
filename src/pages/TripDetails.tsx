@@ -835,31 +835,36 @@ const TripDetails = () => {
         opacity: showStickyBar ? 1 : 0
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className="fixed top-0 left-0 right-0 z-[100] bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-lg"
+      className="fixed top-0 left-0 right-0 z-[100] bg-white/98 backdrop-blur-xl border-b border-gray-100 shadow-2xl"
     >
-      <div className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 py-3 md:py-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 md:gap-6 min-w-0">
+      <div className="max-w-[1920px] mx-auto px-3 sm:px-6 md:px-12 lg:px-20 py-2.5 sm:py-3 md:py-4">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
+          {/* Left: Image and Title */}
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-6 min-w-0 flex-1">
             <img 
               src={trip?.image} 
               alt={trip?.title}
-              className="w-12 h-12 md:w-16 md:h-16 rounded-xl object-cover shrink-0 border border-gray-200"
+              className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-lg md:rounded-xl object-cover shrink-0 border-2 border-secondary/20 shadow-md"
             />
-            <div className="min-w-0">
-              <h3 className="text-sm md:text-lg font-black text-gray-900 truncate">{trip?.title}</h3>
-              <p className="text-xs md:text-sm text-gray-500 font-semibold">{trip?.location}</p>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-xs sm:text-sm md:text-lg font-black text-gray-900 truncate leading-tight">{trip?.title}</h3>
+              <p className="text-[10px] sm:text-xs md:text-sm text-gray-500 font-semibold truncate">{trip?.location}</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-3 md:gap-6 shrink-0">
+          {/* Right: Price and Button */}
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-6 shrink-0">
+            {/* Price Section */}
             <div className="text-right">
-              <p className="text-xs text-gray-500 font-semibold">per person</p>
-              <p className="text-lg md:text-2xl font-black text-gray-900">₹{trip?.price?.toLocaleString('en-IN')}</p>
+              <p className="text-[9px] sm:text-xs text-gray-400 font-bold uppercase tracking-wide">per person</p>
+              <p className="text-sm sm:text-lg md:text-2xl font-black text-secondary leading-none mt-0.5">₹{trip?.price?.toLocaleString('en-IN')}</p>
             </div>
+            
+            {/* Book Now Button */}
             <button
               onClick={handleBookSlot}
               disabled={paying}
-              className="bg-secondary text-white px-4 md:px-8 py-2.5 md:py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap"
+              className="bg-secondary text-white px-3 sm:px-5 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-full font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {paying ? 'Processing...' : 'Book Now'}
             </button>

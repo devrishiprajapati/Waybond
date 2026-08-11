@@ -100,7 +100,7 @@ const Discover = () => {
               <h1 className="text-2xl md:text-4xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
                 The <span className="text-primary" style={{ WebkitTextStroke: '1px white' }}>Adventures</span> Hub
               </h1>
-              <p className="text-white/40 font-medium text-sm max-w-xl italic leading-relaxed">Curated escapes for the Ahmedabad spirit. From the rugged north to tropical islands.</p>
+              {/* <p className="text-white/40 font-medium text-sm max-w-xl italic leading-relaxed">Curated escapes for the Ahmedabad spirit. From the rugged north to tropical islands.</p> */}
             </div>
 
             {/* Search - Liquid Glass */}
@@ -130,7 +130,11 @@ const Discover = () => {
                   }}
                   className={`px-3 sm:px-5 py-3 rounded-full text-[10px] font-black transition-all duration-500 ${activeExperience === experience.key
                     ? 'bg-secondary text-white shadow-2xl shadow-secondary/40'
-                    : 'liquid-glass text-white/40 hover:text-white hover:bg-white/10'}`}
+                    : 'bg-white text-white/40 hover:text-white hover:bg-white/10'}`}
+                  style={activeExperience === experience.key 
+                    ? { border: '1.5px solid var(--secondary)' }
+                    : { border: '1.5px solid #000000' }
+                  }
                 >
                   <span className="mr-1.5" aria-hidden="true">{experience.icon}</span>{experience.label}
                 </button>
