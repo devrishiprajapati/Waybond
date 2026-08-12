@@ -35,7 +35,7 @@ const AllTripsPage = () => {
     }
 
     const parsedUser = JSON.parse(savedUser)
-    
+
     // Verify that the userId in URL matches the logged-in user's database ID
     if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
@@ -48,11 +48,11 @@ const AllTripsPage = () => {
         const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
         if (!response.ok) throw new Error('Dashboard unavailable')
         const data = await response.json()
-        
+
         // Separate booked and cancelled trips
         const booked = data.bookings.filter((booking: any) => booking.status !== 'Cancelled')
         const cancelled = data.bookings.filter((booking: any) => booking.status === 'Cancelled')
-        
+
         setBookedTrips(booked)
         setCancelledTrips(cancelled)
         setAllTrips(data.bookings)
@@ -62,7 +62,7 @@ const AllTripsPage = () => {
         setLoading(false)
       }
     }
-    
+
     loadAllTrips()
   }, [navigate, userId])
 
@@ -83,7 +83,7 @@ const AllTripsPage = () => {
               <ArrowLeft size={16} />
               Back to Dashboard
             </button>
-            <h1 className="text-5xl md:text-7xl font-sans font-black tracking-tighter uppercase italic leading-none liquid-text">
+            <h1 className="text-5xl md:text-7xl font-bungee font-black tracking-tighter uppercase italic leading-none liquid-text">
               All Your <span className="text-primary">Trips</span>
             </h1>
             <p className="text-white/50 max-w-2xl font-medium italic">
@@ -139,16 +139,15 @@ const AllTripsPage = () => {
           ) : (
             allTrips.map((trip, index) => {
               const isCancelled = cancelledTrips.some((t) => t.id === trip.id || t.bookingId === trip.bookingId)
-              
+
               return (
                 <motion.article
                   key={trip.bookingId || trip.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.08 }}
-                  className={`liquid-glass-dark border rounded-[2.5rem] overflow-hidden ${
-                    isCancelled ? 'border-red-500/20 opacity-75' : 'border-white/10'
-                  }`}
+                  className={`liquid-glass-dark border rounded-[2.5rem] overflow-hidden ${isCancelled ? 'border-red-500/20 opacity-75' : 'border-white/10'
+                    }`}
                 >
                   <div className="grid grid-cols-1 md:grid-cols-[240px_1fr]">
                     {/* Image Section */}
@@ -160,13 +159,12 @@ const AllTripsPage = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                       <span
-                        className={`absolute left-5 bottom-5 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.18em] ${
-                          isCancelled
+                        className={`absolute left-5 bottom-5 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.18em] ${isCancelled
                             ? 'bg-red-500 text-white'
                             : trip.status === 'Confirmed'
                               ? 'bg-green-500 text-white'
                               : 'bg-secondary text-white'
-                        }`}
+                          }`}
                       >
                         {trip.status}
                       </span>
@@ -179,7 +177,7 @@ const AllTripsPage = () => {
                           <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.25em]">
                             Booking ID {trip.bookingId}
                           </p>
-                          <h3 className="text-2xl md:text-3xl font-sans font-black uppercase italic tracking-tighter leading-none">
+                          <h3 className="text-2xl md:text-3xl font-bungee font-black uppercase italic tracking-tighter leading-none">
                             {trip.title}
                           </h3>
                           <div className="flex flex-wrap items-center gap-4 text-white/50 text-[10px] font-black uppercase tracking-[0.16em]">
@@ -226,11 +224,10 @@ const AllTripsPage = () => {
                         {trip.highlights?.slice(0, 4).map((highlight: string) => (
                           <span
                             key={highlight}
-                            className={`rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.16em] ${
-                              isCancelled
+                            className={`rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.16em] ${isCancelled
                                 ? 'bg-red-500/10 text-red-300 border border-red-500/20'
                                 : 'bg-secondary/10 text-secondary border border-secondary/20'
-                            }`}
+                              }`}
                           >
                             {highlight}
                           </span>

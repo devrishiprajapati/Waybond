@@ -183,7 +183,7 @@ const TripDetails = () => {
                   <span className="ml-1.5 text-xs font-black text-white">{trip.rating} ({trip.reviews} reviews)</span>
                 </div>
               </div>
-              <h1 className="text-2xl md:text-4xl font-sans font-black text-white liquid-text italic uppercase tracking-tighter font-bungee">{trip.title}</h1>
+              <h1 className="text-2xl md:text-4xl font-bungee font-black text-white liquid-text italic uppercase tracking-tighter">{trip.title}</h1>
               <div className="flex items-center text-white/60 mt-4 font-black uppercase tracking-widest text-xs min-w-0">
                 <MapPin size={16} className="mr-2 text-secondary shrink-0" /> <span className="break-words">{trip.location}</span>
               </div>
@@ -259,7 +259,7 @@ const TripDetails = () => {
               <div className="flex justify-between items-center gap-4 pb-5 border-b border-white/10 md:pb-8">
                 <div className="min-w-0 flex-1 overflow-hidden">
                   <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em] drop-shadow-sm">Price per person</span>
-                  <div className="text-3xl md:text-4xl font-sans font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
+                  <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
                 </div>
                 <div className="liquid-glass p-3 md:p-4 rounded-2xl text-center shrink-0 min-w-[64px] md:min-w-[72px] border border-white/5">
                   <div className="text-white font-black text-xl md:text-2xl drop-shadow-md">{trip.duration.split(' ')[0]}</div>
@@ -422,7 +422,7 @@ const TripDetails = () => {
           <div className="lg:col-span-8 space-y-12 md:space-y-20">
             {/* Overview */}
             <div>
-              <h2 className="text-2xl md:text-5xl font-sans font-black text-white tracking-tighter uppercase italic mb-5 md:mb-8 liquid-text font-bungee">Trip Overview</h2>
+              <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic mb-5 md:mb-8 liquid-text">Trip Overview</h2>
               <p className="text-base md:text-lg text-white/60 leading-relaxed font-medium italic">
                 {trip.description}
               </p>
@@ -440,7 +440,7 @@ const TripDetails = () => {
             {/* Itinerary */}
             <div>
               <div className="flex justify-between items-end gap-4 mb-6 md:mb-10">
-                <h2 className="text-2xl md:text-5xl font-sans font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
+                <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
                 <button
                   onClick={() => {
                     haptics.light();
@@ -464,7 +464,7 @@ const TripDetails = () => {
                   >
                     <div className="p-4 md:p-8 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 md:gap-6 min-w-0">
-                        <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-sans transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
+                        <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
                           <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
                           <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
                         </div>
@@ -517,7 +517,7 @@ const TripDetails = () => {
 
                 <div className="space-y-5">
                   <div>
-                    <h3 className="text-3xl md:text-4xl font-sans font-black italic tracking-tighter liquid-text">{trip.captain.name}</h3>
+                    <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{trip.captain.name}</h3>
                     <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{trip.captain.role}</p>
                   </div>
                   <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">

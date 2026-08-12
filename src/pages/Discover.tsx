@@ -131,7 +131,7 @@ const Discover = () => {
                   className={`px-3 sm:px-5 py-3 rounded-full text-[10px] font-black font-bungee transition-all duration-500 ${activeExperience === experience.key
                     ? 'bg-secondary text-white shadow-2xl shadow-secondary/40'
                     : ' text-white/40 hover:text-white hover:bg-white/10'}`}
-                  style={activeExperience === experience.key 
+                  style={activeExperience === experience.key
                     ? { border: '2px solid var(--secondary)' }
                     : { border: '1px solid rgba(0, 0, 0, 0.8)' }
                   }
@@ -159,7 +159,7 @@ const Discover = () => {
                   <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center space-x-3">
                       <Filter className="text-secondary" size={20} />
-                      <h2 className="text-xl font-sans font-black uppercase italic tracking-tighter">Refine</h2>
+                      <h2 className="text-xl font-bungee font-black uppercase italic tracking-tighter">Refine</h2>
                     </div>
                     {activeFilters.length > 0 && (
                       <button onClick={() => { haptics.light(); setActiveFilters([]); }} className="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-secondary transition-colors underline">RESET</button>
@@ -224,7 +224,7 @@ const Discover = () => {
                 {filteredTrips.map((trip) => {
                   const selectedDeparture = selectedDepartures[trip.id] || trip.departureDates?.[0]
                   const isWishlisted = isInList(trip.id)
-                  
+
                   return (
                     <motion.div
                       key={trip.id}
@@ -233,7 +233,7 @@ const Discover = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col relative cursor-pointer"
-                      onClick={() => { 
+                      onClick={() => {
                         haptics.medium()
                         navigate(`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`)
                       }}
@@ -250,11 +250,11 @@ const Discover = () => {
                         title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                         aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                       >
-                        <Heart 
+                        <Heart
                           className={`w-5 h-5 transition-all duration-300 ${isWishlisted ? 'fill-secondary text-secondary' : 'fill-none'}`}
                         />
                       </button>
-                      
+
                       {/* Image Section - Fixed */}
                       <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
                         <img src={trip.image} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
@@ -269,7 +269,7 @@ const Discover = () => {
                           <span className="inline-flex items-center gap-1.5 min-w-0"><MapPin size={13} className="text-secondary shrink-0" /><span className="truncate">{trip.location}</span></span>
                         </div>
                         <div className="h-px bg-white/10 mb-3" />
-                        <h3 className="text-lg md:text-xl font-sans font-black tracking-tight text-white leading-snug line-clamp-2 mb-2 font-bungee">{trip.title}</h3>
+                        <h3 className="text-lg md:text-xl font-bungee font-black tracking-tight text-white leading-snug line-clamp-2 mb-2">{trip.title}</h3>
                         <p className="text-xs md:text-sm text-white/55 line-clamp-3 flex-grow">{trip.description}</p>
                       </div>
 
@@ -279,7 +279,7 @@ const Discover = () => {
                         <div className="grid grid-cols-2 gap-3 items-end">
                           <div>
                             <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Starting from</p>
-                            <p className="text-xl md:text-2xl font-sans font-black text-secondary leading-none">₹{trip.price}</p>
+                            <p className="text-xl md:text-2xl font-bungee font-black text-secondary leading-none">₹{trip.price}</p>
                           </div>
                           <div className="text-right">
                             <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Difficulty</p>
@@ -362,8 +362,8 @@ const Discover = () => {
                                           }
                                         }}
                                         className={`px-2 py-1 text-[7px] font-black uppercase tracking-wider rounded transition-colors ${isActive
-                                            ? 'bg-secondary text-white'
-                                            : 'bg-transparent text-white/50 hover:text-white'
+                                          ? 'bg-secondary text-white'
+                                          : 'bg-transparent text-white/50 hover:text-white'
                                           }`}
                                       >
                                         {monthName} {year}
@@ -391,8 +391,8 @@ const Discover = () => {
                                             }))
                                           }}
                                           className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${isSelected
-                                              ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
-                                              : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
+                                            ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
+                                            : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
                                             }`}
                                           title={date}
                                         >
@@ -421,7 +421,7 @@ const Discover = () => {
                 <div className="liquid-glass-dark w-24 h-24 rounded-[2rem] flex items-center justify-center text-white/10 border-white/5">
                   <Search size={40} />
                 </div>
-                <h3 className="text-3xl font-sans font-black text-white/20 uppercase tracking-tighter italic">No matching adventures found...</h3>
+                <h3 className="text-3xl font-bungee font-black text-white/20 uppercase tracking-tighter italic">No matching adventures found...</h3>
                 <button
                   onClick={() => {
                     haptics.light();

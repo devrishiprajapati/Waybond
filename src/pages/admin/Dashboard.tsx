@@ -115,7 +115,7 @@ const AdminDashboard = () => {
       <aside className="w-80 liquid-glass-dark border-r border-white/10 p-8 hidden lg:flex flex-col">
         <div className="mb-12">
           <p className="text-secondary text-[9px] font-black uppercase tracking-[0.4em] mb-3 font-bungee">WayBond</p>
-          <h1 className="text-3xl font-sans font-black uppercase italic tracking-tighter liquid-text font-bungee">
+          <h1 className="text-3xl font-bungee font-black uppercase italic tracking-tighter liquid-text">
             Admin <span className="text-primary font-bungee">Basecamp</span>
           </h1>
         </div>
@@ -126,8 +126,8 @@ const AdminDashboard = () => {
               key={item.path}
               to={item.path}
               className={`flex items-center gap-3 p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.16em] transition-all${location.pathname === item.path
-                  ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
-                  : 'text-white/55 hover:text-white hover:bg-white/5'
+                ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
+                : 'text-white/55 hover:text-white hover:bg-white/5'
                 }`}
             >
               <item.icon size={18} />
@@ -149,7 +149,7 @@ const AdminDashboard = () => {
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8 mb-10">
           <div className="space-y-4">
             {/* <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Control Center</span> */}
-            <h2 className="text-3xl md:text-5xl pt-8 font-sans font-black tracking-tighter uppercase italic leading-none liquid-text font-bungee">
+            <h2 className="text-3xl md:text-5xl pt-8 font-bungee font-black tracking-tighter uppercase italic leading-none liquid-text">
               Package <span className="text-primary font-bungee">Inventory</span>
             </h2>
             {/* <p className="text-white/45 font-medium italic max-w-2xl">
@@ -217,8 +217,8 @@ const AdminDashboard = () => {
                   key={experience}
                   onClick={() => setExperienceFilter(experience)}
                   className={`h-11 px-5 rounded-2xl font-black text-[9px] uppercase tracking-[0.18em] transition-all font-bungee ${experienceFilter === experience
-                      ? 'bg-secondary text-white'
-                      : 'bg-white/5 text-white/45 border border-white/10 hover:text-white hover:bg-white/10 font-bungee'
+                    ? 'bg-secondary text-white'
+                    : 'bg-white/5 text-white/45 border border-white/10 hover:text-white hover:bg-white/10 font-bungee'
                     }`}
                 >
                   {experience === 'All' ? 'All' : `${experience} trips`}
@@ -250,7 +250,7 @@ const AdminDashboard = () => {
                     {trip.category}
                   </span>
                 </div>
-                <h3 className="text-2xl font-sans font-black uppercase italic tracking-tighter text-white leading-none font-bungee">{trip.title}</h3>
+                <h3 className="text-2xl font-bungee font-black uppercase italic tracking-tighter text-white leading-none">{trip.title}</h3>
                 <div className="flex flex-wrap items-center gap-4 text-white/45 text-[10px] font-black uppercase tracking-[0.16em]">
                   <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" /> {trip.location}</span>
                   <span className="flex items-center gap-2"><Calendar size={13} className="text-secondary" /> {trip.nextBatch || 'Batch TBA'}</span>
@@ -297,7 +297,7 @@ const AdminDashboard = () => {
           {filteredTrips.length === 0 && (
             <div className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-12 text-center">
               <Package className="mx-auto text-white/20 mb-5" size={44} />
-              <h3 className="text-2xl font-sans font-black uppercase italic tracking-tighter text-white/50">No packages found</h3>
+              <h3 className="text-2xl font-bungee font-black uppercase italic tracking-tighter text-white/50">No packages found</h3>
               <p className="text-white/35 text-sm font-medium italic mt-2">Try another search or add a fresh expedition.</p>
             </div>
           )}

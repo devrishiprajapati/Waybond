@@ -38,7 +38,7 @@ const CancellationRefunds = () => (
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-5xl md:text-7xl lg:text-[6rem] font-sans font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
+          className="text-5xl md:text-7xl lg:text-[6rem] font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
         >
           CANCELLATION<br />& <span className="text-secondary">REFUNDS</span>
         </motion.h1>
@@ -108,7 +108,7 @@ const CancellationRefunds = () => (
           className="liquid-glass p-8 md:p-10 rounded-[3rem] border border-white/15 shadow-2xl lg:sticky lg:top-28"
         >
           <MessageCircle className="text-secondary mb-8" size={32} />
-          <h2 className="text-3xl font-sans font-black uppercase italic tracking-tighter text-white">Need help with a refund?</h2>
+          <h2 className="text-3xl font-bungee font-black uppercase italic tracking-tighter text-white">Need help with a refund?</h2>
           <p className="text-sm text-white/50 leading-relaxed italic font-medium mt-5 mb-8">Contact our team through our official support channels for refund-related queries.</p>
           <a
             href={getWhatsAppLink(`Hi WayBond! I'd like to cancel or reschedule my trip. Can you assist me with this?`)}
@@ -136,7 +136,7 @@ const PolicyCard = ({ icon: Icon, title, number, children }: { icon: typeof File
       <div className="bg-secondary/20 p-4 rounded-2xl"><Icon size={24} className="text-secondary" /></div>
       <div>
         <p className="text-[9px] font-black tracking-[0.3em] text-secondary uppercase mb-2">Policy {number}</p>
-        <h2 className="text-3xl font-sans font-black uppercase italic tracking-tighter text-white">{title}</h2>
+        <h2 className="text-3xl font-bungee font-black uppercase italic tracking-tighter text-white">{title}</h2>
       </div>
     </div>
     {children}

@@ -53,43 +53,43 @@ const Testimonials = () => {
         <div className="max-w-4xl mb-16 md:mb-20 space-y-6">
           {/* <div className="liquid-glass inline-flex items-center gap-3 px-5 py-2 rounded-full border-white/10 shadow-lg"><Quote size={14} className="text-secondary" /><span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">Stories from the tribe</span></div> */}
           <h1 className="text-2xl md:text-4xl lg:text-5xl
-           font-sans font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic">TRAVELLER<br /><span className="text-secondary">REVIEWS</span></h1>
+           font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic">TRAVELLER<br /><span className="text-secondary">REVIEWS</span></h1>
           <p className="text-lg text-white/50 font-medium max-w-2xl italic leading-relaxed">Real journeys, shared memories, and the people who made the WayBond experience their own.</p>
           <p className="text-sm text-white/40 italic mt-4">Add your testimonial from your dashboard after booking a trip.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.filter((testimonial) => !isTestimonialHidden(testimonial.id)).map((testimonial, index) => (
-              <motion.article 
-                key={`${testimonial.id}-${index}`} 
-                initial={{ opacity: 0, y: 20 }} 
-                whileInView={{ opacity: 1, y: 0 }} 
-                viewport={{ once: true }} 
-                className="liquid-glass-dark rounded-[2.5rem] overflow-hidden border border-white/10 shadow-xl"
-              >
-                {testimonial.media && (
-                  <div className="h-56 bg-black/30">
-                    {testimonial.mediaType === 'video' ? (
-                      <video src={testimonial.media} controls className="w-full h-full object-cover" />
-                    ) : (
-                      <img src={testimonial.media} alt={`${testimonial.name}'s trip`} className="w-full h-full object-cover" />
-                    )}
-                  </div>
-                )}
-                <div className="p-7 md:p-8">
-                  <Quote size={24} className="text-secondary/70 mb-5" />
-                  <p className="text-white/65 text-sm leading-relaxed italic font-medium">"{testimonial.review}"</p>
-                  <div className="flex gap-1 mt-6">
-                    {Array.from({ length: testimonial.rating }).map((_, star) => (
-                      <Star key={star} size={14} className="text-secondary fill-secondary" />
-                    ))}
-                  </div>
-                  <p className="mt-5 font-sans font-black uppercase italic text-white tracking-tight">{testimonial.name}</p>
-                  <p className="text-[9px] font-black uppercase tracking-[0.22em] text-secondary mt-1">{testimonial.trip}</p>
+          {testimonials.filter((testimonial) => !isTestimonialHidden(testimonial.id)).map((testimonial, index) => (
+            <motion.article
+              key={`${testimonial.id}-${index}`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="liquid-glass-dark rounded-[2.5rem] overflow-hidden border border-white/10 shadow-xl"
+            >
+              {testimonial.media && (
+                <div className="h-56 bg-black/30">
+                  {testimonial.mediaType === 'video' ? (
+                    <video src={testimonial.media} controls className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={testimonial.media} alt={`${testimonial.name}'s trip`} className="w-full h-full object-cover" />
+                  )}
                 </div>
-              </motion.article>
-            ))}
-          </div>
+              )}
+              <div className="p-7 md:p-8">
+                <Quote size={24} className="text-secondary/70 mb-5" />
+                <p className="text-white/65 text-sm leading-relaxed italic font-medium">"{testimonial.review}"</p>
+                <div className="flex gap-1 mt-6">
+                  {Array.from({ length: testimonial.rating }).map((_, star) => (
+                    <Star key={star} size={14} className="text-secondary fill-secondary" />
+                  ))}
+                </div>
+                <p className="mt-5 font-bungee font-black uppercase italic text-white tracking-tight">{testimonial.name}</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.22em] text-secondary mt-1">{testimonial.trip}</p>
+              </div>
+            </motion.article>
+          ))}
+        </div>
       </div>
     </motion.div>
   )

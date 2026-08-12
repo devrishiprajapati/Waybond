@@ -50,7 +50,7 @@ const ProfilePage = () => {
     }
 
     const parsedUser = JSON.parse(savedUser)
-    
+
     // Verify that the userId in URL matches the logged-in user
     if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
@@ -147,7 +147,7 @@ const ProfilePage = () => {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div className="space-y-4">
               <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Your Account</span>
-              <h1 className="text-5xl md:text-6xl font-sans font-black tracking-tighter uppercase italic leading-none liquid-text">
+              <h1 className="text-5xl md:text-6xl font-bungee font-black tracking-tighter uppercase italic leading-none liquid-text">
                 Profile <span className="text-primary">Settings</span>
               </h1>
             </div>
@@ -160,11 +160,10 @@ const ProfilePage = () => {
                   setIsEditing(true)
                 }
               }}
-              className={`h-12 px-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 transition-all ${
-                isEditing
+              className={`h-12 px-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 transition-all ${isEditing
                   ? 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
                   : 'bg-secondary text-white hover:bg-white hover:text-slate-800 shadow-lg shadow-secondary/20'
-              }`}
+                }`}
             >
               {isEditing ? (
                 <>
@@ -225,7 +224,7 @@ const ProfilePage = () => {
 
               {/* User Info */}
               <div className="text-center space-y-3">
-                <h2 className="text-3xl font-sans font-black text-white">{user.fullName}</h2>
+                <h2 className="text-3xl font-bungee font-black text-white">{user.fullName}</h2>
                 <p className="text-white/45 text-xs font-medium italic">{user.email}</p>
               </div>
 
@@ -264,7 +263,7 @@ const ProfilePage = () => {
             <section className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-8 space-y-6">
               <div>
                 <p className="text-secondary text-[9px] font-black uppercase tracking-[0.3em]">Personal Info</p>
-                <h3 className="text-2xl font-sans font-black uppercase italic tracking-tighter mt-2">Basic Details</h3>
+                <h3 className="text-2xl font-bungee font-black uppercase italic tracking-tighter mt-2">Basic Details</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -336,7 +335,7 @@ const ProfilePage = () => {
             <section className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-8 space-y-6">
               <div>
                 <p className="text-secondary text-[9px] font-black uppercase tracking-[0.3em]">Contact Info</p>
-                <h3 className="text-2xl font-sans font-black uppercase italic tracking-tighter mt-2">Phone & Address</h3>
+                <h3 className="text-2xl font-bungee font-black uppercase italic tracking-tighter mt-2">Phone & Address</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -391,7 +390,7 @@ const ProfilePage = () => {
             <section className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-8 space-y-6">
               <div>
                 <p className="text-secondary text-[9px] font-black uppercase tracking-[0.3em]">Health Info</p>
-                <h3 className="text-2xl font-sans font-black uppercase italic tracking-tighter mt-2">Medical Details</h3>
+                <h3 className="text-2xl font-bungee font-black uppercase italic tracking-tighter mt-2">Medical Details</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

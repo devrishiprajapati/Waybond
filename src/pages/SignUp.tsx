@@ -243,7 +243,7 @@ const SignUp = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black text-slate-800 uppercase italic tracking-tighter mb-2 font-bungee">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bungee font-black text-slate-800 uppercase italic tracking-tighter mb-2">
                 Join the <span className="text-secondary font-bungee ">Community</span>
               </h1>
               <p className="text-slate-500 font-medium text-xs italic tracking-wide">
@@ -284,10 +284,10 @@ const SignUp = () => {
                   placeholder="Your Full Name"
                   autoComplete="name"
                   className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.fullName && fieldErrors.fullName
-                      ? 'border-red-500 bg-red-50'
-                      : touched.fullName && !fieldErrors.fullName && fullName
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-slate-200'
+                    ? 'border-red-500 bg-red-50'
+                    : touched.fullName && !fieldErrors.fullName && fullName
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
                     }`}
                   required
                 />
@@ -326,10 +326,10 @@ const SignUp = () => {
                   validateField('dateOfBirth', dateOfBirth)
                 }}
                 className={`w-full bg-slate-50 border p-4 px-4 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors text-base ${touched.dateOfBirth && fieldErrors.dateOfBirth
-                    ? 'border-red-500 bg-red-50'
-                    : touched.dateOfBirth && !fieldErrors.dateOfBirth && dateOfBirth
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-slate-200'
+                  ? 'border-red-500 bg-red-50'
+                  : touched.dateOfBirth && !fieldErrors.dateOfBirth && dateOfBirth
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-slate-200'
                   }`}
                 required
               />
@@ -376,10 +376,10 @@ const SignUp = () => {
                   autoComplete="tel"
                   inputMode="numeric"
                   className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.mobileNumber && fieldErrors.mobileNumber
-                      ? 'border-red-500 bg-red-50'
-                      : touched.mobileNumber && !fieldErrors.mobileNumber && mobileNumber
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-slate-200'
+                    ? 'border-red-500 bg-red-50'
+                    : touched.mobileNumber && !fieldErrors.mobileNumber && mobileNumber
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
                     }`}
                   required
                 />
@@ -418,10 +418,10 @@ const SignUp = () => {
                   autoComplete="email"
                   inputMode="email"
                   className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.email && fieldErrors.email
-                      ? 'border-red-500 bg-red-50'
-                      : touched.email && !fieldErrors.email && email
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-slate-200'
+                    ? 'border-red-500 bg-red-50'
+                    : touched.email && !fieldErrors.email && email
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
                     }`}
                   required
                 />
@@ -457,10 +457,10 @@ const SignUp = () => {
                   }}
                   placeholder="Street, City, State, Postal Code"
                   className={`w-full bg-slate-50 border p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base resize-none ${touched.address && fieldErrors.address
-                      ? 'border-red-500 bg-red-50'
-                      : touched.address && !fieldErrors.address && address
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-slate-200'
+                    ? 'border-red-500 bg-red-50'
+                    : touched.address && !fieldErrors.address && address
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
                     }`}
                   rows={2}
                   required
@@ -491,10 +491,10 @@ const SignUp = () => {
                   placeholder="10 digit emergency contact"
                   inputMode="numeric"
                   className={`w-full bg-slate-50 border p-4 pl-12 pr-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.emergencyContact && fieldErrors.emergencyContact
-                      ? 'border-red-500 bg-red-50'
-                      : touched.emergencyContact && !fieldErrors.emergencyContact && emergencyContact
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-slate-200'
+                    ? 'border-red-500 bg-red-50'
+                    : touched.emergencyContact && !fieldErrors.emergencyContact && emergencyContact
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
                     }`}
                   required
                 />
@@ -582,10 +582,10 @@ const SignUp = () => {
                   placeholder="••••••••"
                   autoComplete="new-password"
                   className={`w-full bg-slate-50 border p-4 pl-12 pr-24 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.password && fieldErrors.password
-                      ? 'border-red-500 bg-red-50'
-                      : touched.password && !fieldErrors.password && password
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-slate-200'
+                    ? 'border-red-500 bg-red-50'
+                    : touched.password && !fieldErrors.password && password
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
                     }`}
                   required
                 />
@@ -631,10 +631,10 @@ const SignUp = () => {
                   placeholder="••••••••"
                   autoComplete="new-password"
                   className={`w-full bg-slate-50 border p-4 pl-12 pr-24 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base ${touched.confirmPassword && fieldErrors.confirmPassword
-                      ? 'border-red-500 bg-red-50'
-                      : touched.confirmPassword && !fieldErrors.confirmPassword && confirmPassword
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-slate-200'
+                    ? 'border-red-500 bg-red-50'
+                    : touched.confirmPassword && !fieldErrors.confirmPassword && confirmPassword
+                      ? 'border-green-500 bg-green-50'
+                      : 'border-slate-200'
                     }`}
                   required
                 />

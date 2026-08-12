@@ -49,7 +49,7 @@ const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, class
         <motion.h1
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-3xl md:text-5xl lg:text-[7rem] font-sans font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
+          className="text-3xl md:text-5xl lg:text-[7rem] font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
         >
           {title}
         </motion.h1>
@@ -100,7 +100,7 @@ const TeamMemberModal = ({ member, onClose }: { member: TeamMember; onClose: () 
             <X size={18} />
           </button>
           <div className="absolute bottom-6 left-6">
-            <p className="text-3xl font-sans font-black text-white italic tracking-tighter drop-shadow-xl">{member.name}</p>
+            <p className="text-3xl font-bungee font-black text-white italic tracking-tighter drop-shadow-xl">{member.name}</p>
             <p className="text-[10px] text-secondary font-black uppercase tracking-[0.25em] mt-1">{member.designation}</p>
           </div>
         </div>
@@ -174,7 +174,7 @@ const TeamMembersSection = () => {
         <div className="liquid-glass inline-block px-5 py-2 rounded-full border border-white/10 shadow-lg mb-6">
           <span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">The People Behind The Adventure</span>
         </div>
-        <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-sans font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
+        <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
           Meet The <span className="text-primary px-2 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>Team</span>
         </h2>
         <p className="text-white/40 italic mt-6 text-sm font-medium max-w-xl mx-auto leading-relaxed">
@@ -207,7 +207,7 @@ const TeamMembersSection = () => {
             </div>
             {/* Info */}
             <div className="p-6 space-y-2">
-              <p className="text-xl font-sans font-black text-white uppercase italic tracking-tight group-hover:text-secondary transition-colors">{member.name}</p>
+              <p className="text-xl font-bungee font-black text-white uppercase italic tracking-tight group-hover:text-secondary transition-colors">{member.name}</p>
               <p className="text-[9px] text-secondary font-black uppercase tracking-[0.25em]">{member.designation}</p>
               <p className="text-white/45 text-xs leading-relaxed line-clamp-2 mt-1">{member.shortBio}</p>
               <p className="text-[8px] font-black uppercase tracking-[0.2em] text-secondary/60 mt-2 flex items-center gap-1">
@@ -243,7 +243,7 @@ const About = () => (
         className="space-y-12"
       >
         <div className="space-y-6">
-          <h2 className="text-4xl font-sans font-black uppercase italic tracking-tighter text-secondary font-bungee">Our Manifest</h2>
+          <h2 className="text-4xl font-bungee font-black uppercase italic tracking-tighter text-secondary">Our Manifest</h2>
           <p className="text-lg text-white/60 leading-relaxed font-sarif italic">
             Born from a simple desire: to make travel meaningful, accessible, and deeply community-driven for the people of Ahmedabad. We believe that every journey should be an exploration of both the world and the inner self.
           </p>
@@ -260,7 +260,7 @@ const About = () => (
               <div className="bg-secondary/20 p-4 rounded-2xl w-fit group-hover:scale-110 transition-transform">
                 <item.icon className="text-secondary" size={24} />
               </div>
-              <h4 className="font-sans font-black text-xl uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{item.title}</h4>
+              <h4 className="font-bungee font-black text-xl uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{item.title}</h4>
               <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-loose">{item.desc}</p>
             </div>
           ))}
@@ -277,7 +277,7 @@ const About = () => (
         <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a] via-black/20 to-transparent"></div>
         <div className="absolute bottom-6 md:bottom-12 left-6 right-6 md:left-12 md:right-12">
           <div className="liquid-glass p-4 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-white/20 text-center shadow-2xl backdrop-blur-xl">
-            <p className="text-2xl md:text-4xl lg:text-5xl font-sans font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
+            <p className="text-2xl md:text-4xl lg:text-5xl font-bungee font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
             {/* <p className="text-[8px] md:text-[9px] text-white/50 uppercase font-black tracking-[0.3em] md:tracking-[0.4em] mt-2 md:mt-3">Founded for the Ahmedabad Spirit</p> */}
           </div>
         </div>

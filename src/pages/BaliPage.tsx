@@ -40,7 +40,7 @@ export default function BaliPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-6xl md:text-[8rem] font-sans font-black leading-[0.8] tracking-tighter uppercase drop-shadow-2xl liquid-text mb-8"
+              className="text-6xl md:text-[8rem] font-bungee font-black leading-[0.8] tracking-tighter uppercase drop-shadow-2xl liquid-text mb-8"
             >
               BALI<br />
               <span className="text-transparent px-4 italic" style={{ WebkitTextStroke: '2px white' }}>ESSENCE</span>
@@ -66,7 +66,7 @@ export default function BaliPage() {
       <section className="py-24 max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16">
         <div className="lg:col-span-2 space-y-16">
           <div className="space-y-6">
-            <h2 className="text-4xl font-sans font-black uppercase italic tracking-tighter text-primary flex items-center gap-4">
+            <h2 className="text-4xl font-bungee font-black uppercase italic tracking-tighter text-primary flex items-center gap-4">
               <Palmtree size={32} /> The Tropical Call
             </h2>
             <p className="text-gray-400 text-lg leading-relaxed font-medium">
@@ -76,7 +76,7 @@ export default function BaliPage() {
 
           {/* Itinerary Timeline */}
           <div className="space-y-8">
-            <h3 className="text-2xl font-sans font-black uppercase tracking-tighter border-l-4 border-secondary pl-6">Deep Dive Journey</h3>
+            <h3 className="text-2xl font-bungee font-black uppercase tracking-tighter border-l-4 border-secondary pl-6">Deep Dive Journey</h3>
             <div className="space-y-4">
               {itinerary.map((day, i) => (
                 <motion.div
@@ -85,9 +85,9 @@ export default function BaliPage() {
                   initial={{ opacity: 0, x: -20 }}
                   className="liquid-glass p-8 rounded-[2.5rem] flex items-center space-x-8 group hover:bg-white/10 transition-all duration-500 cursor-default border-white/10"
                 >
-                  <span className="text-4xl font-sans font-black text-secondary group-hover:scale-110 transition-transform">{day.day}</span>
+                  <span className="text-4xl font-bungee font-black text-secondary group-hover:scale-110 transition-transform">{day.day}</span>
                   <div>
-                    <h4 className="text-xl font-sans font-black uppercase tracking-tighter mb-1">{day.title}</h4>
+                    <h4 className="text-xl font-bungee font-black uppercase tracking-tighter mb-1">{day.title}</h4>
                     <p className="text-gray-500 font-medium text-sm">{day.desc}</p>
                   </div>
                 </motion.div>
@@ -101,7 +101,7 @@ export default function BaliPage() {
           <div className="sticky top-32 liquid-glass p-10 rounded-[3rem] border-white/20 shadow-2xl">
             <div className="mb-10 text-center">
               <span className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px]">ALL-INCLUSIVE PACK</span>
-              <p className="text-5xl font-sans font-black text-white mt-2 tracking-tighter">₹54,999<span className="text-xs text-white/20 ml-2">/PP</span></p>
+              <p className="text-5xl font-bungee font-black text-white mt-2 tracking-tighter">₹54,999<span className="text-xs text-white/20 ml-2">/PP</span></p>
             </div>
 
             <div className="space-y-6 mb-10">

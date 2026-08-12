@@ -78,7 +78,7 @@ export default function AdminTestimonials() {
           <div>
             <Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.22em] mb-5"><ArrowLeft size={15} /> Admin dashboard</Link>
             <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-3">Community voice</p>
-            <h1 className="text-4xl md:text-6xl font-sans font-black uppercase italic tracking-tighter liquid-text">Manage <span className="text-primary">Testimonials</span></h1>
+            <h1 className="text-4xl md:text-6xl font-bungee font-black uppercase italic tracking-tighter liquid-text">Manage <span className="text-primary">Testimonials</span></h1>
           </div>
           <button onClick={loadTestimonials} className="h-12 px-5 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 hover:border-secondary"><RefreshCw size={15} /> Refresh</button>
         </div>
