@@ -17,45 +17,33 @@ html {
 body {
   @apply font-sans antialiased bg-white;
   font-family: 'Manrope', sans-serif;
-  font-weight: 400; /* Regular for body text */
+  font-weight: 400;
+  /* Regular for body text */
   color: #333333;
   /* Smooth momentum scrolling on iOS Safari & Chrome */
   -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
 }
 
-/* Typography System */
-h1, h2, h3, h4, h5, h6,
-.heading,
-.title {
-  font-family: 'Bungee', cursive;
-  font-weight: 400; /* Bungee Regular */
-}
+/* Typography System — placed in @layer base so Tailwind utilities (font-bungee, font-sans, etc.) always win */
+@layer base {
 
-.subtitle,
-h1 + p,
-h2 + p,
-h3 + p,
-h4 + p,
-h5 + p,
-h6 + p {
-  font-family: 'Manrope', sans-serif;
-  font-weight: 600; /* Semibold */
-}
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .heading,
+  .title {
+    font-family: 'Bungee', cursive;
+    font-weight: 400;
+  }
 
-p, span, div,
-.body-text {
-  font-family: 'Manrope', sans-serif;
-  font-weight: 400; /* Regular */
-}
-
-button, 
-.btn,
-a.button,
-input[type="submit"],
-input[type="button"] {
-  font-family: 'Manrope', sans-serif;
-  font-weight: 700; /* Bold */
+  body {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 400;
+  }
 }
 
 img,
@@ -185,7 +173,8 @@ label {
 /* Custom utility for Bungee font on headings */
 .font-bungee {
   font-family: 'Bungee', cursive !important;
-  font-weight: 400 !important; /* Bungee Regular */
+  font-weight: 400 !important;
+  /* Bungee Regular */
 }
 
 /* Utility classes for consistent typography */

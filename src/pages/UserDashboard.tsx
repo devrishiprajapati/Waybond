@@ -46,7 +46,7 @@ const UserDashboard = () => {
       navigate('/login')
       return
     }
-    
+
     if (!userId) {
       navigate(`/dashboard/${parsedUser.id}`, { replace: true })
       return
@@ -62,19 +62,19 @@ const UserDashboard = () => {
         const response = await fetch(`/api/users/${parsedUser.id}/dashboard`)
         if (!response.ok) throw new Error('Dashboard unavailable')
         const data = await response.json()
-        
+
         // Load testimonials
-        setTestimonials(data.testimonials.map((item: any) => ({ 
-          ...item, 
-          tripTitle: item.trip, 
-          text: item.review, 
-          createdAt: new Date(item.createdAt).toLocaleDateString('en-IN') 
+        setTestimonials(data.testimonials.map((item: any) => ({
+          ...item,
+          tripTitle: item.trip,
+          text: item.review,
+          createdAt: new Date(item.createdAt).toLocaleDateString('en-IN')
         })))
-        
+
         // Separate active and cancelled bookings
         const activeBookings = data.bookings.filter((booking: any) => booking.status !== 'Cancelled')
         const cancelledBookings = data.bookings.filter((booking: any) => booking.status === 'Cancelled')
-        
+
         setBookedTrips(activeBookings)
         setCancelledTrips(cancelledBookings)
       } catch (error) {
@@ -107,16 +107,16 @@ const UserDashboard = () => {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' }
       })
-      
+
       if (!response.ok) throw new Error('Failed to cancel booking')
-      
+
       // Move booking from active to cancelled
       const tripToCancel = bookedTrips.find((trip) => trip.bookingDbId === bookingDbId)
       if (tripToCancel) {
-        const cancelledTrip = { 
-          ...tripToCancel, 
-          status: 'Cancelled', 
-          cancelledOn: new Date().toLocaleDateString('en-IN') 
+        const cancelledTrip = {
+          ...tripToCancel,
+          status: 'Cancelled',
+          cancelledOn: new Date().toLocaleDateString('en-IN')
         }
         setBookedTrips((prev) => prev.filter((trip) => trip.bookingDbId !== bookingDbId))
         setCancelledTrips((prev) => [...prev, cancelledTrip])
@@ -158,31 +158,31 @@ const UserDashboard = () => {
 
     try {
       if (!user.id) throw new Error('No database user')
-      const response = await fetch('/api/testimonials', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify({ 
-          name: user.name, 
-          email: user.email, 
-          trip: selectedTrip?.title || 'WayBond Trip', 
-          review: testimonialText.trim(), 
-          rating: testimonialRating, 
+      const response = await fetch('/api/testimonials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: user.name,
+          email: user.email,
+          trip: selectedTrip?.title || 'WayBond Trip',
+          review: testimonialText.trim(),
+          rating: testimonialRating,
           userId: user.id,
           media: testimonialImage || undefined,
           mediaType: testimonialImage ? 'image' : undefined
-        }) 
+        })
       })
-      
+
       if (!response.ok) throw new Error('Unable to publish')
-      
+
       const saved = await response.json()
-      setTestimonials((current) => [{ 
-        ...saved, 
-        tripTitle: saved.trip, 
-        text: saved.review, 
-        createdAt: new Date(saved.createdAt).toLocaleDateString('en-IN') 
+      setTestimonials((current) => [{
+        ...saved,
+        tripTitle: saved.trip,
+        text: saved.review,
+        createdAt: new Date(saved.createdAt).toLocaleDateString('en-IN')
       }, ...current])
-      
+
       setTestimonialText('')
       setTestimonialRating(5)
       setTestimonialTripId('')
@@ -202,7 +202,7 @@ const UserDashboard = () => {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-8">
           <div className="space-y-4">
             <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Welcome back, explorer</span>
-            <h1 className="text-2xl md:text-5xl font-sans font-black tracking-tighter uppercase italic leading-none liquid-text">
+            <h1 className="text-2xl md:text-5xl font-bungee font-black tracking-tighter uppercase italic leading-none liquid-text">
               {user.name}'s <span className="text-primary">Dashboard</span>
             </h1>
             <p className="text-white/50 max-w-2xl font-medium italic">
@@ -259,11 +259,11 @@ const UserDashboard = () => {
 
         {/* MAIN CONTENT GRID - Profile (1), Trips (2), Testimonials (3) on mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* PROFILE CARD - Mobile (order-1, FIRST), Desktop (4 cols on right) */}
           <div className="col-span-1 lg:col-span-4 order-1 lg:order-1">
             <div className="sticky top-32 space-y-8">
-              <section 
+              <section
                 onClick={() => navigate(`/dashboard/${userId}/profile`)}
                 className="liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] overflow-hidden relative cursor-pointer hover:border-secondary/40 transition-all hover:shadow-lg hover:shadow-secondary/10"
               >
@@ -521,11 +521,10 @@ const UserDashboard = () => {
                               }
                             }}
                             disabled={trip.status !== 'Confirmed'}
-                            className={`h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border transition-all ${
-                              trip.status === 'Confirmed'
+                            className={`h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border transition-all ${trip.status === 'Confirmed'
                                 ? 'bg-white/5 text-white border-white/10 hover:bg-white hover:text-slate-800 cursor-pointer'
                                 : 'bg-white/5 text-white/30 border-white/10 cursor-not-allowed opacity-50'
-                            }`}
+                              }`}
                           >
                             Add Testimonial
                           </button>
