@@ -16,7 +16,7 @@ export default function CommunityGallery() {
     return (
       <div className="min-h-screen bg-white text-white pt-40 px-6 text-center">
         <ImageIcon className="mx-auto text-white/20 mb-5" size={44} />
-        <h1 className="text-3xl font-display font-black uppercase italic">Gallery not found</h1>
+        <h1 className="text-3xl font-sans font-black uppercase italic">Gallery not found</h1>
         <Link to="/community" className="inline-flex mt-8 text-secondary font-black text-xs uppercase tracking-widest">Back to community</Link>
       </div>
     )
@@ -28,7 +28,7 @@ export default function CommunityGallery() {
         <Link to="/community" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.24em] mb-8"><ArrowLeft size={16} /> Community</Link>
         <div className="mb-14">
           <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-4">Community gallery</p>
-          <h1 className="text-5xl md:text-7xl font-display font-black uppercase italic tracking-tighter liquid-text">{gallery.destination}</h1>
+          <h1 className="text-5xl md:text-7xl font-sans font-black uppercase italic tracking-tighter liquid-text">{gallery.destination}</h1>
           <p className="text-white/50 font-medium italic mt-4">{gallery.label}</p>
         </div>
 

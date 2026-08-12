@@ -31,10 +31,10 @@ export default function TrendingDestinations() {
               ✨ Destinations In Demand
             </span>
           </div> */}
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display font-black text-gray-900 tracking-tight uppercase leading-tight mb-6 max-w-4xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bungee font-black text-gray-900 tracking-tight uppercase leading-tight mb-6 max-w-4xl mx-auto">
             Trending <span className="relative inline-block">
-              <span className="absolute inset-0 bg-gradient-to-r from-secondary to[#003d6a] blur-lg opacity-30" />
-              <span className="relative bg-gradient-to-r from-secondary to-[#003d6a] bg-clip-text text-transparent">
+              {/* <span className="absolute inset-0 bg-gradient-to-r from-secondary to[#003d6a] blur-lg opacity-30" /> */}
+              <span className="relative bg-gradient-to-r from-secondary to-[#003d6a] bg-clip-text text-transparent font-bungee">
                 Adventures
               </span>
             </span>
@@ -82,13 +82,13 @@ export default function TrendingDestinations() {
                       className="space-y-0.5"
                     >
                       <h3 
-                        className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-caveat font-bold tracking-wide leading-tight drop-shadow-2xl"
-                        style={{ color: 'white', fontFamily: "'Caveat', cursive" }}
+                        className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-subtitle tracking-wide leading-tight drop-shadow-2xl"
+                        style={{ color: 'white' }}
                       >
                         {card.title}
                       </h3>
                       <p 
-                        className="text-[8px] sm:text-[9px] md:text-[10px] font-sans font-normal tracking-widest drop-shadow-lg uppercase"
+                        className="text-[8px] sm:text-[9px] md:text-[10px] text-body tracking-widest drop-shadow-lg uppercase"
                         style={{ color: 'white' }}
                       >
                         {card.subtitle}
@@ -158,7 +158,7 @@ export default function TrendingDestinations() {
             to="/discover"
             className="inline-flex items-center space-x-3 px-8 md:px-10 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-[0.2em] text-white bg-gradient-to-r from-secondary to-[#003d6a] hover:shadow-2xl hover:shadow-secondary/40 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl shadow-secondary/30 border border-white/20"
           >
-            <span className="!text-white">View All Experiences</span>
+            <span className="!text-white font-bungee" style={{ fontWeight:800 }}>View All Experiences</span>
             <ArrowUpRight size={20} className='!text-white' />
           </Link>
         </motion.div>

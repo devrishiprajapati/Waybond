@@ -243,8 +243,8 @@ const SignUp = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-slate-800 uppercase italic tracking-tighter mb-2">
-                Join the <span className="text-secondary">Community</span>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black text-slate-800 uppercase italic tracking-tighter mb-2 font-bungee">
+                Join the <span className="text-secondary font-bungee ">Community</span>
               </h1>
               <p className="text-slate-500 font-medium text-xs italic tracking-wide">
                 Ahmedabad's premier travel collective

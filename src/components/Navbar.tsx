@@ -172,7 +172,7 @@ const Navbar = () => {
                     <Link
                       to={link.path}
                       onClick={() => haptics.light()}
-                      className="text-xl font-display font-black text-white hover:text-secondary transition-colors uppercase italic drop-shadow-lg"
+                      className="text-xl font-sans font-black text-white hover:text-secondary transition-colors uppercase italic drop-shadow-lg font-bungee"
                     >
                       {link.name}
                     </Link>
@@ -198,7 +198,7 @@ const Navbar = () => {
 
               <button
                 onClick={() => { setIsOpen(false); handleBookNow('/discover') }}
-                className="w-full bg-secondary text-white py-4 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-secondary/30 active:scale-95 transition-all outline-none relative z-10 mt-auto"
+                className="w-full bg-secondary text-white py-4 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-secondary/30 active:scale-95 transition-all outline-none relative z-10 mt-auto font-bungee"
               >
                 Book Now
               </button>

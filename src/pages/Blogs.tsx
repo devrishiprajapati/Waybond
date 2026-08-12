@@ -48,7 +48,7 @@ export default function Blogs() {
           className="bg-gradient-to-br from-secondary/10 to-blue-50 py-16 md:py-20 border-b-2 border-secondary/10"
         >
           <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20">
-            <h1 className="text-2xl md:text-4xl font-display font-black text-gray-900 uppercase tracking-tight mb-4">
+            <h1 className="text-2xl md:text-4xl font-sans font-black text-gray-900 uppercase tracking-tight mb-4">
               Travel Stories
             </h1>
             <p className="text-xl text-xs text-gray-600 max-w-3xl font-medium">
@@ -253,7 +253,7 @@ export default function Blogs() {
                             </div>
 
                             {/* Title */}
-                            <h3 className="text-2xl md:text-3xl font-display font-black text-gray-900 mb-3 group-hover:text-secondary transition-colors duration-300">
+                            <h3 className="text-2xl md:text-3xl font-sans font-black text-gray-900 mb-3 group-hover:text-secondary transition-colors duration-300">
                               {blog.title}
                             </h3>
 

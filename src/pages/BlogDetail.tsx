@@ -37,7 +37,7 @@ export default function BlogDetail() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center px-6"
         >
-          <h1 className="text-5xl font-display font-black text-gray-900 mb-4">Blog Not Found</h1>
+          <h1 className="text-5xl font-sans font-black text-gray-900 mb-4">Blog Not Found</h1>
           <p className="text-xl text-gray-600 mb-8">The blog you're looking for doesn't exist.</p>
           <Link
             to="/blogs"
@@ -146,7 +146,7 @@ export default function BlogDetail() {
           transition={{ delay: 0.2, duration: 0.6 }}
           className="max-w-4xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 mb-12"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black text-gray-900 mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-sans font-black text-gray-900 mb-6 leading-tight">
             {blog.title}
           </h1>
 
@@ -265,7 +265,7 @@ export default function BlogDetail() {
                 <User size={40} className="sm:w-[48px] sm:h-[48px] text-white" />
               </div>
               <div>
-                <h3 className="text-xl sm:text-2xl font-display font-black text-gray-900 mb-2">
+                <h3 className="text-xl sm:text-2xl font-sans font-black text-gray-900 mb-2">
                   About {blog.author}
                 </h3>
                 <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
@@ -294,7 +294,7 @@ export default function BlogDetail() {
                     <ArrowLeft size={16} />
                     <span>Previous Article</span>
                   </div>
-                  <h4 className="text-base sm:text-lg font-display font-black text-gray-900 group-hover:text-secondary transition-colors line-clamp-2 flex-grow">
+                  <h4 className="text-base sm:text-lg font-sans font-black text-gray-900 group-hover:text-secondary transition-colors line-clamp-2 flex-grow">
                     {prevBlog.title}
                   </h4>
                 </Link>
@@ -310,7 +310,7 @@ export default function BlogDetail() {
                     <span>Next Article</span>
                     <ArrowRight size={16} />
                   </div>
-                  <h4 className="text-base sm:text-lg font-display font-black text-gray-900 group-hover:text-secondary transition-colors line-clamp-2 flex-grow">
+                  <h4 className="text-base sm:text-lg font-sans font-black text-gray-900 group-hover:text-secondary transition-colors line-clamp-2 flex-grow">
                     {nextBlog.title}
                   </h4>
                 </Link>
@@ -330,7 +330,7 @@ export default function BlogDetail() {
             className="bg-gradient-to-b from-white to-blue-50 py-16 sm:py-20"
           >
             <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20">
-              <h2 className="text-3xl sm:text-4xl font-display font-black text-gray-900 mb-10 sm:mb-12 text-center">
+              <h2 className="text-3xl sm:text-4xl font-sans font-black text-gray-900 mb-10 sm:mb-12 text-center">
                 Related Articles
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -354,7 +354,7 @@ export default function BlogDetail() {
                         <span className="inline-block bg-secondary text-white px-3 py-1 rounded-full text-xs font-bold mb-3">
                           {relatedBlog.category}
                         </span>
-                        <h3 className="text-lg font-display font-black text-gray-900 group-hover:text-secondary transition-colors line-clamp-2 mb-3">
+                        <h3 className="text-lg font-sans font-black text-gray-900 group-hover:text-secondary transition-colors line-clamp-2 mb-3">
                           {relatedBlog.title}
                         </h3>
                         <p className="text-gray-600 text-sm line-clamp-2 mb-4">
@@ -381,7 +381,7 @@ export default function BlogDetail() {
           className="max-w-4xl mx-auto px-4 sm:px-6 md:px-12 lg:px-20 py-16 sm:py-20"
         >
           <div className="bg-gradient-to-r from-secondary to-blue-500 rounded-3xl p-6 sm:p-12 text-center shadow-2xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-white mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black text-white mb-4">
               Ready for Your Next Adventure?
             </h2>
             <p className="text-white/90 text-base sm:text-lg mb-6 sm:mb-8 max-w-2xl mx-auto">

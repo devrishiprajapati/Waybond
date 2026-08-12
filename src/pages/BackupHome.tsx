@@ -40,7 +40,7 @@ export default function BackupHome() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-[5rem] md:text-[8rem] font-display font-black text-white leading-[0.8] tracking-tighter uppercase mb-32 liquid-text"
+            className="text-[5rem] md:text-[8rem] font-sans font-black text-white leading-[0.8] tracking-tighter uppercase mb-32 liquid-text"
           >
             EXPLORE<br />
             <span className="text-transparent px-4 italic" style={{ WebkitTextStroke: '2px white' }}>ADVENTURE</span>
@@ -95,7 +95,7 @@ export default function BackupHome() {
           ].map((s, i) => (
             <div key={i} className="text-center group cursor-default">
               <s.icon className="mx-auto text-white/30 mb-3 group-hover:text-secondary transition-colors" size={22} />
-              <p className="text-3xl font-display font-black text-white tracking-tighter italic">{s.val}</p>
+              <p className="text-3xl font-sans font-black text-white tracking-tighter italic">{s.val}</p>
               <p className="text-[9px] text-white/30 font-black uppercase tracking-[0.3em] mt-2">{s.label}</p>
             </div>
           ))}

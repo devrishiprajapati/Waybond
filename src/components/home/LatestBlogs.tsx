@@ -91,7 +91,7 @@ const BlogCard = React.memo(({ blog, index }: any) => {
           </div>
 
           {/* Title */}
-          <h3 className="text-lg font-display font-black text-gray-900 mb-2 line-clamp-2 group-hover:text-secondary transition-colors duration-300">
+          <h3 className="text-lg font-sans font-black text-gray-900 mb-2 line-clamp-2 group-hover:text-secondary transition-colors duration-300">
             {blog.title}
           </h3>
 
@@ -137,8 +137,8 @@ export default function LatestBlogs() {
           viewport={{ once: true }}
           className="text-center mb-12 space-y-3"
         >
-          <h2 className="text-2xl md:text-5xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
-            Travel <span className="text-primary">Stories</span>
+          <h2 className="text-2xl md:text-5xl font-bungee font-black text-slate-800 tracking-tighter uppercase italic leading-none">
+            Travel <span className="text-primary font-bungee">Stories</span>
           </h2>
         </motion.div>
 
@@ -171,7 +171,7 @@ export default function LatestBlogs() {
             to="/blogs"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-secondary to-[#003d6a] text-white px-6 md:px-8 py-3 rounded-full font-black uppercase tracking-wide text-xs md:text-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
-            <span className="!text-white">View All Stories</span>
+            <span className="!text-white font-bungee">View All Stories</span>
             <ArrowRight size={16} className='!text-white' />
           </Link>
         </motion.div>

@@ -83,7 +83,7 @@ const AllTripsPage = () => {
               <ArrowLeft size={16} />
               Back to Dashboard
             </button>
-            <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
+            <h1 className="text-5xl md:text-7xl font-sans font-black tracking-tighter uppercase italic leading-none liquid-text">
               All Your <span className="text-primary">Trips</span>
             </h1>
             <p className="text-white/50 max-w-2xl font-medium italic">
@@ -100,7 +100,7 @@ const AllTripsPage = () => {
             </div>
             <div>
               <p className="text-[9px] text-white/50 font-black uppercase tracking-[0.2em]">Total Trips</p>
-              <p className="text-3xl font-display font-black text-white">{allTrips.length}</p>
+              <p className="text-3xl font-sans font-black text-white">{allTrips.length}</p>
             </div>
           </div>
 
@@ -110,7 +110,7 @@ const AllTripsPage = () => {
             </div>
             <div>
               <p className="text-[9px] text-white/50 font-black uppercase tracking-[0.2em]">Booked Trips</p>
-              <p className="text-3xl font-display font-black text-white">{bookedTrips.length}</p>
+              <p className="text-3xl font-sans font-black text-white">{bookedTrips.length}</p>
             </div>
           </div>
 
@@ -120,7 +120,7 @@ const AllTripsPage = () => {
             </div>
             <div>
               <p className="text-[9px] text-white/50 font-black uppercase tracking-[0.2em]">Cancelled</p>
-              <p className="text-3xl font-display font-black text-white">{cancelledTrips.length}</p>
+              <p className="text-3xl font-sans font-black text-white">{cancelledTrips.length}</p>
             </div>
           </div>
         </div>
@@ -179,7 +179,7 @@ const AllTripsPage = () => {
                           <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.25em]">
                             Booking ID {trip.bookingId}
                           </p>
-                          <h3 className="text-2xl md:text-3xl font-display font-black uppercase italic tracking-tighter leading-none">
+                          <h3 className="text-2xl md:text-3xl font-sans font-black uppercase italic tracking-tighter leading-none">
                             {trip.title}
                           </h3>
                           <div className="flex flex-wrap items-center gap-4 text-white/50 text-[10px] font-black uppercase tracking-[0.16em]">
@@ -195,7 +195,7 @@ const AllTripsPage = () => {
                         </div>
                         <div className="text-left lg:text-right">
                           <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.22em]">Total Amount</p>
-                          <p className="text-3xl font-display font-black text-white tracking-tighter">₹{trip.price}</p>
+                          <p className="text-3xl font-sans font-black text-white tracking-tighter">₹{trip.price}</p>
                         </div>
                       </div>
 

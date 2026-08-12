@@ -49,7 +49,7 @@ const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, class
         <motion.h1
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-3xl md:text-5xl lg:text-[7rem] font-display font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
+          className="text-3xl md:text-5xl lg:text-[7rem] font-sans font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
         >
           {title}
         </motion.h1>
@@ -100,7 +100,7 @@ const TeamMemberModal = ({ member, onClose }: { member: TeamMember; onClose: () 
             <X size={18} />
           </button>
           <div className="absolute bottom-6 left-6">
-            <p className="text-3xl font-display font-black text-white italic tracking-tighter drop-shadow-xl">{member.name}</p>
+            <p className="text-3xl font-sans font-black text-white italic tracking-tighter drop-shadow-xl">{member.name}</p>
             <p className="text-[10px] text-secondary font-black uppercase tracking-[0.25em] mt-1">{member.designation}</p>
           </div>
         </div>
@@ -174,7 +174,7 @@ const TeamMembersSection = () => {
         <div className="liquid-glass inline-block px-5 py-2 rounded-full border border-white/10 shadow-lg mb-6">
           <span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">The People Behind The Adventure</span>
         </div>
-        <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-display font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
+        <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-sans font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
           Meet The <span className="text-primary px-2 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>Team</span>
         </h2>
         <p className="text-white/40 italic mt-6 text-sm font-medium max-w-xl mx-auto leading-relaxed">
@@ -207,7 +207,7 @@ const TeamMembersSection = () => {
             </div>
             {/* Info */}
             <div className="p-6 space-y-2">
-              <p className="text-xl font-display font-black text-white uppercase italic tracking-tight group-hover:text-secondary transition-colors">{member.name}</p>
+              <p className="text-xl font-sans font-black text-white uppercase italic tracking-tight group-hover:text-secondary transition-colors">{member.name}</p>
               <p className="text-[9px] text-secondary font-black uppercase tracking-[0.25em]">{member.designation}</p>
               <p className="text-white/45 text-xs leading-relaxed line-clamp-2 mt-1">{member.shortBio}</p>
               <p className="text-[8px] font-black uppercase tracking-[0.2em] text-secondary/60 mt-2 flex items-center gap-1">
@@ -227,10 +227,12 @@ const TeamMembersSection = () => {
 // ─── About Page ──────────────────────────────────────────────────────────────
 
 const About = () => (
+
+
   <PageLayout
     seoTitle="About WAYBOND — Ahmedabad's Premier Travel Community"
     seoDescription="Learn about Way Bond's mission to make travel meaningful, accessible, and community-driven for Ahmedabad."
-    title={<>THE WAY<br /><span className="text-primary px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>BOND</span> SPIRIT</>}
+    title=''
   // subtitle="Way Bond is Ahmedabad's premier authentic travel community. We don't just book tours; we craft soul-stirring memories that resonate for a lifetime."
   >
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -241,8 +243,8 @@ const About = () => (
         className="space-y-12"
       >
         <div className="space-y-6">
-          <h2 className="text-4xl font-display font-black uppercase italic tracking-tighter text-secondary">Our Manifest</h2>
-          <p className="text-lg text-white/60 leading-relaxed font-medium italic">
+          <h2 className="text-4xl font-sans font-black uppercase italic tracking-tighter text-secondary font-bungee">Our Manifest</h2>
+          <p className="text-lg text-white/60 leading-relaxed font-sarif italic">
             Born from a simple desire: to make travel meaningful, accessible, and deeply community-driven for the people of Ahmedabad. We believe that every journey should be an exploration of both the world and the inner self.
           </p>
         </div>
@@ -258,7 +260,7 @@ const About = () => (
               <div className="bg-secondary/20 p-4 rounded-2xl w-fit group-hover:scale-110 transition-transform">
                 <item.icon className="text-secondary" size={24} />
               </div>
-              <h4 className="font-display font-black text-xl uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{item.title}</h4>
+              <h4 className="font-sans font-black text-xl uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{item.title}</h4>
               <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-loose">{item.desc}</p>
             </div>
           ))}
@@ -275,7 +277,7 @@ const About = () => (
         <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a] via-black/20 to-transparent"></div>
         <div className="absolute bottom-6 md:bottom-12 left-6 right-6 md:left-12 md:right-12">
           <div className="liquid-glass p-4 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-white/20 text-center shadow-2xl backdrop-blur-xl">
-            <p className="text-2xl md:text-4xl lg:text-5xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
+            <p className="text-2xl md:text-4xl lg:text-5xl font-sans font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
             {/* <p className="text-[8px] md:text-[9px] text-white/50 uppercase font-black tracking-[0.3em] md:tracking-[0.4em] mt-2 md:mt-3">Founded for the Ahmedabad Spirit</p> */}
           </div>
         </div>
@@ -294,15 +296,15 @@ const Community = () => {
 
   return (
     <PageLayout
-      seoTitle="Community & Socials — Join the WAYBOND Tribe"
-      seoDescription="Connect with 45K+ fellow travelers. Share stories, find expedition partners, and access local intel."
-      title={<>TRAVELER<br /><span className="text-secondary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>ELITE</span> HUB</>}
+      // seoTitle="Community & Socials — Join the WAYBOND Tribe"
+      // seoDescription="Connect with 45K+ fellow travelers. Share stories, find expedition partners, and access local intel."
+      title=""
     // subtitle="The digital campfire for our global tribe. Connect with fellow explorers, share road-side epiphanies, and find your next expedition partner."
     >
       {/* Moments / Group Images Section */}
       <div className="mb-24">
         <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-4xl font-display font-black uppercase italic tracking-tighter text-white">Moments <span className="text-primary">Captured</span></h2>
+          <h2 className="text-2xl md:text-4xl font-sans font-black uppercase italic tracking-tighter text-white font-bungee">Moments <span className="text-primary font-bungee">Captured</span></h2>
           <p className="text-white/40 italic mt-4 text-sm font-medium tracking-wide">Real smiles, real connections.</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -319,7 +321,7 @@ const Community = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent"></div>
               <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination}                                                                                                                                                                                                                                                                      gallery`} className="absolute inset-0 z-10" />
               <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
-                <p className="text-2xl md:text-3xl font-display font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
+                <p className="text-2xl md:text-3xl font-sans font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
                 <p className="text-[9px] md:text-[10px] text-white uppercase font-black tracking-[0.25em] md:tracking-[0.3em] mt-2">{gallery.label}</p>
               </div>
             </motion.div>
@@ -347,7 +349,7 @@ const Community = () => {
               <card.icon className="text-secondary" size={40} />
             </div>
             <div className="space-y-3 relative z-10">
-              <h3 className="text-2xl font-display font-black uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{card.title}</h3>
+              <h3 className="text-2xl font-sans font-black uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{card.title}</h3>
               <p className="text-xs text-white/50 font-black uppercase tracking-widest leading-loose max-w-[220px] px-2">{card.desc}</p>
             </div>
             <button className="bg-white/5 text-white/40 px-8 py-3 rounded-full text-[9px] font-black uppercase tracking-[0.2em] group-hover:bg-secondary group-hover:text-white transition-all shadow-lg border border-white/10">ENTER HUB</button>
@@ -359,7 +361,7 @@ const Community = () => {
       <div className="liquid-glass p-16 md:p-20 rounded-[4rem] border border-white/10 text-center space-y-12 shadow-[0_20px_50px_rgba(0,0,0,0.4)] relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/5 blur-[100px] rounded-full z-0"></div>
         <div className="relative z-10">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-display font-black uppercase italic tracking-tighter text-white mb-16 liquid-text">Our Shared <span className="text-primary">Legacy</span></h2>
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-sans font-black uppercase italic tracking-tighter text-white mb-16 liquid-text">Our Shared <span className="text-primary">Legacy</span></h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
             {[
               { value: "45k+", label: "ACTIVE TRIBE" },
@@ -368,7 +370,7 @@ const Community = () => {
               { value: " #1", label: "RATED IN AHMEDABAD" }
             ].map((stat, i) => (
               <div key={i} className="space-y-3">
-                <p className="text-4xl md:text-5xl font-display font-black text-secondary tracking-tighter italic drop-shadow-md">{stat.value}</p>
+                <p className="text-4xl md:text-5xl font-sans font-black text-secondary tracking-tighter italic drop-shadow-md">{stat.value}</p>
                 <p className="text-[9px] text-white/50 font-black uppercase tracking-[0.3em]">{stat.label}</p>
               </div>
             ))}
@@ -399,7 +401,7 @@ const Wishlist = () => {
             <Heart size={80} className="mx-auto text-white/10 fill-white/10 group-hover:fill-secondary/20 transition-all scale-110" />
             <Star size={32} className="absolute -top-4 -right-4 text-secondary animate-pulse" />
           </div>
-          <h3 className="text-3xl md:text-4xl font-display font-black uppercase italic tracking-tighter text-white/30 mb-10">Your Expedition Vault is Empty</h3>
+          <h3 className="text-3xl md:text-4xl font-sans font-black uppercase italic tracking-tighter text-white/30 mb-10">Your Expedition Vault is Empty</h3>
           <Link
             to="/discover"
             onClick={() => haptics.light()}
@@ -463,7 +465,7 @@ const Wishlist = () => {
                     </span>
                   </div>
                   <div className="h-px bg-white/10 mb-3" />
-                  <h3 className="text-lg md:text-xl font-display font-black tracking-tight text-white leading-snug line-clamp-2 mb-2">
+                  <h3 className="text-lg md:text-xl font-sans font-black tracking-tight text-white leading-snug line-clamp-2 mb-2">
                     {trip.title}
                   </h3>
                   <p className="text-xs md:text-sm text-white/55 line-clamp-3 flex-grow">{trip.description}</p>
@@ -475,7 +477,7 @@ const Wishlist = () => {
                   <div className="flex items-end justify-between">
                     <div>
                       <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Starting from</p>
-                      <p className="text-xl md:text-2xl font-display font-black text-secondary leading-none">₹{trip.price}</p>
+                      <p className="text-xl md:text-2xl font-sans font-black text-secondary leading-none">₹{trip.price}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">{trip.category}</p>

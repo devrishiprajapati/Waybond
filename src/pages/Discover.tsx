@@ -9,10 +9,10 @@ import { haptics } from '../lib/haptics'
 import { useWishlist } from '../lib/wishlist'
 
 const experienceFilters = [
-  { key: 'monsoon', label: 'Monsoon Treks', icon: '⛰️' },
-  { key: 'weekend', label: 'Weekend Treks', icon: '🥾' },
-  { key: 'road', label: 'Road Trips', icon: '🚙' },
-  { key: 'snow', label: 'Snow Treks', icon: '❄️' },
+  { key: 'monsoon', label: 'Monsoon ', icon: '⛰️' },
+  { key: 'weekend', label: 'Weekend ', icon: '🥾' },
+  { key: 'road', label: 'Road ', icon: '🚙' },
+  { key: 'snow', label: 'Snow ', icon: '❄️' },
 ] as const
 
 const Discover = () => {
@@ -97,8 +97,8 @@ const Discover = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">
               <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px] drop-shadow-lg">COLLECTIONS 2026</span>
-              <h1 className="text-2xl md:text-4xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
-                The <span className="text-primary" style={{ WebkitTextStroke: '1px white' }}>Adventures</span> Hub
+              <h1 className="text-2xl md:text-4xl font-bungee font-black tracking-tighter uppercase italic leading-none liquid-text">
+                The <span className="text-primary font-bungee" style={{ WebkitTextStroke: '1px white' }}>Adventures</span> Hub
               </h1>
               {/* <p className="text-white/40 font-medium text-sm max-w-xl italic leading-relaxed">Curated escapes for the Ahmedabad spirit. From the rugged north to tropical islands.</p> */}
             </div>
@@ -128,12 +128,12 @@ const Discover = () => {
                     haptics.light();
                     setActiveExperience(activeExperience === experience.key ? 'All' : experience.key);
                   }}
-                  className={`px-3 sm:px-5 py-3 rounded-full text-[10px] font-black transition-all duration-500 ${activeExperience === experience.key
+                  className={`px-3 sm:px-5 py-3 rounded-full text-[10px] font-black font-bungee transition-all duration-500 ${activeExperience === experience.key
                     ? 'bg-secondary text-white shadow-2xl shadow-secondary/40'
-                    : 'liquid-glass text-white/40 hover:text-white hover:bg-white/10'}`}
+                    : ' text-white/40 hover:text-white hover:bg-white/10'}`}
                   style={activeExperience === experience.key 
                     ? { border: '2px solid var(--secondary)' }
-                    : { border: '2px solid rgba(0, 0, 0, 0.8)' }
+                    : { border: '1px solid rgba(0, 0, 0, 0.8)' }
                   }
                 >
                   <span className="mr-1.5" aria-hidden="true">{experience.icon}</span>{experience.label}
@@ -159,7 +159,7 @@ const Discover = () => {
                   <div className="flex justify-between items-center mb-6">
                     <div className="flex items-center space-x-3">
                       <Filter className="text-secondary" size={20} />
-                      <h2 className="text-xl font-display font-black uppercase italic tracking-tighter">Refine</h2>
+                      <h2 className="text-xl font-sans font-black uppercase italic tracking-tighter">Refine</h2>
                     </div>
                     {activeFilters.length > 0 && (
                       <button onClick={() => { haptics.light(); setActiveFilters([]); }} className="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-secondary transition-colors underline">RESET</button>
@@ -269,7 +269,7 @@ const Discover = () => {
                           <span className="inline-flex items-center gap-1.5 min-w-0"><MapPin size={13} className="text-secondary shrink-0" /><span className="truncate">{trip.location}</span></span>
                         </div>
                         <div className="h-px bg-white/10 mb-3" />
-                        <h3 className="text-lg md:text-xl font-display font-black tracking-tight text-white leading-snug line-clamp-2 mb-2">{trip.title}</h3>
+                        <h3 className="text-lg md:text-xl font-sans font-black tracking-tight text-white leading-snug line-clamp-2 mb-2 font-bungee">{trip.title}</h3>
                         <p className="text-xs md:text-sm text-white/55 line-clamp-3 flex-grow">{trip.description}</p>
                       </div>
 
@@ -279,7 +279,7 @@ const Discover = () => {
                         <div className="grid grid-cols-2 gap-3 items-end">
                           <div>
                             <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Starting from</p>
-                            <p className="text-xl md:text-2xl font-display font-black text-secondary leading-none">₹{trip.price}</p>
+                            <p className="text-xl md:text-2xl font-sans font-black text-secondary leading-none">₹{trip.price}</p>
                           </div>
                           <div className="text-right">
                             <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Difficulty</p>
@@ -421,7 +421,7 @@ const Discover = () => {
                 <div className="liquid-glass-dark w-24 h-24 rounded-[2rem] flex items-center justify-center text-white/10 border-white/5">
                   <Search size={40} />
                 </div>
-                <h3 className="text-3xl font-display font-black text-white/20 uppercase tracking-tighter italic">No matching adventures found...</h3>
+                <h3 className="text-3xl font-sans font-black text-white/20 uppercase tracking-tighter italic">No matching adventures found...</h3>
                 <button
                   onClick={() => {
                     haptics.light();

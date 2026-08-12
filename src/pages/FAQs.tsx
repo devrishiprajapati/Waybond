@@ -99,7 +99,7 @@ const FAQs = () => {
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl lg:text-[6rem] font-display font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
+            className="text-5xl md:text-7xl lg:text-[6rem] font-sans font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
           >
             YOUR QUESTIONS,<br /><span className="text-secondary">ANSWERED</span>
           </motion.h1>
@@ -132,7 +132,7 @@ const FAQs = () => {
                     aria-expanded={isOpen}
                     className="w-full flex items-center justify-between gap-6 p-6 md:p-8 text-left"
                   >
-                    <span className={`font-display font-black text-lg md:text-xl uppercase italic tracking-tight transition-colors ${isOpen ? 'text-secondary' : 'text-white'}`}>
+                    <span className={`font-sans font-black text-lg md:text-xl uppercase italic tracking-tight transition-colors ${isOpen ? 'text-secondary' : 'text-white'}`}>
                       {faq.question}
                     </span>
                     <span className={`shrink-0 p-2 rounded-xl transition-all duration-300 ${isOpen ? 'bg-secondary text-white rotate-180' : 'bg-white/10 text-white/70'}`}>
@@ -168,7 +168,7 @@ const FAQs = () => {
             <div className="bg-secondary/20 p-4 rounded-2xl w-fit mb-8">
               <ShieldCheck className="text-secondary" size={28} />
             </div>
-            <h2 className="text-3xl font-display font-black uppercase italic tracking-tighter text-white">Still need a hand?</h2>
+            <h2 className="text-3xl font-sans font-black uppercase italic tracking-tighter text-white">Still need a hand?</h2>
             <p className="text-sm text-white/50 leading-relaxed italic font-medium mt-5 mb-8">
               Our team is here to help you plan your next journey with confidence.
             </p>

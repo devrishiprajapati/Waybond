@@ -198,9 +198,9 @@ export default function AdminTeamMembers() {
                             <ArrowLeft size={15} /> Admin Dashboard
                         </Link>
                         <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-3">People &amp; Culture</p>
-                        <h1 className="text-4xl md:text-6xl font-display font-black uppercase italic tracking-tighter liquid-text">
-                            Manage <span className="text-primary">Team</span>
-                        </h1>
+                        <h1 className="text-4xl md:text-6xl font-sans font-black uppercase italic tracking-tighter liquid-text ">
+                            Manage <span className="text-primary font-bungee">Team</span>
+                        </h1>   
                     </div>
                     <div className="flex gap-3">
                         <button
@@ -225,7 +225,7 @@ export default function AdminTeamMembers() {
                     </div>
                     <div>
                         <p className="text-[9px] text-white/35 font-black uppercase tracking-[0.2em]">Total Members</p>
-                        <p className="text-2xl font-display font-black text-white">{members.length}</p>
+                        <p className="text-2xl font-sans font-black text-white">{members.length}</p>
                     </div>
                 </div>
 
@@ -268,7 +268,7 @@ export default function AdminTeamMembers() {
                                 <div className="flex-grow min-w-0">
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="min-w-0">
-                                            <p className="text-xl font-display font-black text-white uppercase italic tracking-tight truncate">{member.name}</p>
+                                            <p className="text-xl font-sans font-black text-white uppercase italic tracking-tight truncate">{member.name}</p>
                                             <p className="text-[10px] text-secondary font-black uppercase tracking-[0.16em] mt-1">{member.designation}</p>
                                             {!member.isActive && (
                                                 <span className="text-[8px] font-black uppercase tracking-widest text-white/30 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full mt-1 inline-block">Inactive</span>
@@ -332,7 +332,7 @@ export default function AdminTeamMembers() {
                             <div className="flex items-center justify-between gap-4">
                                 <div>
                                     <p className="text-secondary text-[9px] font-black uppercase tracking-[0.22em] mb-2">People & Culture</p>
-                                    <h2 className="text-3xl font-display font-black uppercase italic text-white">
+                                    <h2 className="text-3xl font-sans font-black uppercase italic text-white">
                                         {editing ? 'Edit Member' : 'Add Member'}
                                     </h2>
                                 </div>

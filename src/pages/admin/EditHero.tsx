@@ -73,8 +73,8 @@ export default function EditHero() {
             <Link to="/admin/dashboard" className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all"><ArrowLeft size={18} className="mr-2" /> Back to Dashboard</Link>
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/15 text-secondary text-[10px] font-black uppercase tracking-[0.24em] mb-4"><LayoutDashboard size={14} /> Homepage Content</div>
-              <h2 className="text-4xl md:text-6xl font-display font-black tracking-tighter uppercase italic leading-none">Trending <span className="text-secondary">Adventures</span></h2>
-              <p className="text-white/45 font-bold italic mt-3 max-w-xl">Upload a card image and set the badge, title, and subtitle shown in the Trending Adventures section.</p>
+              <h2 className="text-4xl md:text-6xl font-sans font-black tracking-tighter uppercase italic leading-none font-bungee">Trending <span className="text-secondary font-bungee">Adventures</span></h2>
+              {/* <p className="text-white/45 font-bold italic mt-3 max-w-xl">Upload a card image and set the badge, title, and subtitle shown in the Trending Adventures section.</p> */}
             </div>
           </div>
           <button type="button" disabled={cards.length >= 6} onClick={() => setCards((current) => current.length < 6 ? [...current, emptyCard()] : current)} className="h-[52px] px-7 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.18em] flex items-center justify-center gap-2 shadow-2xl shadow-secondary/20 hover:bg-secondary/90 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-45 disabled:cursor-not-allowed"><Plus size={16} /> Add Card</button>

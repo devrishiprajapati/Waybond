@@ -199,8 +199,8 @@ export default function TestimonialsSection() {
       {/* Header */}
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 text-center mb-14 space-y-3">
         <Heart className="text-secondary mx-auto drop-shadow-lg" size={40} />
-        <h2 className="text-2xl md:text-5xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
-          Traveler <span className="text-secondary">Love</span>
+        <h2 className="text-2xl md:text-5xl font-bungee font-black text-slate-800 tracking-tighter uppercase italic leading-none">
+          Traveler <span className="text-secondary font-bungee">Love</span>
         </h2>
       </div>
 

@@ -32,8 +32,8 @@ export default function WhyChooseUs() {
           viewport={{ once: true }}
           className="text-center mb-16 space-y-3"
         >
-          <h2 className="text-2xl md:text-5xl font-display font-black text-slate-800 tracking-tighter uppercase italic leading-none">
-            What Makes Us <span className="text-primary">Different</span>
+          <h2 className="text-2xl md:text-5xl font-bungee font-black text-slate-800 tracking-tighter uppercase italic leading-none">
+            What Makes Us <span className="text-primary font-bungee">Different</span>
           </h2>
         </motion.div>
 
@@ -56,7 +56,7 @@ export default function WhyChooseUs() {
               
               {/* Content - Centered on mobile, left-aligned on desktop */}
               <div className="text-center md:text-left">
-                <h3 className="text-lg md:text-xl font-display font-black text-gray-900 tracking-tight mb-2">
+                <h3 className="text-lg md:text-xl font-sans font-black text-gray-900 tracking-tight mb-2">
                   {reason.title}
                 </h3>
                 <p className="text-sm text-gray-600 font-medium leading-relaxed">{reason.desc}</p>

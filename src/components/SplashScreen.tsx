@@ -91,7 +91,7 @@ const SplashScreen: React.FC = () => {
           transition={{ delay: 0.4, duration: 0.6 }}
           className="mb-4"
         >
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-display font-black tracking-tighter">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-sans font-black tracking-tighter">
             <motion.span
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}

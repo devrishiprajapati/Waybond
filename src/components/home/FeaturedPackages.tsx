@@ -60,8 +60,7 @@ export default function FeaturedPackages() {
       <div className="absolute left-1/2 top-0 h-80 w-2/3 -translate-x-1/2 rounded-full bg-secondary/5 blur-[110px] pointer-events-none" />
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
         <div className="text-center mb-10 md:mb-12">
-          <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px]mb-4">WayBond adventures</p>
-          <h2 className="text-2xl md:text-5xl font-display font-black text-white tracking-tighter uppercase italic leading-none">Choose Your <span className="text-secondary">Experience</span></h2>
+          <h2 className="text-2xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none font-bungee">Choose Your <span className="text-secondary font-bungee">Experience</span></h2>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-xl md:max-w-none mx-auto mb-14 md:mb-16">
@@ -78,7 +77,7 @@ export default function FeaturedPackages() {
               title={`${filter.label}`}
             >
               <span className="inline-block mr-1 text-sm sm:text-base" aria-hidden="true">{filter.icon}</span>
-              <span className="hidden sm:inline">{filter.label}</span>
+              <span className="hidden sm:inline font-bungee">{filter.label}</span>
               <span className="sm:hidden">{filter.label.split(' ')[0]}</span>
             </button>
           ))}
@@ -142,7 +141,7 @@ export default function FeaturedPackages() {
                         <span className="inline-flex items-center gap-1.5 min-w-0"><MapPin size={13} className="text-secondary shrink-0" /><span className="truncate">{trip.location}</span></span>
                       </div>
                       <div className="h-px bg-white/10 mb-2.5 md:mb-3" />
-                      <h3 className="text-base md:text-lg lg:text-xl font-display font-black tracking-tight text-white leading-snug line-clamp-2 mb-1.5 md:mb-2">{trip.title}</h3>
+                      <h3 className="text-base md:text-lg lg:text-xl font-sans font-black tracking-tight text-white leading-snug line-clamp-2 mb-1.5 md:mb-2">{trip.title}</h3>
                       <p className="text-xs md:text-sm text-white/55 line-clamp-2 md:line-clamp-3 flex-grow leading-relaxed">{trip.description}</p>
                     </div> 
 
@@ -152,7 +151,7 @@ export default function FeaturedPackages() {
                       <div className="grid grid-cols-2 gap-2.5 md:gap-3 items-end">
                         <div>
                           <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white/45 mb-0.5 md:mb-1">Starting from</p>
-                          <p className="text-lg md:text-xl lg:text-2xl font-display font-black text-secondary leading-none">₹{trip.price}</p>
+                          <p className="text-lg md:text-xl lg:text-2xl font-sans font-black text-secondary leading-none">₹{trip.price}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white/45 mb-0.5 md:mb-1">Difficulty</p>

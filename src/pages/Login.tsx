@@ -197,7 +197,7 @@ const Login = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-black text-slate-800 uppercase italic tracking-tighter mb-2">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-sans font-black text-slate-800 uppercase italic tracking-tighter mb-2">
                                 {mode === 'admin' ? (
                                     <>Admin <span className="text-primary">Basecamp</span></>
                                 ) : resetMode ? (

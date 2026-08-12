@@ -115,7 +115,7 @@ export default function AdminTravelStories() {
           <div>
             <Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.22em] mb-5"><ArrowLeft size={15} /> Admin dashboard</Link>
             <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-3">Editorial desk</p>
-            <h1 className="text-4xl md:text-6xl font-display font-black uppercase italic tracking-tighter liquid-text">Travel <span className="text-primary">Stories</span></h1>
+            <h1 className="text-4xl md:text-6xl font-sans font-black uppercase italic tracking-tighter liquid-text font-bungee">Travel <span className="text-primary font-bungee">Stories</span></h1>
           </div>
           <label className="relative w-full lg:max-w-md">
             <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35" />
@@ -128,7 +128,7 @@ export default function AdminTravelStories() {
             <div className="flex items-start justify-between gap-4 mb-6">
               <div>
                 <p className="text-secondary text-[9px] font-black uppercase tracking-[0.22em] mb-2">Update story</p>
-                <h2 className="text-2xl md:text-3xl font-display font-black uppercase italic text-white">{editingStory.title}</h2>
+                <h2 className="text-2xl md:text-3xl font-sans font-black uppercase italic text-white">{editingStory.title}</h2>
               </div>
               <button type="button" onClick={() => { setEditingStory(null); setDraft(null); setError('') }} className="w-11 h-11 rounded-xl border border-white/10 text-white/70 hover:text-white hover:bg-white/10 flex items-center justify-center" title="Close editor"><X size={18} /></button>
             </div>
@@ -178,12 +178,12 @@ export default function AdminTravelStories() {
                   <span className="text-[9px] text-white/35 font-black uppercase tracking-[0.15em]">{story.readTime} min</span>
                 </div>
                 <div>
-                  <h2 className="text-xl font-display font-black uppercase italic text-white leading-tight">{story.title}</h2>
+                  <h2 className="text-xl font-sans font-black uppercase italic text-white leading-tight">{story.title}</h2>
                   <p className="text-white/45 text-sm leading-relaxed mt-3 line-clamp-2">{story.excerpt}</p>
                 </div>
                 <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-4">
                   <span className="text-[9px] text-white/35 font-black uppercase tracking-[0.15em]">{story.author}</span>
-                  <button onClick={() => openEditor(story)} className="h-11 px-4 rounded-xl bg-secondary text-white hover:bg-white hover:text-slate-800 transition-all flex items-center gap-2 font-black text-[10px] uppercase tracking-[0.12em]" title={`Edit ${story.title}`}><Edit2 size={15} /> Edit</button>
+                  <button onClick={() => openEditor(story)} className="h-11 px-4 rounded-xl bg-secondary text-white hover:bg-white hover:text-slate-800 transition-all flex items-center gap-2 font-black text-[10px] uppercase tracking-[0.12em] font-bungee" title={`Edit ${story.title}`}><Edit2 size={15} /> Edit</button>
                 </div>
               </div>
             </article>

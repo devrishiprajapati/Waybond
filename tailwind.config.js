@@ -30,13 +30,16 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Google Sans', 'Arial', 'sans-serif'],
-        serif: ['Google Sans', 'Arial', 'sans-serif'],
-        display: ['Google Sans', 'Arial', 'sans-serif'],
-        handwriting: ['Pacifico', 'Dancing Script', 'cursive'],
-        script: ['Great Vibes', 'Allura', 'Dancing Script', 'cursive'],
-        elegant: ['Allura', 'Great Vibes', 'cursive'],
-        caveat: ['Caveat', 'cursive'],
+        sans: ['Manrope', 'sans-serif'],
+        serif: ['Manrope', 'sans-serif'],
+        display: ['Manrope', 'sans-serif'],
+        bungee: ['Bungee', 'cursive'],
+        body: ['Manrope', 'sans-serif'],
+      },
+      fontWeight: {
+        regular: '400',
+        semibold: '600',
+        bold: '700',
       },
       keyframes: {
         fadeIn: {

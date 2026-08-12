@@ -58,7 +58,7 @@ const TestimonialsPage = () => {
 
           <div className="space-y-4">
             <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Your Reviews</span>
-            <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
+            <h1 className="text-5xl md:text-7xl font-sans font-black tracking-tighter uppercase italic leading-none liquid-text">
               My <span className="text-primary">Testimonials</span>
             </h1>
             <p className="text-white/50 max-w-2xl font-medium italic">
@@ -81,7 +81,7 @@ const TestimonialsPage = () => {
               className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-12 md:p-16 text-center"
             >
               <MessageCircle className="text-white/15 mx-auto mb-6" size={48} />
-              <h2 className="text-2xl font-display font-black text-white mb-3">No Testimonials Yet</h2>
+              <h2 className="text-2xl font-sans font-black text-white mb-3">No Testimonials Yet</h2>
               <p className="text-white/50 font-medium mb-8">Share your travel story and help inspire others!</p>
               <button
                 onClick={() => navigate('/dashboard')}

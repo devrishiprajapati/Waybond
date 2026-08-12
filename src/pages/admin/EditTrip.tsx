@@ -180,8 +180,8 @@ const EditTrip = () => {
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/15 text-secondary text-[10px] font-black uppercase tracking-[0.24em] mb-4">
                 <Globe size={14} /> Package Builder
               </div>
-              <h2 className="text-4xl md:text-6xl font-display font-black tracking-tighter uppercase italic leading-none">
-                {id === 'new' ? 'New' : 'Edit'} <span className="text-secondary">Package</span>
+              <h2 className="text-4xl md:text-6xl font-sans font-black tracking-tighter uppercase italic leading-none font-bungee">
+                {id === 'new' ? 'New' : 'Edit'} <span className="text-secondary font-bungee">Package</span>
               </h2>
               <p className="text-white/45 font-bold italic mt-3 max-w-xl">
                 Configure package details, images, batches, itinerary and trip lead.
@@ -210,7 +210,7 @@ const EditTrip = () => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className={sectionClass}>
-            <h3 className="text-xl font-display font-black uppercase italic tracking-widest text-white flex items-center">
+            <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
               <Info size={20} className="mr-3 text-secondary" /> Basic Information
             </h3>
 
@@ -318,7 +318,7 @@ const EditTrip = () => {
           </motion.section>
 
           <section className={sectionClass}>
-            <h3 className="text-xl font-display font-black uppercase italic tracking-widest text-white flex items-center">
+            <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
               <ImageIcon size={20} className="mr-3 text-secondary" /> Media & Highlights
             </h3>
 
@@ -384,7 +384,7 @@ const EditTrip = () => {
 
           <section className={sectionClass}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="text-xl font-display font-black uppercase italic tracking-widest text-white flex items-center">
+              <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
                 <List size={20} className="mr-3 text-secondary" /> Itinerary
               </h3>
               <button
@@ -457,7 +457,7 @@ const EditTrip = () => {
           </section>
 
           <section className={sectionClass}>
-            <h3 className="text-xl font-display font-black uppercase italic tracking-widest text-white flex items-center">
+            <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
               <Clock size={20} className="mr-3 text-secondary" /> Logistics & Batches
             </h3>
 
@@ -523,7 +523,7 @@ const EditTrip = () => {
           </section>
 
           <section className={sectionClass}>
-            <h3 className="text-xl font-display font-black uppercase italic tracking-widest text-white flex items-center">
+            <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
               <User size={20} className="mr-3 text-secondary" /> Expedition Lead
             </h3>
 

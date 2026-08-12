@@ -202,7 +202,7 @@ const UserDashboard = () => {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-8">
           <div className="space-y-4">
             <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Welcome back, explorer</span>
-            <h1 className="text-2xl md:text-5xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
+            <h1 className="text-2xl md:text-5xl font-sans font-black tracking-tighter uppercase italic leading-none liquid-text">
               {user.name}'s <span className="text-primary">Dashboard</span>
             </h1>
             <p className="text-white/50 max-w-2xl font-medium italic">
@@ -251,7 +251,7 @@ const UserDashboard = () => {
               </div>
               <div className="text-center">
                 <p className="text-[9px] font-black text-white/50 uppercase tracking-[0.25em]">{stat.label}</p>
-                <p className="text-3xl font-display font-black text-white leading-none mt-1">{stat.value}</p>
+                <p className="text-3xl font-sans font-black text-white leading-none mt-1">{stat.value}</p>
               </div>
             </motion.div>
           ))}
@@ -275,7 +275,7 @@ const UserDashboard = () => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-display font-black tracking-tight">{user.name}</h3>
+                    <h3 className="text-xl font-sans font-black tracking-tight">{user.name}</h3>
                     <p className="text-white/45 text-xs font-medium italic mt-1">{user.email}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -302,7 +302,7 @@ const UserDashboard = () => {
               <section id="testimonial-form" className="hidden lg:block liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">
                 <div>
                   <p className="text-secondary text-[9px] font-black uppercase tracking-[0.3em]">Your Voice</p>
-                  <h2 className="text-2xl font-display font-black uppercase italic tracking-tighter mt-2">Add Testimonial</h2>
+                  <h2 className="text-2xl font-sans font-black uppercase italic tracking-tighter mt-2">Add Testimonial</h2>
                 </div>
 
                 {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0 ? (
@@ -400,7 +400,7 @@ const UserDashboard = () => {
 
               {/* Testimonials List on Desktop ONLY */}
               <section className="hidden lg:block liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">
-                <h2 className="text-xl font-display font-black uppercase italic tracking-tighter">My Testimonials</h2>
+                <h2 className="text-xl font-sans font-black uppercase italic tracking-tighter">My Testimonials</h2>
                 {testimonials.length === 0 ? (
                   <div className="text-center py-8">
                     <Package className="text-white/15 mx-auto mb-4" size={34} />
@@ -432,7 +432,7 @@ const UserDashboard = () => {
           <div className="col-span-1 lg:col-span-8 order-2 lg:order-2">
             <section className="space-y-5">
               <div className="flex items-center justify-between gap-4">
-                <h2 className="text-xl font-display font-black uppercase italic tracking-tight flex items-center">
+                <h2 className="text-xl font-sans font-black uppercase italic tracking-tight flex items-center">
                   <Calendar className="mr-3 text-secondary" /> All Your Trips
                 </h2>
                 <Link
@@ -465,7 +465,7 @@ const UserDashboard = () => {
                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                           <div className="space-y-2">
                             <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.25em]">Booking ID {trip.bookingId}</p>
-                            <h3 className="text-2xl md:text-3xl font-display font-black uppercase italic tracking-tighter leading-none">{trip.title}</h3>
+                            <h3 className="text-2xl md:text-3xl font-sans font-black uppercase italic tracking-tighter leading-none">{trip.title}</h3>
                             <div className="flex flex-wrap items-center gap-4 text-white/50 text-[10px] font-black uppercase tracking-[0.16em]">
                               <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" />{trip.location}</span>
                               <span className="flex items-center gap-2"><Clock size={13} className="text-secondary" />{trip.duration}</span>
@@ -473,7 +473,7 @@ const UserDashboard = () => {
                           </div>
                           <div className="text-left lg:text-right">
                             <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.22em]">Total Amount</p>
-                            <p className="text-3xl font-display font-black text-white tracking-tighter">₹{trip.price}</p>
+                            <p className="text-3xl font-sans font-black text-white tracking-tighter">₹{trip.price}</p>
                           </div>
                         </div>
 
@@ -564,7 +564,7 @@ const UserDashboard = () => {
                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                           <div className="space-y-2">
                             <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.25em]">Booking ID {trip.bookingId}</p>
-                            <h3 className="text-2xl md:text-3xl font-display font-black uppercase italic tracking-tighter leading-none">{trip.title}</h3>
+                            <h3 className="text-2xl md:text-3xl font-sans font-black uppercase italic tracking-tighter leading-none">{trip.title}</h3>
                             <div className="flex flex-wrap items-center gap-4 text-white/50 text-[10px] font-black uppercase tracking-[0.16em]">
                               <span className="flex items-center gap-2"><MapPin size={13} className="text-red-400" />{trip.location}</span>
                               <span className="flex items-center gap-2"><Clock size={13} className="text-red-400" />{trip.duration}</span>
@@ -572,7 +572,7 @@ const UserDashboard = () => {
                           </div>
                           <div className="text-left lg:text-right">
                             <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.22em]">Total Amount</p>
-                            <p className="text-3xl font-display font-black text-white tracking-tighter">₹{trip.price}</p>
+                            <p className="text-3xl font-sans font-black text-white tracking-tighter">₹{trip.price}</p>
                           </div>
                         </div>
 
@@ -625,7 +625,7 @@ const UserDashboard = () => {
             <section className="liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">
               <div>
                 <p className="text-secondary text-[9px] font-black uppercase tracking-[0.3em]">Your Voice</p>
-                <h2 className="text-2xl font-display font-black uppercase italic tracking-tighter mt-2">Add Testimonial</h2>
+                <h2 className="text-2xl font-sans font-black uppercase italic tracking-tighter mt-2">Add Testimonial</h2>
               </div>
 
               {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0 ? (
@@ -682,7 +682,7 @@ const UserDashboard = () => {
             </section>
 
             <section className="liquid-glass-dark border border-white/10 p-8 rounded-[2.5rem] space-y-6">
-              <h2 className="text-xl font-display font-black uppercase italic tracking-tighter">My Testimonials</h2>
+              <h2 className="text-xl font-sans font-black uppercase italic tracking-tighter">My Testimonials</h2>
               {testimonials.length === 0 ? (
                 <div className="text-center py-8">
                   <Package className="text-white/15 mx-auto mb-4" size={34} />

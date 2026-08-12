@@ -59,7 +59,7 @@ const ConfirmedTripsPage = () => {
 
           <div className="space-y-4">
             <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Confirmed & Ready</span>
-            <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
+            <h1 className="text-5xl md:text-7xl font-sans font-black tracking-tighter uppercase italic leading-none liquid-text">
               Confirmed <span className="text-primary">Trips</span>
             </h1>
             <p className="text-white/50 max-w-2xl font-medium italic">
@@ -82,7 +82,7 @@ const ConfirmedTripsPage = () => {
               className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-12 md:p-16 text-center"
             >
               <CheckCircle2 className="text-white/15 mx-auto mb-6" size={48} />
-              <h2 className="text-2xl font-display font-black text-white mb-3">No Confirmed Trips Yet</h2>
+              <h2 className="text-2xl font-sans font-black text-white mb-3">No Confirmed Trips Yet</h2>
               <p className="text-white/50 font-medium mb-8">Complete payment to confirm your booking!</p>
               <button
                 onClick={() => navigate('/discover')}
@@ -117,7 +117,7 @@ const ConfirmedTripsPage = () => {
                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
                           <div className="space-y-2">
                             <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.25em]">Booking ID {trip.bookingId}</p>
-                            <h3 className="text-2xl md:text-3xl font-display font-black uppercase italic tracking-tighter leading-none">{trip.title}</h3>
+                            <h3 className="text-2xl md:text-3xl font-sans font-black uppercase italic tracking-tighter leading-none">{trip.title}</h3>
                             <div className="flex flex-wrap items-center gap-4 text-white/50 text-[10px] font-black uppercase tracking-[0.16em] mt-3">
                               <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" />{trip.location}</span>
                               <span className="flex items-center gap-2"><Clock size={13} className="text-secondary" />{trip.duration}</span>
@@ -125,7 +125,7 @@ const ConfirmedTripsPage = () => {
                           </div>
                           <div className="text-left lg:text-right">
                             <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.22em]">Total Amount</p>
-                            <p className="text-3xl font-display font-black text-white tracking-tighter">₹{trip.price}</p>
+                            <p className="text-3xl font-sans font-black text-white tracking-tighter">₹{trip.price}</p>
                           </div>
                         </div>
 

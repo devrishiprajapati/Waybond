@@ -114,9 +114,9 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-white text-white flex">
       <aside className="w-80 liquid-glass-dark border-r border-white/10 p-8 hidden lg:flex flex-col">
         <div className="mb-12">
-          <p className="text-secondary text-[9px] font-black uppercase tracking-[0.4em] mb-3">WayBond</p>
-          <h1 className="text-3xl font-display font-black uppercase italic tracking-tighter liquid-text">
-            Admin <span className="text-primary">Basecamp</span>
+          <p className="text-secondary text-[9px] font-black uppercase tracking-[0.4em] mb-3 font-bungee">WayBond</p>
+          <h1 className="text-3xl font-sans font-black uppercase italic tracking-tighter liquid-text font-bungee">
+            Admin <span className="text-primary font-bungee">Basecamp</span>
           </h1>
         </div>
 
@@ -125,13 +125,13 @@ const AdminDashboard = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.16em] transition-all ${location.pathname === item.path
+              className={`flex items-center gap-3 p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.16em] transition-all${location.pathname === item.path
                   ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
                   : 'text-white/55 hover:text-white hover:bg-white/5'
                 }`}
             >
               <item.icon size={18} />
-              <span>{item.label}</span>
+              <span className='font-bungee'>{item.label}</span>
             </Link>
           ))}
         </nav>
@@ -141,38 +141,38 @@ const AdminDashboard = () => {
           className="flex items-center gap-3 p-4 text-red-300/80 hover:text-red-200 hover:bg-red-500/10 rounded-2xl transition-all font-black text-[11px] uppercase tracking-[0.16em] mt-auto"
         >
           <LogOut size={18} />
-          <span>Exit Basecamp</span>
+          <span className='font-bungee'>Exit Basecamp</span>
         </button>
       </aside>
 
       <main className="flex-grow p-6 md:p-10 lg:p-12 overflow-y-auto">
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8 mb-10">
           <div className="space-y-4">
-            <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Control Center</span>
-            <h2 className="text-3xl md:text-5xl pt-8 font-display font-black tracking-tighter uppercase italic leading-none liquid-text">
-              Package <span className="text-primary">Inventory</span>
+            {/* <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Control Center</span> */}
+            <h2 className="text-3xl md:text-5xl pt-8 font-sans font-black tracking-tighter uppercase italic leading-none liquid-text font-bungee">
+              Package <span className="text-primary font-bungee">Inventory</span>
             </h2>
-            <p className="text-white/45 font-medium italic max-w-2xl">
+            {/* <p className="text-white/45 font-medium italic max-w-2xl">
               Manage trips, pricing, hero content, and featured expedition details from one focused admin dashboard.
-            </p>
+            </p> */}
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Link
               to="/admin/hero"
-              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all"
+              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all font-bungee"
             >
               <ImageIcon size={16} /> Edit Trending Cards
             </Link>
             <Link
               to="/admin/testimonials"
-              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all"
+              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all font-bungee"
             >
               <MessageSquareText size={16} /> Testimonials
             </Link>
             <Link
               to="/admin/new"
-              className="h-12 px-6 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all shadow-xl shadow-secondary/20"
+              className="h-12 px-6 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all shadow-xl shadow-secondary/20 font-bungee"
             >
               <Plus size={16} /> Add Expedition
             </Link>
@@ -193,7 +193,7 @@ const AdminDashboard = () => {
               </div>
               <div className="text-center lg:text-left">
                 <p className="text-[8px] md:text-[9px] text-white/35 font-black uppercase tracking-[0.18em] md:tracking-[0.24em]">{stat.label}</p>
-                <p className="text-2xl md:text-3xl font-display font-black text-white mt-1 md:mt-2 leading-none">{stat.value}</p>
+                <p className="text-2xl md:text-3xl font-sans font-black text-white mt-1 md:mt-2 leading-none">{stat.value}</p>
               </div>
             </motion.div>
           ))}
@@ -216,9 +216,9 @@ const AdminDashboard = () => {
                 <button
                   key={experience}
                   onClick={() => setExperienceFilter(experience)}
-                  className={`h-11 px-5 rounded-2xl font-black text-[9px] uppercase tracking-[0.18em] transition-all ${experienceFilter === experience
+                  className={`h-11 px-5 rounded-2xl font-black text-[9px] uppercase tracking-[0.18em] transition-all font-bungee ${experienceFilter === experience
                       ? 'bg-secondary text-white'
-                      : 'bg-white/5 text-white/45 border border-white/10 hover:text-white hover:bg-white/10'
+                      : 'bg-white/5 text-white/45 border border-white/10 hover:text-white hover:bg-white/10 font-bungee'
                     }`}
                 >
                   {experience === 'All' ? 'All' : `${experience} trips`}
@@ -250,7 +250,7 @@ const AdminDashboard = () => {
                     {trip.category}
                   </span>
                 </div>
-                <h3 className="text-2xl font-display font-black uppercase italic tracking-tighter text-white leading-none">{trip.title}</h3>
+                <h3 className="text-2xl font-sans font-black uppercase italic tracking-tighter text-white leading-none font-bungee">{trip.title}</h3>
                 <div className="flex flex-wrap items-center gap-4 text-white/45 text-[10px] font-black uppercase tracking-[0.16em]">
                   <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" /> {trip.location}</span>
                   <span className="flex items-center gap-2"><Calendar size={13} className="text-secondary" /> {trip.nextBatch || 'Batch TBA'}</span>
@@ -260,7 +260,7 @@ const AdminDashboard = () => {
               <div className="grid grid-cols-2 gap-4 xl:w-[260px]">
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                   <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.18em] block mb-2">Rate</span>
-                  <span className="text-xl font-display font-black text-secondary tracking-tighter">₹{trip.price}</span>
+                  <span className="text-xl font-sans font-black text-secondary tracking-tighter">₹{trip.price}</span>
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                   <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.18em] block mb-2">Duration</span>
@@ -297,7 +297,7 @@ const AdminDashboard = () => {
           {filteredTrips.length === 0 && (
             <div className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-12 text-center">
               <Package className="mx-auto text-white/20 mb-5" size={44} />
-              <h3 className="text-2xl font-display font-black uppercase italic tracking-tighter text-white/50">No packages found</h3>
+              <h3 className="text-2xl font-sans font-black uppercase italic tracking-tighter text-white/50">No packages found</h3>
               <p className="text-white/35 text-sm font-medium italic mt-2">Try another search or add a fresh expedition.</p>
             </div>
           )}

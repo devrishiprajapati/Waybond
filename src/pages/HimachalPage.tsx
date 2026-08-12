@@ -40,7 +40,7 @@ export default function HimachalPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-6xl md:text-[8rem] font-display font-black leading-[0.8] tracking-tighter uppercase drop-shadow-2xl liquid-text mb-8"
+              className="text-6xl md:text-[8rem] font-sans font-black leading-[0.8] tracking-tighter uppercase drop-shadow-2xl liquid-text mb-8"
             >
               HIMACHAL<br />
               <span className="text-transparent px-4 italic" style={{ WebkitTextStroke: '2px white' }}>MYSTIQUE</span>
@@ -66,7 +66,7 @@ export default function HimachalPage() {
       <section className="py-24 max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16">
         <div className="lg:col-span-2 space-y-16">
           <div className="space-y-6">
-            <h2 className="text-4xl font-display font-black uppercase italic tracking-tighter text-primary">The Adventure Calling</h2>
+            <h2 className="text-4xl font-sans font-black uppercase italic tracking-tighter text-primary">The Adventure Calling</h2>
             <p className="text-gray-400 text-lg leading-relaxed font-medium">
               Join the Infi Yatra community as we venture into the rugged heart of the Himalayas. This isn't just a sightseeing tour; it's a soul-stirring journey through pine forests, snow-clad peaks, and the mystical Parvati Valley. Experience the authentic "Old Manali" lifestyle curated specifically for the Ahmedabad explorer.
             </p>
@@ -74,7 +74,7 @@ export default function HimachalPage() {
 
           {/* Itinerary Timeline */}
           <div className="space-y-8">
-            <h3 className="text-2xl font-display font-black uppercase tracking-tighter border-l-4 border-secondary pl-6">Detailed Itinerary</h3>
+            <h3 className="text-2xl font-sans font-black uppercase tracking-tighter border-l-4 border-secondary pl-6">Detailed Itinerary</h3>
             <div className="space-y-4">
               {itinerary.map((day, i) => (
                 <motion.div
@@ -83,9 +83,9 @@ export default function HimachalPage() {
                   initial={{ opacity: 0, x: -20 }}
                   className="liquid-glass p-8 rounded-[2.5rem] flex items-center space-x-8 group hover:bg-white/10 transition-all duration-500 cursor-default border-white/10"
                 >
-                  <span className="text-4xl font-display font-black text-secondary group-hover:scale-110 transition-transform">{day.day}</span>
+                  <span className="text-4xl font-sans font-black text-secondary group-hover:scale-110 transition-transform">{day.day}</span>
                   <div>
-                    <h4 className="text-xl font-display font-black uppercase tracking-tighter mb-1">{day.title}</h4>
+                    <h4 className="text-xl font-sans font-black uppercase tracking-tighter mb-1">{day.title}</h4>
                     <p className="text-gray-500 font-medium text-sm">{day.desc}</p>
                   </div>
                 </motion.div>
@@ -99,7 +99,7 @@ export default function HimachalPage() {
           <div className="sticky top-32 liquid-glass p-10 rounded-[3rem] border-white/20 shadow-2xl">
             <div className="mb-10 text-center">
               <span className="text-white/40 font-black uppercase tracking-[0.4em] text-[10px]">PACKAGE STARTS FROM</span>
-              <p className="text-5xl font-display font-black text-white mt-2 tracking-tighter">₹14,999<span className="text-xs text-white/20 ml-2">/PP</span></p>
+              <p className="text-5xl font-sans font-black text-white mt-2 tracking-tighter">₹14,999<span className="text-xs text-white/20 ml-2">/PP</span></p>
             </div>
 
             <div className="space-y-6 mb-10">
@@ -141,11 +141,11 @@ export default function HimachalPage() {
       {/* Featured Destinations CTA */}
       <section className="py-24 bg-white/5 backdrop-blur-3xl border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-6xl font-display font-black uppercase tracking-tighter italic mb-12">Looking for <span className="text-secondary">More?</span></h2>
+          <h2 className="text-4xl md:text-6xl font-sans font-black uppercase tracking-tighter italic mb-12">Looking for <span className="text-secondary">More?</span></h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {["Spiti", "Ladakh", "Srinagar", "Shimla"].map((place, i) => (
               <div key={i} className="liquid-glass p-6 rounded-3xl hover:bg-secondary transition-all cursor-pointer group border-white/5">
-                <h4 className="font-display font-black text-xl uppercase italic group-hover:scale-110 transition-transform">{place}</h4>
+                <h4 className="font-sans font-black text-xl uppercase italic group-hover:scale-110 transition-transform">{place}</h4>
               </div>
             ))}
           </div>

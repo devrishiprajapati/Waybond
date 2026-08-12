@@ -63,7 +63,7 @@ const AdminLogin = () => {
             <div className="inline-flex p-4 bg-primary/10 rounded-2xl mb-6">
               <Lock className="text-primary" size={32} />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-display font-black text-slate-800 uppercase italic tracking-tighter">
+            <h1 className="text-2xl sm:text-3xl font-sans font-black text-slate-800 uppercase italic tracking-tighter">
               Admin <span className="text-primary">Basecamp</span>
             </h1>
             <p className="text-slate-500 font-medium text-sm mt-2 italic">Secure access for WayBond organizers</p>

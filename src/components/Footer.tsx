@@ -86,7 +86,7 @@ const Footer = () => {
       
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-4 gap-16 relative z-10">
         <div className="space-y-6">
-          <h3 className="text-3xl font-display font-black text-slate-100 tracking-tighter">
+          <h3 className="text-3xl font-sans font-black text-slate-100 tracking-tighter">
             WAY
             <span className="text-secondary text-2xl uppercase ml-1">Bond</span>
           </h3>
@@ -225,7 +225,7 @@ const Footer = () => {
       <section className="w-full relative z-10 mt-16 md:mt-20">
         <div className="max-w-[1400px] md:max-w-none mx-auto px-6 md:px-0">
           <div className="bg-slate-800 rounded-2xl md:rounded-none border border-slate-700 md:border-0 md:border-y p-4 sm:p-6 md:py-8">
-            <h3 className="text-lg md:text-xl font-display font-black text-slate-100 tracking-tighter mb-4 md:px-12 lg:px-20">Find Us</h3>
+            <h3 className="text-lg md:text-xl font-sans font-black text-slate-100 tracking-tighter mb-4 md:px-12 lg:px-20">Find Us</h3>
             <div className="relative w-full h-[200px] sm:h-[250px] md:h-[300px] rounded-xl overflow-hidden shadow-lg md:px-12 lg:px-20">
               <iframe
                 src="https://maps.google.com/maps?q=23.063877909238336,72.67752775052084&hl=en&z=15&output=embed"
