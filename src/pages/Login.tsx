@@ -301,7 +301,7 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={submitting}
-                            className={`w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center active:scale-95 touch-manipulation ${mode === 'admin' ? 'bg-primary shadow-primary/20' : 'bg-secondary shadow-secondary/20'} text-white`}
+                            className={`w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center active:scale-95 touch-manipulation ${mode === 'admin' ? 'bg-primary shadow-primary/20' : 'bg-secondary shadow-secondary/20'} text-white font-bungee`}
                         >
                             {submitting ? 'Please wait' : resetMode ? (otpSent ? 'Reset Password' : 'Send OTP') : mode === 'admin' ? 'Authorize' : (isLogin ? 'Sign In' : 'Join')}
                             <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={14} />

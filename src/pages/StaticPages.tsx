@@ -243,12 +243,12 @@ const About = () => (
         className="space-y-12"
       >
         <div className="space-y-6">
-          <h2 className="text-4xl font-bungee font-black uppercase italic tracking-tighter text-secondary">Our Manifest</h2>
+          <h2 className="text-4xl font-bungee font-black uppercase italic tracking-tighter">Our <span className='text-secondary font-bungee'>Manifest</span></h2>
           <p className="text-lg text-white/60 leading-relaxed font-sarif italic">
             Born from a simple desire: to make travel meaningful, accessible, and deeply community-driven for the people of Ahmedabad. We believe that every journey should be an exploration of both the world and the inner self.
           </p>
         </div>
-
+     
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {[
             { icon: UserCheck, title: "Verified Captains", desc: "Led by Ahmedabad-local experts who live and breathe the terrain." },
