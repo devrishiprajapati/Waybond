@@ -11,6 +11,7 @@ interface TravellerInfo {
   age: string
   gender: string
   phone: string
+  emergencyContact: string
   email: string
   dateOfBirth: string
   state: string
@@ -27,7 +28,7 @@ const BookingForm = () => {
   const [loading, setLoading] = useState(true)
   const [numTravellers, setNumTravellers] = useState(1)
   const [travellers, setTravellers] = useState<TravellerInfo[]>([{
-    name: '', age: '', gender: 'Male', phone: '', email: '', dateOfBirth: '', state: '', city: ''
+    name: '', age: '', gender: 'Male', phone: '', emergencyContact: '', email: '', dateOfBirth: '', state: '', city: ''
   }])
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -50,7 +51,7 @@ const BookingForm = () => {
     if (count > travellers.length) {
       for (let i = travellers.length; i < count; i++) {
         newTravellers.push({
-          name: '', age: '', gender: 'Male', phone: '', email: '', dateOfBirth: '', state: '', city: ''
+          name: '', age: '', gender: 'Male', phone: '', emergencyContact: '', email: '', dateOfBirth: '', state: '', city: ''
         })
       }
     } else {
@@ -75,6 +76,11 @@ const BookingForm = () => {
       }
       if (!traveller.phone.trim() || !/^\d{10}$/.test(traveller.phone)) {
         newErrors[`phone_${idx}`] = 'Valid 10-digit phone number is required'
+      }
+      if (!traveller.emergencyContact.trim()) {
+        newErrors[`emergencyContact_${idx}`] = 'Emergency contact number is required'
+      } else if (!/^\d{10}$/.test(traveller.emergencyContact)) {
+        newErrors[`emergencyContact_${idx}`] = 'Valid 10-digit emergency contact number is required'
       }
       if (!traveller.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(traveller.email)) {
         newErrors[`email_${idx}`] = 'Valid email is required'
@@ -252,6 +258,26 @@ const BookingForm = () => {
                     </div>
                     {errors[`phone_${idx}`] && (
                       <p className="text-red-500 text-xs mt-1 ml-1">{errors[`phone_${idx}`]}</p>
+                    )}
+                  </div>
+
+                  {/* Emergency Contact with country code */}
+                  <div>
+                    <div className="flex gap-2">
+                      <div className="w-24 px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 flex items-center justify-center font-semibold text-gray-600">
+                        +91
+                      </div>
+                      <input
+                        type="tel"
+                        placeholder="Emergency Contact No."
+                        value={traveller.emergencyContact}
+                        onChange={e => handleTravellerChange(idx, 'emergencyContact', e.target.value)}
+                        className={`flex-1 px-4 py-3 rounded-xl border ${errors[`emergencyContact_${idx}`] ? 'border-red-400' : 'border-gray-300'
+                          } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
+                      />
+                    </div>
+                    {errors[`emergencyContact_${idx}`] && (
+                      <p className="text-red-500 text-xs mt-1 ml-1">{errors[`emergencyContact_${idx}`]}</p>
                     )}
                   </div>
 
