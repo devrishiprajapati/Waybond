@@ -160,7 +160,7 @@ app.post('/api/booking-details', async (req, res, next) => {
       </tr>
     `).join('')
 
-    const formattedDeparture = departureDate 
+    const formattedDeparture = departureDate
       ? new Date(departureDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
       : 'Not specified'
 
@@ -217,10 +217,10 @@ app.post('/api/booking-details', async (req, res, next) => {
 
           <div style="background: linear-gradient(135deg, #6495ed 0%, #4169e1 100%); border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 4px 12px rgba(100,149,237,0.3);">
             <p style="color: #ffffff; margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.5px;">
-              ⏰ Booking received on ${new Date().toLocaleString('en-IN', { 
-                dateStyle: 'long', 
-                timeStyle: 'short' 
-              })}
+              ⏰ Booking received on ${new Date().toLocaleString('en-IN', {
+      dateStyle: 'long',
+      timeStyle: 'short'
+    })}
             </p>
           </div>
 
@@ -670,6 +670,31 @@ app.put('/api/community-galleries', async (req, res, next) => {
     })))
     res.json({ success: true })
   } catch (error) { next(error) }
+})
+
+app.get('/api/team-members', async (_req, res, next) => {
+  try { res.json(await prisma.teamMember.findMany({ orderBy: { position: 'asc' } })) } catch (error) { next(error) }
+})
+
+app.post('/api/team-members', async (req, res, next) => {
+  try {
+    const { name, designation, shortBio, fullBio, image, email, phone, linkedin, twitter, position, isActive } = req.body
+    if (!name?.trim() || !designation?.trim() || !image) return res.status(400).json({ message: 'Name, designation, and image are required.' })
+    res.status(201).json(await prisma.teamMember.create({ data: { name, designation, shortBio: shortBio || '', fullBio: fullBio || '', image, email: email || null, phone: phone || null, linkedin: linkedin || null, twitter: twitter || null, position: Number(position ?? 0), isActive: Boolean(isActive ?? true) } }))
+  } catch (error) { next(error) }
+})
+
+app.put('/api/team-members/:id', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id)
+    if (!await prisma.teamMember.findUnique({ where: { id } })) return res.status(404).json({ message: 'Team member not found' })
+    const { name, designation, shortBio, fullBio, image, email, phone, linkedin, twitter, position, isActive } = req.body
+    res.json(await prisma.teamMember.update({ where: { id }, data: { name, designation, shortBio, fullBio, image, email: email || null, phone: phone || null, linkedin: linkedin || null, twitter: twitter || null, position: Number(position ?? 0), isActive: Boolean(isActive ?? true) } }))
+  } catch (error) { next(error) }
+})
+
+app.delete('/api/team-members/:id', async (req, res, next) => {
+  try { await prisma.teamMember.delete({ where: { id: Number(req.params.id) } }); res.json({ success: true }) } catch (error) { next(error) }
 })
 
 app.use((error, _req, res, _next) => {

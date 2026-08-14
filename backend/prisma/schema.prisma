@@ -7,15 +7,15 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  name        String
-  email       String   @unique
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
   passwordHash String
-  role        String   @default("USER")
-  profile     Json?
-  joinedAt    DateTime @default(now())
-  lastLoginAt DateTime @updatedAt
-  bookings    Booking[]
+  role         String        @default("USER")
+  profile      Json?
+  joinedAt     DateTime      @default(now())
+  lastLoginAt  DateTime      @updatedAt
+  bookings     Booking[]
   testimonials Testimonial[]
 }
 
