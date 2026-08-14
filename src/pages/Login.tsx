@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import { useNavigate, Link, Navigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Shield, Compass, Eye, EyeOff } from 'lucide-react'
@@ -21,63 +21,11 @@ const Login = () => {
     const [newPassword, setNewPassword] = useState('')
     const [confirmNewPassword, setConfirmNewPassword] = useState('')
     const [message, setMessage] = useState('')
-    const [turnstileToken, setTurnstileToken] = useState('')
-    const turnstileRef = useRef<HTMLDivElement>(null)
-    const widgetIdRef = useRef<string | undefined>(undefined)
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const redirectTo = searchParams.get('redirect') || '/dashboard'
     const existingUser = getUser()
 
-    // Mount Turnstile widget — poll until the async script has loaded
-    // Both keys live in the single root .env file:
-    //   VITE_TURNSTILE_SITE_KEY      → real key, used in production builds
-    //   VITE_TURNSTILE_TEST_SITE_KEY → test key, used during local dev
-    useEffect(() => {
-        if (mode !== 'user' || resetMode) return
-
-        const sitekey = import.meta.env.PROD
-            ? import.meta.env.VITE_TURNSTILE_SITE_KEY
-            : import.meta.env.VITE_TURNSTILE_TEST_SITE_KEY
-
-        if (!sitekey) {
-            // Env var not loaded — restart Vite dev server after editing root .env
-            console.warn('[Turnstile] Site key env var missing. Restart the Vite dev server. CAPTCHA bypassed.')
-            setTurnstileToken('dev-no-sitekey')
-            return
-        }
-
-        let cancelled = false
-        const mount = () => {
-            const win = window as any
-            if (!win.turnstile || !turnstileRef.current) return false
-            widgetIdRef.current = win.turnstile.render(turnstileRef.current, {
-                sitekey,
-                callback: (token: string) => setTurnstileToken(token),
-                'expired-callback': () => setTurnstileToken(''),
-                'error-callback': () => setTurnstileToken(''),
-                theme: 'light',
-            })
-            return true
-        }
-
-        if (!mount()) {
-            const interval = setInterval(() => {
-                if (cancelled) { clearInterval(interval); return }
-                if (mount()) clearInterval(interval)
-            }, 100)
-        }
-
-        return () => {
-            cancelled = true
-            const win = window as any
-            if (widgetIdRef.current !== undefined) {
-                win.turnstile?.remove(widgetIdRef.current)
-                widgetIdRef.current = undefined
-                setTurnstileToken('')
-            }
-        }
-    }, [mode, resetMode])
 
     if (existingUser) {
         return <Navigate to={sessionStorage.getItem('isAdmin') === 'true' ? '/admin/dashboard' : redirectTo} replace />
@@ -123,7 +71,7 @@ const Login = () => {
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password, ...(mode === 'user' ? { turnstileToken } : {}) })
+                body: JSON.stringify({ name, email, password })
             })
             const responseText = await response.text()
             let data: { user?: { id?: string; name: string; email: string;[key: string]: unknown }; message?: string } = {}
@@ -293,10 +241,6 @@ const Login = () => {
                             </>
                         )}
 
-                        {/* Cloudflare Turnstile — user login/signup only */}
-                        {mode === 'user' && !resetMode && (
-                            <div ref={turnstileRef} className="flex justify-center" />
-                        )}
 
                         <button
                             type="submit"
