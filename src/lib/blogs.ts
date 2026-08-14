@@ -267,5 +267,5 @@ export const getYouTubeEmbedUrl = (url?: string): string => {
 
 export const getYouTubeThumbnailUrl = (url?: string): string => {
   const videoId = getYouTubeVideoId(url);
-  return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : '';
+  return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
 };
