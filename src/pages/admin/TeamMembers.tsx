@@ -44,7 +44,7 @@ export default function AdminTeamMembers() {
     const [saving, setSaving] = useState(false)
     const [imageUploading, setImageUploading] = useState(false)
     const [error, setError] = useState('')
-    const [formError, setFormError] = useState('')
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
     const [editing, setEditing] = useState<TeamMember | null>(null)
     const [isAddingNew, setIsAddingNew] = useState(false)
     const [draft, setDraft] = useState<Omit<TeamMember, 'id' | 'createdAt' | 'updatedAt'>>(EMPTY_FORM)
@@ -73,10 +73,27 @@ export default function AdminTeamMembers() {
         loadMembers()
     }, [navigate])
 
+    const validate = (d: typeof draft): Record<string, string> => {
+        const errs: Record<string, string> = {}
+        if (!d.name.trim()) errs.name = 'Name is required.'
+        else if (d.name.trim().length < 2) errs.name = 'Name must be at least 2 characters.'
+        if (!d.designation.trim()) errs.designation = 'Designation is required.'
+        else if (d.designation.trim().length < 2) errs.designation = 'Designation must be at least 2 characters.'
+        if (!d.shortBio.trim()) errs.shortBio = 'Short bio is required.'
+        else if (d.shortBio.trim().length < 10) errs.shortBio = 'Short bio must be at least 10 characters.'
+        if (!d.image) errs.image = 'A profile image is required.'
+        if (d.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email)) errs.email = 'Enter a valid email address.'
+        if (d.phone && !/^[6-9]\d{9}$/.test(d.phone.replace(/\s+/g, ''))) errs.phone = 'Enter a valid 10-digit Indian mobile number.'
+        if (d.linkedin && !/^https?:\/\/.+/.test(d.linkedin)) errs.linkedin = 'LinkedIn URL must start with http:// or https://'
+        if (d.twitter && !/^https?:\/\/.+/.test(d.twitter)) errs.twitter = 'Twitter/X URL must start with http:// or https://'
+        if (d.position < 0) errs.position = 'Position must be 0 or greater.'
+        return errs
+    }
+
     const openAdd = () => {
         setDraft({ ...EMPTY_FORM, position: members.length })
         setEditing(null)
-        setFormError('')
+        setFieldErrors({})
         setIsAddingNew(true)
     }
 
@@ -95,31 +112,37 @@ export default function AdminTeamMembers() {
             isActive: member.isActive,
         })
         setEditing(member)
-        setFormError('')
+        setFieldErrors({})
         setIsAddingNew(false)
     }
 
     const closeModal = () => {
         setIsAddingNew(false)
         setEditing(null)
+        setFieldErrors({})
     }
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
         if (file.size > 8 * 1024 * 1024) {
-            setFormError('Image must be smaller than 8 MB.')
+            setFieldErrors(prev => ({ ...prev, image: 'Image must be smaller than 8 MB.' }))
+            return
+        }
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+        if (!allowed.includes(file.type)) {
+            setFieldErrors(prev => ({ ...prev, image: 'Only JPG, PNG, WEBP or GIF images are allowed.' }))
             return
         }
         setImageUploading(true)
-        setFormError('')
+        setFieldErrors(prev => { const n = { ...prev }; delete n.image; return n })
         const reader = new FileReader()
         reader.onload = (ev) => {
             setDraft(d => ({ ...d, image: ev.target?.result as string }))
             setImageUploading(false)
         }
         reader.onerror = () => {
-            setFormError('Could not read the image file. Please try again.')
+            setFieldErrors(prev => ({ ...prev, image: 'Could not read the image file. Please try again.' }))
             setImageUploading(false)
         }
         reader.readAsDataURL(file)
@@ -127,12 +150,13 @@ export default function AdminTeamMembers() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!draft.name.trim() || !draft.designation.trim() || !draft.image) {
-            setFormError('Name, designation, and a profile image are required.')
+        const errs = validate(draft)
+        if (Object.keys(errs).length > 0) {
+            setFieldErrors(errs)
             return
         }
         setSaving(true)
-        setFormError('')
+        setFieldErrors({})
         try {
             const url = editing ? `/api/team-members/${editing.id}` : '/api/team-members'
             const method = editing ? 'PUT' : 'POST'
@@ -141,7 +165,11 @@ export default function AdminTeamMembers() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(draft),
             })
-            if (!res.ok) throw new Error('Save failed')
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}))
+                setFieldErrors({ _form: body.message || 'Could not save. Please try again.' })
+                return
+            }
             const saved: TeamMember = await res.json()
             if (editing) {
                 setMembers(curr => curr.map(m => String(m.id) === String(editing.id) ? saved : m))
@@ -150,7 +178,7 @@ export default function AdminTeamMembers() {
             }
             closeModal()
         } catch {
-            setFormError('Could not save. Please try again.')
+            setFieldErrors({ _form: 'Network error. Please check your connection and try again.' })
         } finally {
             setSaving(false)
         }
@@ -166,6 +194,11 @@ export default function AdminTeamMembers() {
         }
     }
 
+    const setField = (key: keyof typeof draft, value: string | number | boolean) => {
+        setDraft(d => ({ ...d, [key]: value }))
+        setFieldErrors(prev => { const n = { ...prev }; delete n[key as string]; return n })
+    }
+
     const field = (
         label: string,
         key: keyof typeof draft,
@@ -173,17 +206,24 @@ export default function AdminTeamMembers() {
         required = false,
         placeholder = ''
     ) => (
-        <label className="block text-[9px] text-white/45 font-black uppercase tracking-[0.18em]">
-            {label}{required && <span className="text-secondary ml-1">*</span>}
+        <div className="flex flex-col gap-1">
+            <label className="text-[9px] text-white/45 font-black uppercase tracking-[0.18em]">
+                {label}{required && <span className="text-secondary ml-1">*</span>}
+            </label>
             <input
                 type={type}
-                required={required}
                 placeholder={placeholder}
                 value={String(draft[key] ?? '')}
-                onChange={e => setDraft(d => ({ ...d, [key]: e.target.value }))}
-                className="mt-2 w-full h-12 rounded-xl bg-white/5 border border-white/10 px-4 text-white text-sm outline-none focus:border-secondary transition-colors"
+                onChange={e => setField(key, e.target.value)}
+                className={`w-full h-12 rounded-xl bg-white/5 border px-4 text-white text-sm outline-none transition-colors ${fieldErrors[key as string]
+                    ? 'border-red-400/70 focus:border-red-400'
+                    : 'border-white/10 focus:border-secondary'
+                    }`}
             />
-        </label>
+            {fieldErrors[key as string] && (
+                <p className="text-red-400 text-[10px] font-semibold">{fieldErrors[key as string]}</p>
+            )}
+        </div>
     )
 
     const showModal = isAddingNew || editing !== null
@@ -200,7 +240,7 @@ export default function AdminTeamMembers() {
                         <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-3">People &amp; Culture</p>
                         <h1 className="text-4xl md:text-6xl font-sans font-black uppercase italic tracking-tighter liquid-text ">
                             Manage <span className="text-primary font-bungee">Team</span>
-                        </h1>   
+                        </h1>
                     </div>
                     <div className="flex gap-3">
                         <button
@@ -403,32 +443,47 @@ export default function AdminTeamMembers() {
                                 {field('Designation', 'designation', 'text', true, 'e.g. Founder & CEO')}
                             </div>
 
-                            <label className="block text-[9px] text-white/45 font-black uppercase tracking-[0.18em]">
-                                Short Bio <span className="text-secondary">*</span>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[9px] text-white/45 font-black uppercase tracking-[0.18em]">
+                                    Short Bio <span className="text-secondary">*</span>
+                                </label>
                                 <textarea
-                                    required
                                     rows={2}
                                     placeholder="One-line intro shown on the profile card..."
                                     value={draft.shortBio}
-                                    onChange={e => setDraft(d => ({ ...d, shortBio: e.target.value }))}
-                                    className="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-white text-sm outline-none focus:border-secondary resize-y transition-colors"
+                                    onChange={e => setField('shortBio', e.target.value)}
+                                    className={`w-full rounded-xl bg-white/5 border px-4 py-3 text-white text-sm outline-none resize-y transition-colors ${fieldErrors.shortBio ? 'border-red-400/70 focus:border-red-400' : 'border-white/10 focus:border-secondary'
+                                        }`}
                                 />
-                            </label>
+                                {fieldErrors.shortBio && <p className="text-red-400 text-[10px] font-semibold">{fieldErrors.shortBio}</p>}
+                            </div>
 
-                            <label className="block text-[9px] text-white/45 font-black uppercase tracking-[0.18em]">
-                                Full Bio
+                            <div className="flex flex-col gap-1">
+                                <label className="text-[9px] text-white/45 font-black uppercase tracking-[0.18em]">Full Bio</label>
                                 <textarea
                                     rows={4}
                                     placeholder="Detailed biography shown in the popup modal..."
                                     value={draft.fullBio}
-                                    onChange={e => setDraft(d => ({ ...d, fullBio: e.target.value }))}
-                                    className="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-white text-sm outline-none focus:border-secondary resize-y transition-colors"
+                                    onChange={e => setField('fullBio', e.target.value)}
+                                    className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-white text-sm outline-none focus:border-secondary resize-y transition-colors"
                                 />
-                            </label>
+                            </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {field('Email', 'email', 'email', false, 'contact@waybond.in')}
-                                {field('Phone', 'phone', 'tel', false, '+91 9876543210')}
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[9px] text-white/45 font-black uppercase tracking-[0.18em]">Phone</label>
+                                    <input
+                                        type="tel"
+                                        placeholder="9876543210"
+                                        maxLength={10}
+                                        value={String(draft.phone ?? '')}
+                                        onChange={e => setField('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                        className={`w-full h-12 rounded-xl bg-white/5 border px-4 text-white text-sm outline-none transition-colors ${fieldErrors.phone ? 'border-red-400/70 focus:border-red-400' : 'border-white/10 focus:border-secondary'
+                                            }`}
+                                    />
+                                    {fieldErrors.phone && <p className="text-red-400 text-[10px] font-semibold">{fieldErrors.phone}</p>}
+                                </div>
                                 {field('LinkedIn URL', 'linkedin', 'url', false, 'https://linkedin.com/in/...')}
                                 {field('Twitter / X URL', 'twitter', 'url', false, 'https://x.com/...')}
                             </div>
@@ -440,8 +495,9 @@ export default function AdminTeamMembers() {
                                         type="number"
                                         min={0}
                                         value={draft.position}
-                                        onChange={e => setDraft(d => ({ ...d, position: Number(e.target.value) }))}
-                                        className="mt-2 w-full h-12 rounded-xl bg-white/5 border border-white/10 px-4 text-white text-sm outline-none focus:border-secondary transition-colors"
+                                        onChange={e => setField('position', Number(e.target.value))}
+                                        className={`mt-2 w-full h-12 rounded-xl bg-white/5 border px-4 text-white text-sm outline-none transition-colors ${fieldErrors.position ? 'border-red-400/70 focus:border-red-400' : 'border-white/10 focus:border-secondary'
+                                            }`}
                                     />
                                 </label>
                                 <label className="block text-[9px] text-white/45 font-black uppercase tracking-[0.18em]">
@@ -457,7 +513,9 @@ export default function AdminTeamMembers() {
                                 </label>
                             </div>
 
-                            {formError && <p className="text-red-300 text-xs font-bold">{formError}</p>}
+                            {fieldErrors._form && (
+                                <p className="text-red-400 text-xs font-bold bg-red-500/10 border border-red-400/30 rounded-xl px-4 py-3">{fieldErrors._form}</p>
+                            )}
 
                             <div className="flex justify-end gap-3 pt-2">
                                 <button
