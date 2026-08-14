@@ -42,6 +42,16 @@ const TripDetails = () => {
     }
   }, [slug, departureParam])
 
+  // Auto-open enquiry form after 5 seconds once the trip has loaded
+  useEffect(() => {
+    if (!trip) return
+    const timer = window.setTimeout(() => {
+      setEnquiryOpen(true)
+    }, 5000)
+    return () => window.clearTimeout(timer)
+  }, [trip])
+
+
   // Scroll handler for sticky booking bar
   useEffect(() => {
     const handleScroll = () => {

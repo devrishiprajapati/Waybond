@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Edit2, ImagePlus, Play, Save, Search, Upload, X } from 'lucide-react'
+import { ArrowLeft, Edit2, ImagePlus, Save, Search, Upload, X } from 'lucide-react'
 import { Blog, getAllBlogs, saveBlogUpdates } from '../../lib/blogs'
 
 type StoryDraft = Omit<Blog, 'id' | 'tags'> & { tags: string }
@@ -170,7 +170,14 @@ export default function AdminTravelStories() {
             <article key={story.id} className="liquid-glass-dark border border-white/10 rounded-[2rem] overflow-hidden">
               <div className="relative h-52 bg-white/5">
                 <img src={story.image} alt={story.title} className="w-full h-full object-cover" />
-                {story.youtubeUrl && <div className="absolute top-4 right-4 w-11 h-11 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-lg" title="YouTube link added"><Play size={17} fill="currentColor" /></div>}
+                {story.youtubeUrl && (
+                  <div className="absolute bottom-3 right-3 drop-shadow-lg" title="YouTube video">
+                    <svg viewBox="0 0 24 24" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" fill="#FF0000" />
+                      <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white" />
+                    </svg>
+                  </div>
+                )}
               </div>
               <div className="p-6 space-y-4">
                 <div className="flex items-center justify-between gap-3">

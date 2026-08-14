@@ -22,7 +22,7 @@ const BookingForm = () => {
   const [searchParams] = useSearchParams()
   const tripId = searchParams.get('tripId')
   const departure = searchParams.get('departure')
-  
+
   const [trip, setTrip] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [numTravellers, setNumTravellers] = useState(1)
@@ -45,7 +45,7 @@ const BookingForm = () => {
   const handleTravellerCountChange = (count: number) => {
     setNumTravellers(count)
     haptics.light()
-    
+
     const newTravellers = [...travellers]
     if (count > travellers.length) {
       for (let i = travellers.length; i < count; i++) {
@@ -67,7 +67,7 @@ const BookingForm = () => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
-    
+
     travellers.forEach((traveller, idx) => {
       if (!traveller.name.trim()) newErrors[`name_${idx}`] = 'Name is required'
       if (!traveller.age.trim() || isNaN(Number(traveller.age)) || Number(traveller.age) < 1) {
@@ -85,14 +85,14 @@ const BookingForm = () => {
     })
 
     if (!termsAccepted) newErrors.terms = 'You must accept the terms and conditions'
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       haptics.error()
       return
@@ -143,7 +143,7 @@ const BookingForm = () => {
       <Helmet>
         <title>Booking Details - {trip.title} | WAYBOND</title>
       </Helmet>
-      
+
       <div className="min-h-screen bg-gray-50 pt-24 pb-20">
         <div className="max-w-2xl mx-auto px-4">
           {/* Header */}
@@ -169,11 +169,10 @@ const BookingForm = () => {
                     key={num}
                     type="button"
                     onClick={() => handleTravellerCountChange(num)}
-                    className={`w-12 h-12 rounded-full font-black text-lg transition-all ${
-                      numTravellers === num
+                    className={`w-12 h-12 rounded-full font-black text-lg transition-all ${numTravellers === num
                         ? 'bg-secondary text-white shadow-lg scale-110'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     {num}
                   </button>
@@ -202,9 +201,8 @@ const BookingForm = () => {
                       placeholder="Name"
                       value={traveller.name}
                       onChange={e => handleTravellerChange(idx, 'name', e.target.value)}
-                      className={`w-full px-4 py-3 rounded-xl border ${
-                        errors[`name_${idx}`] ? 'border-red-400' : 'border-gray-300'
-                      } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
+                      className={`w-full px-4 py-3 rounded-xl border ${errors[`name_${idx}`] ? 'border-red-400' : 'border-gray-300'
+                        } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
                     />
                     {errors[`name_${idx}`] && (
                       <p className="text-red-500 text-xs mt-1 ml-1">{errors[`name_${idx}`]}</p>
@@ -219,9 +217,8 @@ const BookingForm = () => {
                         placeholder="Age"
                         value={traveller.age}
                         onChange={e => handleTravellerChange(idx, 'age', e.target.value)}
-                        className={`w-full px-4 py-3 rounded-xl border ${
-                          errors[`age_${idx}`] ? 'border-red-400' : 'border-gray-300'
-                        } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
+                        className={`w-full px-4 py-3 rounded-xl border ${errors[`age_${idx}`] ? 'border-red-400' : 'border-gray-300'
+                          } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
                       />
                       {errors[`age_${idx}`] && (
                         <p className="text-red-500 text-xs mt-1 ml-1">{errors[`age_${idx}`]}</p>
@@ -242,16 +239,15 @@ const BookingForm = () => {
                   <div>
                     <div className="flex gap-2">
                       <div className="w-24 px-4 py-3 rounded-xl border border-gray-300 bg-gray-50 flex items-center justify-center font-semibold text-gray-600">
-                        +91 (India)
+                        +91
                       </div>
                       <input
                         type="tel"
                         placeholder="Mobile No."
                         value={traveller.phone}
                         onChange={e => handleTravellerChange(idx, 'phone', e.target.value)}
-                        className={`flex-1 px-4 py-3 rounded-xl border ${
-                          errors[`phone_${idx}`] ? 'border-red-400' : 'border-gray-300'
-                        } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
+                        className={`flex-1 px-4 py-3 rounded-xl border ${errors[`phone_${idx}`] ? 'border-red-400' : 'border-gray-300'
+                          } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
                       />
                     </div>
                     {errors[`phone_${idx}`] && (
@@ -266,9 +262,8 @@ const BookingForm = () => {
                       placeholder="Email"
                       value={traveller.email}
                       onChange={e => handleTravellerChange(idx, 'email', e.target.value)}
-                      className={`w-full px-4 py-3 rounded-xl border ${
-                        errors[`email_${idx}`] ? 'border-red-400' : 'border-gray-300'
-                      } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
+                      className={`w-full px-4 py-3 rounded-xl border ${errors[`email_${idx}`] ? 'border-red-400' : 'border-gray-300'
+                        } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
                     />
                     {errors[`email_${idx}`] && (
                       <p className="text-red-500 text-xs mt-1 ml-1">{errors[`email_${idx}`]}</p>
@@ -281,9 +276,8 @@ const BookingForm = () => {
                       type="date"
                       value={traveller.dateOfBirth}
                       onChange={e => handleTravellerChange(idx, 'dateOfBirth', e.target.value)}
-                      className={`w-full px-4 py-3 rounded-xl border ${
-                        errors[`dob_${idx}`] ? 'border-red-400' : 'border-gray-300'
-                      } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
+                      className={`w-full px-4 py-3 rounded-xl border ${errors[`dob_${idx}`] ? 'border-red-400' : 'border-gray-300'
+                        } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
                     />
                     {errors[`dob_${idx}`] && (
                       <p className="text-red-500 text-xs mt-1 ml-1">{errors[`dob_${idx}`]}</p>
@@ -298,9 +292,8 @@ const BookingForm = () => {
                         placeholder="State"
                         value={traveller.state}
                         onChange={e => handleTravellerChange(idx, 'state', e.target.value)}
-                        className={`w-full px-4 py-3 rounded-xl border ${
-                          errors[`state_${idx}`] ? 'border-red-400' : 'border-gray-300'
-                        } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
+                        className={`w-full px-4 py-3 rounded-xl border ${errors[`state_${idx}`] ? 'border-red-400' : 'border-gray-300'
+                          } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
                       />
                       {errors[`state_${idx}`] && (
                         <p className="text-red-500 text-xs mt-1 ml-1">{errors[`state_${idx}`]}</p>
@@ -312,9 +305,8 @@ const BookingForm = () => {
                         placeholder="City"
                         value={traveller.city}
                         onChange={e => handleTravellerChange(idx, 'city', e.target.value)}
-                        className={`w-full px-4 py-3 rounded-xl border ${
-                          errors[`city_${idx}`] ? 'border-red-400' : 'border-gray-300'
-                        } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
+                        className={`w-full px-4 py-3 rounded-xl border ${errors[`city_${idx}`] ? 'border-red-400' : 'border-gray-300'
+                          } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
                       />
                       {errors[`city_${idx}`] && (
                         <p className="text-red-500 text-xs mt-1 ml-1">{errors[`city_${idx}`]}</p>
