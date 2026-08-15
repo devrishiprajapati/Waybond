@@ -289,10 +289,28 @@ const About = () => (
 
 const Community = () => {
   const [galleries, setGalleries] = React.useState(communityGalleries)
+  const [activeImageIndex, setActiveImageIndex] = React.useState<{ [key: string]: number }>({})
 
   React.useEffect(() => {
     loadCommunityGalleries().then(setGalleries)
   }, [])
+
+  // Auto-slide images for each gallery
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveImageIndex((prev) => {
+        const updated = { ...prev }
+        galleries.forEach((gallery) => {
+          const currentIndex = prev[gallery.destination] || 0
+          const nextIndex = (currentIndex + 1) % Math.min(gallery.images.length, 4) // Cycle through first 4 images
+          updated[gallery.destination] = nextIndex
+        })
+        return updated
+      })
+    }, 3000) // Change image every 3 seconds
+
+    return () => clearInterval(interval)
+  }, [galleries])
 
   return (
     <PageLayout
@@ -308,24 +326,41 @@ const Community = () => {
           <p className="text-white/40 italic mt-4 text-sm font-medium tracking-wide">Real smiles, real connections.</p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {galleries.map((gallery, index) => (
-            <motion.div
-              key={gallery.destination}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden group keep-light-text shadow-[0_15px_40px_rgba(0,0,0,0.5)] aspect-square w-full border border-white/10"
-            >
-              <img src={gallery.images[0].src} alt={`${gallery.destination} travel memories`} loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent"></div>
-              <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination}                                                                                                                                                                                                                                                                      gallery`} className="absolute inset-0 z-10" />
-              <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
-                <p className="text-2xl md:text-3xl font-sans font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
-                <p className="text-[9px] md:text-[10px] text-white uppercase font-black tracking-[0.25em] md:tracking-[0.3em] mt-2">{gallery.label}</p>
-              </div>
-            </motion.div>
-          ))}
+          {galleries.map((gallery, index) => {
+            const currentImageIndex = activeImageIndex[gallery.destination] || 0
+            const imagesToShow = gallery.images.slice(0, 4) // Show only first 4 images
+            
+            return (
+              <motion.div
+                key={gallery.destination}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="relative rounded-[2rem] md:rounded-[3rem] overflow-hidden group keep-light-text shadow-[0_15px_40px_rgba(0,0,0,0.5)] aspect-square w-full border border-white/10"
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.img
+                    key={`${gallery.destination}-${currentImageIndex}`}
+                    src={imagesToShow[currentImageIndex].src}
+                    alt={`${gallery.destination} travel memories`}
+                    loading="lazy"
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '-100%' }}
+                    transition={{ duration: 0.7, ease: 'easeInOut' }}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </AnimatePresence>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent pointer-events-none z-10"></div>
+                <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination} gallery`} className="absolute inset-0 z-20" />
+                <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 z-20">
+                  <p className="text-2xl md:text-3xl font-sans font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
+                  <p className="text-[9px] md:text-[10px] text-white uppercase font-black tracking-[0.25em] md:tracking-[0.3em] mt-2">{gallery.label}</p>
+                </div>
+              </motion.div>
+            )
+          })}
         </div>
       </div>
 
