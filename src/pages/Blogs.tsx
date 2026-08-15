@@ -209,6 +209,7 @@ export default function Blogs() {
                           className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-secondary/30 flex flex-col md:flex-row"
                         >
 <<<<<<< HEAD
+<<<<<<< HEAD
                         {/* Blog Image */}
                         {blog.youtubeUrl ? (
                           <a
@@ -289,6 +290,8 @@ export default function Blogs() {
                               to={`/blog/${blog.slug}`}
                               className="inline-flex items-center space-x-2 text-secondary font-bold hover:text-secondary/80 transition-colors group/link"
 =======
+=======
+>>>>>>> 6ca6e66c686c6779e9dc9b0568d3819d401ea8fe
                           {/* Blog Image */}
                           {blog.youtubeUrl ? (
                             <a
@@ -297,6 +300,9 @@ export default function Blogs() {
                               rel="noopener noreferrer"
                               className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative block"
                               title={`Open video for ${blog.title}`}
+<<<<<<< HEAD
+>>>>>>> 6ca6e66c686c6779e9dc9b0568d3819d401ea8fe
+=======
 >>>>>>> 6ca6e66c686c6779e9dc9b0568d3819d401ea8fe
                             >
                               <img
