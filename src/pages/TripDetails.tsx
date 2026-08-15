@@ -438,7 +438,7 @@ const TripDetails = () => {
               </p>
 
               <div className="mt-6 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                {trip.highlights.map((highlight: string, idx: number) => (
+                {(trip.highlights || []).map((highlight: string, idx: number) => (
                   <div key={idx} className="flex items-center gap-3 p-4 md:gap-4 md:p-5 liquid-glass-dark border border-white/10 rounded-2xl shadow-lg">
                     <CheckCircle2 className="text-secondary shrink-0" size={18} />
                     <span className="text-white font-bold text-sm tracking-wide">{highlight}</span>
@@ -548,6 +548,77 @@ const TripDetails = () => {
             </div>
           </div>
         </section>
+
+        {/* Inclusion & Exclusion - Full Width */}
+        {((trip.inclusion && trip.inclusion.length > 0) || (trip.exclusion && trip.exclusion.length > 0)) && (
+          <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 pb-12 md:pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:items-start">
+              {/* Inclusion */}
+              {trip.inclusion && trip.inclusion.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-10 h-full"
+                >
+                  <h3 className="text-xl md:text-2xl lg:text-3xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-8">
+                    Inclusions
+                  </h3>
+                  <div className="space-y-4 md:space-y-5">
+                    {trip.inclusion.map((item: string, idx: number) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="flex items-start gap-3 md:gap-4"
+                      >
+                        <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={22} strokeWidth={2.5} />
+                        <span className="text-white/90 text-sm md:text-base lg:text-lg font-medium leading-relaxed">
+                          {item}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Exclusion */}
+              {trip.exclusion && trip.exclusion.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-10 h-full"
+                >
+                  <h3 className="text-xl md:text-2xl lg:text-3xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-8">
+                    Exclusions
+                  </h3>
+                  <div className="space-y-4 md:space-y-5">
+                    {trip.exclusion.map((item: string, idx: number) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="flex items-start gap-3 md:gap-4"
+                      >
+                        <X className="text-red-500 shrink-0 mt-0.5" size={22} strokeWidth={2.5} />
+                        <span className="text-white/90 text-sm md:text-base lg:text-lg font-medium leading-relaxed">
+                          {item}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </section>
+        )}
       </div>
 
       <AnimatePresence>

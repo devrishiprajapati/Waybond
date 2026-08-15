@@ -19,7 +19,9 @@ export interface Trip {
   groupSize: string;
   nextBatch: string;
   departureDates: string[];
-  highlights: string[];
+  highlights?: string[];
+  inclusion?: string[];
+  exclusion?: string[];
   captain: {
     name: string;
     role: string;

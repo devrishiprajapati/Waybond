@@ -40,7 +40,8 @@ const EditTrip = () => {
     link: '#',
     description: '',
     images: [],
-    highlights: [],
+    inclusion: [''],
+    exclusion: [''],
     nextBatch: '',
     departureDates: [],
     groupSize: '',
@@ -149,7 +150,8 @@ const EditTrip = () => {
     const finalData = {
       ...cleanData,
       images: formData.images && formData.images.length > 0 ? formData.images : [formData.image || ''],
-      highlights: formData.highlights || [],
+      inclusion: (formData.inclusion || []).filter(item => item.trim()),
+      exclusion: (formData.exclusion || []).filter(item => item.trim()),
       departureDates: formData.departureDates?.filter(Boolean) || [],
       itinerary: formData.itinerary || []
     }
@@ -371,14 +373,112 @@ const EditTrip = () => {
 
             {mediaError && <p className="text-sm font-bold text-red-300">{mediaError}</p>}
 
-            <div className="space-y-2">
-              <label className={labelClass}>Highlights (Comma separated)</label>
-              <textarea
-                value={formData.highlights?.join(', ')}
-                onChange={e => setFormData({ ...formData, highlights: e.target.value.split(',').map(h => h.trim()).filter(h => h) })}
-                placeholder="Traditional Homestays, Professional Photography, Stargazing"
-                className={`${textareaClass} min-h-[95px]`}
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className={labelClass}>Inclusion (Press Enter after each item)</label>
+                <div className="space-y-2">
+                  {(formData.inclusion || []).map((item, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={item}
+                        onChange={e => {
+                          const newInclusion = [...(formData.inclusion || [])]
+                          newInclusion[index] = e.target.value
+                          setFormData({ ...formData, inclusion: newInclusion })
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            setFormData({ 
+                              ...formData, 
+                              inclusion: [...(formData.inclusion || []), ''] 
+                            })
+                          }
+                        }}
+                        placeholder="e.g., Accommodation"
+                        className={`${inputClass} flex-1`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newInclusion = [...(formData.inclusion || [])]
+                          newInclusion.splice(index, 1)
+                          setFormData({ ...formData, inclusion: newInclusion })
+                        }}
+                        className="w-12 shrink-0 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
+                        aria-label="Remove inclusion item"
+                      >
+                        <Trash2 size={16} className="mx-auto" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ 
+                      ...formData, 
+                      inclusion: [...(formData.inclusion || []), ''] 
+                    })}
+                    className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                  >
+                    <Plus size={16} /> Add Inclusion Item
+                  </button>
+                </div>
+                <p className="text-[10px] text-white/30 ml-2">What's included in the package</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className={labelClass}>Exclusion (Press Enter after each item)</label>
+                <div className="space-y-2">
+                  {(formData.exclusion || []).map((item, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={item}
+                        onChange={e => {
+                          const newExclusion = [...(formData.exclusion || [])]
+                          newExclusion[index] = e.target.value
+                          setFormData({ ...formData, exclusion: newExclusion })
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault()
+                            setFormData({ 
+                              ...formData, 
+                              exclusion: [...(formData.exclusion || []), ''] 
+                            })
+                          }
+                        }}
+                        placeholder="e.g., Personal Expenses"
+                        className={`${inputClass} flex-1`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newExclusion = [...(formData.exclusion || [])]
+                          newExclusion.splice(index, 1)
+                          setFormData({ ...formData, exclusion: newExclusion })
+                        }}
+                        className="w-12 shrink-0 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
+                        aria-label="Remove exclusion item"
+                      >
+                        <Trash2 size={16} className="mx-auto" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ 
+                      ...formData, 
+                      exclusion: [...(formData.exclusion || []), ''] 
+                    })}
+                    className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                  >
+                    <Plus size={16} /> Add Exclusion Item
+                  </button>
+                </div>
+                <p className="text-[10px] text-white/30 ml-2">What's not included in the package</p>
+              </div>
             </div>
           </section>
 
