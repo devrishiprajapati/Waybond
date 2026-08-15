@@ -112,10 +112,10 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-white text-white flex">
-      <aside className="w-80 liquid-glass-dark border-r border-white/10 p-8 hidden lg:flex flex-col">
+      <aside className="w-80 liquid-glass-dark border-r border-white/10 px-8 pt-24 pb-8 hidden lg:flex flex-col">
         <div className="mb-12">
           <p className="text-secondary text-[9px] font-black uppercase tracking-[0.4em] mb-3 font-bungee">WayBond</p>
-          <h1 className="text-3xl font-bungee font-black uppercase italic tracking-tighter liquid-text">
+          <h1 className="text-3xl font-bungee font-black uppercase italic tracking-tighter">
             Admin <span className="text-primary font-bungee">Basecamp</span>
           </h1>
         </div>
@@ -149,7 +149,7 @@ const AdminDashboard = () => {
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-8 mb-10">
           <div className="space-y-4">
             {/* <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Control Center</span> */}
-            <h2 className="text-3xl md:text-5xl pt-8 font-bungee font-black tracking-tighter uppercase italic leading-none liquid-text">
+            <h2 className="text-3xl md:text-5xl pt-8 font-bungee font-black tracking-tighter uppercase italic leading-none">
               Package <span className="text-primary font-bungee">Inventory</span>
             </h2>
             {/* <p className="text-white/45 font-medium italic max-w-2xl">
