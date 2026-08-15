@@ -157,7 +157,7 @@ const AdminDashboard = () => {
             </p> */}
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          {/* <div className="flex flex-wrap gap-3">
             <Link
               to="/admin/hero"
               className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all font-bungee"
@@ -176,7 +176,7 @@ const AdminDashboard = () => {
             >
               <Plus size={16} /> Add Expedition
             </Link>
-          </div>
+          </div> */}
         </header>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5 mb-8">

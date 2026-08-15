@@ -220,7 +220,7 @@ export default function Blogs() {
                             className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative block"
                             title={`Open video for ${blog.title}`}
                           >
-                            <img
+                            <img                                          
                               src={imageSrc}
                               alt={blog.title}
                               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"

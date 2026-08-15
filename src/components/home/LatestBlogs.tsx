@@ -171,7 +171,7 @@ export default function LatestBlogs() {
             to="/blogs"
             className="inline-flex items-center gap-2 bg-gradient-to-r from-secondary to-[#003d6a] text-white px-6 md:px-8 py-3 rounded-full font-black uppercase tracking-wide text-xs md:text-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
-            <span className="!text-white font-bungee">View All Stories</span>
+            <span className="!text-white font-sans font-bold">View All Stories</span>
             <ArrowRight size={16} className='!text-white' />
           </Link>
         </motion.div>

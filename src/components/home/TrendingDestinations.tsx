@@ -147,7 +147,7 @@ export default function TrendingDestinations() {
         </div>
 
         {/* View All Button */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.6 }}
@@ -161,7 +161,7 @@ export default function TrendingDestinations() {
             <span className="!text-white font-bungee" style={{ fontWeight:800 }}>View All Experiences</span>
             <ArrowUpRight size={20} className='!text-white' />
           </Link>
-        </motion.div>
+        </motion.div> */}
       </div>
     </section> 
   )

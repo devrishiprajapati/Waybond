@@ -389,7 +389,7 @@ const TripDetails = () => {
 
               <button
                 onClick={handleBookSlot}
-                className="w-full bg-secondary text-white py-4 md:py-6 rounded-2xl font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20 font-bungee"
+                className="w-full bg-secondary text-white py-4 md:py-6 rounded-2xl font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20 font-sans font-bold"
               >
                 Book Your Slot
               </button>
@@ -754,7 +754,7 @@ const TripDetails = () => {
               {/* Book Now Button */}
               <button
                 onClick={handleBookSlot}
-                className="bg-secondary text-white px-4 md:px-8 py-2.5 md:py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap font-bungee"
+                className="bg-secondary text-white px-4 md:px-8 py-2.5 md:py-3 rounded-full font-black text-xs md:text-sm uppercase tracking-wider transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 whitespace-nowrap font-sans font-bold"
               >
                 Book Now
               </button>

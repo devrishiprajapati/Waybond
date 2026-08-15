@@ -122,7 +122,7 @@ const SplashScreen: React.FC = () => {
         </motion.p>
 
         {/* Loading Bar Animation */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.2, duration: 0.5 }}
@@ -141,7 +141,6 @@ const SplashScreen: React.FC = () => {
             ></motion.div>
           </div>
           
-          {/* Loading Text */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: [0.5, 1, 0.5] }}
@@ -154,7 +153,7 @@ const SplashScreen: React.FC = () => {
           >
             Loading Adventure
           </motion.p>
-        </motion.div>
+        </motion.div> */}
 
         {/* Floating Particles */}
         {[...Array(6)].map((_, index) => (

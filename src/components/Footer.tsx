@@ -57,13 +57,13 @@ const Footer = () => {
       
       <section className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20 relative z-10 mb-16 md:mb-20">
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-[1.5rem] md:rounded-[2rem] border border-slate-700 p-6 sm:p-8 md:p-10 shadow-xl">
-          <h2 className="text-xl md:text-2xl font-bold text-slate-100 tracking-tight mb-6 md:mb-8">Events by Category</h2>
+          <h2 className="text-xl md:text-2xl text-slate-100 tracking-tight mb-6 md:mb-8">Events by Category</h2>
           
           {/* Mobile: 2 columns, Desktop: 4 columns */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {categoryGroups.map((group) => (
               <div key={group.title} className="min-w-0">
-                <h3 className="text-secondary text-sm md:text-base font-bold mb-3 md:mb-4">
+                <h3 className="text-secondary text-sm md:text-base font-sans font-bold mb-3 md:mb-4">
                   {group.title}
                 </h3>
                 <ul className="space-y-2 md:space-y-2.5">
@@ -97,7 +97,7 @@ const Footer = () => {
           </p>
         </div>
         <div>
-          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-5 text-secondary">
+          <h4 className="text-[10px] font-sans font-bold uppercase tracking-[0.3em] mb-5 text-secondary">
             Quick Links
           </h4>
           <ul className="space-y-4 text-slate-300 text-xs font-bold uppercase tracking-widest">
@@ -141,7 +141,7 @@ const Footer = () => {
           </ul>
         </div>
         <div>
-          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-5 text-secondary">
+          <h4 className="text-[10px] font-sans font-bold uppercase tracking-[0.3em] mb-5 text-secondary">
             Support & Safety
           </h4>
           <ul className="space-y-4 text-slate-300 text-xs font-bold uppercase tracking-widest">
@@ -187,7 +187,7 @@ const Footer = () => {
           </ul>
         </div>
         <div>
-          <h4 className="text-[10px] font-black uppercase tracking-[0.3em] mb-6 text-secondary">
+          <h4 className="text-[10px] font-sans font-bold uppercase tracking-[0.3em] mb-6 text-secondary">
             Contact
           </h4>
           <ul className="space-y-4 text-slate-300 text-xs font-medium">
@@ -242,7 +242,6 @@ const Footer = () => {
           </div>
         </div>
       </section>
-
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 mt-24 pt-8 border-t border-slate-700 text-center relative z-10">
         <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.3em]">
           © 2026 WayBond Travels. All rights reserved.{" "}

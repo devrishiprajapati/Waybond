@@ -676,7 +676,7 @@ const SignUp = () => {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center active:scale-95 touch-manipulation bg-secondary shadow-secondary/20 text-white sticky bottom-0"
+              className="w-full py-5 rounded-2xl font-sans font-bold text-[10px] uppercase tracking-[0.3em] shadow-xl transition-all flex items-center justify-center active:scale-95 touch-manipulation bg-secondary shadow-secondary/20 text-white sticky bottom-0"
             >
               {submitting ? 'Creating Account' : 'Create Account'}
               <ArrowRight className="ml-2 transition-transform" size={14} />
