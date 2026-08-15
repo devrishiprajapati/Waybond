@@ -208,90 +208,6 @@ export default function Blogs() {
                           transition={{ delay: index * 0.1, duration: 0.4 }}
                           className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-secondary/30 flex flex-col md:flex-row"
                         >
-<<<<<<< HEAD
-<<<<<<< HEAD
-                        {/* Blog Image */}
-                        {blog.youtubeUrl ? (
-                          <a
-                            href={blog.youtubeUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative block"
-                            title={`Open video for ${blog.title}`}
-                          >
-                            <img                                          
-                              src={imageSrc}
-                              alt={blog.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                          </a>
-                        ) : (
-                          <div className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative">
-                            <img
-                              src={imageSrc}
-                              alt={blog.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                          </div>
-                        )}
-
-                        {/* Blog Content */}
-                        <div className="flex-grow p-8 flex flex-col justify-between">
-                          <div>
-                            {/* Category & Read Time */}
-                            <div className="flex items-center justify-between mb-4">
-                              <span className="inline-block bg-secondary text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
-                                {blog.category}
-                              </span>
-                              <div className="flex items-center space-x-1 text-gray-500 text-sm">
-                                <BookOpen size={16} />
-                                <span>{blog.readTime} min read</span>
-                              </div>
-                            </div>
-
-                            {/* Title */}
-                            <h3 className="text-2xl md:text-3xl font-sans font-black text-gray-900 mb-3 group-hover:text-secondary transition-colors duration-300">
-                              {blog.title}
-                            </h3>
-
-                            {/* Excerpt */}
-                            <p className="text-gray-600 leading-relaxed mb-4 line-clamp-2">
-                              {blog.excerpt}
-                            </p>
-
-                            {/* Tags */}
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {blog.tags.map((tag, idx) => (
-                                <span
-                                  key={idx}
-                                  className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-semibold"
-                                >
-                                  #{tag}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* Footer */}
-                          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                            <div className="flex items-center space-x-4 text-sm text-gray-500">
-                              <div className="flex items-center space-x-1">
-                                <Calendar size={16} />
-                                <span>{new Date(blog.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                              </div>
-                              <div className="flex items-center space-x-1">
-                                <User size={16} />
-                                <span>{blog.author}</span>
-                              </div>
-                            </div>
-                            <Link
-                              to={`/blog/${blog.slug}`}
-                              className="inline-flex items-center space-x-2 text-secondary font-bold hover:text-secondary/80 transition-colors group/link"
-=======
-=======
->>>>>>> 6ca6e66c686c6779e9dc9b0568d3819d401ea8fe
                           {/* Blog Image */}
                           {blog.youtubeUrl ? (
                             <a
@@ -300,16 +216,10 @@ export default function Blogs() {
                               rel="noopener noreferrer"
                               className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative block"
                               title={`Open video for ${blog.title}`}
-<<<<<<< HEAD
->>>>>>> 6ca6e66c686c6779e9dc9b0568d3819d401ea8fe
-=======
->>>>>>> 6ca6e66c686c6779e9dc9b0568d3819d401ea8fe
-                            >
-                              <img
-                                src={imageSrc}
+                            >   src={imageSrc}
                                 alt={blog.title}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                              />
+                              
                               <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                             </a>
                           ) : (
