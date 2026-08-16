@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { MapPin, Clock, ArrowLeft, Package } from 'lucide-react'
+import { getUser } from '../../lib/auth'
 
 const BookedTripsPage = () => {
   const [bookedTrips, setBookedTrips] = useState<any[]>([])
@@ -10,13 +11,11 @@ const BookedTripsPage = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user')
-    if (!savedUser) {
+    const parsedUser = getUser()
+    if (!parsedUser) {
       navigate('/login')
       return
     }
-
-    const parsedUser = JSON.parse(savedUser)
 
     // Verify that the userId in URL matches the logged-in user's database ID
     if (!parsedUser.id || (userId && userId !== parsedUser.id)) {

@@ -145,8 +145,7 @@ const TripDetails = () => {
     haptics.medium()
 
     // Check if user is logged in
-    const savedUser = localStorage.getItem('user')
-    if (!savedUser) {
+    if (!isLoggedIn()) {
       navigate(`/login?redirect=${encodeURIComponent(`/trip/${slug}`)}`)
       return
     }

@@ -12,16 +12,15 @@ import {
   MapPin,
   MessageCircle,
   Package,
-  Shield,
   Star,
   User
 } from 'lucide-react'
 import { registerUser } from '../lib/adminStorage'
+import { getUser, logout } from '../lib/auth'
 import { useWishlist } from '../lib/wishlist'
 
 const UserDashboard = () => {
   const [user, setUser] = useState<any>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
   const [bookedTrips, setBookedTrips] = useState<any[]>([])
   const [cancelledTrips, setCancelledTrips] = useState<any[]>([])
   const [testimonials, setTestimonials] = useState<any[]>([])
@@ -35,13 +34,12 @@ const UserDashboard = () => {
   const { count: wishlistCount } = useWishlist()
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user')
-    if (!savedUser) {
+    const parsedUser = getUser()
+    if (!parsedUser) {
       navigate('/login')
       return
     }
 
-    const parsedUser = JSON.parse(savedUser)
     if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
       navigate('/login')
       return
@@ -54,7 +52,6 @@ const UserDashboard = () => {
 
     registerUser(parsedUser)
     setUser(parsedUser)
-    setIsAdmin(sessionStorage.getItem('isAdmin') === 'true')
 
     const loadDashboard = async () => {
       try {
@@ -96,8 +93,7 @@ const UserDashboard = () => {
   }, [bookedTrips, testimonials, cancelledTrips])
 
   const handleLogout = () => {
-    localStorage.removeItem('user')
-    sessionStorage.removeItem('isAdmin')
+    logout()
     navigate('/login')
   }
 
@@ -211,15 +207,6 @@ const UserDashboard = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
-            {isAdmin && (
-              <Link
-                to="/admin/dashboard"
-                className="flex items-center gap-2 bg-secondary text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-secondary/80 transition-all"
-              >
-                <Shield size={14} />
-                <span>Admin Panel</span>
-              </Link>
-            )}
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-white/50 hover:text-red-300 transition-colors font-black text-[10px] uppercase tracking-widest"
