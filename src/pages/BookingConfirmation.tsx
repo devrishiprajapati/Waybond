@@ -173,50 +173,6 @@ const BookingConfirmation = () => {
         <title>Booking Confirmation - {trip.title} | WAYBOND</title>
       </Helmet>
 
-<<<<<<< HEAD
-=======
-      {/* Success Popup */}
-      <AnimatePresence>
-        {showSuccessPopup && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
-            >
-              {/* Success Icon */}
-              <div className="flex justify-center mb-6">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                >
-                  <CheckCircle size={80} className="text-green-500" strokeWidth={2} />
-                </motion.div>
-              </div>
-
-              {/* Content */}
-              <div className="text-center space-y-3">
-                <h2 className="text-2xl font-black text-gray-900 uppercase tracking-wide">
-                  BOOKING DETAILS
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  Booking Details Registered Successfully
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
->>>>>>> 3612ae16f1b8c13c43b786f15be1eb499421c4eb
       <div className="min-h-screen bg-gray-50 pt-24 pb-20">
         <div className="max-w-2xl mx-auto px-4">
           {/* Back Button */}
