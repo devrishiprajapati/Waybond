@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Lock, ShieldCheck, ArrowRight } from 'lucide-react'
+import { Lock, ShieldCheck, ArrowRight, Eye, EyeOff } from 'lucide-react'
 
 const AdminLogin = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
 
   if (sessionStorage.getItem('isAdmin') === 'true') {
@@ -72,16 +73,26 @@ const AdminLogin = () => {
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Access Key</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter credentials..."
-                autoComplete="current-password"
-                /* text-base (16px) prevents iOS Safari/Chrome auto-zoom on focus */
-                className="w-full bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-2xl text-slate-800 focus:border-primary outline-none transition-colors placeholder:text-slate-400 text-base"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter credentials..."
+                  autoComplete="current-password"
+                  /* text-base (16px) prevents iOS Safari/Chrome auto-zoom on focus */
+                  className="w-full bg-slate-50 border border-slate-200 p-4 sm:p-5 pr-12 rounded-2xl text-slate-800 focus:border-primary outline-none transition-colors placeholder:text-slate-400 text-base"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
             {error && (
