@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Users, MapPin, Clock, Check, IndianRupee, CheckCircle, X } from 'lucide-react'
+import { Calendar, Users, MapPin, Clock, Check, IndianRupee, CheckCircle, X, ArrowLeft } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
@@ -228,6 +228,14 @@ const BookingConfirmation = () => {
       
       <div className="min-h-screen bg-gray-50 pt-24 pb-20">
         <div className="max-w-2xl mx-auto px-4">
+          {/* Back Button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 font-semibold mb-6 transition-colors"
+          >
+            <ArrowLeft size={20} className="mr-2" /> Back
+          </button>
+
           <h1 className="text-3xl font-black text-gray-900 mb-2 text-center">Booking Details</h1>
           <p className="text-center text-gray-600 mb-8">Review your booking and proceed to payment</p>
 
