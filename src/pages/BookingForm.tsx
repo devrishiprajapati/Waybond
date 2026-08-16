@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Users, Check, Calendar } from 'lucide-react'
+import { ArrowLeft, Users } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { getTripById } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
@@ -16,6 +16,7 @@ interface TravellerInfo {
   dateOfBirth: string
   state: string
   city: string
+  isEligible?: boolean
 }
 
 const BookingForm = () => {
@@ -33,6 +34,21 @@ const BookingForm = () => {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
+
+  // Calculate age from date of birth
+  const calculateAge = (birthDate: string): number => {
+    if (!birthDate) return 0
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    
+    return age
+  }
 
   useEffect(() => {
     if (tripId) {
@@ -62,8 +78,30 @@ const BookingForm = () => {
 
   const handleTravellerChange = (index: number, field: keyof TravellerInfo, value: string) => {
     const updated = [...travellers]
-    updated[index][field] = value
+    
+    // Number validation for specific fields
+    if (field === 'phone' || field === 'emergencyContact') {
+      // Allow only digits and limit to 10 characters
+      const numericValue = value.replace(/\D/g, '').slice(0, 10);
+      (updated[index] as any)[field] = numericValue
+    } else if (field === 'dateOfBirth') {
+      // When date of birth changes, calculate age and check eligibility
+      (updated[index] as any)[field] = value
+      const age = calculateAge(value)
+      updated[index].age = age > 0 ? age.toString() : ''
+      updated[index].isEligible = age <= 40 && age > 0
+    } else {
+      (updated[index] as any)[field] = value
+    }
+    
     setTravellers(updated)
+    
+    // Clear error for this field when user starts typing
+    if (errors[`${field}_${index}`]) {
+      const newErrors = { ...errors }
+      delete newErrors[`${field}_${index}`]
+      setErrors(newErrors)
+    }
   }
 
   const validateForm = () => {
@@ -71,21 +109,40 @@ const BookingForm = () => {
 
     travellers.forEach((traveller, idx) => {
       if (!traveller.name.trim()) newErrors[`name_${idx}`] = 'Name is required'
-      if (!traveller.age.trim() || isNaN(Number(traveller.age)) || Number(traveller.age) < 1) {
-        newErrors[`age_${idx}`] = 'Valid age is required'
+      
+      // Date of birth validation
+      if (!traveller.dateOfBirth.trim()) {
+        newErrors[`dob_${idx}`] = 'Date of birth is required'
+      } else {
+        const age = calculateAge(traveller.dateOfBirth)
+        if (age <= 0) {
+          newErrors[`dob_${idx}`] = 'Please enter a valid date of birth'
+        } else if (age > 40) {
+          newErrors[`dob_${idx}`] = 'Not eligible (Age must be 40 or below)'
+        }
       }
-      if (!traveller.phone.trim() || !/^\d{10}$/.test(traveller.phone)) {
-        newErrors[`phone_${idx}`] = 'Valid 10-digit phone number is required'
+      
+      // Phone validation
+      if (!traveller.phone.trim()) {
+        newErrors[`phone_${idx}`] = 'Phone number is required'
+      } else if (!/^\d{10}$/.test(traveller.phone)) {
+        newErrors[`phone_${idx}`] = 'Phone number must be exactly 10 digits'
+      } else if (!/^[6-9]\d{9}$/.test(traveller.phone)) {
+        newErrors[`phone_${idx}`] = 'Please enter a valid Indian mobile number'
       }
+      
+      // Emergency contact validation
       if (!traveller.emergencyContact.trim()) {
-        newErrors[`emergencyContact_${idx}`] = 'Emergency contact number is required'
+        newErrors[`emergencyContact_${idx}`] = 'Emergency contact is required'
       } else if (!/^\d{10}$/.test(traveller.emergencyContact)) {
-        newErrors[`emergencyContact_${idx}`] = 'Valid 10-digit emergency contact number is required'
+        newErrors[`emergencyContact_${idx}`] = 'Emergency contact must be exactly 10 digits'
+      } else if (!/^[6-9]\d{9}$/.test(traveller.emergencyContact)) {
+        newErrors[`emergencyContact_${idx}`] = 'Please enter a valid Indian mobile number'
       }
+      
       if (!traveller.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(traveller.email)) {
         newErrors[`email_${idx}`] = 'Valid email is required'
       }
-      if (!traveller.dateOfBirth.trim()) newErrors[`dob_${idx}`] = 'Date of birth is required'
       if (!traveller.state.trim()) newErrors[`state_${idx}`] = 'State is required'
       if (!traveller.city.trim()) newErrors[`city_${idx}`] = 'City is required'
     })
@@ -123,18 +180,20 @@ const BookingForm = () => {
         })
       })
 
-      // Navigate to confirmation page
-      const bookingData = {
-        tripId,
-        trip,
-        departure,
-        travellers,
-        numTravellers
-      }
-      navigate('/booking-confirmation', { state: bookingData })
+      // Navigate directly to booking confirmation page
+      navigate('/booking-confirmation', {
+        state: {
+          trip,
+          departure,
+          travellers,
+          numTravellers
+        }
+      })
+      haptics.success()
     } catch (error) {
       console.error('Booking submission failed:', error)
       alert('Unable to process booking. Please try again.')
+      haptics.error()
     } finally {
       setSubmitting(false)
     }
@@ -177,7 +236,7 @@ const BookingForm = () => {
                     onClick={() => handleTravellerCountChange(num)}
                     className={`w-12 h-12 rounded-full font-black text-lg transition-all ${numTravellers === num
                         ? 'bg-secondary text-white shadow-lg scale-110'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-gray-100 text-gray-600 hover:bg-secondary/10 hover:text-secondary'
                       }`}
                   >
                     {num}
@@ -215,21 +274,8 @@ const BookingForm = () => {
                     )}
                   </div>
 
-                  {/* Age & Gender */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <input
-                        type="text"
-                        placeholder="Age"
-                        value={traveller.age}
-                        onChange={e => handleTravellerChange(idx, 'age', e.target.value)}
-                        className={`w-full px-4 py-3 rounded-xl border ${errors[`age_${idx}`] ? 'border-red-400' : 'border-gray-300'
-                          } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
-                      />
-                      {errors[`age_${idx}`] && (
-                        <p className="text-red-500 text-xs mt-1 ml-1">{errors[`age_${idx}`]}</p>
-                      )}
-                    </div>
+                  {/* Gender */}
+                  <div>
                     <select
                       value={traveller.gender}
                       onChange={e => handleTravellerChange(idx, 'gender', e.target.value)}
@@ -241,6 +287,41 @@ const BookingForm = () => {
                     </select>
                   </div>
 
+                  {/* Date of Birth with Age Display */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      Date of Birth *
+                    </label>
+                    <input
+                      type="date"
+                      value={traveller.dateOfBirth}
+                      onChange={e => handleTravellerChange(idx, 'dateOfBirth', e.target.value)}
+                      max={new Date().toISOString().split('T')[0]}
+                      className={`w-full px-4 py-3 rounded-xl border ${errors[`dob_${idx}`] ? 'border-red-400' : 'border-gray-300'
+                        } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
+                    />
+                    {traveller.dateOfBirth && traveller.age && (
+                      <div className="mt-2 flex items-center justify-between">
+                        <p className="text-sm text-gray-600">
+                          Age: <span className="font-bold text-gray-900">{traveller.age} years</span>
+                        </p>
+                        {traveller.isEligible === false && (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide bg-red-100 text-red-600 border border-red-200">
+                            Not Eligible
+                          </span>
+                        )}
+                        {traveller.isEligible === true && (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-wide bg-green-100 text-green-600 border border-green-200">
+                            Eligible
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {errors[`dob_${idx}`] && (
+                      <p className="text-red-500 text-xs mt-1 ml-1">{errors[`dob_${idx}`]}</p>
+                    )}
+                  </div>
+
                   {/* Phone with country code */}
                   <div>
                     <div className="flex gap-2">
@@ -249,15 +330,21 @@ const BookingForm = () => {
                       </div>
                       <input
                         type="tel"
-                        placeholder="Mobile No."
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        placeholder="Mobile No. (10 digits)"
                         value={traveller.phone}
                         onChange={e => handleTravellerChange(idx, 'phone', e.target.value)}
+                        maxLength={10}
                         className={`flex-1 px-4 py-3 rounded-xl border ${errors[`phone_${idx}`] ? 'border-red-400' : 'border-gray-300'
                           } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
                       />
                     </div>
                     {errors[`phone_${idx}`] && (
                       <p className="text-red-500 text-xs mt-1 ml-1">{errors[`phone_${idx}`]}</p>
+                    )}
+                    {!errors[`phone_${idx}`] && traveller.phone && traveller.phone.length < 10 && (
+                      <p className="text-gray-400 text-xs mt-1 ml-1">{traveller.phone.length}/10 digits</p>
                     )}
                   </div>
 
@@ -269,15 +356,21 @@ const BookingForm = () => {
                       </div>
                       <input
                         type="tel"
-                        placeholder="Emergency Contact No."
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        placeholder="Emergency Contact No. (10 digits)"
                         value={traveller.emergencyContact}
                         onChange={e => handleTravellerChange(idx, 'emergencyContact', e.target.value)}
+                        maxLength={10}
                         className={`flex-1 px-4 py-3 rounded-xl border ${errors[`emergencyContact_${idx}`] ? 'border-red-400' : 'border-gray-300'
                           } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
                       />
                     </div>
                     {errors[`emergencyContact_${idx}`] && (
                       <p className="text-red-500 text-xs mt-1 ml-1">{errors[`emergencyContact_${idx}`]}</p>
+                    )}
+                    {!errors[`emergencyContact_${idx}`] && traveller.emergencyContact && traveller.emergencyContact.length < 10 && (
+                      <p className="text-gray-400 text-xs mt-1 ml-1">{traveller.emergencyContact.length}/10 digits</p>
                     )}
                   </div>
 
@@ -293,20 +386,6 @@ const BookingForm = () => {
                     />
                     {errors[`email_${idx}`] && (
                       <p className="text-red-500 text-xs mt-1 ml-1">{errors[`email_${idx}`]}</p>
-                    )}
-                  </div>
-
-                  {/* Date of Birth */}
-                  <div>
-                    <input
-                      type="date"
-                      value={traveller.dateOfBirth}
-                      onChange={e => handleTravellerChange(idx, 'dateOfBirth', e.target.value)}
-                      className={`w-full px-4 py-3 rounded-xl border ${errors[`dob_${idx}`] ? 'border-red-400' : 'border-gray-300'
-                        } focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none transition-colors`}
-                    />
-                    {errors[`dob_${idx}`] && (
-                      <p className="text-red-500 text-xs mt-1 ml-1">{errors[`dob_${idx}`]}</p>
                     )}
                   </div>
 

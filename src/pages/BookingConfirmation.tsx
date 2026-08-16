@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Calendar, Users, MapPin, Clock, Check, IndianRupee } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Calendar, Users, MapPin, Clock, Check, IndianRupee, CheckCircle, X, ArrowLeft } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
@@ -33,12 +33,22 @@ const BookingConfirmation = () => {
   const bookingData = location.state as any
 
   const [paying, setPaying] = useState(false)
+  const [showSuccessPopup, setShowSuccessPopup] = useState(true)
 
   useEffect(() => {
     if (!bookingData) {
       navigate('/discover')
     }
   }, [bookingData, navigate])
+
+  // Auto-hide popup after 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSuccessPopup(false)
+    }, 4000)
+    
+    return () => clearTimeout(timer)
+  }, [])
 
   if (!bookingData) return null
 
@@ -163,19 +173,59 @@ const BookingConfirmation = () => {
         <title>Booking Confirmation - {trip.title} | WAYBOND</title>
       </Helmet>
 
+<<<<<<< HEAD
+=======
+      {/* Success Popup */}
+      <AnimatePresence>
+        {showSuccessPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
+            >
+              {/* Success Icon */}
+              <div className="flex justify-center mb-6">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                >
+                  <CheckCircle size={80} className="text-green-500" strokeWidth={2} />
+                </motion.div>
+              </div>
+
+              {/* Content */}
+              <div className="text-center space-y-3">
+                <h2 className="text-2xl font-black text-gray-900 uppercase tracking-wide">
+                  BOOKING DETAILS
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  Booking Details Registered Successfully
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+>>>>>>> 3612ae16f1b8c13c43b786f15be1eb499421c4eb
       <div className="min-h-screen bg-gray-50 pt-24 pb-20">
         <div className="max-w-2xl mx-auto px-4">
-          {/* Success Header */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', duration: 0.5 }}
-            className="flex items-center justify-center mb-8"
+          {/* Back Button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 font-semibold mb-6 transition-colors"
           >
-            <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
-              <Check size={40} className="text-white" strokeWidth={3} />
-            </div>
-          </motion.div>
+            <ArrowLeft size={20} className="mr-2" /> Back
+          </button>
 
           <h1 className="text-3xl font-black text-gray-900 mb-2 text-center">Booking Details</h1>
           <p className="text-center text-gray-600 mb-8">Review your booking and proceed to payment</p>

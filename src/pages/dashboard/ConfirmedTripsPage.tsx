@@ -86,7 +86,7 @@ const ConfirmedTripsPage = () => {
                 <p className="text-white/50 font-medium mb-8">Complete payment to confirm your booking!</p>
                 <button
                   onClick={() => navigate('/discover')}
-                  className="bg-secondary text-white h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] hover:bg-white hover:text-slate-800 transition-all"
+                  className="bg-secondary text-white h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] hover:bg-secondary/80 transition-all"
                 >
                   Browse Trips
                 </button>

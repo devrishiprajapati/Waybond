@@ -525,7 +525,7 @@ const Wishlist = () => {
                     <Link
                       to={`/trip/${createSlug(trip.title)}`}
                       onClick={() => haptics.medium()}
-                      className="inline-flex justify-center items-center gap-1 rounded-full bg-white/10 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-colors"
+                      className="inline-flex justify-center items-center gap-1 rounded-full bg-white/10 px-2 py-2 text-[8px] sm:text-[9px] font-black uppercase tracking-wider text-white hover:bg-white/30 hover:border-white/50 transition-colors"
                       title="More details"
                     >
                       <CircleHelp size={12} />

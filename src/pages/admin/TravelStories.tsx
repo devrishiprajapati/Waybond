@@ -190,7 +190,7 @@ export default function AdminTravelStories() {
                 </div>
                 <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-4">
                   <span className="text-[9px] text-white/35 font-black uppercase tracking-[0.15em]">{story.author}</span>
-                  <button onClick={() => openEditor(story)} className="h-11 px-4 rounded-xl bg-secondary text-white hover:bg-white hover:text-slate-800 transition-all flex items-center gap-2 font-black text-[10px] uppercase tracking-[0.12em] font-bungee" title={`Edit ${story.title}`}><Edit2 size={15} /> Edit</button>
+                  <button onClick={() => openEditor(story)} className="h-11 px-4 rounded-xl bg-secondary text-white hover:bg-secondary/80 transition-all flex items-center gap-2 font-black text-[10px] uppercase tracking-[0.12em] font-bungee" title={`Edit ${story.title}`}><Edit2 size={15} /> Edit</button>
                 </div>
               </div>
             </article>

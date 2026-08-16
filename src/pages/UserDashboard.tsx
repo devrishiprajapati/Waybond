@@ -214,7 +214,7 @@ const UserDashboard = () => {
             {isAdmin && (
               <Link
                 to="/admin/dashboard"
-                className="flex items-center gap-2 bg-white text-slate-800 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-secondary hover:text-white transition-all"
+                className="flex items-center gap-2 bg-secondary text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-secondary/80 transition-all"
               >
                 <Shield size={14} />
                 <span>Admin Panel</span>
@@ -390,7 +390,7 @@ const UserDashboard = () => {
 
                     <button
                       type="submit"
-                      className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-slate-800 transition-all"
+                      className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-secondary/80 transition-all"
                     >
                       Publish Testimonial
                     </button>
@@ -501,7 +501,7 @@ const UserDashboard = () => {
                         <div className="flex flex-wrap gap-3">
                           <Link
                             to={`/trip/${trip.id}`}
-                            className="bg-secondary text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] hover:bg-white hover:text-slate-800 transition-all"
+                            className="bg-secondary text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] hover:bg-secondary/80 transition-all"
                           >
                             View Trip Details
                           </Link>
@@ -522,7 +522,7 @@ const UserDashboard = () => {
                             }}
                             disabled={trip.status !== 'Confirmed'}
                             className={`h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border transition-all ${trip.status === 'Confirmed'
-                              ? 'bg-white/5 text-white border-white/10 hover:bg-white hover:text-slate-800 cursor-pointer'
+                              ? 'bg-white/5 text-white border-white/10 hover:bg-white/20 hover:border-white/30 cursor-pointer'
                               : 'bg-white/5 text-white/30 border-white/10 cursor-not-allowed opacity-50'
                               }`}
                           >
@@ -599,7 +599,7 @@ const UserDashboard = () => {
                         <div className="flex flex-wrap gap-3">
                           <Link
                             to={`/trip/${trip.id}`}
-                            className="bg-white/5 text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-white/10 hover:bg-white hover:text-slate-800 transition-all"
+                            className="bg-white/5 text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-white/10 hover:bg-white/20 hover:border-white/30 transition-all"
                           >
                             View Trip Details
                           </Link>
@@ -672,7 +672,7 @@ const UserDashboard = () => {
 
                   <button
                     type="submit"
-                    className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-slate-800 transition-all"
+                    className="w-full bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] hover:bg-secondary/80 transition-all"
                   >
                     Publish Testimonial
                   </button>

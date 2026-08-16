@@ -160,19 +160,19 @@ const AdminDashboard = () => {
           {/* <div className="flex flex-wrap gap-3">
             <Link
               to="/admin/hero"
-              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all font-bungee"
+              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white/20 hover:border-white/30 transition-all font-bungee"
             >
               <ImageIcon size={16} /> Edit Trending Cards
             </Link>
             <Link
               to="/admin/testimonials"
-              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all font-bungee"
+              className="h-12 px-6 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white/20 hover:border-white/30 transition-all font-bungee"
             >
               <MessageSquareText size={16} /> Testimonials
             </Link>
             <Link
               to="/admin/new"
-              className="h-12 px-6 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-white hover:text-slate-800 transition-all shadow-xl shadow-secondary/20 font-bungee"
+              className="h-12 px-6 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 hover:bg-secondary/80 transition-all shadow-xl shadow-secondary/20 font-bungee"
             >
               <Plus size={16} /> Add Expedition
             </Link>
@@ -271,14 +271,14 @@ const AdminDashboard = () => {
               <div className="flex items-center gap-3 xl:ml-auto">
                 <Link
                   to={`/trip/${trip.id}`}
-                  className="h-12 px-5 rounded-2xl bg-white/5 text-white border border-white/10 hover:bg-white hover:text-slate-800 transition-all flex items-center justify-center"
+                  className="h-12 px-5 rounded-2xl bg-white/5 text-white border border-white/10 hover:bg-white/20 hover:border-white/30 transition-all flex items-center justify-center"
                   title="Preview trip"
                 >
                   <BarChart3 size={17} />
                 </Link>
                 <Link
                   to={`/admin/edit/${trip.id}`}
-                  className="h-12 px-5 rounded-2xl bg-secondary text-white hover:bg-white hover:text-slate-800 transition-all flex items-center justify-center"
+                  className="h-12 px-5 rounded-2xl bg-secondary text-white hover:bg-secondary/80 transition-all flex items-center justify-center"
                   title="Edit trip"
                 >
                   <Edit2 size={17} />

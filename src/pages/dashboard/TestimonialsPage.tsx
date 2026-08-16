@@ -85,7 +85,7 @@ const TestimonialsPage = () => {
                 <p className="text-white/50 font-medium mb-8">Share your travel story and help inspire others!</p>
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="bg-secondary text-white h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] hover:bg-white hover:text-slate-800 transition-all"
+                  className="bg-secondary text-white h-12 px-8 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] hover:bg-secondary/80 transition-all"
                 >
                   Add a Testimonial
                 </button>

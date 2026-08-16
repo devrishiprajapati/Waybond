@@ -278,7 +278,7 @@ export default function FeaturedPackages() {
                       <Link 
                         to={`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`} 
                         onClick={() => haptics.medium()} 
-                        className="w-full inline-flex justify-center items-center gap-2 rounded-full bg-secondary px-4 py-3 text-[10px] font-black uppercase tracking-wider text-white hover:bg-white hover:text-slate-800 transition-all shadow-lg hover:shadow-xl" 
+                        className="w-full inline-flex justify-center items-center gap-2 rounded-full bg-secondary px-4 py-3 text-[10px] font-black uppercase tracking-wider text-white hover:bg-secondary/80 transition-all shadow-lg hover:shadow-xl" 
                         title="Explore package"
                       >
                         <span>Explore</span>
