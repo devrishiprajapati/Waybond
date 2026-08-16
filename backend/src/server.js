@@ -448,6 +448,9 @@ app.get('/api/users/:id/dashboard', async (req, res, next) => {
 
 app.post('/api/users/:id/bookings', async (req, res, next) => {
   try {
+    if (req.params.id === 'waybond-admin') {
+      return res.status(403).json({ message: 'Admin accounts cannot make bookings.' })
+    }
     const booking = await prisma.booking.create({ data: { userId: req.params.id, payload: req.body } })
     res.status(201).json(toBooking(booking))
   } catch (error) { next(error) }

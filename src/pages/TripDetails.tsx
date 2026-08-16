@@ -206,7 +206,7 @@ const TripDetails = () => {
                 <Instagram size={20} className="text-white/80" />
               </button>
               <a
-                href={getWhatsAppLink(`Hi! I'm interested in the ${trip.title}`)}
+                href='/faqs'
                 target="_blank" rel="noopener noreferrer"
                 onClick={() => haptics.medium()}
                 className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 shadow-xl transition-colors hover:border-secondary hover:bg-secondary sm:h-auto sm:w-auto sm:rounded-2xl sm:p-4 group"
