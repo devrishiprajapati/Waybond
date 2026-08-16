@@ -41,6 +41,15 @@ const BookingConfirmation = () => {
     }
   }, [bookingData, navigate])
 
+  // Auto-hide popup after 2 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSuccessPopup(false)
+    }, 4000)
+    
+    return () => clearTimeout(timer)
+  }, [])
+
   if (!bookingData) return null
 
   const { trip, departure, travellers, numTravellers } = bookingData
@@ -176,17 +185,6 @@ const BookingConfirmation = () => {
               transition={{ type: "spring", duration: 0.5 }}
               className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
             >
-              {/* Close button */}
-              <button
-                onClick={() => {
-                  setShowSuccessPopup(false)
-                  haptics.light()
-                }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X size={24} />
-              </button>
-
               {/* Success Icon */}
               <div className="flex justify-center mb-6">
                 <motion.div
@@ -206,20 +204,6 @@ const BookingConfirmation = () => {
                 <p className="text-gray-600 text-sm">
                   Booking Details Registered Successfully
                 </p>
-              </div>
-
-              {/* Action Button */}
-              <div className="mt-8">
-                <button
-                  onClick={() => {
-                    setShowSuccessPopup(false)
-                    navigate('/')
-                    haptics.light()
-                  }}
-                  className="w-full bg-secondary hover:bg-secondary/90 text-white py-4 rounded-full font-black text-base uppercase tracking-wide shadow-xl shadow-secondary/30 transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-95"
-                >
-                  Back to Home
-                </button>
               </div>
             </motion.div>
           </motion.div>
