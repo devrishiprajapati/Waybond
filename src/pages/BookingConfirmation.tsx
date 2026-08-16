@@ -31,7 +31,7 @@ const BookingConfirmation = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const bookingData = location.state as any
-  
+
   const [paying, setPaying] = useState(false)
   const [showSuccessPopup, setShowSuccessPopup] = useState(true)
 
@@ -71,12 +71,16 @@ const BookingConfirmation = () => {
     try {
       const user = JSON.parse(savedUser)
       if (!user.id) throw new Error('User ID not found')
+      if (user.id === 'waybond-admin') {
+        alert('Admin accounts cannot make bookings. Please log in with a regular user account.')
+        return
+      }
 
       // Create unique booking ID
       const timestamp = Date.now().toString(36).toUpperCase()
       const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase()
       const uniqueBookingId = `WB-${timestamp}-${randomSuffix}`
-      
+
       // Create booking payload
       const bookingPayload = {
         id: trip.id,
@@ -108,7 +112,7 @@ const BookingConfirmation = () => {
 
       if (!response.ok) throw new Error('Failed to create booking')
       const booking = await response.json()
-      
+
       const amount = Math.round(totalAmount * 100)
       if (!Number.isInteger(amount) || amount < 100) throw new Error('Invalid amount')
 
@@ -129,7 +133,7 @@ const BookingConfirmation = () => {
         name: 'WayBond',
         description: trip.title,
         order_id: order.orderId,
-        prefill: { 
+        prefill: {
           name: travellers[0]?.name || user.name,
           email: travellers[0]?.email || user.email,
           contact: travellers[0]?.phone || ''
@@ -169,6 +173,8 @@ const BookingConfirmation = () => {
         <title>Booking Confirmation - {trip.title} | WAYBOND</title>
       </Helmet>
 
+<<<<<<< HEAD
+=======
       {/* Success Popup */}
       <AnimatePresence>
         {showSuccessPopup && (
@@ -210,6 +216,7 @@ const BookingConfirmation = () => {
         )}
       </AnimatePresence>
       
+>>>>>>> 3612ae16f1b8c13c43b786f15be1eb499421c4eb
       <div className="min-h-screen bg-gray-50 pt-24 pb-20">
         <div className="max-w-2xl mx-auto px-4">
           {/* Back Button */}
@@ -253,10 +260,10 @@ const BookingConfirmation = () => {
               <div className="flex items-center text-gray-700">
                 <Calendar size={18} className="mr-3 text-gray-400" />
                 <span className="font-semibold">
-                  {departure ? new Date(departure).toLocaleDateString('en-IN', { 
-                    day: 'numeric', 
-                    month: 'long', 
-                    year: 'numeric' 
+                  {departure ? new Date(departure).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
                   }) : 'Date TBD'}
                 </span>
               </div>
