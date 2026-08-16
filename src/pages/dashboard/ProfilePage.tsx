@@ -17,6 +17,7 @@ import {
   Star
 } from 'lucide-react'
 import { haptics } from '../../lib/haptics'
+import { getUser, setUser as persistUser } from '../../lib/auth'
 import { useWishlist } from '../../lib/wishlist'
 
 interface UserData {
@@ -43,13 +44,11 @@ const ProfilePage = () => {
   const { count: wishlistCount } = useWishlist()
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user')
-    if (!savedUser) {
+    const parsedUser = getUser()
+    if (!parsedUser) {
       navigate('/login')
       return
     }
-
-    const parsedUser = JSON.parse(savedUser)
 
     // Verify that the userId in URL matches the logged-in user
     if (!parsedUser.id || (userId && userId !== parsedUser.id)) {
@@ -57,8 +56,8 @@ const ProfilePage = () => {
       return
     }
 
-    setUser(parsedUser)
-    setFormData(parsedUser)
+    setUser(parsedUser as UserData)
+    setFormData(parsedUser as UserData)
   }, [navigate, userId])
 
   const handleInputChange = (field: keyof UserData, value: string) => {
@@ -116,7 +115,7 @@ const ProfilePage = () => {
     }
 
     haptics.success()
-    localStorage.setItem('user', JSON.stringify(formData))
+    persistUser(formData)
     setUser(formData)
     setIsEditing(false)
     setSuccess('Profile updated successfully!')

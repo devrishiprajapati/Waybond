@@ -3,7 +3,7 @@ import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Compass, Phone, MapPin, AlertCircle, Upload, Droplet, Eye, EyeOff, Check, X } from 'lucide-react'
 import { haptics } from '../lib/haptics'
-import { getUser } from '../lib/auth'
+import { getUser, setUser } from '../lib/auth'
 
 const SignUp = () => {
   const [fullName, setFullName] = useState('')
@@ -29,7 +29,7 @@ const SignUp = () => {
   const existingUser = getUser()
 
   if (existingUser) {
-    return <Navigate to={sessionStorage.getItem('isAdmin') === 'true' ? '/admin/dashboard' : '/dashboard'} replace />
+    return <Navigate to="/dashboard" replace />
   }
 
   // Validation functions
@@ -204,7 +204,7 @@ const SignUp = () => {
       if (!response.ok) throw new Error(data.message || 'Unable to create account.')
       if (!data.user) throw new Error('Signup service returned an incomplete response. Restart the backend and try again.')
       haptics.success()
-      localStorage.setItem('user', JSON.stringify(data.user))
+      setUser(data.user)
       navigate('/dashboard')
     } catch (submitError) {
       haptics.error()

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Mail, Search, UserRound, UsersRound } from 'lucide-react'
 import { getAllRegisteredUsers, registerUser, RegisteredUser } from '../../lib/adminStorage'
+import { getUser } from '../../lib/auth'
 
 const formatDate = (value: string) => new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
 
@@ -15,10 +16,8 @@ export default function AdminUsers() {
       navigate('/admin/login')
       return
     }
-    try {
-      const currentUser = localStorage.getItem('user')
-      if (currentUser) registerUser(JSON.parse(currentUser))
-    } catch { /* Ignore malformed local user data. */ }
+    const currentUser = getUser()
+    if (currentUser) registerUser(currentUser)
     getAllRegisteredUsers().then(setUsers)
   }, [navigate])
 

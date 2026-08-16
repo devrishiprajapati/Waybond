@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Users, MapPin, Clock, Check, IndianRupee, CheckCircle, X, ArrowLeft } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { haptics } from '../lib/haptics'
-import { isLoggedIn } from '../lib/auth'
+import { getUser } from '../lib/auth'
 
 declare global {
   interface Window {
@@ -62,19 +62,14 @@ const BookingConfirmation = () => {
     haptics.medium()
 
     // Check if user is logged in
-    const savedUser = localStorage.getItem('user')
-    if (!savedUser) {
+    const user = getUser()
+    if (!user) {
       navigate(`/login?redirect=${encodeURIComponent('/booking-confirmation')}`)
       return
     }
 
     try {
-      const user = JSON.parse(savedUser)
       if (!user.id) throw new Error('User ID not found')
-      if (user.id === 'waybond-admin') {
-        alert('Admin accounts cannot make bookings. Please log in with a regular user account.')
-        return
-      }
 
       // Create unique booking ID
       const timestamp = Date.now().toString(36).toUpperCase()

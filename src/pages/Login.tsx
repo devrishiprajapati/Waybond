@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { haptics } from '../lib/haptics'
 import { registerUser } from '../lib/adminStorage'
-import { getUser } from '../lib/auth'
+import { getUser, setUser } from '../lib/auth'
 
 const Login = () => {
     const [email, setEmail] = useState('')
@@ -80,7 +80,7 @@ const Login = () => {
             if (!data.user) throw new Error('Authentication service returned an incomplete response. Restart the backend and try again.')
             haptics.success()
             const registeredUser = registerUser(data.user)
-            localStorage.setItem('user', JSON.stringify({ ...data.user, name: registeredUser.name }))
+            setUser({ ...data.user, name: registeredUser.name })
             navigate(redirectTo)
         } catch (requestError) {
             haptics.error()

@@ -25,7 +25,6 @@ const AdminLogin = () => {
       const data = await response.json()
       if (!response.ok) throw new Error(data.message || 'Unable to authorize')
       sessionStorage.setItem('isAdmin', 'true')
-      localStorage.setItem('user', JSON.stringify(data.user))
       navigate('/admin/dashboard')
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Invalid expedition credentials')
