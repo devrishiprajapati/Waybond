@@ -238,7 +238,7 @@ const AllTripsPage = () => {
                       <div className="flex flex-wrap gap-3">
                         <button
                           onClick={() => navigate(`/trip/${trip.id}`)}
-                          className="bg-secondary text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] hover:bg-white hover:text-slate-800 transition-all"
+                          className="bg-secondary text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] hover:bg-secondary/80 transition-all"
                         >
                           View Details
                         </button>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { Calendar, Users, MapPin, Clock, Check, IndianRupee } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Calendar, Users, MapPin, Clock, Check, IndianRupee, CheckCircle, X } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
@@ -33,6 +33,7 @@ const BookingConfirmation = () => {
   const bookingData = location.state as any
   
   const [paying, setPaying] = useState(false)
+  const [showSuccessPopup, setShowSuccessPopup] = useState(true)
 
   useEffect(() => {
     if (!bookingData) {
@@ -158,6 +159,81 @@ const BookingConfirmation = () => {
       <Helmet>
         <title>Booking Confirmation - {trip.title} | WAYBOND</title>
       </Helmet>
+
+      {/* Success Popup */}
+      <AnimatePresence>
+        {showSuccessPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
+            >
+              {/* Close button */}
+              <button
+                onClick={() => {
+                  setShowSuccessPopup(false)
+                  haptics.light()
+                }}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={24} />
+              </button>
+
+              {/* Success Icon */}
+              <div className="flex justify-center mb-6">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                >
+                  <CheckCircle size={80} className="text-green-500" strokeWidth={2} />
+                </motion.div>
+              </div>
+
+              {/* Content */}
+              <div className="text-center space-y-3">
+                <h2 className="text-2xl font-black text-gray-900 uppercase tracking-wide">
+                  BOOKING DETAILS
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  Booking Details Registered Successfully
+                </p>
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-8 space-y-3">
+                <button
+                  onClick={() => {
+                    setShowSuccessPopup(false)
+                    haptics.medium()
+                  }}
+                  className="w-full bg-secondary hover:bg-secondary/90 text-white py-4 rounded-full font-black text-base uppercase tracking-wide shadow-xl shadow-secondary/30 transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-95"
+                >
+                  View Details
+                </button>
+                <button
+                  onClick={() => {
+                    setShowSuccessPopup(false)
+                    navigate('/')
+                    haptics.light()
+                  }}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-full font-bold text-base transition-all"
+                >
+                  Back to Home
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       <div className="min-h-screen bg-gray-50 pt-24 pb-20">
         <div className="max-w-2xl mx-auto px-4">

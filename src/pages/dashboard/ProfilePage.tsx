@@ -162,7 +162,7 @@ const ProfilePage = () => {
               }}
               className={`h-12 px-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] flex items-center gap-2 transition-all ${isEditing
                   ? 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
-                  : 'bg-secondary text-white hover:bg-white hover:text-slate-800 shadow-lg shadow-secondary/20'
+                  : 'bg-secondary text-white hover:bg-secondary/80 shadow-lg shadow-secondary/20'
                 }`}
             >
               {isEditing ? (
@@ -439,7 +439,7 @@ const ProfilePage = () => {
               >
                 <button
                   onClick={handleSave}
-                  className="flex-1 bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 hover:bg-white hover:text-slate-800 transition-all"
+                  className="flex-1 bg-secondary text-white h-12 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 hover:bg-secondary/80 transition-all"
                 >
                   <Save size={14} />
                   Save Changes

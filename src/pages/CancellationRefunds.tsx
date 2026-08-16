@@ -115,7 +115,7 @@ const CancellationRefunds = () => (
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => haptics.medium()}
-            className="inline-flex items-center justify-center gap-3 w-full bg-secondary text-white px-6 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.18em] hover:bg-white hover:text-slate-800 transition-all duration-500 shadow-xl shadow-secondary/20 active:scale-95"
+            className="inline-flex items-center justify-center gap-3 w-full bg-secondary text-white px-6 py-4 rounded-full font-black text-[10px] uppercase tracking-[0.18em] hover:bg-secondary/80 transition-all duration-500 shadow-xl shadow-secondary/20 active:scale-95"
           >
             Contact support
           </a>

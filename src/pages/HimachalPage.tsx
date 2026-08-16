@@ -118,7 +118,7 @@ export default function HimachalPage() {
             </div>
 
             <div className="space-y-4">
-              <button className="w-full bg-secondary text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-slate-800 transition-all shadow-xl shadow-secondary/30 transform hover:scale-105 active:scale-95 duration-500">
+              <button className="w-full bg-secondary text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:bg-secondary/80 transition-all shadow-xl shadow-secondary/30 transform hover:scale-105 active:scale-95 duration-500">
                 Book My Adventure
               </button>
               <a

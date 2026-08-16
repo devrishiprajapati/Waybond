@@ -78,7 +78,7 @@ export default function BackupHome() {
                 <MapPin size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest whitespace-nowrap">GLOBAL TOURS</span>
               </div>
-              <button className="bg-secondary text-white px-8 py-3 mx-1 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-slate-800 transition-all shadow-xl flex-shrink-0">
+              <button className="bg-secondary text-white px-8 py-3 mx-1 rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-secondary/80 transition-all shadow-xl flex-shrink-0">
                 SEARCH
               </button>
             </div>

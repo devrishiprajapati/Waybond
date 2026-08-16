@@ -251,7 +251,7 @@ export default function AdminTeamMembers() {
                         </button>
                         <button
                             onClick={openAdd}
-                            className="h-12 px-6 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 shadow-xl shadow-secondary/20 hover:bg-white hover:text-slate-800 transition-all"
+                            className="h-12 px-6 rounded-2xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.15em] flex items-center gap-2 shadow-xl shadow-secondary/20 hover:bg-secondary/80 transition-all"
                         >
                             <Plus size={16} /> Add Member
                         </button>
@@ -406,7 +406,7 @@ export default function AdminTeamMembers() {
                                                 <button
                                                     type="button"
                                                     onClick={() => fileInputRef.current?.click()}
-                                                    className="flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-white hover:text-slate-800 transition-all"
+                                                    className="flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider hover:bg-white/40 transition-all"
                                                 >
                                                     <Upload size={13} /> Change Image
                                                 </button>
@@ -528,7 +528,7 @@ export default function AdminTeamMembers() {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="h-12 px-6 rounded-xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.14em] flex items-center gap-2 disabled:opacity-60 hover:bg-white hover:text-slate-800 transition-all shadow-xl shadow-secondary/20"
+                                    className="h-12 px-6 rounded-xl bg-secondary text-white font-black text-[10px] uppercase tracking-[0.14em] flex items-center gap-2 disabled:opacity-60 hover:bg-secondary/80 transition-all shadow-xl shadow-secondary/20"
                                 >
                                     {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
                                     {saving ? 'Saving…' : 'Save Member'}
