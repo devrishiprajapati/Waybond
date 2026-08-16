@@ -209,23 +209,14 @@ const BookingConfirmation = () => {
               </div>
 
               {/* Action Button */}
-              <div className="mt-8 space-y-3">
-                <button
-                  onClick={() => {
-                    setShowSuccessPopup(false)
-                    haptics.medium()
-                  }}
-                  className="w-full bg-secondary hover:bg-secondary/90 text-white py-4 rounded-full font-black text-base uppercase tracking-wide shadow-xl shadow-secondary/30 transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-95"
-                >
-                  View Details
-                </button>
+              <div className="mt-8">
                 <button
                   onClick={() => {
                     setShowSuccessPopup(false)
                     navigate('/')
                     haptics.light()
                   }}
-                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-full font-bold text-base transition-all"
+                  className="w-full bg-secondary hover:bg-secondary/90 text-white py-4 rounded-full font-black text-base uppercase tracking-wide shadow-xl shadow-secondary/30 transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-95"
                 >
                   Back to Home
                 </button>
@@ -237,18 +228,6 @@ const BookingConfirmation = () => {
       
       <div className="min-h-screen bg-gray-50 pt-24 pb-20">
         <div className="max-w-2xl mx-auto px-4">
-          {/* Success Header */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', duration: 0.5 }}
-            className="flex items-center justify-center mb-8"
-          >
-            <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
-              <Check size={40} className="text-white" strokeWidth={3} />
-            </div>
-          </motion.div>
-
           <h1 className="text-3xl font-black text-gray-900 mb-2 text-center">Booking Details</h1>
           <p className="text-center text-gray-600 mb-8">Review your booking and proceed to payment</p>
 
