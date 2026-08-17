@@ -41,6 +41,75 @@ import BookingForm from './pages/BookingForm'
 import BookingConfirmation from './pages/BookingConfirmation'
 import CommunityGallery from './pages/CommunityGallery'
 
+const isAdminSubdomain = window.location.hostname.startsWith('admin.')
+
+function PublicRoutes({ location }: { location: ReturnType<typeof useLocation> }) {
+  return (
+    <Routes location={location} key={location.pathname}>
+      <Route path="/" element={<Home />} />
+      <Route path="/discover" element={<Discover />} />
+      <Route path="/himachal" element={<HimachalPage />} />
+      <Route path="/bali" element={<BaliPage />} />
+      <Route path="/backup" element={<BackupHome />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/community" element={<Community />} />
+      <Route path="/community/:destination" element={<CommunityGallery />} />
+      <Route path="/wishlist" element={<Wishlist />} />
+      <Route path="/faqs" element={<FAQs />} />
+      <Route path="/cancellation-refunds" element={<CancellationRefunds />} />
+      <Route path="/safety-guidelines" element={<SafetyGuidelines />} />
+      <Route path="/testimonials" element={<Testimonials />} />
+      <Route path="/blogs" element={<Blogs />} />
+      <Route path="/blog/:slug" element={<BlogDetail />} />
+      <Route path="/trip/:slug" element={<TripDetails />} />
+      <Route path="/booking-form" element={<BookingForm />} />
+      <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+      <Route path="/dashboard" element={<UserDashboard />} />
+      <Route path="/dashboard/:userId" element={<UserDashboard />} />
+      <Route path="/dashboard/:userId/all-trips" element={<AllTripsPage />} />
+      <Route path="/dashboard/:userId/booked-trips" element={<BookedTripsPage />} />
+      <Route path="/dashboard/:userId/confirmed" element={<ConfirmedTripsPage />} />
+      <Route path="/dashboard/:userId/testimonials" element={<TestimonialsPage />} />
+      <Route path="/dashboard/:userId/cancelled" element={<CancelledTripsPage />} />
+      <Route path="/dashboard/:userId/profile" element={<ProfilePage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
+    </Routes>
+  )
+}
+
+function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> }) {
+  return (
+    <Routes location={location} key={location.pathname}>
+      <Route path="/" element={<AdminLogin />} />
+      <Route path="/login" element={<AdminLogin />} />
+      <Route path="/dashboard" element={<AdminDashboard />} />
+      <Route path="/testimonials" element={<AdminTestimonials />} />
+      <Route path="/travel-stories" element={<AdminTravelStories />} />
+      <Route path="/users" element={<AdminUsers />} />
+      <Route path="/users/:id" element={<AdminUserDetail />} />
+      <Route path="/gallery" element={<AdminGallery />} />
+      <Route path="/team-members" element={<AdminTeamMembers />} />
+      <Route path="/hero" element={<EditHero />} />
+      <Route path="/edit/:id" element={<EditTrip />} />
+      <Route path="/new" element={<EditTrip />} />
+
+      {/* Keep existing /admin paths working on the admin subdomain. */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+      <Route path="/admin/travel-stories" element={<AdminTravelStories />} />
+      <Route path="/admin/users" element={<AdminUsers />} />
+      <Route path="/admin/users/:id" element={<AdminUserDetail />} />
+      <Route path="/admin/gallery" element={<AdminGallery />} />
+      <Route path="/admin/team-members" element={<AdminTeamMembers />} />
+      <Route path="/admin/hero" element={<EditHero />} />
+      <Route path="/admin/edit/:id" element={<EditTrip />} />
+      <Route path="/admin/new" element={<EditTrip />} />
+    </Routes>
+  )
+}
+
 function App() {
   const location = useLocation();
   const [showSplash, setShowSplash] = useState(true);
@@ -78,49 +147,7 @@ function App() {
         <Navbar />
         <main className="flex-grow w-full">
           <AnimatePresence mode="wait">
-            <Routes location={location} key={location.pathname}>
-              <Route path="/" element={<Home />} />
-              <Route path="/discover" element={<Discover />} />
-              <Route path="/himachal" element={<HimachalPage />} />
-              <Route path="/bali" element={<BaliPage />} />
-              <Route path="/backup" element={<BackupHome />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/community" element={<Community />} />
-              <Route path="/community/:destination" element={<CommunityGallery />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/faqs" element={<FAQs />} />
-              <Route path="/cancellation-refunds" element={<CancellationRefunds />} />
-              <Route path="/safety-guidelines" element={<SafetyGuidelines />} />
-              <Route path="/testimonials" element={<Testimonials />} />
-              <Route path="/blogs" element={<Blogs />} />
-              <Route path="/blog/:slug" element={<BlogDetail />} />
-              <Route path="/trip/:slug" element={<TripDetails />} />
-              <Route path="/booking-form" element={<BookingForm />} />
-              <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-              <Route path="/dashboard" element={<UserDashboard />} />
-              <Route path="/dashboard/:userId" element={<UserDashboard />} />
-              <Route path="/dashboard/:userId/all-trips" element={<AllTripsPage />} />
-              <Route path="/dashboard/:userId/booked-trips" element={<BookedTripsPage />} />
-              <Route path="/dashboard/:userId/confirmed" element={<ConfirmedTripsPage />} />
-              <Route path="/dashboard/:userId/testimonials" element={<TestimonialsPage />} />
-              <Route path="/dashboard/:userId/cancelled" element={<CancelledTripsPage />} />
-              <Route path="/dashboard/:userId/profile" element={<ProfilePage />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-
-              {/* Admin Routes */}
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/testimonials" element={<AdminTestimonials />} />
-              <Route path="/admin/travel-stories" element={<AdminTravelStories />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/users/:id" element={<AdminUserDetail />} />
-              <Route path="/admin/gallery" element={<AdminGallery />} />
-              <Route path="/admin/team-members" element={<AdminTeamMembers />} />
-              <Route path="/admin/hero" element={<EditHero />} />
-              <Route path="/admin/edit/:id" element={<EditTrip />} />
-              <Route path="/admin/new" element={<EditTrip />} />
-            </Routes>
+            {isAdminSubdomain ? <AdminRoutes location={location} /> : <PublicRoutes location={location} />}
           </AnimatePresence>
         </main>
         <Footer />
