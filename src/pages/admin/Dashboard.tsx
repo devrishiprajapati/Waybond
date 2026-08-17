@@ -18,10 +18,12 @@ import {
   Trash2,
   UsersRound,
   Users2,
-  Images
+  Images,
+  Shield
 } from 'lucide-react'
 import { getTrips, deleteTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
+import PermissionGuard from '../../components/PermissionGuard'
 
 type DashboardStats = {
   totalPackages: number
@@ -35,6 +37,7 @@ const AdminDashboard = () => {
   const [liveStats, setLiveStats] = useState<DashboardStats | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [experienceFilter, setExperienceFilter] = useState<'All' | Trip['experience']>('All')
+  const [adminData, setAdminData] = useState<any>(null)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -43,6 +46,17 @@ const AdminDashboard = () => {
       navigate('/admin/login')
       return
     }
+
+    // Get admin data for permission checking
+    const adminDataStr = sessionStorage.getItem('adminData')
+    if (adminDataStr) {
+      try {
+        setAdminData(JSON.parse(adminDataStr))
+      } catch (error) {
+        console.error('Failed to parse admin data:', error)
+      }
+    }
+
     const loadDashboard = async () => {
       try {
         const response = await fetch('/api/admin/dashboard')
@@ -96,21 +110,36 @@ const AdminDashboard = () => {
 
   const handleLogout = () => {
     sessionStorage.removeItem('isAdmin')
+    sessionStorage.removeItem('adminData')
     navigate('/admin/login')
   }
 
   const navItems = [
-    { label: 'Inventory', path: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Trending Adventures', path: '/admin/hero', icon: ImageIcon },
-    { label: 'New Package', path: '/admin/new', icon: Plus },
-    { label: 'Travel Stories', path: '/admin/travel-stories', icon: BookOpen },
-    { label: 'Testimonials', path: '/admin/testimonials', icon: MessageSquareText },
-    { label: 'Team Members', path: '/admin/team-members', icon: Users2 },
-    { label: 'Users', path: '/admin/users', icon: UsersRound },
-    { label: 'Gallery', path: '/admin/gallery', icon: Images }
+    { label: 'Inventory', path: '/admin/dashboard', icon: LayoutDashboard, permission: 'manage_trips' },
+    { label: 'Trending Adventures', path: '/admin/hero', icon: ImageIcon, permission: 'manage_hero' },
+    { label: 'New Package', path: '/admin/new', icon: Plus, permission: 'manage_trips' },
+    { label: 'Travel Stories', path: '/admin/travel-stories', icon: BookOpen, permission: 'manage_travel_stories' },
+    { label: 'Testimonials', path: '/admin/testimonials', icon: MessageSquareText, permission: 'manage_testimonials' },
+    { label: 'Team Members', path: '/admin/team-members', icon: Users2, permission: 'manage_team_members' },
+    { label: 'Users', path: '/admin/users', icon: UsersRound, permission: 'manage_users' },
+    { label: 'Gallery', path: '/admin/gallery', icon: Images, permission: 'manage_gallery' },
+    { label: 'Admin Management', path: '/admin/admins', icon: Shield, permission: 'manage_admins' }
   ]
 
+  // Helper function to check if admin has permission
+  const hasPermission = (permission: string) => {
+    if (!adminData) return false
+    // Master Admin has all permissions
+    if (adminData.role === 'MASTER_ADMIN') return true
+    // Check if admin has the specific permission
+    return adminData.permissions && adminData.permissions.includes(permission)
+  }
+
+  // Filter navigation items based on permissions
+  const visibleNavItems = navItems.filter(item => hasPermission(item.permission))
+
   return (
+    <PermissionGuard requiredPermission="manage_trips">
     <div className="min-h-screen bg-white text-white flex">
       <aside className="w-80 liquid-glass-dark border-r border-white/10 px-8 pt-24 pb-8 hidden lg:flex flex-col">
         <div className="mb-12">
@@ -121,7 +150,7 @@ const AdminDashboard = () => {
         </div>
 
         <nav className="flex-grow space-y-3">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
@@ -304,6 +333,7 @@ const AdminDashboard = () => {
         </section>
       </main>
     </div>
+    </PermissionGuard>
   )
 }
 

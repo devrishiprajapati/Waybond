@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Lock, ShieldCheck, ArrowRight, Eye, EyeOff } from 'lucide-react'
 
 const AdminLogin = () => {
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -20,11 +21,15 @@ const AdminLogin = () => {
       const response = await fetch('/api/auth/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
+        body: JSON.stringify({ email, password })
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.message || 'Unable to authorize')
+      
+      // Store admin data including role and permissions
       sessionStorage.setItem('isAdmin', 'true')
+      sessionStorage.setItem('adminData', JSON.stringify(data.admin))
+      
       navigate('/admin/dashboard')
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Invalid expedition credentials')
@@ -71,13 +76,27 @@ const AdminLogin = () => {
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Access Key</label>
+              <label className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email..."
+                autoComplete="email"
+                /* text-base (16px) prevents iOS Safari/Chrome auto-zoom on focus */
+                className="w-full bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-2xl text-slate-800 focus:border-primary outline-none transition-colors placeholder:text-slate-400 text-base"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter credentials..."
+                  placeholder="Enter password..."
                   autoComplete="current-password"
                   /* text-base (16px) prevents iOS Safari/Chrome auto-zoom on focus */
                   className="w-full bg-slate-50 border border-slate-200 p-4 sm:p-5 pr-12 rounded-2xl text-slate-800 focus:border-primary outline-none transition-colors placeholder:text-slate-400 text-base"

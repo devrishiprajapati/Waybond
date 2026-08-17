@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, Image as ImageIcon, LayoutDashboard, Plus, Save, Trash2, Upload } from 'lucide-react'
 import { getTrendingCards, TrendingCard, updateTrendingCards } from '../../lib/dataService'
+import PermissionGuard from '../../components/PermissionGuard'
 
 const inputClass = 'w-full bg-white/5 border border-white/10 p-4 md:p-5 rounded-2xl text-white placeholder:text-white/25 focus:border-secondary focus:bg-white/10 outline-none transition-all font-bold'
 const labelClass = 'text-[10px] uppercase font-black text-white/45 tracking-[0.2em] ml-2'
@@ -66,6 +67,7 @@ export default function EditHero() {
   }
 
   return (
+    <PermissionGuard requiredPermission="manage_hero">
     <div className="min-h-screen bg-white text-white px-5 md:px-10 lg:px-12 pt-32 pb-36">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between mb-10">
@@ -113,5 +115,6 @@ export default function EditHero() {
         </form>
       </div>
     </div>
+    </PermissionGuard>
   )
 }

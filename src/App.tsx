@@ -31,6 +31,7 @@ import AdminUserDetail from './pages/admin/UserDetail'
 import AdminGallery from './pages/admin/Gallery'
 import AdminTravelStories from './pages/admin/TravelStories'
 import AdminTeamMembers from './pages/admin/TeamMembers'
+import AdminManagement from './pages/admin/AdminManagement'
 import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
 import SafetyGuidelines from './pages/SafetyGuidelines'
@@ -117,6 +118,7 @@ function App() {
               <Route path="/admin/users/:id" element={<AdminUserDetail />} />
               <Route path="/admin/gallery" element={<AdminGallery />} />
               <Route path="/admin/team-members" element={<AdminTeamMembers />} />
+              <Route path="/admin/admins" element={<AdminManagement />} />
               <Route path="/admin/hero" element={<EditHero />} />
               <Route path="/admin/edit/:id" element={<EditTrip />} />
               <Route path="/admin/new" element={<EditTrip />} />

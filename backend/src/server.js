@@ -299,13 +299,68 @@ app.post('/api/auth/reset-password', async (req, res, next) => {
 
 app.post('/api/auth/admin/login', async (req, res, next) => {
   try {
-    const email = process.env.ADMIN_EMAIL || 'admin@waybond.local'
-    const password = process.env.ADMIN_PASSWORD || 'admin123'
-    if (String(req.body.password || '') !== password) return res.status(401).json({ message: 'Invalid admin credentials.' })
-    // Admin access is configured through environment variables. Do not block sign-in
-    // on a database write, especially when the shared database is temporarily offline.
-    res.json({ user: { id: 'waybond-admin', name: 'WayBond Admin', email, role: 'ADMIN' } })
-  } catch (error) { next(error) }
+    const email = String(req.body.email || '').trim().toLowerCase()
+    const password = String(req.body.password || '')
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required.' })
+    }
+
+    // Try to find admin in database
+    const admin = await prisma.admin.findUnique({ where: { email } })
+    
+    if (admin && passwordMatches(password, admin.passwordHash)) {
+      if (!admin.isActive) {
+        return res.status(403).json({ message: 'Your admin account has been deactivated.' })
+      }
+      
+      // Update last login
+      const updatedAdmin = await prisma.admin.update({
+        where: { id: admin.id },
+        data: { lastLoginAt: new Date() }
+      })
+      
+      // Return admin data with permissions
+      return res.json({
+        admin: {
+          id: updatedAdmin.id,
+          name: updatedAdmin.name,
+          email: updatedAdmin.email,
+          role: updatedAdmin.role,
+          permissions: updatedAdmin.permissions
+        }
+      })
+    }
+    
+    // Fallback to environment variable for backward compatibility
+    const envEmail = process.env.ADMIN_EMAIL || 'admin@waybond.local'
+    const envPassword = process.env.ADMIN_PASSWORD || 'admin123'
+    
+    if (email === envEmail && password === envPassword) {
+      return res.json({
+        admin: {
+          id: 'waybond-admin-legacy',
+          name: 'WayBond Admin',
+          email: envEmail,
+          role: 'ADMIN',
+          permissions: [
+            'manage_trips',
+            'manage_hero',
+            'manage_testimonials',
+            'manage_team_members',
+            'manage_users',
+            'manage_gallery',
+            'manage_travel_stories',
+            'view_bookings'
+          ]
+        }
+      })
+    }
+    
+    return res.status(401).json({ message: 'Invalid admin credentials.' })
+  } catch (error) {
+    next(error)
+  }
 })
 
 app.get('/api/trips', async (_req, res, next) => {
@@ -659,6 +714,196 @@ app.put('/api/team-members/:id', async (req, res, next) => {
 
 app.delete('/api/team-members/:id', async (req, res, next) => {
   try { await prisma.teamMember.delete({ where: { id: Number(req.params.id) } }); res.json({ success: true }) } catch (error) { next(error) }
+})
+
+// ============= ADMIN MANAGEMENT ENDPOINTS =============
+
+// Get all admins (Master Admin only)
+app.get('/api/admins', async (req, res, next) => {
+  try {
+    const admins = await prisma.admin.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        permissions: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true,
+        createdBy: true
+      }
+    })
+    res.json(admins)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Get single admin by ID
+app.get('/api/admins/:id', async (req, res, next) => {
+  try {
+    const admin = await prisma.admin.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        permissions: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true,
+        createdBy: true
+      }
+    })
+    if (!admin) return res.status(404).json({ message: 'Admin not found' })
+    res.json(admin)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Create new admin (Master Admin only)
+app.post('/api/admins', async (req, res, next) => {
+  try {
+    const { name, email, password, role, permissions, createdBy } = req.body
+    
+    if (!name?.trim() || !email?.trim() || !password || password.length < 6) {
+      return res.status(400).json({ message: 'Name, email, and a password with at least 6 characters are required.' })
+    }
+    
+    if (role !== 'ADMIN' && role !== 'MASTER_ADMIN') {
+      return res.status(400).json({ message: 'Role must be either ADMIN or MASTER_ADMIN' })
+    }
+    
+    // Check if email already exists
+    const existing = await prisma.admin.findUnique({ where: { email: email.trim().toLowerCase() } })
+    if (existing) {
+      return res.status(409).json({ message: 'An admin with this email already exists.' })
+    }
+    
+    const admin = await prisma.admin.create({
+      data: {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        passwordHash: hashPassword(password),
+        role,
+        permissions: Array.isArray(permissions) ? permissions : [],
+        createdBy: createdBy || null,
+        isActive: true
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        permissions: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true,
+        createdBy: true
+      }
+    })
+    
+    res.status(201).json(admin)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Update admin (Master Admin only)
+app.put('/api/admins/:id', async (req, res, next) => {
+  try {
+    const { name, email, password, role, permissions, isActive } = req.body
+    const id = req.params.id
+    
+    const existing = await prisma.admin.findUnique({ where: { id } })
+    if (!existing) {
+      return res.status(404).json({ message: 'Admin not found' })
+    }
+    
+    // Check if email is being changed and if it's already taken
+    if (email && email.trim().toLowerCase() !== existing.email) {
+      const emailTaken = await prisma.admin.findUnique({ where: { email: email.trim().toLowerCase() } })
+      if (emailTaken) {
+        return res.status(409).json({ message: 'This email is already in use by another admin.' })
+      }
+    }
+    
+    const updateData = {}
+    if (name) updateData.name = name.trim()
+    if (email) updateData.email = email.trim().toLowerCase()
+    if (password && password.length >= 6) updateData.passwordHash = hashPassword(password)
+    if (role) updateData.role = role
+    if (permissions !== undefined) updateData.permissions = Array.isArray(permissions) ? permissions : []
+    if (isActive !== undefined) updateData.isActive = Boolean(isActive)
+    
+    const admin = await prisma.admin.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        permissions: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
+        lastLoginAt: true,
+        createdBy: true
+      }
+    })
+    
+    res.json(admin)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Delete admin (Master Admin only)
+app.delete('/api/admins/:id', async (req, res, next) => {
+  try {
+    const admin = await prisma.admin.findUnique({ where: { id: req.params.id } })
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin not found' })
+    }
+    
+    // Prevent deleting Master Admin
+    if (admin.role === 'MASTER_ADMIN') {
+      return res.status(403).json({ message: 'Cannot delete Master Admin account' })
+    }
+    
+    await prisma.admin.delete({ where: { id: req.params.id } })
+    res.json({ success: true })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Get available permissions list
+app.get('/api/admins/permissions/list', async (_req, res, next) => {
+  try {
+    const permissions = [
+      { key: 'manage_trips', label: 'Manage Trips', description: 'Create, edit, and delete trip packages' },
+      { key: 'manage_hero', label: 'Manage Hero Section', description: 'Edit trending adventure cards and hero slides' },
+      { key: 'manage_testimonials', label: 'Manage Testimonials', description: 'View, edit, and delete testimonials' },
+      { key: 'manage_team_members', label: 'Manage Team Members', description: 'Add, edit, and remove team members' },
+      { key: 'manage_users', label: 'Manage Users', description: 'View and manage registered users' },
+      { key: 'manage_gallery', label: 'Manage Gallery', description: 'Upload and manage gallery images' },
+      { key: 'manage_travel_stories', label: 'Manage Travel Stories', description: 'Create and edit travel stories' },
+      { key: 'view_bookings', label: 'View Bookings', description: 'View all booking details and statistics' },
+      { key: 'manage_admins', label: 'Manage Admins', description: 'Create and manage admin users (Master Admin only)' }
+    ]
+    res.json(permissions)
+  } catch (error) {
+    next(error)
+  }
 })
 
 app.use((error, _req, res, _next) => {

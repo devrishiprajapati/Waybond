@@ -19,6 +19,23 @@ model User {
   testimonials Testimonial[]
 }
 
+model Admin {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN") // MASTER_ADMIN or ADMIN
+  permissions  Json     @default("[]") // Array of permission strings
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    String?  // ID of the admin who created this user
+  lastLoginAt  DateTime @default(now())
+
+  @@index([email])
+  @@index([role])
+}
+
 model Trip {
   id        Int      @id @default(autoincrement())
   payload   Json
