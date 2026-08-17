@@ -18,6 +18,7 @@ import {
 import { registerUser } from '../lib/adminStorage'
 import { getUser, logout } from '../lib/auth'
 import { useWishlist } from '../lib/wishlist'
+import { createSlug } from '../lib/dataService'
 
 const UserDashboard = () => {
   const [user, setUser] = useState<any>(null)
@@ -139,6 +140,18 @@ const UserDashboard = () => {
     }
   }
 
+  // Helper function to check if a trip already has a testimonial
+  const hasTestimonialForTrip = (tripTitle: string) => {
+    return testimonials.some((testimonial) => testimonial.tripTitle === tripTitle)
+  }
+
+  // Get confirmed trips without testimonials
+  const tripsAvailableForTestimonial = useMemo(() => {
+    return bookedTrips.filter(
+      (trip) => trip.status === 'Confirmed' && !hasTestimonialForTrip(trip.title)
+    )
+  }, [bookedTrips, testimonials])
+
   const handleTestimonialSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!testimonialText.trim()) return
@@ -151,6 +164,12 @@ const UserDashboard = () => {
     }
 
     const selectedTrip = confirmedTrips.find((trip) => String(trip.id) === testimonialTripId) || confirmedTrips[0]
+
+    // Check if testimonial already exists for this trip
+    if (hasTestimonialForTrip(selectedTrip?.title)) {
+      alert('You have already submitted a testimonial for this trip.')
+      return
+    }
 
     try {
       if (!user.id) throw new Error('No database user')
@@ -292,10 +311,14 @@ const UserDashboard = () => {
                   <h2 className="text-2xl font-bungee font-black uppercase italic tracking-tighter mt-2">Add Testimonial</h2>
                 </div>
 
-                {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0 ? (
+                {tripsAvailableForTestimonial.length === 0 ? (
                   <div className="text-center py-8">
                     <MessageCircle className="text-white/15 mx-auto mb-4" size={34} />
-                    <p className="text-sm text-white/40 font-medium italic">Testimonials are only available for confirmed trips.</p>
+                    <p className="text-sm text-white/40 font-medium italic">
+                      {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0
+                        ? 'Testimonials are only available for confirmed trips.'
+                        : 'You have already added testimonials for all your confirmed trips.'}
+                    </p>
                   </div>
                 ) : (
                   <form onSubmit={handleTestimonialSubmit} className="space-y-4">
@@ -305,11 +328,9 @@ const UserDashboard = () => {
                       className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white outline-none focus:border-secondary"
                     >
                       <option className="text-slate-800" value="">Select confirmed trip</option>
-                      {bookedTrips
-                        .filter((trip) => trip.status === 'Confirmed')
-                        .map((trip) => (
-                          <option className="text-slate-800" key={trip.id} value={trip.id}>{trip.title}</option>
-                        ))}
+                      {tripsAvailableForTestimonial.map((trip) => (
+                        <option className="text-slate-800" key={trip.id} value={trip.id}>{trip.title}</option>
+                      ))}
                     </select>
 
                     <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-4">
@@ -486,12 +507,6 @@ const UserDashboard = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-3">
-                          <Link
-                            to={`/trip/${trip.id}`}
-                            className="bg-secondary text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] hover:bg-secondary/80 transition-all"
-                          >
-                            View Trip Details
-                          </Link>
                           {trip.status === 'Confirmed' && (
                             <Link
                               to={`/booking-confirmation/${trip.bookingId}`}
@@ -502,18 +517,19 @@ const UserDashboard = () => {
                           )}
                           <button
                             onClick={() => {
-                              if (trip.status === 'Confirmed') {
+                              if (trip.status === 'Confirmed' && !hasTestimonialForTrip(trip.title)) {
                                 setTestimonialTripId(String(trip.id))
                                 document.getElementById('testimonial-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                               }
                             }}
-                            disabled={trip.status !== 'Confirmed'}
-                            className={`h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border transition-all ${trip.status === 'Confirmed'
+                            disabled={trip.status !== 'Confirmed' || hasTestimonialForTrip(trip.title)}
+                            className={`h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border transition-all ${trip.status === 'Confirmed' && !hasTestimonialForTrip(trip.title)
                               ? 'bg-white/5 text-white border-white/10 hover:bg-white/20 hover:border-white/30 cursor-pointer'
                               : 'bg-white/5 text-white/30 border-white/10 cursor-not-allowed opacity-50'
                               }`}
+                            title={hasTestimonialForTrip(trip.title) ? 'Testimonial already submitted' : ''}
                           >
-                            Add Testimonial
+                            {hasTestimonialForTrip(trip.title) ? 'Testimonial Added' : 'Add Testimonial'}
                           </button>
                           {trip.status !== 'Confirmed' && (
                             <button
@@ -585,7 +601,7 @@ const UserDashboard = () => {
 
                         <div className="flex flex-wrap gap-3">
                           <Link
-                            to={`/trip/${trip.id}`}
+                            to={`/trip/${createSlug(trip.title)}`}
                             className="bg-white/5 text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-white/10 hover:bg-white/20 hover:border-white/30 transition-all"
                           >
                             View Trip Details
@@ -614,10 +630,14 @@ const UserDashboard = () => {
                 <h2 className="text-2xl font-bungee font-black uppercase italic tracking-tighter mt-2">Add Testimonial</h2>
               </div>
 
-              {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0 ? (
+              {tripsAvailableForTestimonial.length === 0 ? (
                 <div className="text-center py-8">
                   <MessageCircle className="text-white/15 mx-auto mb-4" size={34} />
-                  <p className="text-sm text-white/40 font-medium italic">Testimonials are only available for confirmed trips.</p>
+                  <p className="text-sm text-white/40 font-medium italic">
+                    {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0
+                      ? 'Testimonials are only available for confirmed trips.'
+                      : 'You have already added testimonials for all your confirmed trips.'}
+                  </p>
                 </div>
               ) : (
                 <form onSubmit={handleTestimonialSubmit} className="space-y-4">
@@ -627,11 +647,9 @@ const UserDashboard = () => {
                     className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white outline-none focus:border-secondary"
                   >
                     <option className="text-slate-800" value="">Select confirmed trip</option>
-                    {bookedTrips
-                      .filter((trip) => trip.status === 'Confirmed')
-                      .map((trip) => (
-                        <option className="text-slate-800" key={trip.id} value={trip.id}>{trip.title}</option>
-                      ))}
+                    {tripsAvailableForTestimonial.map((trip) => (
+                      <option className="text-slate-800" key={trip.id} value={trip.id}>{trip.title}</option>
+                    ))}
                   </select>
 
                   <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-4">
