@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
+import { isDisposable } from '@isdisposable/js'
 import nodemailer from 'nodemailer'
 import { createHmac, randomBytes, randomInt, scryptSync, timingSafeEqual } from 'node:crypto'
 import { prisma } from './prisma.js'
@@ -39,6 +40,14 @@ const PAYMENT_RECORD_STATUSES = {
 const normalizePaymentStatus = (value) => {
   const status = String(value || '').trim()
   return PAYMENT_STATUS_OPTIONS.find((option) => option.toLowerCase() === status.toLowerCase()) || ''
+}
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+const disposableEmailMessage = 'Disposable or temporary email addresses are not allowed. Please use a permanent email address.'
+const validateAccountEmail = (email) => {
+  if (!email) return 'Email is required.'
+  if (!isValidEmail(email)) return 'Enter a valid email address.'
+  if (isDisposable(email)) return disposableEmailMessage
+  return ''
 }
 const publicUser = ({ passwordHash, ...user }) => user
 const hashPassword = (password) => {
@@ -525,7 +534,9 @@ app.post('/api/auth/signup', async (req, res, next) => {
     const name = String(req.body.name || '').trim()
     const password = String(req.body.password || '')
     const profile = req.body.profile || undefined
-    if (!name || !email || password.length < 6) return res.status(400).json({ message: 'Name, email, and a 6-character password are required.' })
+    const emailError = validateAccountEmail(email)
+    if (!name || password.length < 6) return res.status(400).json({ message: 'Name, email, and a 6-character password are required.' })
+    if (emailError) return res.status(400).json({ message: emailError })
     if (await prisma.user.findUnique({ where: { email } })) return res.status(409).json({ message: 'An account already exists for this email.' })
     const user = await prisma.user.create({ data: { name, email, passwordHash: hashPassword(password), profile } })
     res.status(201).json({ user: publicUser(user) })
@@ -536,6 +547,7 @@ app.post('/api/auth/login', async (req, res, next) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase()
     const password = String(req.body.password || '')
+    if (isDisposable(email)) return res.status(403).json({ message: disposableEmailMessage })
     const user = await prisma.user.findUnique({ where: { email } })
     if (!user || !passwordMatches(password, user.passwordHash)) return res.status(401).json({ message: 'Invalid email or password.' })
     const updatedUser = await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
@@ -854,7 +866,8 @@ app.get('/api/admin/payment-updates', async (_req, res, next) => {
 app.post('/api/users', async (req, res, next) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase()
-    if (!email) return res.status(400).json({ message: 'Email is required' })
+    const emailError = validateAccountEmail(email)
+    if (emailError) return res.status(400).json({ message: emailError })
     const name = String(req.body.name || email.split('@')[0]).trim()
     res.json(publicUser(await prisma.user.upsert({ where: { email }, create: { email, name, passwordHash: hashPassword(randomBytes(20).toString('hex')) }, update: { name } })))
   } catch (error) { next(error) }
@@ -1186,17 +1199,21 @@ app.get('/api/admins/:id', async (req, res, next) => {
 app.post('/api/admins', async (req, res, next) => {
   try {
     const { name, email, password, role, permissions, createdBy } = req.body
+    const normalizedEmail = String(email || '').trim().toLowerCase()
+    const emailError = validateAccountEmail(normalizedEmail)
     
-    if (!name?.trim() || !email?.trim() || !password || password.length < 6) {
+    if (!name?.trim() || !password || password.length < 6) {
       return res.status(400).json({ message: 'Name, email, and a password with at least 6 characters are required.' })
     }
+
+    if (emailError) return res.status(400).json({ message: emailError })
     
     if (role !== 'ADMIN' && role !== 'MASTER_ADMIN') {
       return res.status(400).json({ message: 'Role must be either ADMIN or MASTER_ADMIN' })
     }
     
     // Check if email already exists
-    const existing = await prisma.admin.findUnique({ where: { email: email.trim().toLowerCase() } })
+    const existing = await prisma.admin.findUnique({ where: { email: normalizedEmail } })
     if (existing) {
       return res.status(409).json({ message: 'An admin with this email already exists.' })
     }
@@ -1204,7 +1221,7 @@ app.post('/api/admins', async (req, res, next) => {
     const admin = await prisma.admin.create({
       data: {
         name: name.trim(),
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         passwordHash: hashPassword(password),
         role,
         permissions: Array.isArray(permissions) ? permissions : [],
@@ -1236,6 +1253,7 @@ app.put('/api/admins/:id', async (req, res, next) => {
   try {
     const { name, email, password, role, permissions, isActive } = req.body
     const id = req.params.id
+    const normalizedEmail = email ? String(email).trim().toLowerCase() : ''
     
     const existing = await prisma.admin.findUnique({ where: { id } })
     if (!existing) {
@@ -1243,8 +1261,11 @@ app.put('/api/admins/:id', async (req, res, next) => {
     }
     
     // Check if email is being changed and if it's already taken
-    if (email && email.trim().toLowerCase() !== existing.email) {
-      const emailTaken = await prisma.admin.findUnique({ where: { email: email.trim().toLowerCase() } })
+    if (normalizedEmail && normalizedEmail !== existing.email) {
+      const emailError = validateAccountEmail(normalizedEmail)
+      if (emailError) return res.status(400).json({ message: emailError })
+
+      const emailTaken = await prisma.admin.findUnique({ where: { email: normalizedEmail } })
       if (emailTaken) {
         return res.status(409).json({ message: 'This email is already in use by another admin.' })
       }
@@ -1252,7 +1273,7 @@ app.put('/api/admins/:id', async (req, res, next) => {
     
     const updateData = {}
     if (name) updateData.name = name.trim()
-    if (email) updateData.email = email.trim().toLowerCase()
+    if (normalizedEmail) updateData.email = normalizedEmail
     if (password && password.length >= 6) updateData.passwordHash = hashPassword(password)
     if (role) updateData.role = role
     if (permissions !== undefined) updateData.permissions = Array.isArray(permissions) ? permissions : []
