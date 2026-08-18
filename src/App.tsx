@@ -91,6 +91,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
       <Route path="/users/:id" element={<AdminUserDetail />} />
       <Route path="/gallery" element={<AdminGallery />} />
       <Route path="/team-members" element={<AdminTeamMembers />} />
+      <Route path="/admins" element={<AdminManagement />} />
       <Route path="/hero" element={<EditHero />} />
       <Route path="/edit/:id" element={<EditTrip />} />
       <Route path="/new" element={<EditTrip />} />
@@ -104,6 +105,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
       <Route path="/admin/users/:id" element={<AdminUserDetail />} />
       <Route path="/admin/gallery" element={<AdminGallery />} />
       <Route path="/admin/team-members" element={<AdminTeamMembers />} />
+      <Route path="/admin/admins" element={<AdminManagement />} />
       <Route path="/admin/hero" element={<EditHero />} />
       <Route path="/admin/edit/:id" element={<EditTrip />} />
       <Route path="/admin/new" element={<EditTrip />} />

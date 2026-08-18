@@ -159,7 +159,11 @@ const PermissionGuard = ({ children, requiredPermission, requireMasterAdmin = fa
                 Back to Dashboard
               </button>
               <button
-                onClick={() => navigate('/admin/login')}
+                onClick={() => {
+                  sessionStorage.removeItem('isAdmin')
+                  sessionStorage.removeItem('adminData')
+                  navigate('/admin/login')
+                }}
                 className="h-12 px-6 rounded-2xl bg-white/5 text-white border border-white/10 hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-[0.16em]"
               >
                 Sign Out

@@ -139,7 +139,7 @@ const AdminDashboard = () => {
   const visibleNavItems = navItems.filter(item => hasPermission(item.permission))
 
   return (
-    <PermissionGuard requiredPermission="manage_trips">
+    <PermissionGuard>
     <div className="min-h-screen bg-white text-white flex">
       <aside className="w-80 liquid-glass-dark border-r border-white/10 px-8 pt-24 pb-8 hidden lg:flex flex-col">
         <div className="mb-12">
@@ -228,6 +228,9 @@ const AdminDashboard = () => {
           ))}
         </div>
 
+        {/* Show trips section only if admin has manage_trips permission */}
+        {hasPermission('manage_trips') ? (
+          <>
         <section className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-5 md:p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
             <div className="relative flex-grow max-w-2xl">
@@ -331,6 +334,28 @@ const AdminDashboard = () => {
             </div>
           )}
         </section>
+        </>
+        ) : (
+          <div className="liquid-glass-dark border border-white/10 rounded-[2.5rem] p-12 text-center">
+            <Shield className="mx-auto text-white/20 mb-5" size={44} />
+            <h3 className="text-2xl font-bungee font-black uppercase italic tracking-tighter text-white/50">Welcome to Admin Dashboard</h3>
+            <p className="text-white/35 text-sm font-medium italic mt-2 mb-6">
+              You don't have permission to manage trips. Use the navigation menu to access features available to you.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {visibleNavItems.slice(0, 4).map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="flex items-center gap-2 bg-secondary/10 text-secondary border border-secondary/20 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] hover:bg-secondary hover:text-white transition-all"
+                >
+                  <item.icon size={16} />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
     </PermissionGuard>
