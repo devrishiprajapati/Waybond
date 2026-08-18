@@ -57,6 +57,16 @@ select {
   max-width: 100%;
 }
 
+.light-theme select option {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+.light-theme select option:checked {
+  background-color: var(--secondary) !important;
+  color: #ffffff !important;
+}
+
 /* Shared light surface theme. Applied at the app root so every route uses the
    same white canvas without duplicating background rules in each page. */
 .light-theme .text-white {

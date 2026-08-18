@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
+import { isDisposable } from '@isdisposable/js'
 import nodemailer from 'nodemailer'
 import { createHmac, randomBytes, randomInt, scryptSync, timingSafeEqual } from 'node:crypto'
 import { prisma } from './prisma.js'
@@ -16,6 +17,38 @@ const toHeroSlide = (record) => ({ id: record.id, ...record.payload })
 
 const toTrendingCard = (record) => ({ id: record.id, ...record.payload })
 const toBooking = (record) => ({ id: record.id, bookingDbId: record.id, ...record.payload })
+const PAYMENT_STATUS_OPTIONS = [
+  'Online',
+  'Cash',
+  'Cancelled',
+  'Pending Payment',
+  'Paid',
+  'Failed',
+  'Refunded',
+  'Partially Paid'
+]
+const PAYMENT_RECORD_STATUSES = {
+  Online: 'PAID',
+  Cash: 'CASH',
+  Cancelled: 'CANCELLED',
+  'Pending Payment': 'PENDING',
+  Paid: 'PAID',
+  Failed: 'FAILED',
+  Refunded: 'REFUNDED',
+  'Partially Paid': 'PARTIALLY_PAID'
+}
+const normalizePaymentStatus = (value) => {
+  const status = String(value || '').trim()
+  return PAYMENT_STATUS_OPTIONS.find((option) => option.toLowerCase() === status.toLowerCase()) || ''
+}
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+const disposableEmailMessage = 'Disposable or temporary email addresses are not allowed. Please use a permanent email address.'
+const validateAccountEmail = (email) => {
+  if (!email) return 'Email is required.'
+  if (!isValidEmail(email)) return 'Enter a valid email address.'
+  if (isDisposable(email)) return disposableEmailMessage
+  return ''
+}
 const publicUser = ({ passwordHash, ...user }) => user
 const hashPassword = (password) => {
   const salt = randomBytes(16).toString('hex')
@@ -70,6 +103,15 @@ const parseDateOnly = (value) => {
   if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
   const date = new Date(text)
   return Number.isNaN(date.getTime()) ? null : date
+}
+const datesMatch = (left, right) => {
+  const leftText = normalizeText(left)
+  const rightText = normalizeText(right)
+  if (!leftText || !rightText) return false
+  if (leftText === rightText) return true
+  const leftDate = parseDateOnly(leftText)
+  const rightDate = parseDateOnly(rightText)
+  return Boolean(leftDate && rightDate && leftDate.getTime() === rightDate.getTime())
 }
 const formatTripDate = (value) => {
   const text = normalizeText(value)
@@ -210,7 +252,18 @@ const sendTripDateChangeEmail = async ({ booking, user, tripTitle, oldDate, newD
   return { sent: true, skipped: false }
 }
 
-const getTripDateChangePlan = (oldPayload, newPayload) => {
+const getTripDateChangePlan = (oldPayload, newPayload, explicitDateChange) => {
+  const explicitOldDate = normalizeText(explicitDateChange?.oldDate)
+  const explicitNewDate = normalizeText(explicitDateChange?.newDate)
+  if (explicitOldDate && explicitNewDate && !datesMatch(explicitOldDate, explicitNewDate)) {
+    return {
+      oldDate: explicitOldDate,
+      newDate: explicitNewDate,
+      changedDates: new Map([[explicitOldDate, explicitNewDate]]),
+      appliesToAllActiveBookings: false
+    }
+  }
+
   const oldDate = getTripDate(oldPayload)
   const newDate = getTripDate(newPayload)
   if (oldDate !== newDate) return { oldDate, newDate, changedDates: new Map(), appliesToAllActiveBookings: true }
@@ -227,8 +280,15 @@ const getTripDateChangePlan = (oldPayload, newPayload) => {
   return { oldDate, newDate, changedDates, appliesToAllActiveBookings: false }
 }
 
-const updateBookingsForTripDate = async ({ tripId, tripTitle, oldPayload, newPayload }) => {
-  const dateChange = getTripDateChangePlan(oldPayload, newPayload)
+const getMappedDateChange = (date, changedDates) => {
+  for (const [oldDate, newDate] of changedDates.entries()) {
+    if (datesMatch(date, oldDate)) return { oldDate, newDate }
+  }
+  return null
+}
+
+const updateBookingsForTripDate = async ({ tripId, tripTitle, oldPayload, newPayload, explicitDateChange }) => {
+  const dateChange = getTripDateChangePlan(oldPayload, newPayload, explicitDateChange)
   if (!dateChange.appliesToAllActiveBookings && dateChange.changedDates.size === 0) {
     return { updated: 0, emailsSent: 0, emailFailures: 0, oldDate: dateChange.oldDate, newDate: dateChange.newDate }
   }
@@ -243,22 +303,26 @@ const updateBookingsForTripDate = async ({ tripId, tripTitle, oldPayload, newPay
 
   const targetBookings = activeBookings.map((booking) => {
     const bookingOldDate = normalizeText(booking.payload?.nextBatch)
-    const bookingNewDate = dateChange.appliesToAllActiveBookings
-      ? dateChange.newDate
-      : dateChange.changedDates.get(bookingOldDate)
-    return bookingNewDate ? { booking, oldDate: bookingOldDate || dateChange.oldDate, newDate: bookingNewDate } : null
+    if (dateChange.appliesToAllActiveBookings) {
+      return dateChange.newDate ? { booking, oldDate: bookingOldDate || dateChange.oldDate, newDate: dateChange.newDate } : null
+    }
+    const mappedDateChange = getMappedDateChange(bookingOldDate, dateChange.changedDates)
+    return mappedDateChange ? { booking, oldDate: bookingOldDate || mappedDateChange.oldDate, newDate: mappedDateChange.newDate } : null
   }).filter(Boolean)
 
   if (!targetBookings.length) {
     return { updated: 0, emailsSent: 0, emailFailures: 0, oldDate: dateChange.oldDate, newDate: dateChange.newDate }
   }
 
-  await prisma.$transaction(targetBookings.map(({ booking, newDate }) => prisma.booking.update({
+  await prisma.$transaction(targetBookings.map(({ booking, oldDate, newDate }) => prisma.booking.update({
     where: { id: booking.id },
     data: {
       payload: {
         ...booking.payload,
         nextBatch: newDate,
+        departureDates: Array.isArray(booking.payload?.departureDates)
+          ? booking.payload.departureDates.map((date) => datesMatch(date, oldDate) ? newDate : date)
+          : booking.payload?.departureDates,
         previousBatch: booking.payload?.nextBatch,
         tripDateUpdatedAt: new Date().toISOString()
       }
@@ -470,7 +534,9 @@ app.post('/api/auth/signup', async (req, res, next) => {
     const name = String(req.body.name || '').trim()
     const password = String(req.body.password || '')
     const profile = req.body.profile || undefined
-    if (!name || !email || password.length < 6) return res.status(400).json({ message: 'Name, email, and a 6-character password are required.' })
+    const emailError = validateAccountEmail(email)
+    if (!name || password.length < 6) return res.status(400).json({ message: 'Name, email, and a 6-character password are required.' })
+    if (emailError) return res.status(400).json({ message: emailError })
     if (await prisma.user.findUnique({ where: { email } })) return res.status(409).json({ message: 'An account already exists for this email.' })
     const user = await prisma.user.create({ data: { name, email, passwordHash: hashPassword(password), profile } })
     res.status(201).json({ user: publicUser(user) })
@@ -481,6 +547,7 @@ app.post('/api/auth/login', async (req, res, next) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase()
     const password = String(req.body.password || '')
+    if (isDisposable(email)) return res.status(403).json({ message: disposableEmailMessage })
     const user = await prisma.user.findUnique({ where: { email } })
     if (!user || !passwordMatches(password, user.passwordHash)) return res.status(401).json({ message: 'Invalid email or password.' })
     const updatedUser = await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
@@ -638,13 +705,15 @@ app.put('/api/trips/:id', async (req, res, next) => {
     const id = Number(req.params.id)
     const current = await prisma.trip.findUnique({ where: { id } })
     if (!current) return res.status(404).json({ message: 'Not found' })
-    const nextPayload = { ...current.payload, ...req.body }
+    const { _confirmedDateChange, ...requestPayload } = req.body
+    const nextPayload = { ...current.payload, ...requestPayload }
     const updatedTrip = await prisma.trip.update({ where: { id }, data: { payload: nextPayload } })
     const notificationResult = await updateBookingsForTripDate({
       tripId: id,
       tripTitle: nextPayload.title,
       oldPayload: current.payload,
-      newPayload: nextPayload
+      newPayload: nextPayload,
+      explicitDateChange: _confirmedDateChange
     })
     if (notificationResult.updated > 0) {
       console.log('[Trip Date Update]', {
@@ -756,10 +825,49 @@ app.get('/api/admin/dashboard', async (_req, res, next) => {
   } catch (error) { next(error) }
 })
 
+app.get('/api/admin/payment-updates', async (_req, res, next) => {
+  try {
+    const bookings = await prisma.booking.findMany({
+      include: { user: true },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    const tripMap = new Map()
+    bookings.forEach((booking) => {
+      const payload = booking.payload || {}
+      const tripKey = String(payload.id || payload.tripId || payload.title || 'unknown-trip')
+      const tripTitle = String(payload.title || payload.tripTitle || 'WayBond Trip')
+      const tripLocation = String(payload.location || payload.destination || 'Location pending')
+      const tripDate = String(payload.nextBatch || payload.departure || payload.departureDate || '')
+
+      if (!tripMap.has(tripKey)) {
+        tripMap.set(tripKey, {
+          tripId: tripKey,
+          title: tripTitle,
+          location: tripLocation,
+          nextBatch: tripDate,
+          bookings: []
+        })
+      }
+
+      tripMap.get(tripKey).bookings.push({
+        ...toBooking(booking),
+        user: publicUser(booking.user)
+      })
+    })
+
+    res.json({
+      paymentStatuses: PAYMENT_STATUS_OPTIONS,
+      trips: Array.from(tripMap.values()).sort((a, b) => a.title.localeCompare(b.title))
+    })
+  } catch (error) { next(error) }
+})
+
 app.post('/api/users', async (req, res, next) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase()
-    if (!email) return res.status(400).json({ message: 'Email is required' })
+    const emailError = validateAccountEmail(email)
+    if (emailError) return res.status(400).json({ message: emailError })
     const name = String(req.body.name || email.split('@')[0]).trim()
     res.json(publicUser(await prisma.user.upsert({ where: { email }, create: { email, name, passwordHash: hashPassword(randomBytes(20).toString('hex')) }, update: { name } })))
   } catch (error) { next(error) }
@@ -793,6 +901,48 @@ app.put('/api/bookings/:bookingId/cancel', async (req, res, next) => {
       where: { id: req.params.bookingId },
       data: { payload: updatedPayload }
     })
+    res.json(toBooking(updated))
+  } catch (error) { next(error) }
+})
+
+app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
+  try {
+    const paymentStatus = normalizePaymentStatus(req.body.paymentStatus)
+    if (!paymentStatus) {
+      return res.status(400).json({
+        message: `Payment status must be one of: ${PAYMENT_STATUS_OPTIONS.join(', ')}.`
+      })
+    }
+
+    const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId } })
+    if (!booking) return res.status(404).json({ message: 'Booking not found' })
+
+    const updatedPayload = {
+      ...booking.payload,
+      paymentStatus,
+      paymentStatusUpdatedAt: new Date().toISOString()
+    }
+
+    const latestPayment = await prisma.payment.findFirst({
+      where: { bookingId: booking.id },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    const updates = [
+      prisma.booking.update({
+        where: { id: booking.id },
+        data: { payload: updatedPayload }
+      })
+    ]
+
+    if (latestPayment) {
+      updates.push(prisma.payment.update({
+        where: { id: latestPayment.id },
+        data: { status: PAYMENT_RECORD_STATUSES[paymentStatus] }
+      }))
+    }
+
+    const [updated] = await prisma.$transaction(updates)
     res.json(toBooking(updated))
   } catch (error) { next(error) }
 })
@@ -1049,17 +1199,21 @@ app.get('/api/admins/:id', async (req, res, next) => {
 app.post('/api/admins', async (req, res, next) => {
   try {
     const { name, email, password, role, permissions, createdBy } = req.body
+    const normalizedEmail = String(email || '').trim().toLowerCase()
+    const emailError = validateAccountEmail(normalizedEmail)
     
-    if (!name?.trim() || !email?.trim() || !password || password.length < 6) {
+    if (!name?.trim() || !password || password.length < 6) {
       return res.status(400).json({ message: 'Name, email, and a password with at least 6 characters are required.' })
     }
+
+    if (emailError) return res.status(400).json({ message: emailError })
     
     if (role !== 'ADMIN' && role !== 'MASTER_ADMIN') {
       return res.status(400).json({ message: 'Role must be either ADMIN or MASTER_ADMIN' })
     }
     
     // Check if email already exists
-    const existing = await prisma.admin.findUnique({ where: { email: email.trim().toLowerCase() } })
+    const existing = await prisma.admin.findUnique({ where: { email: normalizedEmail } })
     if (existing) {
       return res.status(409).json({ message: 'An admin with this email already exists.' })
     }
@@ -1067,7 +1221,7 @@ app.post('/api/admins', async (req, res, next) => {
     const admin = await prisma.admin.create({
       data: {
         name: name.trim(),
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         passwordHash: hashPassword(password),
         role,
         permissions: Array.isArray(permissions) ? permissions : [],
@@ -1099,6 +1253,7 @@ app.put('/api/admins/:id', async (req, res, next) => {
   try {
     const { name, email, password, role, permissions, isActive } = req.body
     const id = req.params.id
+    const normalizedEmail = email ? String(email).trim().toLowerCase() : ''
     
     const existing = await prisma.admin.findUnique({ where: { id } })
     if (!existing) {
@@ -1106,8 +1261,11 @@ app.put('/api/admins/:id', async (req, res, next) => {
     }
     
     // Check if email is being changed and if it's already taken
-    if (email && email.trim().toLowerCase() !== existing.email) {
-      const emailTaken = await prisma.admin.findUnique({ where: { email: email.trim().toLowerCase() } })
+    if (normalizedEmail && normalizedEmail !== existing.email) {
+      const emailError = validateAccountEmail(normalizedEmail)
+      if (emailError) return res.status(400).json({ message: emailError })
+
+      const emailTaken = await prisma.admin.findUnique({ where: { email: normalizedEmail } })
       if (emailTaken) {
         return res.status(409).json({ message: 'This email is already in use by another admin.' })
       }
@@ -1115,7 +1273,7 @@ app.put('/api/admins/:id', async (req, res, next) => {
     
     const updateData = {}
     if (name) updateData.name = name.trim()
-    if (email) updateData.email = email.trim().toLowerCase()
+    if (normalizedEmail) updateData.email = normalizedEmail
     if (password && password.length >= 6) updateData.passwordHash = hashPassword(password)
     if (role) updateData.role = role
     if (permissions !== undefined) updateData.permissions = Array.isArray(permissions) ? permissions : []

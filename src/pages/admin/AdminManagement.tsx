@@ -27,11 +27,20 @@ type Admin = {
   id: string
   name: string
   email: string
-  role: 'MASTER_ADMIN' | 'ADMIN'
+  role: string
   permissions: string[]
   isActive: boolean
   createdAt: string
   lastLoginAt: string
+}
+
+type AdminFormData = {
+  name: string
+  email: string
+  password: string
+  role: string
+  permissions: string[]
+  isActive: boolean
 }
 
 const AdminManagement = () => {
@@ -44,11 +53,11 @@ const AdminManagement = () => {
   const navigate = useNavigate()
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AdminFormData>({
     name: '',
     email: '',
     password: '',
-    role: 'ADMIN' as string,
+    role: 'ADMIN' as 'ADMIN' | 'MASTER_ADMIN',
     permissions: [] as string[],
     isActive: true
   })

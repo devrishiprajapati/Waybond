@@ -12,11 +12,15 @@
     "studio": "npm --prefix backend exec prisma studio"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.3.1",
     "@mui/material": "^9.3.1",
     "@mui/x-date-pickers": "^9.11.0",
+=======
+    "@isdisposable/js": "^1.0.7",
+>>>>>>> 36f5615ec3ea8e9434d5d9aa2830c8a4313e5dfd
     "@prisma/client": "^7.9.1",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.0.0",

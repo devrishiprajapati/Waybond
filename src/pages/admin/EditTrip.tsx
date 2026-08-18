@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Star, Users, Globe, Upload, FileText, CheckCircle } from 'lucide-react'
 import { getTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
+import { parseDateOnly } from '../../lib/date'
 
 const CATEGORIES = ['Adventure', 'Beach', 'Luxury', 'Nature', 'Honeymoon', 'Backpacking']
 const DIFFICULTY_LEVELS: { value: Trip['difficulty'], label: string, color: string }[] = [
@@ -22,6 +23,18 @@ const sectionClass = 'liquid-glass-dark border border-white/10 rounded-[2.5rem] 
 const labelClass = 'text-[10px] uppercase font-black text-white/45 tracking-[0.2em] ml-2 flex items-center'
 const inputClass = 'w-full bg-white/5 border border-white/10 p-4 md:p-5 rounded-2xl text-white placeholder:text-white/25 focus:border-secondary focus:bg-white/10 outline-none transition-all font-bold'
 const textareaClass = `${inputClass} min-h-[120px] resize-none leading-relaxed`
+
+const toDateInputValue = (value?: string) => {
+  const parsed = parseDateOnly(String(value || '').trim())
+  if (!parsed) return ''
+  const year = parsed.getFullYear()
+  const month = String(parsed.getMonth() + 1).padStart(2, '0')
+  const day = String(parsed.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const normalizeDateText = (value?: string) => String(value || '').trim()
+const mergeUniqueDates = (dates: string[]) => Array.from(new Set(dates.map(normalizeDateText).filter(Boolean)))
 
 const EditTrip = () => {
   const { id } = useParams()
@@ -64,6 +77,19 @@ const EditTrip = () => {
   const showToast = (message: string) => {
     setToast({ message, visible: true })
     setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000)
+  }
+
+  const handleNextBatchChange = (date: string) => {
+    const nextBatch = normalizeDateText(date)
+    const previousNextBatch = normalizeDateText(formData.nextBatch)
+    const departureDates = mergeUniqueDates([
+      nextBatch,
+      ...(formData.departureDates || []).map((item) => (
+        previousNextBatch && normalizeDateText(item) === previousNextBatch ? nextBatch : item
+      ))
+    ])
+
+    setFormData({ ...formData, nextBatch, departureDates })
   }
 
   useEffect(() => {
@@ -154,7 +180,7 @@ const EditTrip = () => {
       images: formData.images && formData.images.length > 0 ? formData.images : [formData.image || ''],
       inclusion: (formData.inclusion || []).filter(item => item.trim()),
       exclusion: (formData.exclusion || []).filter(item => item.trim()),
-      departureDates: formData.departureDates?.filter(Boolean) || [],
+      departureDates: mergeUniqueDates([cleanData.nextBatch, ...(formData.departureDates || [])]),
       itinerary: formData.itinerary || []
     }
 
@@ -193,9 +219,10 @@ const EditTrip = () => {
     departureDates[index] = confirmedDateValue
     setFormData({
       ...formData,
+      _confirmedDateChange: { oldDate: previousDate, newDate: confirmedDateValue },
       departureDates,
       nextBatch: formData.nextBatch === previousDate || !formData.nextBatch ? confirmedDateValue : formData.nextBatch
-    })
+    } as Partial<Trip>)
     setMediaError('')
     showToast('Confirmed trip date updated. Save package to notify booked users.')
   }
@@ -595,10 +622,9 @@ const EditTrip = () => {
               <div className="space-y-2">
                 <label className={labelClass}>Next Batch Date</label>
                 <input
-                  type="text"
-                  value={formData.nextBatch}
-                  onChange={e => setFormData({ ...formData, nextBatch: e.target.value })}
-                  placeholder="e.g. Oct 15, 2026"
+                  type="date"
+                  value={toDateInputValue(formData.nextBatch)}
+                  onChange={e => handleNextBatchChange(e.target.value)}
                   className={inputClass}
                 />
               </div>
@@ -634,9 +660,9 @@ const EditTrip = () => {
                     className={`${inputClass} p-3 text-sm`}
                   >
                     <option value="" className="bg-slate-900">Select date</option>
-                    {(formData.departureDates || []).filter(Boolean).map((date, index) => (
+                    {(formData.departureDates || []).map((date, index) => date ? (
                       <option key={`${date}-${index}`} value={index} className="bg-slate-900">{date}</option>
-                    ))}
+                    ) : null)}
                   </select>
                 </div>
                 <div className="space-y-2">

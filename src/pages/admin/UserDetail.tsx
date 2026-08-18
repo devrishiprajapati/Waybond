@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, ClipboardList, Mail, MapPin, MessageSquareText, Phone, ShieldCheck, Star, UserRound, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, CalendarDays, ClipboardList, CreditCard, Mail, MapPin, MessageSquareText, Phone, ShieldCheck, Star, UserRound, type LucideIcon } from 'lucide-react'
 
 type UserDetailData = {
   user: {
@@ -16,14 +16,19 @@ type UserDetailData = {
   testimonials: Array<{ id: string; trip: string; review: string; rating: number; createdAt: string }>
 }
 
+const PAYMENT_STATUS_OPTIONS = ['Online', 'Cash', 'Cancelled', 'Pending Payment', 'Paid', 'Failed', 'Refunded', 'Partially Paid']
 const formatDate = (value?: string) => value ? new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not available'
 const profileValue = (profile: Record<string, unknown> | undefined, key: string) => String(profile?.[key] || 'Not provided')
+const bookingText = (booking: Record<string, unknown>, key: string, fallback = '') => String(booking[key] || fallback)
+const bookingDbId = (booking: Record<string, unknown>) => bookingText(booking, 'bookingDbId', bookingText(booking, 'id'))
 
 export default function AdminUserDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [data, setData] = useState<UserDetailData | null>(null)
   const [error, setError] = useState('')
+  const [paymentError, setPaymentError] = useState('')
+  const [updatingPaymentId, setUpdatingPaymentId] = useState('')
 
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
@@ -66,6 +71,33 @@ export default function AdminUserDetail() {
     { label: 'Profile details', value: details.filter(([, value]) => value !== 'Not provided').length, Icon: UserRound }
   ]
 
+  const handlePaymentStatusChange = async (booking: Record<string, unknown>, paymentStatus: string) => {
+    const currentBookingDbId = bookingDbId(booking)
+    if (!currentBookingDbId) return
+
+    setPaymentError('')
+    setUpdatingPaymentId(currentBookingDbId)
+
+    try {
+      const response = await fetch(`/api/bookings/${currentBookingDbId}/payment-status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentStatus })
+      })
+      const updatedBooking = await response.json()
+      if (!response.ok) throw new Error(updatedBooking.message || 'Unable to update payment status.')
+
+      setData((current) => current ? {
+        ...current,
+        bookings: current.bookings.map((item) => bookingDbId(item) === currentBookingDbId ? updatedBooking : item)
+      } : current)
+    } catch (updateError) {
+      setPaymentError(updateError instanceof Error ? updateError.message : 'Unable to update payment status.')
+    } finally {
+      setUpdatingPaymentId('')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white text-white px-6 md:px-10 lg:px-16 pt-32 pb-20">
       <div className="max-w-[1500px] mx-auto">
@@ -82,7 +114,13 @@ export default function AdminUserDetail() {
 
         <section className="mb-7"><h2 className="text-2xl font-sans font-black uppercase italic text-white mb-4">Personal <span className="text-secondary">Details</span></h2><div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">{details.map(([label, value, Icon]) => <div key={label} className="liquid-glass-dark border border-white/10 rounded-2xl p-5"><Icon size={18} className="text-secondary mb-4" /><p className="text-[9px] text-white/35 font-black uppercase tracking-[0.16em] mb-2">{label}</p><p className="text-sm text-white/80 font-semibold break-words">{value}</p></div>)}</div></section>
 
-        <section className="mb-7"><h2 className="text-2xl font-sans font-black uppercase italic text-white mb-4">Booked <span className="text-secondary">Trips</span></h2><div className="space-y-4">{bookings.length ? bookings.map((booking, index) => <article key={String(booking.id || index)} className="liquid-glass-dark border border-white/10 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4"><div><p className="text-lg font-sans font-black uppercase italic text-white">{String(booking.title || booking.tripTitle || 'WayBond Trip')}</p><p className="text-sm text-white/50 mt-2">{String(booking.location || booking.destination || 'Location pending')}</p></div><div className="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-[0.14em]"><span className="px-3 py-2 rounded-full bg-secondary/15 text-secondary">{String(booking.status || 'Booked')}</span><span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{String(booking.bookingId || `Booking ${index + 1}`)}</span><span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{String(booking.travelers || 1)} traveller(s)</span></div></article>) : <div className="liquid-glass-dark border border-white/10 rounded-2xl p-8 text-white/45">No booked trips yet.</div>}</div></section>
+        <section className="mb-7"><div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4"><h2 className="text-2xl font-sans font-black uppercase italic text-white">Booked <span className="text-secondary">Trips</span></h2>{paymentError && <p className="text-xs font-bold text-red-300">{paymentError}</p>}</div><div className="space-y-4">{bookings.length ? bookings.map((booking, index) => {
+          const currentBookingDbId = bookingDbId(booking)
+          const paymentStatus = bookingText(booking, 'paymentStatus', 'Pending Payment')
+          const isUpdating = updatingPaymentId === currentBookingDbId
+
+          return <article key={currentBookingDbId || String(index)} className="liquid-glass-dark border border-white/10 rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-5"><div><p className="text-lg font-sans font-black uppercase italic text-white">{bookingText(booking, 'title', bookingText(booking, 'tripTitle', 'WayBond Trip'))}</p><p className="text-sm text-white/50 mt-2">{bookingText(booking, 'location', bookingText(booking, 'destination', 'Location pending'))}</p><div className="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-[0.14em] mt-4"><span className="px-3 py-2 rounded-full bg-secondary/15 text-secondary">{bookingText(booking, 'status', 'Booked')}</span><span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{bookingText(booking, 'bookingId', `Booking ${index + 1}`)}</span><span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{bookingText(booking, 'travelers', '1')} traveller(s)</span></div></div><label className="w-full xl:w-72"><span className="mb-2 flex items-center gap-2 text-[9px] text-white/40 font-black uppercase tracking-[0.18em]"><CreditCard size={14} className="text-secondary" /> Payment status</span><select disabled={isUpdating} value={paymentStatus} onChange={(event) => void handlePaymentStatusChange(booking, event.target.value)} className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 px-4 text-sm text-white outline-none focus:border-secondary disabled:opacity-60">{PAYMENT_STATUS_OPTIONS.map((status) => <option key={status} value={status}>{status}</option>)}</select>{isUpdating && <span className="mt-2 block text-[9px] font-black uppercase tracking-[0.16em] text-white/40">Updating...</span>}</label></article>
+        }) : <div className="liquid-glass-dark border border-white/10 rounded-2xl p-8 text-white/45">No booked trips yet.</div>}</div></section>
 
         <section><h2 className="text-2xl font-sans font-black uppercase italic text-white mb-4">User <span className="text-secondary">Testimonials</span></h2><div className="grid grid-cols-1 lg:grid-cols-2 gap-4">{testimonials.length ? testimonials.map((testimonial) => <article key={testimonial.id} className="liquid-glass-dark border border-white/10 rounded-2xl p-5"><p className="text-secondary text-[10px] font-black uppercase tracking-[0.16em] mb-3">{testimonial.trip}</p><p className="text-white/75 italic leading-relaxed">&ldquo;{testimonial.review}&rdquo;</p><div className="flex items-center justify-between border-t border-white/10 mt-5 pt-4"><span className="flex gap-1">{Array.from({ length: 5 }).map((_, index) => <Star key={index} size={14} className={index < testimonial.rating ? 'text-secondary fill-secondary' : 'text-white/15'} />)}</span><span className="text-[9px] text-white/35 font-black uppercase tracking-[0.14em]">{formatDate(testimonial.createdAt)}</span></div></article>) : <div className="liquid-glass-dark border border-white/10 rounded-2xl p-8 text-white/45">No testimonials yet.</div>}</div></section>
       </div>
