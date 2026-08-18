@@ -94,6 +94,7 @@ const AdminManagement = () => {
       permissions: [],
       isActive: true
     })
+    setShowPassword(false)
     setIsModalOpen(true)
   }
 
@@ -107,6 +108,7 @@ const AdminManagement = () => {
       permissions: admin.permissions,
       isActive: admin.isActive
     })
+    setShowPassword(false)
     setIsModalOpen(true)
   }
 
@@ -148,20 +150,26 @@ const AdminManagement = () => {
       }
 
       await loadData()
-      setIsModalOpen(false)
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        role: 'ADMIN',
-        permissions: [],
-        isActive: true
-      })
+      closeModal()
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to save admin')
     } finally {
       setLoading(false)
     }
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setShowPassword(false)
+    setEditingAdmin(null)
+    setFormData({
+      name: '',
+      email: '',
+      password: '',
+      role: 'ADMIN',
+      permissions: [],
+      isActive: true
+    })
   }
 
   const handleDelete = async (admin: Admin) => {
@@ -295,11 +303,9 @@ const AdminManagement = () => {
                     <h3 className="text-2xl font-bungee font-black uppercase italic tracking-tighter text-white">
                       {admin.name}
                     </h3>
-                    {admin.role === 'MASTER_ADMIN' && (
-                      <span className="text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full bg-primary/20 text-primary border border-primary/30">
-                        Master Admin
-                      </span>
-                    )}
+                    <span className="text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                      {admin.role}
+                    </span>
                     {!admin.isActive && (
                       <span className="text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
                         Inactive
@@ -397,7 +403,7 @@ const AdminManagement = () => {
                 </p>
               </div>
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeModal}
                 className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all"
               >
                 <X size={20} />
@@ -463,18 +469,18 @@ const AdminManagement = () => {
               {/* Role */}
               <div className="space-y-2">
                 <label className="text-[10px] uppercase font-black text-white/60 tracking-[0.2em] ml-4">
-                  Role *
+                  Role Name *
                 </label>
-                <select
+                <input
+                  type="text"
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as 'ADMIN' | 'MASTER_ADMIN' })}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white outline-none focus:border-secondary transition-all"
-                >
-                  <option value="ADMIN" className="bg-slate-800">Admin</option>
-                  <option value="MASTER_ADMIN" className="bg-slate-800">Master Admin</option>
-                </select>
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value.toUpperCase() })}
+                  placeholder="Enter role name (e.g., ADMIN, MANAGER, EDITOR)"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white placeholder:text-white/25 outline-none focus:border-secondary transition-all uppercase"
+                  required
+                />
                 <p className="text-white/30 text-xs font-medium italic ml-4 mt-2">
-                  Master Admin has full access to all features including admin management
+                  Enter a custom role name. Common roles: ADMIN, MANAGER, EDITOR, VIEWER
                 </p>
               </div>
 
@@ -482,7 +488,7 @@ const AdminManagement = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <label className="text-[10px] uppercase font-black text-white/60 tracking-[0.2em] ml-4">
-                    Permissions
+                    Permissions ({formData.permissions.length} selected)
                   </label>
                   <div className="flex gap-2">
                     <button
@@ -502,37 +508,80 @@ const AdminManagement = () => {
                   </div>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3">
-                  {permissions.map(perm => (
-                    <label
-                      key={perm.key}
-                      className="flex items-start gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-secondary/30 transition-all cursor-pointer group"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.permissions.includes(perm.key)}
-                        onChange={() => togglePermission(perm.key)}
-                        className="mt-1 w-5 h-5 rounded border-2 border-white/20 bg-white/5 checked:bg-secondary checked:border-secondary cursor-pointer"
-                      />
-                      <div className="flex-grow">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-black text-white group-hover:text-secondary transition-colors">
-                            {perm.label}
-                          </span>
-                          {formData.permissions.includes(perm.key) && (
+                {/* Selected Permissions Display */}
+                {formData.permissions.length > 0 && (
+                  <div className="bg-secondary/10 border border-secondary/20 rounded-2xl p-4">
+                    <p className="text-[9px] uppercase font-black text-secondary tracking-[0.2em] mb-3">
+                      Selected Features
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.permissions.map(permKey => {
+                        const perm = permissions.find(p => p.key === permKey)
+                        return (
+                          <div
+                            key={permKey}
+                            className="flex items-center gap-2 bg-secondary/20 border border-secondary/30 rounded-xl px-3 py-2"
+                          >
                             <CheckCircle2 size={14} className="text-secondary" />
-                          )}
+                            <span className="text-xs font-black text-white">
+                              {perm?.label || permKey}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => togglePermission(permKey)}
+                              className="ml-1 text-white/60 hover:text-red-400 transition-colors"
+                              title="Remove permission"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Available Permissions to Add */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-3">
+                  <p className="text-[9px] uppercase font-black text-white/40 tracking-[0.2em] mb-3">
+                    {formData.permissions.length === 0 ? 'Select Features' : 'Add More Features'}
+                  </p>
+                  {permissions
+                    .filter(perm => !formData.permissions.includes(perm.key))
+                    .map(perm => (
+                      <label
+                        key={perm.key}
+                        className="flex items-start gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-secondary/30 transition-all cursor-pointer group"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={false}
+                          onChange={() => togglePermission(perm.key)}
+                          className="mt-1 w-5 h-5 rounded border-2 border-white/20 bg-white/5 checked:bg-secondary checked:border-secondary cursor-pointer"
+                        />
+                        <div className="flex-grow">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-black text-white group-hover:text-secondary transition-colors">
+                              {perm.label}
+                            </span>
+                          </div>
+                          <p className="text-xs text-white/40 font-medium mt-1">{perm.description}</p>
                         </div>
-                        <p className="text-xs text-white/40 font-medium mt-1">{perm.description}</p>
-                      </div>
-                    </label>
-                  ))}
+                      </label>
+                    ))}
+                  
+                  {permissions.filter(perm => !formData.permissions.includes(perm.key)).length === 0 && (
+                    <div className="text-center py-6">
+                      <CheckCircle2 className="text-green-400 mx-auto mb-3" size={32} />
+                      <p className="text-sm text-white/60 font-medium">All permissions selected!</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
                   <AlertCircle size={18} className="text-blue-400 mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-blue-300/90 font-medium leading-relaxed">
-                    Select the features this admin can access. Master Admins automatically have access to all features including admin management.
+                    Select the features this admin can access. You can add or remove permissions anytime.
                   </p>
                 </div>
               </div>
@@ -557,7 +606,7 @@ const AdminManagement = () => {
               <div className="flex gap-4 pt-4">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeModal}
                   className="flex-1 h-12 rounded-2xl bg-white/5 text-white border border-white/10 hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-[0.16em]"
                 >
                   Cancel
