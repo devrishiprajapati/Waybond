@@ -71,6 +71,15 @@ const parseDateOnly = (value) => {
   const date = new Date(text)
   return Number.isNaN(date.getTime()) ? null : date
 }
+const datesMatch = (left, right) => {
+  const leftText = normalizeText(left)
+  const rightText = normalizeText(right)
+  if (!leftText || !rightText) return false
+  if (leftText === rightText) return true
+  const leftDate = parseDateOnly(leftText)
+  const rightDate = parseDateOnly(rightText)
+  return Boolean(leftDate && rightDate && leftDate.getTime() === rightDate.getTime())
+}
 const formatTripDate = (value) => {
   const text = normalizeText(value)
   if (!text) return 'To be announced'
@@ -210,7 +219,18 @@ const sendTripDateChangeEmail = async ({ booking, user, tripTitle, oldDate, newD
   return { sent: true, skipped: false }
 }
 
-const getTripDateChangePlan = (oldPayload, newPayload) => {
+const getTripDateChangePlan = (oldPayload, newPayload, explicitDateChange) => {
+  const explicitOldDate = normalizeText(explicitDateChange?.oldDate)
+  const explicitNewDate = normalizeText(explicitDateChange?.newDate)
+  if (explicitOldDate && explicitNewDate && !datesMatch(explicitOldDate, explicitNewDate)) {
+    return {
+      oldDate: explicitOldDate,
+      newDate: explicitNewDate,
+      changedDates: new Map([[explicitOldDate, explicitNewDate]]),
+      appliesToAllActiveBookings: false
+    }
+  }
+
   const oldDate = getTripDate(oldPayload)
   const newDate = getTripDate(newPayload)
   if (oldDate !== newDate) return { oldDate, newDate, changedDates: new Map(), appliesToAllActiveBookings: true }
@@ -227,8 +247,15 @@ const getTripDateChangePlan = (oldPayload, newPayload) => {
   return { oldDate, newDate, changedDates, appliesToAllActiveBookings: false }
 }
 
-const updateBookingsForTripDate = async ({ tripId, tripTitle, oldPayload, newPayload }) => {
-  const dateChange = getTripDateChangePlan(oldPayload, newPayload)
+const getMappedDateChange = (date, changedDates) => {
+  for (const [oldDate, newDate] of changedDates.entries()) {
+    if (datesMatch(date, oldDate)) return { oldDate, newDate }
+  }
+  return null
+}
+
+const updateBookingsForTripDate = async ({ tripId, tripTitle, oldPayload, newPayload, explicitDateChange }) => {
+  const dateChange = getTripDateChangePlan(oldPayload, newPayload, explicitDateChange)
   if (!dateChange.appliesToAllActiveBookings && dateChange.changedDates.size === 0) {
     return { updated: 0, emailsSent: 0, emailFailures: 0, oldDate: dateChange.oldDate, newDate: dateChange.newDate }
   }
@@ -243,22 +270,26 @@ const updateBookingsForTripDate = async ({ tripId, tripTitle, oldPayload, newPay
 
   const targetBookings = activeBookings.map((booking) => {
     const bookingOldDate = normalizeText(booking.payload?.nextBatch)
-    const bookingNewDate = dateChange.appliesToAllActiveBookings
-      ? dateChange.newDate
-      : dateChange.changedDates.get(bookingOldDate)
-    return bookingNewDate ? { booking, oldDate: bookingOldDate || dateChange.oldDate, newDate: bookingNewDate } : null
+    if (dateChange.appliesToAllActiveBookings) {
+      return dateChange.newDate ? { booking, oldDate: bookingOldDate || dateChange.oldDate, newDate: dateChange.newDate } : null
+    }
+    const mappedDateChange = getMappedDateChange(bookingOldDate, dateChange.changedDates)
+    return mappedDateChange ? { booking, oldDate: bookingOldDate || mappedDateChange.oldDate, newDate: mappedDateChange.newDate } : null
   }).filter(Boolean)
 
   if (!targetBookings.length) {
     return { updated: 0, emailsSent: 0, emailFailures: 0, oldDate: dateChange.oldDate, newDate: dateChange.newDate }
   }
 
-  await prisma.$transaction(targetBookings.map(({ booking, newDate }) => prisma.booking.update({
+  await prisma.$transaction(targetBookings.map(({ booking, oldDate, newDate }) => prisma.booking.update({
     where: { id: booking.id },
     data: {
       payload: {
         ...booking.payload,
         nextBatch: newDate,
+        departureDates: Array.isArray(booking.payload?.departureDates)
+          ? booking.payload.departureDates.map((date) => datesMatch(date, oldDate) ? newDate : date)
+          : booking.payload?.departureDates,
         previousBatch: booking.payload?.nextBatch,
         tripDateUpdatedAt: new Date().toISOString()
       }
@@ -638,13 +669,15 @@ app.put('/api/trips/:id', async (req, res, next) => {
     const id = Number(req.params.id)
     const current = await prisma.trip.findUnique({ where: { id } })
     if (!current) return res.status(404).json({ message: 'Not found' })
-    const nextPayload = { ...current.payload, ...req.body }
+    const { _confirmedDateChange, ...requestPayload } = req.body
+    const nextPayload = { ...current.payload, ...requestPayload }
     const updatedTrip = await prisma.trip.update({ where: { id }, data: { payload: nextPayload } })
     const notificationResult = await updateBookingsForTripDate({
       tripId: id,
       tripTitle: nextPayload.title,
       oldPayload: current.payload,
-      newPayload: nextPayload
+      newPayload: nextPayload,
+      explicitDateChange: _confirmedDateChange
     })
     if (notificationResult.updated > 0) {
       console.log('[Trip Date Update]', {

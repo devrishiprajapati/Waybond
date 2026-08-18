@@ -7,7 +7,7 @@ import { CATEGORIES } from '../lib/trips'
 import { getTrips, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 import { useWishlist } from '../lib/wishlist'
-import { formatDateOnly } from '../lib/date'
+import { formatDateOnly, parseDateOnly } from '../lib/date'
 
 const experienceFilters = [
   { key: 'monsoon', label: 'Monsoon ', icon: '⛰️' },
@@ -15,6 +15,23 @@ const experienceFilters = [
   { key: 'road', label: 'Road ', icon: '🚙' },
   { key: 'snow', label: 'Snow ', icon: '❄️' },
 ] as const
+
+const getDepartureOptions = (trip: any) => {
+  const dates = [
+    trip.nextBatch,
+    ...(Array.isArray(trip.departureDates) ? trip.departureDates : [])
+  ]
+
+  return Array.from(new Set(dates.map((date) => String(date || '').trim()).filter(Boolean)))
+}
+
+const getMonthKey = (date: string) => {
+  const parsed = parseDateOnly(date)
+  if (!parsed) return ''
+  const year = parsed.getFullYear()
+  const month = String(parsed.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
+}
 
 const Discover = () => {
   const [trips, setTrips] = useState<any[]>([])
@@ -223,7 +240,8 @@ const Discover = () => {
             <div className={`grid grid-cols-1 md:grid-cols-2 ${isFiltersOpen ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-3 xl:grid-cols-4'} gap-6 transition-all duration-700`}>
               <AnimatePresence mode="popLayout">
                 {filteredTrips.map((trip) => {
-                  const selectedDeparture = selectedDepartures[trip.id] || trip.departureDates?.[0]
+                  const departureOptions = getDepartureOptions(trip)
+                  const selectedDeparture = selectedDepartures[trip.id] || departureOptions[0]
                   const isWishlisted = isInList(trip.id)
 
                   return (
@@ -294,13 +312,14 @@ const Discover = () => {
 
                           {/* Month tabs and dates */}
                           {(() => {
-                            const dates = trip.departureDates || []
+                            const dates = departureOptions
                             if (!dates.length) return <p className="text-[7px] text-white/30">No dates available</p>
 
                             // Create month groups: { "2026-08": ["2026-08-05", "2026-08-10", ...] }
                             const monthGroups: Record<string, string[]> = {}
                             dates.forEach(date => {
-                              const monthKey = date.slice(0, 7) // "2026-08"
+                              const monthKey = getMonthKey(date)
+                              if (!monthKey) return
                               if (!monthGroups[monthKey]) {
                                 monthGroups[monthKey] = []
                               }
@@ -315,13 +334,14 @@ const Discover = () => {
                             // Get sorted month keys
                             const sortedMonths = Object.keys(monthGroups).sort()
                             const firstMonth = sortedMonths[0]
+                            if (!firstMonth) return <p className="text-[7px] text-white/30">{dates[0]}</p>
 
                             // Get or set current selected month
                             let currentSelectedMonth = firstMonth
                             let currentSelectedDate = selectedDepartures[trip.id]
 
                             if (currentSelectedDate) {
-                              const dateMonthKey = currentSelectedDate.slice(0, 7)
+                              const dateMonthKey = getMonthKey(currentSelectedDate)
                               // Make sure month exists in data
                               if (monthGroups[dateMonthKey]) {
                                 currentSelectedMonth = dateMonthKey
@@ -377,7 +397,8 @@ const Discover = () => {
                                 <div className="flex gap-1.5 flex-wrap">
                                   {datesInMonth && datesInMonth.length > 0 ? (
                                     datesInMonth.map(date => {
-                                      const day = date.slice(8, 10) // Get DD from YYYY-MM-DD
+                                      const parsedDate = parseDateOnly(date)
+                                      const day = parsedDate ? String(parsedDate.getDate()).padStart(2, '0') : date
                                       const isSelected = currentSelectedDate === date
 
                                       return (
