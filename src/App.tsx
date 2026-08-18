@@ -32,6 +32,7 @@ import AdminGallery from './pages/admin/Gallery'
 import AdminTravelStories from './pages/admin/TravelStories'
 import AdminTeamMembers from './pages/admin/TeamMembers'
 import AdminManagement from './pages/admin/AdminManagement'
+import DataFilters from './pages/admin/DataFilters'
 import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
 import SafetyGuidelines from './pages/SafetyGuidelines'
@@ -92,6 +93,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
       <Route path="/gallery" element={<AdminGallery />} />
       <Route path="/team-members" element={<AdminTeamMembers />} />
       <Route path="/admins" element={<AdminManagement />} />
+      <Route path="/data-filters" element={<DataFilters />} />
       <Route path="/hero" element={<EditHero />} />
       <Route path="/edit/:id" element={<EditTrip />} />
       <Route path="/new" element={<EditTrip />} />
@@ -106,6 +108,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
       <Route path="/admin/gallery" element={<AdminGallery />} />
       <Route path="/admin/team-members" element={<AdminTeamMembers />} />
       <Route path="/admin/admins" element={<AdminManagement />} />
+      <Route path="/admin/data-filters" element={<DataFilters />} />
       <Route path="/admin/hero" element={<EditHero />} />
       <Route path="/admin/edit/:id" element={<EditTrip />} />
       <Route path="/admin/new" element={<EditTrip />} />

@@ -13,7 +13,8 @@ import {
   UserCog,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react'
 
 type Permission = {
@@ -47,7 +48,7 @@ const AdminManagement = () => {
     name: '',
     email: '',
     password: '',
-    role: 'ADMIN' as 'ADMIN' | 'MASTER_ADMIN',
+    role: 'ADMIN' as string,
     permissions: [] as string[],
     isActive: true
   })
@@ -214,9 +215,12 @@ const AdminManagement = () => {
 
   return (
     <div className="min-h-screen bg-white text-white p-6 md:p-10 lg:p-12">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto pt-20">
+        {/* Back to Dashboard Button */}
+       <a className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all" href="/admin/dashboard" data-discover="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-arrow-left mr-2"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg> Back to Dashboard</a>
+
         {/* Header */}
-        <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10 pt-20">
+        <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10">
           <div className="space-y-3">
             <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Access Control</span>
             <h1 className="text-3xl md:text-5xl font-bungee font-black tracking-tighter uppercase italic leading-none">
