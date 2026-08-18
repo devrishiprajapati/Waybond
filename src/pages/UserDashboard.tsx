@@ -19,6 +19,7 @@ import { registerUser } from '../lib/adminStorage'
 import { getUser, logout } from '../lib/auth'
 import { useWishlist } from '../lib/wishlist'
 import { createSlug } from '../lib/dataService'
+import { formatDateOnly } from '../lib/date'
 
 const UserDashboard = () => {
   const [user, setUser] = useState<any>(null)
@@ -487,7 +488,7 @@ const UserDashboard = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {[
-                            { label: 'Next Batch', value: trip.nextBatch },
+                            { label: 'Trip Start', value: formatDateOnly(trip.nextBatch || 'TBD') },
                             { label: 'Travelers', value: `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}` },
                             { label: 'Booked On', value: trip.bookedOn }
                           ].map((item) => (
@@ -580,7 +581,7 @@ const UserDashboard = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {[
-                            { label: 'Next Batch', value: trip.nextBatch },
+                            { label: 'Trip Start', value: formatDateOnly(trip.nextBatch || 'TBD') },
                             { label: 'Travelers', value: `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}` },
                             { label: 'Cancelled On', value: trip.cancelledOn }
                           ].map((item) => (

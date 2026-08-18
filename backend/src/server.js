@@ -36,6 +36,256 @@ const mailTransport = process.env.EMAIL_HOST && process.env.EMAIL_USER && proces
   })
   : null
 
+const ADMIN_PERMISSIONS = [
+  'manage_trips',
+  'manage_hero',
+  'manage_testimonials',
+  'manage_team_members',
+  'manage_users',
+  'manage_gallery',
+  'manage_travel_stories',
+  'view_bookings'
+]
+
+const MASTER_ADMIN_PERMISSIONS = [
+  ...ADMIN_PERMISSIONS,
+  'manage_admins'
+]
+
+const normalizeText = (value) => String(value || '').trim()
+const escapeHtml = (value) => normalizeText(value)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;')
+
+const getTripDate = (payload) => normalizeText(payload?.nextBatch || payload?.departureDates?.[0] || '')
+const getDepartureDates = (payload) => Array.isArray(payload?.departureDates)
+  ? payload.departureDates.map(normalizeText).filter(Boolean)
+  : []
+const parseDateOnly = (value) => {
+  const text = normalizeText(value)
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text)
+  if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  const date = new Date(text)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+const formatTripDate = (value) => {
+  const text = normalizeText(value)
+  if (!text) return 'To be announced'
+  const date = parseDateOnly(text)
+  return !date
+    ? text
+    : date.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+const toMoneyNumber = (value) => Number(String(value || '').replace(/[^\d.]/g, '')) || 0
+const escapePdfText = (value) => normalizeText(value)
+  .replace(/\\/g, '\\\\')
+  .replace(/\(/g, '\\(')
+  .replace(/\)/g, '\\)')
+  .replace(/[^\x20-\x7E]/g, '')
+
+const createPdfBuffer = (lines) => {
+  const content = [
+    'BT',
+    '/F1 11 Tf',
+    '50 790 Td',
+    '14 TL',
+    ...lines.flatMap((line, index) => [
+      index === 0 ? '/F1 18 Tf' : index === 1 ? '/F1 11 Tf' : '',
+      `(${escapePdfText(line)}) Tj`,
+      'T*'
+    ]).filter(Boolean),
+    'ET'
+  ].join('\n')
+
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    `<< /Length ${Buffer.byteLength(content, 'utf8')} >>\nstream\n${content}\nendstream`
+  ]
+
+  let pdf = '%PDF-1.4\n'
+  const offsets = [0]
+  objects.forEach((object, index) => {
+    offsets.push(Buffer.byteLength(pdf, 'utf8'))
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`
+  })
+  const xrefOffset = Buffer.byteLength(pdf, 'utf8')
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`
+  pdf += offsets.slice(1).map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`).join('')
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`
+  return Buffer.from(pdf, 'utf8')
+}
+
+const createInvoicePdf = ({ booking, user, payloadOverride = {} }) => {
+  const bookingData = { ...(booking.payload || {}), ...payloadOverride }
+  const travelers = Number(bookingData.travelers || 1)
+  const pricePerPerson = toMoneyNumber(bookingData.price)
+  const subtotal = pricePerPerson * travelers
+  const gst = Math.round(subtotal * 0.05)
+  const total = subtotal + gst
+  const invoiceNumber = `WB-${bookingData.bookingId || booking.id}`
+
+  return createPdfBuffer([
+    'WAYBOND INVOICE',
+    `Invoice No: ${invoiceNumber}`,
+    `Issued On: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+    '',
+    `Booking ID: ${bookingData.bookingId || booking.id}`,
+    `Booking Status: ${bookingData.status || 'Confirmed'}`,
+    `Payment Status: ${bookingData.paymentStatus || 'Paid'}`,
+    '',
+    `Customer: ${user?.name || 'Traveller'}`,
+    `Email: ${user?.email || 'Not available'}`,
+    '',
+    `Trip: ${bookingData.title || 'WayBond Trip'}`,
+    `Location: ${bookingData.location || 'Not available'}`,
+    `Duration: ${bookingData.duration || 'Not available'}`,
+    `Trip Date: ${formatTripDate(bookingData.nextBatch)}`,
+    `Travellers: ${travelers}`,
+    '',
+    `Price Per Person: INR ${pricePerPerson.toLocaleString('en-IN')}`,
+    `Subtotal: INR ${subtotal.toLocaleString('en-IN')}`,
+    `GST (5%): INR ${gst.toLocaleString('en-IN')}`,
+    `Total Amount: INR ${total.toLocaleString('en-IN')}`,
+    '',
+    'Thank you for booking with WayBond.',
+    'Your booking remains confirmed with WayBond.'
+  ])
+}
+
+const sendTripDateChangeEmail = async ({ booking, user, tripTitle, oldDate, newDate }) => {
+  if (!mailTransport || !user?.email) return { sent: false, skipped: true }
+
+  const safeName = escapeHtml(user.name || 'Traveller')
+  const subjectTripTitle = normalizeText(tripTitle || booking.payload?.title || 'WayBond Trip')
+  const safeTripTitle = escapeHtml(subjectTripTitle)
+  const safeBookingId = escapeHtml(booking.payload?.bookingId || booking.id)
+  const safeOldDate = escapeHtml(formatTripDate(oldDate))
+  const safeNewDate = escapeHtml(formatTripDate(newDate))
+  const invoicePdf = createInvoicePdf({ booking, user, payloadOverride: { nextBatch: newDate } })
+
+  await mailTransport.sendMail({
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    to: user.email,
+    subject: `WayBond Trip Date Updated - ${subjectTripTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; background: #f8fafc; color: #1e293b;">
+        <div style="background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); padding: 34px 24px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 30px; font-weight: 900;">WAYBOND</h1>
+          <p style="color: rgba(255,255,255,0.82); margin: 8px 0 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px;">Trip Date Update</p>
+        </div>
+        <div style="padding: 30px 22px;">
+          <div style="background: #ffffff; border-radius: 14px; padding: 28px; border: 1px solid #e2e8f0; box-shadow: 0 8px 24px rgba(15,23,42,0.08);">
+            <p style="margin: 0 0 18px; font-size: 16px;">Dear ${safeName},</p>
+            <p style="margin: 0 0 24px; line-height: 1.6; color: #475569;">
+              Your confirmed booking for <strong>${safeTripTitle}</strong> has a revised trip date.
+            </p>
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 10px; padding: 18px 20px; margin-bottom: 24px;">
+              <p style="margin: 0 0 10px; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800;">Booking ID</p>
+              <p style="margin: 0 0 18px; color: #0f172a; font-size: 16px; font-weight: 800;">${safeBookingId}</p>
+              <p style="margin: 0 0 8px; color: #64748b;"><strong>Previous date:</strong> ${safeOldDate}</p>
+              <p style="margin: 0; color: #0f172a; font-size: 17px;"><strong>New date:</strong> ${safeNewDate}</p>
+            </div>
+            <p style="margin: 0; line-height: 1.6; color: #475569;">
+              Your booking remains confirmed. An updated invoice with the revised trip date is attached to this email.
+            </p>
+          </div>
+          <p style="text-align: center; color: #64748b; font-size: 12px; margin: 22px 0 0;">
+            Need help? Contact the WayBond team.
+          </p>
+        </div>
+      </div>
+    `,
+    attachments: [{
+      filename: `WayBond-Invoice-${normalizeText(booking.payload?.bookingId || booking.id)}.pdf`,
+      content: invoicePdf,
+      contentType: 'application/pdf'
+    }]
+  })
+  return { sent: true, skipped: false }
+}
+
+const getTripDateChangePlan = (oldPayload, newPayload) => {
+  const oldDate = getTripDate(oldPayload)
+  const newDate = getTripDate(newPayload)
+  if (oldDate !== newDate) return { oldDate, newDate, changedDates: new Map(), appliesToAllActiveBookings: true }
+
+  const oldDates = getDepartureDates(oldPayload)
+  const newDates = getDepartureDates(newPayload)
+  const changedDates = new Map()
+  const length = Math.max(oldDates.length, newDates.length)
+  for (let index = 0; index < length; index += 1) {
+    if (oldDates[index] && newDates[index] && oldDates[index] !== newDates[index]) {
+      changedDates.set(oldDates[index], newDates[index])
+    }
+  }
+  return { oldDate, newDate, changedDates, appliesToAllActiveBookings: false }
+}
+
+const updateBookingsForTripDate = async ({ tripId, tripTitle, oldPayload, newPayload }) => {
+  const dateChange = getTripDateChangePlan(oldPayload, newPayload)
+  if (!dateChange.appliesToAllActiveBookings && dateChange.changedDates.size === 0) {
+    return { updated: 0, emailsSent: 0, emailFailures: 0, oldDate: dateChange.oldDate, newDate: dateChange.newDate }
+  }
+
+  const bookings = await prisma.booking.findMany({ include: { user: true }, orderBy: { createdAt: 'asc' } })
+  const activeBookings = bookings.filter((booking) => (
+    String(booking.payload?.id) === String(tripId) &&
+    booking.payload?.status !== 'Cancelled'
+  ))
+
+  if (!activeBookings.length) return { updated: 0, emailsSent: 0, emailFailures: 0 }
+
+  const targetBookings = activeBookings.map((booking) => {
+    const bookingOldDate = normalizeText(booking.payload?.nextBatch)
+    const bookingNewDate = dateChange.appliesToAllActiveBookings
+      ? dateChange.newDate
+      : dateChange.changedDates.get(bookingOldDate)
+    return bookingNewDate ? { booking, oldDate: bookingOldDate || dateChange.oldDate, newDate: bookingNewDate } : null
+  }).filter(Boolean)
+
+  if (!targetBookings.length) {
+    return { updated: 0, emailsSent: 0, emailFailures: 0, oldDate: dateChange.oldDate, newDate: dateChange.newDate }
+  }
+
+  await prisma.$transaction(targetBookings.map(({ booking, newDate }) => prisma.booking.update({
+    where: { id: booking.id },
+    data: {
+      payload: {
+        ...booking.payload,
+        nextBatch: newDate,
+        previousBatch: booking.payload?.nextBatch,
+        tripDateUpdatedAt: new Date().toISOString()
+      }
+    }
+  })))
+
+  const mailResults = await Promise.allSettled(targetBookings.map(({ booking, oldDate, newDate }) => sendTripDateChangeEmail({
+    booking,
+    user: booking.user,
+    tripTitle,
+    oldDate,
+    newDate
+  })))
+
+  const emailsSent = mailResults.filter((result) => result.status === 'fulfilled' && result.value.sent).length
+  const emailFailures = mailResults.filter((result) => result.status === 'rejected').length
+  if (emailFailures) console.error(`Trip date update email failures for trip ${tripId}:`, emailFailures)
+
+  return {
+    updated: targetBookings.length,
+    emailsSent,
+    emailFailures,
+    oldDate: dateChange.oldDate,
+    newDate: dateChange.newDate
+  }
+}
+
 app.get('/', (_req, res) => res.json({ service: 'WayBond API', status: 'running', health: '/api/health' }))
 app.get('/api/health', (_req, res) => res.json({ ok: true }))
 
@@ -45,7 +295,7 @@ app.post('/api/enquiry', async (req, res, next) => {
     if (!name?.trim() || !phone?.trim()) return res.status(400).json({ message: 'Name and phone are required.' })
 
     const adminEmail = 'prajapatirishi748@gmail.com'
-    const formattedDate = travelDate ? new Date(travelDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Not specified'
+    const formattedDate = travelDate ? formatTripDate(travelDate) : 'Not specified'
 
     if (mailTransport) {
       await mailTransport.sendMail({
@@ -125,9 +375,7 @@ app.post('/api/booking-details', async (req, res, next) => {
       </tr>
     `).join('')
 
-    const formattedDeparture = departureDate
-      ? new Date(departureDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
-      : 'Not specified'
+    const formattedDeparture = departureDate ? formatTripDate(departureDate) : 'Not specified'
 
     const htmlContent = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff;">
@@ -332,6 +580,21 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
       })
     }
     
+    const masterEmail = process.env.MASTER_ADMIN_EMAIL || 'master@waybond.com'
+    const masterPassword = process.env.MASTER_ADMIN_PASSWORD || 'master123'
+
+    if (email === masterEmail && password === masterPassword) {
+      return res.json({
+        admin: {
+          id: 'waybond-master-admin',
+          name: 'Master Admin',
+          email: masterEmail,
+          role: 'MASTER_ADMIN',
+          permissions: MASTER_ADMIN_PERMISSIONS
+        }
+      })
+    }
+
     // Fallback to environment variable for backward compatibility
     const envEmail = process.env.ADMIN_EMAIL || 'admin@waybond.local'
     const envPassword = process.env.ADMIN_PASSWORD || 'admin123'
@@ -343,16 +606,7 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
           name: 'WayBond Admin',
           email: envEmail,
           role: 'ADMIN',
-          permissions: [
-            'manage_trips',
-            'manage_hero',
-            'manage_testimonials',
-            'manage_team_members',
-            'manage_users',
-            'manage_gallery',
-            'manage_travel_stories',
-            'view_bookings'
-          ]
+          permissions: ADMIN_PERMISSIONS
         }
       })
     }
@@ -384,7 +638,25 @@ app.put('/api/trips/:id', async (req, res, next) => {
     const id = Number(req.params.id)
     const current = await prisma.trip.findUnique({ where: { id } })
     if (!current) return res.status(404).json({ message: 'Not found' })
-    res.json(toTrip(await prisma.trip.update({ where: { id }, data: { payload: { ...current.payload, ...req.body } } })))
+    const nextPayload = { ...current.payload, ...req.body }
+    const updatedTrip = await prisma.trip.update({ where: { id }, data: { payload: nextPayload } })
+    const notificationResult = await updateBookingsForTripDate({
+      tripId: id,
+      tripTitle: nextPayload.title,
+      oldPayload: current.payload,
+      newPayload: nextPayload
+    })
+    if (notificationResult.updated > 0) {
+      console.log('[Trip Date Update]', {
+        tripId: id,
+        oldDate: notificationResult.oldDate,
+        newDate: notificationResult.newDate,
+        bookingsUpdated: notificationResult.updated,
+        emailsSent: notificationResult.emailsSent,
+        emailFailures: notificationResult.emailFailures
+      })
+    }
+    res.json(toTrip(updatedTrip))
   } catch (error) { next(error) }
 })
 
@@ -603,6 +875,7 @@ app.post('/api/payments/verify', async (req, res, next) => {
     if (mailTransport && booking.user?.email) {
       try {
         const bookingData = toBooking({ ...booking, payload })
+        const invoicePdf = createInvoicePdf({ booking: { ...booking, payload }, user: booking.user })
         await mailTransport.sendMail({
           from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
           to: booking.user.email,
@@ -631,7 +904,7 @@ app.post('/api/payments/verify', async (req, res, next) => {
                     <p style="margin: 0 0 10px 0; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Booking Details</p>
                     <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Booking ID:</strong> ${bookingData.bookingId}</p>
                     <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Trip:</strong> ${bookingData.title}</p>
-                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Departure:</strong> ${bookingData.nextBatch}</p>
+                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Departure:</strong> ${formatTripDate(bookingData.nextBatch)}</p>
                     <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Travelers:</strong> ${bookingData.travelers}</p>
                     <p style="margin: 0; color: #1e293b;"><strong>Amount Paid:</strong> ₹${Number(bookingData.price || 0).toLocaleString('en-IN')}</p>
                   </div>
@@ -658,7 +931,12 @@ app.post('/api/payments/verify', async (req, res, next) => {
                 </p>
               </div>
             </div>
-          `
+          `,
+          attachments: [{
+            filename: `WayBond-Invoice-${normalizeText(bookingData.bookingId || booking.id)}.pdf`,
+            content: invoicePdf,
+            contentType: 'application/pdf'
+          }]
         })
         console.log(`Invoice email sent to ${booking.user.email}`)
       } catch (emailError) {

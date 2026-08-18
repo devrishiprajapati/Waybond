@@ -12,6 +12,7 @@ import { getWhatsAppLink } from '../lib/data'
 import { getTripBySlug, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
+import { formatDateOnly } from '../lib/date'
 
 const TripDetails = () => {
   const { slug } = useParams()
@@ -331,7 +332,7 @@ const TripDetails = () => {
                             {sortedMonths.map(monthKey => {
                               const isActive = monthKey === currentSelectedMonth
                               const [year, month] = monthKey.split('-')
-                              const monthName = new Date(`${year}-${month}-01`).toLocaleDateString('en-IN', { month: 'short' })
+                              const monthName = formatDateOnly(`${year}-${month}-01`, { month: 'short' })
 
                               return (
                                 <button

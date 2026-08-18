@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarDays } from 'lucide-react'
+import { formatDateOnly, parseDateOnly } from '../lib/date'
 
 type DepartureDatePickerProps = {
   dates?: string[]
@@ -7,11 +8,11 @@ type DepartureDatePickerProps = {
   onChange: (date: string) => void
 }
 
-const toDate = (date: string) => new Date(`${date}T00:00:00`)
-const monthKey = (date: string) => toDate(date).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })
+const toDate = (date: string) => parseDateOnly(date)
+const monthKey = (date: string) => formatDateOnly(date, { month: 'short', year: 'numeric' })
 
 export default function DepartureDatePicker({ dates = [], value, onChange }: DepartureDatePickerProps) {
-  const validDates = useMemo(() => dates.filter(date => !Number.isNaN(toDate(date).getTime())), [dates])
+  const validDates = useMemo(() => dates.filter(date => toDate(date)), [dates])
   const months = useMemo(() => Array.from(new Set(validDates.map(monthKey))), [validDates])
   const initialMonth = value && validDates.includes(value) ? monthKey(value) : months[0]
   const [activeMonth, setActiveMonth] = useState(initialMonth)
@@ -36,8 +37,8 @@ export default function DepartureDatePicker({ dates = [], value, onChange }: Dep
           const parsed = toDate(date)
           const isSelected = selectedDate === date
           return <button key={date} type="button" onClick={() => onChange(date)} className={`rounded-xl border px-3 py-2 text-left transition-all ${isSelected ? 'border-secondary bg-secondary/10 text-secondary' : 'border-slate-200 bg-white text-slate-600 hover:border-secondary/50'}`}>
-            <span className="block text-base font-black leading-none">{parsed.getDate()}</span>
-            <span className="block mt-1 text-[8px] font-black uppercase tracking-wider">{parsed.toLocaleDateString('en-IN', { weekday: 'short' })}</span>
+            <span className="block text-base font-black leading-none">{parsed?.getDate()}</span>
+            <span className="block mt-1 text-[8px] font-black uppercase tracking-wider">{formatDateOnly(date, { weekday: 'short' })}</span>
           </button>
         })}
       </div>

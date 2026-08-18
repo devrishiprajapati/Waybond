@@ -7,6 +7,7 @@ import { CATEGORIES } from '../lib/trips'
 import { getTrips, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 import { useWishlist } from '../lib/wishlist'
+import { formatDateOnly } from '../lib/date'
 
 const experienceFilters = [
   { key: 'monsoon', label: 'Monsoon ', icon: '⛰️' },
@@ -344,7 +345,7 @@ const Discover = () => {
                                   {sortedMonths.map(monthKey => {
                                     const isActive = monthKey === currentSelectedMonth
                                     const [year, month] = monthKey.split('-')
-                                    const monthName = new Date(`${year}-${month}-01`).toLocaleDateString('en-IN', { month: 'short' })
+                                    const monthName = formatDateOnly(`${year}-${month}-01`, { month: 'short' })
 
                                     return (
                                       <button

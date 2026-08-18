@@ -5,6 +5,7 @@ import { Calendar, Users, MapPin, Clock, Check, IndianRupee, CheckCircle, X, Arr
 import { Helmet } from 'react-helmet-async'
 import { haptics } from '../lib/haptics'
 import { getUser } from '../lib/auth'
+import { formatDateOnly } from '../lib/date'
 
 declare global {
   interface Window {
@@ -211,11 +212,7 @@ const BookingConfirmation = () => {
               <div className="flex items-center text-gray-700">
                 <Calendar size={18} className="mr-3 text-gray-400" />
                 <span className="font-semibold">
-                  {departure ? new Date(departure).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                  }) : 'Date TBD'}
+                  {departure ? formatDateOnly(departure) : 'Date TBD'}
                 </span>
               </div>
               <div className="flex items-center text-gray-700">

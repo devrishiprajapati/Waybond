@@ -58,6 +58,8 @@ const EditTrip = () => {
   })
   const [mediaError, setMediaError] = useState('')
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false })
+  const [confirmedDateIndex, setConfirmedDateIndex] = useState('')
+  const [confirmedDateValue, setConfirmedDateValue] = useState('')
 
   const showToast = (message: string) => {
     setToast({ message, visible: true })
@@ -168,6 +170,34 @@ const EditTrip = () => {
     } catch (error) {
       setMediaError(error instanceof Error ? error.message : 'Unable to save the package.')
     }
+  }
+
+  const handleApplyConfirmedDateChange = () => {
+    const index = Number(confirmedDateIndex)
+    if (!Number.isInteger(index) || index < 0) {
+      setMediaError('Select the confirmed trip date you want to change.')
+      return
+    }
+    if (!confirmedDateValue) {
+      setMediaError('Choose the new confirmed trip date.')
+      return
+    }
+
+    const departureDates = [...(formData.departureDates || [])]
+    const previousDate = departureDates[index]
+    if (!previousDate) {
+      setMediaError('Selected confirmed trip date is not available.')
+      return
+    }
+
+    departureDates[index] = confirmedDateValue
+    setFormData({
+      ...formData,
+      departureDates,
+      nextBatch: formData.nextBatch === previousDate || !formData.nextBatch ? confirmedDateValue : formData.nextBatch
+    })
+    setMediaError('')
+    showToast('Confirmed trip date updated. Save package to notify booked users.')
   }
 
   return (
@@ -583,6 +613,51 @@ const EditTrip = () => {
                 />
               </div>
             </div>
+
+            <div className="rounded-[2rem] border border-secondary/25 bg-secondary/10 p-5 md:p-6 space-y-5">
+              <div>
+                <label className={labelClass}>Change Confirmed Trip Date</label>
+                <p className="text-xs text-white/50 mt-2 ml-2">
+                  Use this when users have already booked a confirmed departure. After you save the package, all confirmed bookings for this changed date are updated and emailed automatically.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3 md:items-end">
+                <div className="space-y-2">
+                  <label className="text-[9px] uppercase font-black text-white/40 tracking-[0.18em] ml-2">Current confirmed date</label>
+                  <select
+                    value={confirmedDateIndex}
+                    onChange={(event) => {
+                      setConfirmedDateIndex(event.target.value)
+                      const selectedDate = formData.departureDates?.[Number(event.target.value)] || ''
+                      setConfirmedDateValue(selectedDate)
+                    }}
+                    className={`${inputClass} p-3 text-sm`}
+                  >
+                    <option value="" className="bg-slate-900">Select date</option>
+                    {(formData.departureDates || []).filter(Boolean).map((date, index) => (
+                      <option key={`${date}-${index}`} value={index} className="bg-slate-900">{date}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] uppercase font-black text-white/40 tracking-[0.18em] ml-2">New date</label>
+                  <input
+                    type="date"
+                    value={confirmedDateValue}
+                    onChange={(event) => setConfirmedDateValue(event.target.value)}
+                    className={`${inputClass} p-3 text-sm`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleApplyConfirmedDateChange}
+                  className="h-12 px-5 rounded-2xl bg-secondary text-white font-black text-[9px] uppercase tracking-[0.16em] hover:bg-secondary/80 transition-all"
+                >
+                  Apply Date
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-3">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>

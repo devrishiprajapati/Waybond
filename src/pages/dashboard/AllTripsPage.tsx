@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Calendar, Clock, MapPin, Package, Download } from 'lucide-react'
 import { getUser } from '../../lib/auth'
+import { formatDateOnly } from '../../lib/date'
 
 interface Trip {
   id: string | number
@@ -199,7 +200,7 @@ const AllTripsPage = () => {
                       {/* Trip Details Grid */}
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {[
-                          { label: 'Next Batch', value: trip.nextBatch },
+                          { label: 'Trip Start', value: formatDateOnly(trip.nextBatch || 'TBD') },
                           {
                             label: 'Travelers',
                             value: `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}`

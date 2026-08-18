@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { MapPin, Clock, ArrowLeft, Package } from 'lucide-react'
 import { getUser } from '../../lib/auth'
+import { formatDateOnly } from '../../lib/date'
 
 const BookedTripsPage = () => {
   const [bookedTrips, setBookedTrips] = useState<any[]>([])
@@ -129,7 +130,7 @@ const BookedTripsPage = () => {
 
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             {[
-                              { label: 'Next Batch', value: trip.nextBatch },
+                              { label: 'Trip Start', value: formatDateOnly(trip.nextBatch || 'TBD') },
                               { label: 'Travelers', value: `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}` },
                               { label: 'Booked On', value: trip.bookedOn }
                             ].map((item) => (
