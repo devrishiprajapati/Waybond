@@ -16,6 +16,30 @@ const toHeroSlide = (record) => ({ id: record.id, ...record.payload })
 
 const toTrendingCard = (record) => ({ id: record.id, ...record.payload })
 const toBooking = (record) => ({ id: record.id, bookingDbId: record.id, ...record.payload })
+const PAYMENT_STATUS_OPTIONS = [
+  'Online',
+  'Cash',
+  'Cancelled',
+  'Pending Payment',
+  'Paid',
+  'Failed',
+  'Refunded',
+  'Partially Paid'
+]
+const PAYMENT_RECORD_STATUSES = {
+  Online: 'PAID',
+  Cash: 'CASH',
+  Cancelled: 'CANCELLED',
+  'Pending Payment': 'PENDING',
+  Paid: 'PAID',
+  Failed: 'FAILED',
+  Refunded: 'REFUNDED',
+  'Partially Paid': 'PARTIALLY_PAID'
+}
+const normalizePaymentStatus = (value) => {
+  const status = String(value || '').trim()
+  return PAYMENT_STATUS_OPTIONS.find((option) => option.toLowerCase() === status.toLowerCase()) || ''
+}
 const publicUser = ({ passwordHash, ...user }) => user
 const hashPassword = (password) => {
   const salt = randomBytes(16).toString('hex')
@@ -789,6 +813,44 @@ app.get('/api/admin/dashboard', async (_req, res, next) => {
   } catch (error) { next(error) }
 })
 
+app.get('/api/admin/payment-updates', async (_req, res, next) => {
+  try {
+    const bookings = await prisma.booking.findMany({
+      include: { user: true },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    const tripMap = new Map()
+    bookings.forEach((booking) => {
+      const payload = booking.payload || {}
+      const tripKey = String(payload.id || payload.tripId || payload.title || 'unknown-trip')
+      const tripTitle = String(payload.title || payload.tripTitle || 'WayBond Trip')
+      const tripLocation = String(payload.location || payload.destination || 'Location pending')
+      const tripDate = String(payload.nextBatch || payload.departure || payload.departureDate || '')
+
+      if (!tripMap.has(tripKey)) {
+        tripMap.set(tripKey, {
+          tripId: tripKey,
+          title: tripTitle,
+          location: tripLocation,
+          nextBatch: tripDate,
+          bookings: []
+        })
+      }
+
+      tripMap.get(tripKey).bookings.push({
+        ...toBooking(booking),
+        user: publicUser(booking.user)
+      })
+    })
+
+    res.json({
+      paymentStatuses: PAYMENT_STATUS_OPTIONS,
+      trips: Array.from(tripMap.values()).sort((a, b) => a.title.localeCompare(b.title))
+    })
+  } catch (error) { next(error) }
+})
+
 app.post('/api/users', async (req, res, next) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase()
@@ -826,6 +888,48 @@ app.put('/api/bookings/:bookingId/cancel', async (req, res, next) => {
       where: { id: req.params.bookingId },
       data: { payload: updatedPayload }
     })
+    res.json(toBooking(updated))
+  } catch (error) { next(error) }
+})
+
+app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
+  try {
+    const paymentStatus = normalizePaymentStatus(req.body.paymentStatus)
+    if (!paymentStatus) {
+      return res.status(400).json({
+        message: `Payment status must be one of: ${PAYMENT_STATUS_OPTIONS.join(', ')}.`
+      })
+    }
+
+    const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId } })
+    if (!booking) return res.status(404).json({ message: 'Booking not found' })
+
+    const updatedPayload = {
+      ...booking.payload,
+      paymentStatus,
+      paymentStatusUpdatedAt: new Date().toISOString()
+    }
+
+    const latestPayment = await prisma.payment.findFirst({
+      where: { bookingId: booking.id },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    const updates = [
+      prisma.booking.update({
+        where: { id: booking.id },
+        data: { payload: updatedPayload }
+      })
+    ]
+
+    if (latestPayment) {
+      updates.push(prisma.payment.update({
+        where: { id: latestPayment.id },
+        data: { status: PAYMENT_RECORD_STATUSES[paymentStatus] }
+      }))
+    }
+
+    const [updated] = await prisma.$transaction(updates)
     res.json(toBooking(updated))
   } catch (error) { next(error) }
 })

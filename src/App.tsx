@@ -28,6 +28,7 @@ import AdminLogin from './pages/admin/Login'
 import AdminTestimonials from './pages/admin/Testimonials'
 import AdminUsers from './pages/admin/Users'
 import AdminUserDetail from './pages/admin/UserDetail'
+import AdminPaymentUpdate from './pages/admin/PaymentUpdate'
 import AdminGallery from './pages/admin/Gallery'
 import AdminTravelStories from './pages/admin/TravelStories'
 import AdminTeamMembers from './pages/admin/TeamMembers'
@@ -89,6 +90,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
       <Route path="/travel-stories" element={<AdminTravelStories />} />
       <Route path="/users" element={<AdminUsers />} />
       <Route path="/users/:id" element={<AdminUserDetail />} />
+      <Route path="/payment-update" element={<AdminPaymentUpdate />} />
       <Route path="/gallery" element={<AdminGallery />} />
       <Route path="/team-members" element={<AdminTeamMembers />} />
       <Route path="/admins" element={<AdminManagement />} />
@@ -103,6 +105,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
       <Route path="/admin/travel-stories" element={<AdminTravelStories />} />
       <Route path="/admin/users" element={<AdminUsers />} />
       <Route path="/admin/users/:id" element={<AdminUserDetail />} />
+      <Route path="/admin/payment-update" element={<AdminPaymentUpdate />} />
       <Route path="/admin/gallery" element={<AdminGallery />} />
       <Route path="/admin/team-members" element={<AdminTeamMembers />} />
       <Route path="/admin/admins" element={<AdminManagement />} />

@@ -19,7 +19,8 @@ import {
   UsersRound,
   Users2,
   Images,
-  Shield
+  Shield,
+  CreditCard
 } from 'lucide-react'
 import { getTrips, deleteTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
@@ -122,6 +123,7 @@ const AdminDashboard = () => {
     { label: 'Testimonials', path: '/admin/testimonials', icon: MessageSquareText, permission: 'manage_testimonials' },
     { label: 'Team Members', path: '/admin/team-members', icon: Users2, permission: 'manage_team_members' },
     { label: 'Users', path: '/admin/users', icon: UsersRound, permission: 'manage_users' },
+    { label: 'Payment Update', path: '/admin/payment-update', icon: CreditCard, permission: 'view_bookings' },
     { label: 'Gallery', path: '/admin/gallery', icon: Images, permission: 'manage_gallery' },
     { label: 'Admin Management', path: '/admin/admins', icon: Shield, permission: 'manage_admins' }
   ]
