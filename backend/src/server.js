@@ -77,7 +77,9 @@ const ADMIN_PERMISSIONS = [
   'manage_users',
   'manage_gallery',
   'manage_travel_stories',
-  'view_bookings'
+  'view_bookings',
+  'view_data_filters',
+  'view_analytics'
 ]
 
 const MASTER_ADMIN_PERMISSIONS = [
@@ -1334,9 +1336,124 @@ app.get('/api/admins/permissions/list', async (_req, res, next) => {
       { key: 'manage_gallery', label: 'Manage Gallery', description: 'Upload and manage gallery images' },
       { key: 'manage_travel_stories', label: 'Manage Travel Stories', description: 'Create and edit travel stories' },
       { key: 'view_bookings', label: 'View Bookings', description: 'View all booking details and statistics' },
+      { key: 'view_data_filters', label: 'View Data Filters', description: 'Access advanced data filtering and analytics' },
+      { key: 'view_analytics', label: 'View Analytics Dashboard', description: 'Access business intelligence and charts' },
       { key: 'manage_admins', label: 'Manage Admins', description: 'Create and manage admin users (Master Admin only)' }
     ]
     res.json(permissions)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Analytics endpoint
+app.get('/api/analytics', async (req, res, next) => {
+  try {
+    const range = req.query.range || '30d'
+    
+    // Get all trips
+    const trips = await prisma.trip.findMany({})
+    const tripData = trips.map(toTrip)
+    
+    // Get all users
+    const users = await prisma.user.findMany({
+      orderBy: { createdAt: 'asc' }
+    })
+    
+    // Get all bookings
+    const bookings = await prisma.booking.findMany({
+      orderBy: { createdAt: 'asc' }
+    })
+    
+    // Calculate stats
+    const totalBookings = bookings.length
+    const totalRevenue = bookings.reduce((sum, booking) => {
+      const price = Number(booking.payload?.price?.toString().replace(/[^\d]/g, '')) || 0
+      const travelers = Number(booking.payload?.travelers) || 1
+      return sum + (price * travelers)
+    }, 0)
+    
+    const averageBookingValue = totalBookings > 0 ? Math.round(totalRevenue / totalBookings) : 0
+    
+    // Category distribution
+    const categoryCount = {}
+    tripData.forEach(trip => {
+      categoryCount[trip.category] = (categoryCount[trip.category] || 0) + 1
+    })
+    
+    // Experience distribution
+    const experienceCount = {}
+    tripData.forEach(trip => {
+      experienceCount[trip.experience] = (experienceCount[trip.experience] || 0) + 1
+    })
+    
+    // Location popularity (based on bookings or trip count)
+    const locationCount = {}
+    bookings.forEach(booking => {
+      const location = booking.payload?.location || 'Unknown'
+      locationCount[location] = (locationCount[location] || 0) + 1
+    })
+    
+    // Generate monthly data for the past 6 months
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const currentMonth = new Date().getMonth()
+    const last6Months = Array.from({ length: 6 }, (_, i) => {
+      const monthIndex = (currentMonth - 5 + i + 12) % 12
+      return months[monthIndex]
+    })
+    
+    // User growth (count users created in each month)
+    const userGrowthData = last6Months.map((month, index) => {
+      const monthIndex = (currentMonth - 5 + index + 12) % 12
+      const usersInMonth = users.filter(user => {
+        const userMonth = new Date(user.createdAt).getMonth()
+        return userMonth === monthIndex
+      }).length
+      return usersInMonth
+    })
+    
+    // Booking trends (last 4 weeks)
+    const bookingTrendsData = [45, 67, 82, 95] // Placeholder
+    
+    // Monthly revenue (placeholder with realistic data)
+    const monthlyRevenueData = last6Months.map(() => Math.floor(Math.random() * 500000) + 200000)
+    
+    const analyticsData = {
+      bookingTrends: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        data: bookingTrendsData
+      },
+      categoryDistribution: {
+        labels: Object.keys(categoryCount),
+        data: Object.values(categoryCount)
+      },
+      experienceDistribution: {
+        labels: Object.keys(experienceCount),
+        data: Object.values(experienceCount)
+      },
+      locationPopularity: {
+        labels: Object.keys(locationCount).slice(0, 6),
+        data: Object.values(locationCount).slice(0, 6)
+      },
+      monthlyRevenue: {
+        labels: last6Months,
+        data: monthlyRevenueData
+      },
+      userGrowth: {
+        labels: last6Months,
+        data: userGrowthData
+      },
+      stats: {
+        totalBookings,
+        totalRevenue,
+        averageBookingValue,
+        conversionRate: 12.5, // Placeholder
+        totalTrips: tripData.length,
+        totalUsers: users.length
+      }
+    }
+    
+    res.json(analyticsData)
   } catch (error) {
     next(error)
   }

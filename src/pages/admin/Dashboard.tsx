@@ -20,11 +20,9 @@ import {
   Users2,
   Images,
   Shield,
-<<<<<<< HEAD
-  Filter
-=======
-  CreditCard
->>>>>>> 36f5615ec3ea8e9434d5d9aa2830c8a4313e5dfd
+  Filter,
+  CreditCard,
+  TrendingUp
 } from 'lucide-react'
 import { getTrips, deleteTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
@@ -121,7 +119,8 @@ const AdminDashboard = () => {
 
   const navItems = [
     { label: 'Inventory', path: '/admin/dashboard', icon: LayoutDashboard, permission: 'manage_trips' },
-    { label: 'Data Filters', path: '/admin/data-filters', icon: Filter, permission: 'view_bookings' },
+    { label: 'Analytics', path: '/admin/analytics', icon: TrendingUp, permission: 'view_analytics' },
+    { label: 'Data Filters', path: '/admin/data-filters', icon: Filter, permission: 'view_data_filters' },
     { label: 'Trending Adventures', path: '/admin/hero', icon: ImageIcon, permission: 'manage_hero' },
     { label: 'New Package', path: '/admin/new', icon: Plus, permission: 'manage_trips' },
     { label: 'Travel Stories', path: '/admin/travel-stories', icon: BookOpen, permission: 'manage_travel_stories' },

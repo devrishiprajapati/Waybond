@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { MaterialReactTable, type MRT_ColumnDef, useMaterialReactTable } from 'material-react-table'
 import { Button, ThemeProvider, createTheme } from '@mui/material'
 import { Filter, Database, Users, Package, FileDown, ArrowLeft } from 'lucide-react'
@@ -643,11 +643,17 @@ const DataFilters = () => {
   }
 
   return (
-    <PermissionGuard>
+    <PermissionGuard requiredPermission="view_data_filters">
       <div className="min-h-screen bg-white text-white p-6 md:p-10 lg:p-12">
         <div className="max-w-[1800px] mx-auto pt-20">
           {/* Back to Dashboard Button */}
-         <a className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all" href="/admin/dashboard" data-discover="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-arrow-left mr-2"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg> Back to Dashboard</a>
+          <Link
+            to="/admin/dashboard"
+            className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all"
+          >
+            <ArrowLeft className="mr-2" size={18} />
+            Back to Dashboard
+          </Link>
 
           {/* Header */}
           <header className="mb-10">
