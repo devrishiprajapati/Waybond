@@ -326,7 +326,7 @@ const Analytics = () => {
 
   return (
     <PermissionGuard requiredPermission="view_analytics">
-      <div className="min-h-screen bg-white text-white p-6 md:p-10 lg:p-12">
+      <div className="min-h-screen bg-white text-white p-4 pb-28 pt-24 sm:p-6 sm:pb-28 sm:pt-24 md:p-10 md:pb-28 lg:p-12 lg:pb-12">
         <div className="max-w-[1800px] mx-auto pt-20">
           {/* Back to Dashboard */}
           <Link

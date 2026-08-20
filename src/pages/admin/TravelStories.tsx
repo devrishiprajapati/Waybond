@@ -109,7 +109,7 @@ export default function AdminTravelStories() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-white px-6 md:px-10 lg:px-16 pt-32 pb-20">
+    <div className="min-h-screen bg-white text-white px-4 sm:px-6 md:px-10 lg:px-16 pt-24 md:pt-32 pb-28 lg:pb-20">
       <div className="max-w-[1500px] mx-auto">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-7 mb-10">
           <div>

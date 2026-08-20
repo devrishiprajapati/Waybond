@@ -96,7 +96,7 @@ export default function AdminGallery() {
     if (editingSource === sourceToRemove) resetImageForm()
   }
 
-  return <div className="min-h-screen bg-white text-white px-6 md:px-10 lg:px-16 pt-32 pb-20"><div className="max-w-[1500px] mx-auto">
+  return <div className="min-h-screen bg-white text-white px-4 sm:px-6 md:px-10 lg:px-16 pt-24 md:pt-32 pb-28 lg:pb-20"><div className="max-w-[1500px] mx-auto">
     <Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.22em] mb-5"><ArrowLeft size={15} /> Admin dashboard</Link>
     <div className="mb-10"><p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-3">Community media</p><h1 className="text-4xl md:text-6xl font-sans font-black uppercase italic tracking-tighter liquid-text font-bungee">Destination <span className="text-primary font-bungee">Gallery</span></h1></div>
 

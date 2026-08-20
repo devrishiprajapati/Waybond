@@ -122,7 +122,7 @@ export default function PaymentUpdate() {
 
   return (
     <PermissionGuard requiredPermission="view_bookings">
-      <div className="min-h-screen bg-white text-white px-6 md:px-10 lg:px-16 pt-32 pb-20">
+      <div className="min-h-screen bg-white text-white px-4 sm:px-6 md:px-10 lg:px-16 pt-24 md:pt-32 pb-28 lg:pb-20">
         {confirmedPopup && (
           <div className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/55 px-4 backdrop-blur-sm">
             <div className="relative w-full max-w-md rounded-[2rem] border border-green-500/20 bg-white p-7 text-center text-slate-950 shadow-2xl">

@@ -223,7 +223,7 @@ const AdminManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white text-white p-6 md:p-10 lg:p-12">
+    <div className="min-h-screen bg-white text-white p-4 pb-28 pt-24 sm:p-6 sm:pb-28 sm:pt-24 md:p-10 md:pb-28 lg:p-12 lg:pb-12">
       <div className="max-w-7xl mx-auto pt-20">
         {/* Back to Dashboard Button */}
        <a className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all" href="/admin/dashboard" data-discover="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-arrow-left mr-2"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg> Back to Dashboard</a>

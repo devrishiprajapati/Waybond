@@ -49,8 +49,8 @@ export default function AdminUserDetail() {
     void loadUser()
   }, [id, navigate])
 
-  if (error) return <div className="min-h-screen bg-white text-white px-6 pt-32"><div className="max-w-5xl mx-auto liquid-glass-dark border border-white/10 rounded-[2rem] p-10"><Link to="/admin/users" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.2em] mb-6"><ArrowLeft size={15} /> Back to users</Link><p className="text-red-300 font-bold">{error}</p></div></div>
-  if (!data) return <div className="min-h-screen bg-white text-white px-6 pt-32"><div className="max-w-5xl mx-auto text-white/45 font-bold">Loading user details...</div></div>
+  if (error) return <div className="min-h-screen bg-white text-white px-4 sm:px-6 pt-24 md:pt-32 pb-28"><div className="max-w-5xl mx-auto liquid-glass-dark border border-white/10 rounded-[2rem] p-6 md:p-10"><Link to="/admin/users" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.2em] mb-6"><ArrowLeft size={15} /> Back to users</Link><p className="text-red-300 font-bold">{error}</p></div></div>
+  if (!data) return <div className="min-h-screen bg-white text-white px-4 sm:px-6 pt-24 md:pt-32 pb-28"><div className="max-w-5xl mx-auto text-white/45 font-bold">Loading user details...</div></div>
 
   const { user, bookings, testimonials } = data
   const profile = user.profile
@@ -99,7 +99,7 @@ export default function AdminUserDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-white px-6 md:px-10 lg:px-16 pt-32 pb-20">
+    <div className="min-h-screen bg-white text-white px-4 sm:px-6 md:px-10 lg:px-16 pt-24 md:pt-32 pb-28 lg:pb-20">
       <div className="max-w-[1500px] mx-auto">
         <Link to="/admin/users" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.22em] mb-7"><ArrowLeft size={15} /> All users</Link>
 

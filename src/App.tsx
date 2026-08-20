@@ -5,6 +5,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import FloatingWhatsApp from './components/FloatingWhatsApp'
 import SplashScreen from './components/SplashScreen'
+import AdminMobileNav from './components/admin/AdminMobileNav'
 import Home from './pages/Home'
 import Discover from './pages/Discover'
 import HimachalPage from './pages/HimachalPage'
@@ -84,41 +85,44 @@ function PublicRoutes({ location }: { location: ReturnType<typeof useLocation> }
 
 function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> }) {
   return (
-    <Routes location={location} key={location.pathname}>
-      <Route path="/" element={<AdminLogin />} />
-      <Route path="/login" element={<AdminLogin />} />
-      <Route path="/dashboard" element={<AdminDashboard />} />
-      <Route path="/testimonials" element={<AdminTestimonials />} />
-      <Route path="/travel-stories" element={<AdminTravelStories />} />
-      <Route path="/users" element={<AdminUsers />} />
-      <Route path="/users/:id" element={<AdminUserDetail />} />
-      <Route path="/payment-update" element={<AdminPaymentUpdate />} />
-      <Route path="/gallery" element={<AdminGallery />} />
-      <Route path="/team-members" element={<AdminTeamMembers />} />
-      <Route path="/admins" element={<AdminManagement />} />
-      <Route path="/data-filters" element={<DataFilters />} />
-      <Route path="/analytics" element={<Analytics />} />
-      <Route path="/hero" element={<EditHero />} />
-      <Route path="/edit/:id" element={<EditTrip />} />
-      <Route path="/new" element={<EditTrip />} />
+    <>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<AdminLogin />} />
+        <Route path="/login" element={<AdminLogin />} />
+        <Route path="/dashboard" element={<AdminDashboard />} />
+        <Route path="/testimonials" element={<AdminTestimonials />} />
+        <Route path="/travel-stories" element={<AdminTravelStories />} />
+        <Route path="/users" element={<AdminUsers />} />
+        <Route path="/users/:id" element={<AdminUserDetail />} />
+        <Route path="/payment-update" element={<AdminPaymentUpdate />} />
+        <Route path="/gallery" element={<AdminGallery />} />
+        <Route path="/team-members" element={<AdminTeamMembers />} />
+        <Route path="/admins" element={<AdminManagement />} />
+        <Route path="/data-filters" element={<DataFilters />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/hero" element={<EditHero />} />
+        <Route path="/edit/:id" element={<EditTrip />} />
+        <Route path="/new" element={<EditTrip />} />
 
-      {/* Keep existing /admin paths working on the admin subdomain. */}
-      <Route path="/admin/login" element={<AdminLogin />} />
-      <Route path="/admin/dashboard" element={<AdminDashboard />} />
-      <Route path="/admin/testimonials" element={<AdminTestimonials />} />
-      <Route path="/admin/travel-stories" element={<AdminTravelStories />} />
-      <Route path="/admin/users" element={<AdminUsers />} />
-      <Route path="/admin/users/:id" element={<AdminUserDetail />} />
-      <Route path="/admin/payment-update" element={<AdminPaymentUpdate />} />
-      <Route path="/admin/gallery" element={<AdminGallery />} />
-      <Route path="/admin/team-members" element={<AdminTeamMembers />} />
-      <Route path="/admin/admins" element={<AdminManagement />} />
-      <Route path="/admin/data-filters" element={<DataFilters />} />
-      <Route path="/admin/analytics" element={<Analytics />} />
-      <Route path="/admin/hero" element={<EditHero />} />
-      <Route path="/admin/edit/:id" element={<EditTrip />} />
-      <Route path="/admin/new" element={<EditTrip />} />
-    </Routes>
+        {/* Keep existing /admin paths working on the admin subdomain. */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/testimonials" element={<AdminTestimonials />} />
+        <Route path="/admin/travel-stories" element={<AdminTravelStories />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/users/:id" element={<AdminUserDetail />} />
+        <Route path="/admin/payment-update" element={<AdminPaymentUpdate />} />
+        <Route path="/admin/gallery" element={<AdminGallery />} />
+        <Route path="/admin/team-members" element={<AdminTeamMembers />} />
+        <Route path="/admin/admins" element={<AdminManagement />} />
+        <Route path="/admin/data-filters" element={<DataFilters />} />
+        <Route path="/admin/analytics" element={<Analytics />} />
+        <Route path="/admin/hero" element={<EditHero />} />
+        <Route path="/admin/edit/:id" element={<EditTrip />} />
+        <Route path="/admin/new" element={<EditTrip />} />
+      </Routes>
+      <AdminMobileNav />
+    </>
   )
 }
 
