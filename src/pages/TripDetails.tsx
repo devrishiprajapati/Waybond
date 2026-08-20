@@ -32,6 +32,20 @@ const TripDetails = () => {
   const [shareOpen, setShareOpen] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const [showStickyBar, setShowStickyBar] = useState(false)
+  const travelDateInputRef = React.useRef<HTMLInputElement>(null)
+
+  const openTravelDatePicker = () => {
+    const input = travelDateInputRef.current
+    if (!input) return
+
+    input.focus()
+    const pickerInput = input as HTMLInputElement & { showPicker?: () => void }
+    try {
+      pickerInput.showPicker?.()
+    } catch {
+      // Some browsers only allow showPicker during direct user gestures.
+    }
+  }
 
   useEffect(() => {
     if (slug) {
@@ -759,8 +773,10 @@ const TripDetails = () => {
                         <div>
                           <div className={`relative h-[50px] rounded-xl border ${enquiryErrors.travelDate ? 'border-red-500' : 'border-secondary/15'} bg-white shadow-sm shadow-secondary/5 transition-colors focus-within:border-secondary/60`}>
                             {!enquiryForm.travelDate && <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-base font-semibold text-slate-400">Date of Travel</span>}
-                            <input type="date" value={enquiryForm.travelDate} min={new Date().toISOString().split('T')[0]} onChange={e => setEnquiryForm(f => ({ ...f, travelDate: e.target.value }))} className={`h-full w-full rounded-xl bg-transparent px-4 pr-11 text-base font-semibold outline-none [color-scheme:light] ${enquiryForm.travelDate ? 'text-[#1f2933]' : 'text-transparent'}`} />
-                            <Calendar size={19} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-secondary/45" />
+                            <input ref={travelDateInputRef} type="date" value={enquiryForm.travelDate} min={new Date().toISOString().split('T')[0]} onClick={openTravelDatePicker} onChange={e => setEnquiryForm(f => ({ ...f, travelDate: e.target.value }))} className={`h-full w-full rounded-xl bg-transparent px-4 pr-12 text-base font-semibold outline-none [color-scheme:light] [&::-webkit-calendar-picker-indicator]:opacity-0 ${enquiryForm.travelDate ? 'text-[#1f2933] opacity-100' : 'text-transparent opacity-0'}`} />
+                            <button type="button" onClick={openTravelDatePicker} className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-secondary transition-colors hover:bg-secondary/10" aria-label="Open travel date picker">
+                              <Calendar size={20} strokeWidth={2.5} />
+                            </button>
                           </div>
                           {enquiryErrors.travelDate && <p className="mt-1.5 text-xs font-bold text-red-500">{enquiryErrors.travelDate}</p>}
                         </div>
