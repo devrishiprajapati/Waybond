@@ -20,6 +20,7 @@ import { getUser, logout } from '../lib/auth'
 import { useWishlist } from '../lib/wishlist'
 import { createSlug } from '../lib/dataService'
 import { formatDateOnly } from '../lib/date'
+import { downloadInvoice } from '../lib/invoice'
 
 const UserDashboard = () => {
   const [user, setUser] = useState<any>(null)
@@ -122,6 +123,18 @@ const UserDashboard = () => {
     } catch (error) {
       console.error('Failed to cancel trip:', error)
       alert('Failed to cancel trip. Please try again.')
+    }
+  }
+
+  const handleDownloadInvoice = async (event: React.MouseEvent, bookingId: string) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    try {
+      await downloadInvoice(bookingId)
+    } catch (error) {
+      console.error('Failed to download invoice:', error)
+      alert(error instanceof Error ? error.message : 'Unable to download invoice. Please try again.')
     }
   }
 
@@ -509,12 +522,13 @@ const UserDashboard = () => {
 
                         <div className="flex flex-wrap gap-3">
                           {trip.status === 'Confirmed' && (
-                            <Link
-                              to={`/booking-confirmation/${trip.bookingId}`}
+                            <button
+                              type="button"
+                              onClick={(event) => handleDownloadInvoice(event, trip.bookingId)}
                               className="bg-green-500/10 text-green-300 h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-green-500/20 hover:bg-green-500 hover:text-white transition-all"
                             >
                               Download Invoice
-                            </Link>
+                            </button>
                           )}
                           <button
                             onClick={() => {

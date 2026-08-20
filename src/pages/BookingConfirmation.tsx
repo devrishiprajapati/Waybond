@@ -34,6 +34,7 @@ const BookingConfirmation = () => {
   const bookingData = location.state as any
 
   const [paying, setPaying] = useState(false)
+  const [cashSubmitting, setCashSubmitting] = useState(false)
   const [showSuccessPopup, setShowSuccessPopup] = useState(true)
 
   useEffect(() => {
@@ -59,6 +60,35 @@ const BookingConfirmation = () => {
   const gst = Math.round(subtotal * 0.05) // 5% GST
   const totalAmount = subtotal + gst
 
+  const createBookingPayload = (overrides: Record<string, unknown> = {}) => {
+    const timestamp = Date.now().toString(36).toUpperCase()
+    const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase()
+    const uniqueBookingId = `WB-${timestamp}-${randomSuffix}`
+
+    return {
+      id: trip.id,
+      title: trip.title,
+      location: trip.location,
+      duration: trip.duration,
+      price: trip.price,
+      image: trip.image,
+      rating: trip.rating,
+      reviews: trip.reviews,
+      description: trip.description,
+      highlights: trip.highlights || [],
+      itinerary: trip.itinerary || [],
+      departureDates: trip.departureDates || [],
+      bookingId: uniqueBookingId,
+      status: 'Payment Pending',
+      paymentStatus: 'Pending Payment',
+      travelers: numTravellers,
+      travellerDetails: travellers,
+      bookedOn: new Date().toLocaleDateString('en-IN'),
+      nextBatch: departure || trip.departureDates?.[0] || 'TBD',
+      ...overrides
+    }
+  }
+
   const handlePayNow = async () => {
     haptics.medium()
 
@@ -72,32 +102,7 @@ const BookingConfirmation = () => {
     try {
       if (!user.id) throw new Error('User ID not found')
 
-      // Create unique booking ID
-      const timestamp = Date.now().toString(36).toUpperCase()
-      const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase()
-      const uniqueBookingId = `WB-${timestamp}-${randomSuffix}`
-
-      // Create booking payload
-      const bookingPayload = {
-        id: trip.id,
-        title: trip.title,
-        location: trip.location,
-        duration: trip.duration,
-        price: trip.price,
-        image: trip.image,
-        rating: trip.rating,
-        reviews: trip.reviews,
-        description: trip.description,
-        highlights: trip.highlights || [],
-        itinerary: trip.itinerary || [],
-        departureDates: trip.departureDates || [],
-        bookingId: uniqueBookingId,
-        status: 'Payment Pending',
-        travelers: numTravellers,
-        travellerDetails: travellers,
-        bookedOn: new Date().toLocaleDateString('en-IN'),
-        nextBatch: departure || trip.departureDates?.[0] || 'TBD'
-      }
+      const bookingPayload = createBookingPayload({ paymentMethod: 'Online' })
 
       // Save to database
       const response = await fetch(`/api/users/${user.id}/bookings`, {
@@ -160,6 +165,38 @@ const BookingConfirmation = () => {
       console.error('Payment failed:', error)
       setPaying(false)
       alert(error instanceof Error ? error.message : 'Unable to start payment. Please try again.')
+    }
+  }
+
+  const handleCashPayment = async () => {
+    haptics.medium()
+
+    const user = getUser()
+    if (!user) {
+      navigate(`/login?redirect=${encodeURIComponent('/booking-confirmation')}`)
+      return
+    }
+
+    try {
+      if (!user.id) throw new Error('User ID not found')
+      setCashSubmitting(true)
+
+      const response = await fetch(`/api/users/${user.id}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(createBookingPayload({ paymentMethod: 'Cash' }))
+      })
+
+      const booking = await response.json()
+      if (!response.ok) throw new Error(booking.message || 'Failed to create cash booking')
+
+      alert('Cash payment request submitted. Your booking will stay pending until admin confirmation.')
+      navigate(`/dashboard/${user.id}`)
+    } catch (error) {
+      console.error('Cash booking failed:', error)
+      alert(error instanceof Error ? error.message : 'Unable to submit cash payment request. Please try again.')
+    } finally {
+      setCashSubmitting(false)
     }
   }
 
@@ -283,20 +320,31 @@ const BookingConfirmation = () => {
             </div>
           </motion.div>
 
-          {/* Pay Now Button */}
-          <motion.button
+          {/* Payment Buttons */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            onClick={handlePayNow}
-            disabled={paying}
-            className="w-full bg-secondary hover:bg-secondary/90 text-white py-4 rounded-full font-black text-lg uppercase tracking-wide shadow-xl shadow-secondary/30 transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-3"
           >
-            {paying ? 'Processing Payment...' : 'Pay Now'}
-          </motion.button>
+            <button
+              onClick={handlePayNow}
+              disabled={paying || cashSubmitting}
+              className="w-full bg-secondary hover:bg-secondary/90 text-white py-4 rounded-full font-black text-lg uppercase tracking-wide shadow-xl shadow-secondary/30 transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {paying ? 'Processing...' : 'Pay Now'}
+            </button>
+            <button
+              onClick={handleCashPayment}
+              disabled={paying || cashSubmitting}
+              className="w-full border-2 border-secondary bg-white text-secondary hover:bg-secondary hover:text-white py-4 rounded-full font-black text-lg uppercase tracking-wide shadow-lg shadow-secondary/10 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {cashSubmitting ? 'Submitting...' : 'Cash'}
+            </button>
+          </motion.div>
 
           <p className="text-center text-xs text-gray-500 mt-4">
-            Secure payment powered by Razorpay
+            Online payments are powered by Razorpay. Cash bookings need admin confirmation before invoice access.
           </p>
         </div>
       </div>

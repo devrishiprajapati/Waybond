@@ -4,6 +4,8 @@ import express from 'express'
 import { isDisposable } from '@isdisposable/js'
 import nodemailer from 'nodemailer'
 import { createHmac, randomBytes, randomInt, scryptSync, timingSafeEqual } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { deflateSync, inflateSync } from 'node:zlib'
 import { prisma } from './prisma.js'
 
 const app = express()
@@ -40,6 +42,12 @@ const PAYMENT_RECORD_STATUSES = {
 const normalizePaymentStatus = (value) => {
   const status = String(value || '').trim()
   return PAYMENT_STATUS_OPTIONS.find((option) => option.toLowerCase() === status.toLowerCase()) || ''
+}
+const getBookingStatusForPaymentStatus = (paymentStatus, currentStatus = '') => {
+  if (paymentStatus === 'Cancelled') return 'Cancelled'
+  if (['Cash', 'Online', 'Paid'].includes(paymentStatus)) return 'Confirmed'
+  if (paymentStatus === 'Refunded') return 'Refunded'
+  return currentStatus === 'Cancelled' ? currentStatus : 'Payment Pending'
 }
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 const disposableEmailMessage = 'Disposable or temporary email addresses are not allowed. Please use a permanent email address.'
@@ -130,39 +138,188 @@ const escapePdfText = (value) => normalizeText(value)
   .replace(/\)/g, '\\)')
   .replace(/[^\x20-\x7E]/g, '')
 
-const createPdfBuffer = (lines) => {
-  const content = [
-    'BT',
-    '/F1 11 Tf',
-    '50 790 Td',
-    '14 TL',
-    ...lines.flatMap((line, index) => [
-      index === 0 ? '/F1 18 Tf' : index === 1 ? '/F1 11 Tf' : '',
-      `(${escapePdfText(line)}) Tj`,
-      'T*'
-    ]).filter(Boolean),
-    'ET'
-  ].join('\n')
+const decodePngForPdf = (fileUrl) => {
+  const png = readFileSync(fileUrl)
+  const signature = '89504e470d0a1a0a'
+  if (png.subarray(0, 8).toString('hex') !== signature) throw new Error('Invalid PNG signature')
+
+  let offset = 8
+  let width = 0
+  let height = 0
+  let bitDepth = 0
+  let colorType = 0
+  const idatChunks = []
+
+  while (offset < png.length) {
+    const length = png.readUInt32BE(offset)
+    const type = png.subarray(offset + 4, offset + 8).toString('ascii')
+    const dataStart = offset + 8
+    const data = png.subarray(dataStart, dataStart + length)
+
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0)
+      height = data.readUInt32BE(4)
+      bitDepth = data[8]
+      colorType = data[9]
+    } else if (type === 'IDAT') {
+      idatChunks.push(data)
+    } else if (type === 'IEND') {
+      break
+    }
+
+    offset = dataStart + length + 4
+  }
+
+  const channels = colorType === 6 ? 4 : colorType === 2 ? 3 : colorType === 0 ? 1 : 0
+  if (bitDepth !== 8 || !channels) throw new Error(`Unsupported PNG format: bitDepth=${bitDepth}, colorType=${colorType}`)
+
+  const inflated = inflateSync(Buffer.concat(idatChunks))
+  const rowLength = width * channels
+  const rows = Buffer.alloc(rowLength * height)
+  let sourceOffset = 0
+
+  for (let y = 0; y < height; y += 1) {
+    const filter = inflated[sourceOffset]
+    sourceOffset += 1
+    const rowStart = y * rowLength
+    const prevRowStart = rowStart - rowLength
+
+    for (let x = 0; x < rowLength; x += 1) {
+      const raw = inflated[sourceOffset + x]
+      const left = x >= channels ? rows[rowStart + x - channels] : 0
+      const up = y > 0 ? rows[prevRowStart + x] : 0
+      const upLeft = y > 0 && x >= channels ? rows[prevRowStart + x - channels] : 0
+      let value = raw
+
+      if (filter === 1) value = raw + left
+      else if (filter === 2) value = raw + up
+      else if (filter === 3) value = raw + Math.floor((left + up) / 2)
+      else if (filter === 4) {
+        const p = left + up - upLeft
+        const pa = Math.abs(p - left)
+        const pb = Math.abs(p - up)
+        const pc = Math.abs(p - upLeft)
+        value = raw + (pa <= pb && pa <= pc ? left : pb <= pc ? up : upLeft)
+      }
+
+      rows[rowStart + x] = value & 255
+    }
+
+    sourceOffset += rowLength
+  }
+
+  let minX = width
+  let minY = height
+  let maxX = -1
+  let maxY = -1
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const source = (y * width + x) * channels
+      const r = rows[source]
+      const g = colorType === 0 ? rows[source] : rows[source + 1]
+      const b = colorType === 0 ? rows[source] : rows[source + 2]
+      const a = colorType === 6 ? rows[source + 3] : 255
+      const isDarkCanvas = r < 18 && g < 18 && b < 18
+      if (a > 10 && !isDarkCanvas) {
+        minX = Math.min(minX, x)
+        minY = Math.min(minY, y)
+        maxX = Math.max(maxX, x)
+        maxY = Math.max(maxY, y)
+      }
+    }
+  }
+
+  const padding = 80
+  const cropX = Math.max(0, minX - padding)
+  const cropY = Math.max(0, minY - padding)
+  const cropRight = Math.min(width - 1, maxX + padding)
+  const cropBottom = Math.min(height - 1, maxY + padding)
+  const outputWidth = maxX >= minX ? cropRight - cropX + 1 : width
+  const outputHeight = maxY >= minY ? cropBottom - cropY + 1 : height
+  const rgb = Buffer.alloc(outputWidth * outputHeight * 3)
+
+  for (let y = 0; y < outputHeight; y += 1) {
+    for (let x = 0; x < outputWidth; x += 1) {
+      const source = ((cropY + y) * width + cropX + x) * channels
+      const target = (y * outputWidth + x) * 3
+      if (colorType === 0) {
+        const isDarkCanvas = rows[source] < 18
+        rgb[target] = isDarkCanvas ? 255 : rows[source]
+        rgb[target + 1] = isDarkCanvas ? 255 : rows[source]
+        rgb[target + 2] = isDarkCanvas ? 255 : rows[source]
+      } else if (colorType === 2) {
+        const isDarkCanvas = rows[source] < 18 && rows[source + 1] < 18 && rows[source + 2] < 18
+        rgb[target] = isDarkCanvas ? 255 : rows[source]
+        rgb[target + 1] = isDarkCanvas ? 255 : rows[source + 1]
+        rgb[target + 2] = isDarkCanvas ? 255 : rows[source + 2]
+      } else {
+        const alpha = rows[source + 3] / 255
+        const isDarkCanvas = rows[source] < 18 && rows[source + 1] < 18 && rows[source + 2] < 18
+        rgb[target] = isDarkCanvas ? 255 : Math.round(rows[source] * alpha + 255 * (1 - alpha))
+        rgb[target + 1] = isDarkCanvas ? 255 : Math.round(rows[source + 1] * alpha + 255 * (1 - alpha))
+        rgb[target + 2] = isDarkCanvas ? 255 : Math.round(rows[source + 2] * alpha + 255 * (1 - alpha))
+      }
+    }
+  }
+
+  return { width: outputWidth, height: outputHeight, data: deflateSync(rgb) }
+}
+
+const loadWayBondInvoiceLogo = () => {
+  try {
+    return decodePngForPdf(new URL('../../Waybond Logo.png', import.meta.url))
+  } catch (error) {
+    console.warn('WayBond invoice logo could not be embedded:', error.message)
+    return null
+  }
+}
+
+const WAYBOND_INVOICE_LOGO = loadWayBondInvoiceLogo()
+
+const createPdfBuffer = (content, { images = [] } = {}) => {
+  const streamContent = Array.isArray(content)
+    ? [
+      'BT',
+      '/F1 11 Tf',
+      '50 790 Td',
+      '14 TL',
+      ...content.flatMap((line, index) => [
+        index === 0 ? '/F1 18 Tf' : index === 1 ? '/F1 11 Tf' : '',
+        `(${escapePdfText(line)}) Tj`,
+        'T*'
+      ]).filter(Boolean),
+      'ET'
+    ].join('\n')
+    : content
+  const xObjectResources = images.length
+    ? `/XObject << ${images.map((image, index) => `/${image.name} ${6 + index} 0 R`).join(' ')} >>`
+    : ''
 
   const objects = [
     '<< /Type /Catalog /Pages 2 0 R >>',
     '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> ${xObjectResources} >> /Contents 5 0 R >>`,
     '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
-    `<< /Length ${Buffer.byteLength(content, 'utf8')} >>\nstream\n${content}\nendstream`
+    `<< /Length ${Buffer.byteLength(streamContent, 'utf8')} >>\nstream\n${streamContent}\nendstream`
   ]
+  images.forEach((image) => {
+    const header = `<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ${image.data.length} >>\nstream\n`
+    objects.push(Buffer.concat([Buffer.from(header, 'binary'), image.data, Buffer.from('\nendstream', 'binary')]))
+  })
 
-  let pdf = '%PDF-1.4\n'
+  const chunks = [Buffer.from('%PDF-1.4\n', 'binary')]
   const offsets = [0]
   objects.forEach((object, index) => {
-    offsets.push(Buffer.byteLength(pdf, 'utf8'))
-    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`
+    offsets.push(chunks.reduce((total, chunk) => total + chunk.length, 0))
+    chunks.push(Buffer.from(`${index + 1} 0 obj\n`, 'binary'))
+    chunks.push(Buffer.isBuffer(object) ? object : Buffer.from(object, 'utf8'))
+    chunks.push(Buffer.from('\nendobj\n', 'binary'))
   })
-  const xrefOffset = Buffer.byteLength(pdf, 'utf8')
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`
-  pdf += offsets.slice(1).map((offset) => `${String(offset).padStart(10, '0')} 00000 n \n`).join('')
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`
-  return Buffer.from(pdf, 'utf8')
+  const xrefOffset = chunks.reduce((total, chunk) => total + chunk.length, 0)
+  chunks.push(Buffer.from(`xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`, 'binary'))
+  chunks.push(Buffer.from(offsets.slice(1).map((objectOffset) => `${String(objectOffset).padStart(10, '0')} 00000 n \n`).join(''), 'binary'))
+  chunks.push(Buffer.from(`trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`, 'binary'))
+  return Buffer.concat(chunks)
 }
 
 const createInvoicePdf = ({ booking, user, payloadOverride = {} }) => {
@@ -172,34 +329,124 @@ const createInvoicePdf = ({ booking, user, payloadOverride = {} }) => {
   const subtotal = pricePerPerson * travelers
   const gst = Math.round(subtotal * 0.05)
   const total = subtotal + gst
-  const invoiceNumber = `WB-${bookingData.bookingId || booking.id}`
+  const invoiceNumber = `INV-${bookingData.bookingId || booking.id}`
+  const issuedOn = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+  const tripDate = formatTripDate(bookingData.nextBatch)
+  const firstTraveller = Array.isArray(bookingData.travellerDetails) ? bookingData.travellerDetails[0] : null
+  const customerName = user?.name || firstTraveller?.name || 'Traveller'
+  const customerEmail = user?.email || firstTraveller?.email || 'Not available'
+  const customerPhone = firstTraveller?.phone || 'Not available'
+  const customerPlace = [firstTraveller?.city, firstTraveller?.state].filter(Boolean).join(', ') || bookingData.location || 'Not available'
+  const paymentStatus = bookingData.paymentStatus || (bookingData.status === 'Payment Pending' ? 'Pending Payment' : 'Paid')
 
-  return createPdfBuffer([
-    'WAYBOND INVOICE',
-    `Invoice No: ${invoiceNumber}`,
-    `Issued On: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`,
-    '',
-    `Booking ID: ${bookingData.bookingId || booking.id}`,
-    `Booking Status: ${bookingData.status || 'Confirmed'}`,
-    `Payment Status: ${bookingData.paymentStatus || 'Paid'}`,
-    '',
-    `Customer: ${user?.name || 'Traveller'}`,
-    `Email: ${user?.email || 'Not available'}`,
-    '',
-    `Trip: ${bookingData.title || 'WayBond Trip'}`,
-    `Location: ${bookingData.location || 'Not available'}`,
-    `Duration: ${bookingData.duration || 'Not available'}`,
-    `Trip Date: ${formatTripDate(bookingData.nextBatch)}`,
-    `Travellers: ${travelers}`,
-    '',
-    `Price Per Person: INR ${pricePerPerson.toLocaleString('en-IN')}`,
-    `Subtotal: INR ${subtotal.toLocaleString('en-IN')}`,
-    `GST (5%): INR ${gst.toLocaleString('en-IN')}`,
-    `Total Amount: INR ${total.toLocaleString('en-IN')}`,
-    '',
-    'Thank you for booking with WayBond.',
-    'Your booking remains confirmed with WayBond.'
-  ])
+  const money = (value) => `Rs. ${Number(value || 0).toLocaleString('en-IN')}`
+  const safe = (value, fallback = 'Not available') => normalizeText(value) || fallback
+  const fit = (value, max = 72) => {
+    const text = safe(value, '')
+    return text.length > max ? `${text.slice(0, max - 3)}...` : text
+  }
+  const textWidth = (value, size) => normalizeText(value).length * size * 0.52
+  const color = (hex) => {
+    const clean = hex.replace('#', '')
+    return [0, 2, 4].map((index) => (parseInt(clean.slice(index, index + 2), 16) / 255).toFixed(3)).join(' ')
+  }
+  const ops = []
+  const fill = (hex) => ops.push(`${color(hex)} rg`)
+  const stroke = (hex) => ops.push(`${color(hex)} RG`)
+  const rect = (x, y, w, h, hex) => { fill(hex); ops.push(`${x} ${y} ${w} ${h} re f`) }
+  const line = (x1, y1, x2, y2, hex = '#e8edf5', width = 1) => { stroke(hex); ops.push(`${width} w ${x1} ${y1} m ${x2} ${y2} l S`) }
+  const text = (value, x, y, size = 10, hex = '#0f172a') => {
+    fill(hex)
+    ops.push(`BT /F1 ${size} Tf ${x} ${y} Td (${escapePdfText(fit(value, 120))}) Tj ET`)
+  }
+  const rightText = (value, rightX, y, size = 10, hex = '#0f172a') => text(value, rightX - textWidth(value, size), y, size, hex)
+
+  rect(0, 836, 595, 6, '#6495ED')
+  rect(13, 30, 569, 782, '#ffffff')
+
+  if (WAYBOND_INVOICE_LOGO) {
+    const logoWidth = Math.min(230, WAYBOND_INVOICE_LOGO.width * (58 / WAYBOND_INVOICE_LOGO.height))
+    const logoHeight = WAYBOND_INVOICE_LOGO.height * (logoWidth / WAYBOND_INVOICE_LOGO.width)
+    ops.push(`q ${logoWidth.toFixed(2)} 0 0 ${logoHeight.toFixed(2)} 43 ${(742 + (58 - logoHeight) / 2).toFixed(2)} cm /Logo Do Q`)
+  } else {
+    rect(43, 757, 30, 30, '#07142d')
+    fill('#ffffff')
+    ops.push('45 770 26 2 re f')
+    ops.push('56 759 2 26 re f')
+    ops.push('51 765 12 12 re f')
+    text('WayBond', 83, 775, 15, '#07142d')
+    text('Travel Experiences', 83, 761, 7, '#07142d')
+  }
+  text('INVOICE', 448, 770, 25, '#0067d8')
+  rightText(`#${invoiceNumber}`, 552, 754, 8, '#07142d')
+
+  text('BILL TO', 43, 704, 7, '#07142d')
+  rect(43, 614, 240, 78, '#f3f6fb')
+  text(customerName, 58, 664, 10, '#07142d')
+  text(customerEmail, 58, 648, 8, '#314158')
+  text(customerPhone, 58, 635, 8, '#314158')
+  text(customerPlace, 58, 622, 8, '#314158')
+
+  text('DATE ISSUED', 370, 640, 7, '#07142d')
+  text(issuedOn, 370, 624, 9, '#07142d')
+  rightText('TRIP DATE', 552, 640, 7, '#07142d')
+  rightText(tripDate, 552, 624, 9, '#d71920')
+
+  text('BOOKING ID', 43, 580, 7, '#07142d')
+  text(safe(bookingData.bookingId || booking.id), 43, 565, 9, '#314158')
+  text('STATUS', 195, 580, 7, '#07142d')
+  text(safe(bookingData.status || 'Confirmed'), 195, 565, 9, '#314158')
+  text('PAYMENT', 340, 580, 7, '#07142d')
+  text(paymentStatus, 340, 565, 9, '#314158')
+
+  line(43, 523, 552, 523, '#e8edf5', 1)
+  text('DESCRIPTION', 43, 536, 7, '#07142d')
+  rightText('RATE', 383, 536, 7, '#07142d')
+  rightText('QTY', 452, 536, 7, '#07142d')
+  rightText('LINE TOTAL', 552, 536, 7, '#07142d')
+
+  text(safe(bookingData.title || 'WayBond Trip'), 43, 495, 10, '#07142d')
+  text(`${safe(bookingData.location)} | ${safe(bookingData.duration)} | ${tripDate}`, 43, 481, 7, '#314158')
+  rightText(money(pricePerPerson), 383, 491, 9, '#07142d')
+  rightText(String(travelers), 452, 491, 9, '#07142d')
+  rightText(money(subtotal), 552, 491, 9, '#07142d')
+
+  text('WayBond Travel Support & Booking Management', 43, 440, 10, '#07142d')
+  text('Trip coordination, traveller records, confirmation and assistance', 43, 426, 7, '#314158')
+  rightText('Included', 383, 436, 9, '#07142d')
+  rightText('1', 452, 436, 9, '#07142d')
+  rightText('Rs. 0', 552, 436, 9, '#07142d')
+
+  text('Taxes & Payment Processing', 43, 385, 10, '#07142d')
+  text('GST calculated at 5% on trip subtotal', 43, 371, 7, '#314158')
+  rightText(money(gst), 383, 381, 9, '#07142d')
+  rightText('1', 452, 381, 9, '#07142d')
+  rightText(money(gst), 552, 381, 9, '#07142d')
+
+  rect(43, 150, 150, 55, '#f3f6fb')
+  text('PAYMENT TERMS', 43, 230, 7, '#07142d')
+  text(paymentStatus === 'Pending Payment' ? 'Due on booking' : 'Paid', 67, 179, 9, '#07142d')
+
+  text('CONTACT DETAILS', 43, 125, 7, '#07142d')
+  text('Name: WayBond', 43, 109, 8, '#07142d')
+  text('Email: support@waybond.com', 43, 94, 8, '#07142d')
+  text('Website: www.waybond.com', 43, 79, 8, '#07142d')
+
+  text('Subtotal', 380, 180, 9, '#07142d')
+  rightText(money(subtotal), 552, 180, 9, '#07142d')
+  text('Tax (5%)', 380, 155, 9, '#07142d')
+  rightText(money(gst), 552, 155, 9, '#07142d')
+  line(380, 137, 552, 137, '#d8e0ea', 1)
+  text('Total Due', 380, 113, 14, '#07142d')
+  rightText(money(total), 552, 113, 16, '#0067d8')
+
+  rect(13, 0, 569, 43, '#07142d')
+  text('support@waybond.com', 43, 17, 8, '#64a8ff')
+  rightText('www.waybond.com', 540, 17, 8, '#64a8ff')
+
+  return createPdfBuffer(ops.join('\n'), {
+    images: WAYBOND_INVOICE_LOGO ? [{ name: 'Logo', ...WAYBOND_INVOICE_LOGO }] : []
+  })
 }
 
 const sendTripDateChangeEmail = async ({ booking, user, tripTitle, oldDate, newDate }) => {
@@ -893,6 +1140,29 @@ app.post('/api/users/:id/bookings', async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
+app.get('/api/bookings/:bookingId/invoice', async (req, res, next) => {
+  try {
+    const bookingId = normalizeText(req.params.bookingId)
+    const booking = await prisma.booking.findFirst({
+      where: {
+        OR: [
+          { id: bookingId },
+          { payload: { path: ['bookingId'], equals: bookingId } }
+        ]
+      },
+      include: { user: true }
+    })
+
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' })
+
+    const invoicePdf = createInvoicePdf({ booking, user: booking.user })
+    const fileBookingId = normalizeText(booking.payload?.bookingId || booking.id).replace(/[^a-zA-Z0-9_-]/g, '')
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', `attachment; filename="WayBond-Invoice-${fileBookingId}.pdf"`)
+    res.send(invoicePdf)
+  } catch (error) { next(error) }
+})
+
 app.put('/api/bookings/:bookingId/cancel', async (req, res, next) => {
   try {
     const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId } })
@@ -921,6 +1191,7 @@ app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
 
     const updatedPayload = {
       ...booking.payload,
+      status: getBookingStatusForPaymentStatus(paymentStatus, booking.payload?.status),
       paymentStatus,
       paymentStatusUpdatedAt: new Date().toISOString()
     }

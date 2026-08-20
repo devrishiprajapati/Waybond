@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Calendar, Clock, MapPin, Package, Download } from 'lucide-react'
 import { getUser } from '../../lib/auth'
 import { formatDateOnly } from '../../lib/date'
+import { downloadInvoice } from '../../lib/invoice'
 
 interface Trip {
   id: string | number
@@ -66,8 +67,13 @@ const AllTripsPage = () => {
     loadAllTrips()
   }, [navigate, userId])
 
-  const handleDownloadInvoice = (bookingId: string) => {
-    navigate(`/booking-confirmation/${bookingId}`)
+  const handleDownloadInvoice = async (bookingId: string) => {
+    try {
+      await downloadInvoice(bookingId)
+    } catch (error) {
+      console.error('Failed to download invoice:', error)
+      alert(error instanceof Error ? error.message : 'Unable to download invoice. Please try again.')
+    }
   }
 
   return (
