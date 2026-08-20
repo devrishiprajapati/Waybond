@@ -100,6 +100,7 @@ const Analytics = () => {
         const analyticsData = await response.json()
         setData(analyticsData)
       } else {
+        console.error('Failed to load analytics - using fallback data')
         setData(generateMockData())
       }
     } catch (error) {
