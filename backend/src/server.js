@@ -1434,9 +1434,10 @@ app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
       })
     }
 
-    const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId } })
+    const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId }, include: { user: true } })
     if (!booking) return res.status(404).json({ message: 'Booking not found' })
 
+    const wasConfirmed = booking.payload?.status === 'Confirmed'
     const updatedPayload = {
       ...booking.payload,
       status: getBookingStatusForPaymentStatus(paymentStatus, booking.payload?.status),
@@ -1464,6 +1465,53 @@ app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
     }
 
     const [updated] = await prisma.$transaction(updates)
+    const isNowConfirmed = updatedPayload.status === 'Confirmed'
+    if (!wasConfirmed && isNowConfirmed && mailTransport && booking.user?.email) {
+      try {
+        const updatedBooking = { ...booking, payload: updatedPayload }
+        const bookingData = toBooking(updatedBooking)
+        const invoicePdf = createInvoicePdf({ booking: updatedBooking, user: booking.user })
+        await mailTransport.sendMail({
+          from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+          to: booking.user.email,
+          subject: `WayBond Booking Confirmation - ${bookingData.bookingId}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); padding: 40px 20px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 32px; font-weight: bold;">WAYBOND</h1>
+                <p style="color: white; margin: 10px 0 0 0; font-size: 14px;">Your Journey, Our Passion</p>
+              </div>
+              <div style="background: #f8fafc; padding: 40px 20px;">
+                <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                  <h2 style="color: #10b981; margin: 0 0 20px 0; font-size: 24px;">Booking Confirmed!</h2>
+                  <p style="color: #475569; margin: 0 0 20px 0; font-size: 16px;">Dear ${escapeHtml(booking.user.name)},</p>
+                  <p style="color: #475569; margin: 0 0 30px 0; line-height: 1.6;">
+                    Your ${escapeHtml(paymentStatus)} payment for <strong>${escapeHtml(bookingData.title)}</strong> has been confirmed by the WayBond team.
+                  </p>
+                  <div style="background: #f1f5f9; border-left: 4px solid #0ea5e9; padding: 20px; margin: 0 0 30px 0;">
+                    <p style="margin: 0 0 10px 0; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Booking Details</p>
+                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Booking ID:</strong> ${escapeHtml(bookingData.bookingId)}</p>
+                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Trip:</strong> ${escapeHtml(bookingData.title)}</p>
+                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Departure:</strong> ${escapeHtml(formatTripDate(bookingData.nextBatch))}</p>
+                    <p style="margin: 0; color: #1e293b;"><strong>Payment:</strong> ${escapeHtml(paymentStatus)}</p>
+                  </div>
+                  <p style="color: #475569; margin: 0; line-height: 1.6;">
+                    Your formatted WayBond invoice with the official logo is attached to this email.
+                  </p>
+                </div>
+              </div>
+            </div>
+          `,
+          attachments: [{
+            filename: `WayBond-Invoice-${normalizeText(bookingData.bookingId || booking.id)}.pdf`,
+            content: invoicePdf,
+            contentType: 'application/pdf'
+          }]
+        })
+      } catch (emailError) {
+        console.error('Failed to send confirmed payment invoice email:', emailError)
+      }
+    }
     res.json(toBooking(updated))
   } catch (error) { next(error) }
 })
