@@ -107,6 +107,7 @@ const getTripDate = (payload) => normalizeText(payload?.nextBatch || payload?.de
 const getDepartureDates = (payload) => Array.isArray(payload?.departureDates)
   ? payload.departureDates.map(normalizeText).filter(Boolean)
   : []
+
 const parseDateOnly = (value) => {
   const text = normalizeText(value)
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text)
@@ -1073,6 +1074,253 @@ app.get('/api/admin/dashboard', async (_req, res, next) => {
     })
   } catch (error) { next(error) }
 })
+
+app.get('/api/analytics', async (req, res, next) => {
+  try {
+    const range = req.query.range || '30d'
+    const now = new Date()
+    let startDate = new Date()
+    
+    // Calculate date range
+    switch (range) {
+      case '7d':
+        startDate.setDate(now.getDate() - 7)
+        break
+      case '30d':
+        startDate.setDate(now.getDate() - 30)
+        break
+      case '90d':
+        startDate.setDate(now.getDate() - 90)
+        break
+      case '1y':
+        startDate.setFullYear(now.getFullYear() - 1)
+        break
+      default:
+        startDate.setDate(now.getDate() - 30)
+    }
+
+    // Fetch all data in parallel
+    const [allBookings, allTrips, allUsers] = await Promise.all([
+      prisma.booking.findMany({ orderBy: { createdAt: 'asc' } }),
+      prisma.trip.findMany(),
+      prisma.user.findMany({ where: { role: { not: 'ADMIN' } }, orderBy: { joinedAt: 'asc' } })
+    ])
+
+    // Filter bookings by date range
+    const bookings = allBookings.filter(b => new Date(b.createdAt) >= startDate)
+    const confirmedBookings = bookings.filter(b => 
+      b.payload?.status === 'Confirmed' || 
+      b.payload?.paymentStatus === 'Paid' ||
+      b.payload?.paymentStatus === 'Online'
+    )
+
+    // Calculate total revenue
+    const totalRevenue = confirmedBookings.reduce((sum, booking) => {
+      const travelers = Number(booking.payload?.travelers || 1)
+      const price = toMoneyNumber(booking.payload?.price || 0)
+      return sum + (price * travelers)
+    }, 0)
+
+    // Calculate average booking value
+    const averageBookingValue = confirmedBookings.length > 0 
+      ? Math.round(totalRevenue / confirmedBookings.length) 
+      : 0
+
+    // Booking trends (weekly or monthly based on range)
+    const bookingTrendsData = generateBookingTrends(bookings, range)
+
+    // Category distribution from trips
+    const categoryMap = new Map()
+    allTrips.forEach(trip => {
+      const category = trip.payload?.category || 'Other'
+      categoryMap.set(category, (categoryMap.get(category) || 0) + 1)
+    })
+
+    // Experience distribution from trips
+    const experienceMap = new Map()
+    allTrips.forEach(trip => {
+      const experience = trip.payload?.experience || 'Other'
+      experienceMap.set(experience, (experienceMap.get(experience) || 0) + 1)
+    })
+
+    // Location popularity from bookings
+    const locationMap = new Map()
+    confirmedBookings.forEach(booking => {
+      const location = booking.payload?.location || 'Unknown'
+      locationMap.set(location, (locationMap.get(location) || 0) + 1)
+    })
+
+    // Monthly revenue (last 12 months)
+    const monthlyRevenue = generateMonthlyRevenue(allBookings)
+
+    // User growth (last 6 months)
+    const userGrowth = generateUserGrowth(allUsers)
+
+    // Stats
+    const stats = {
+      totalBookings: confirmedBookings.length,
+      totalRevenue: Math.round(totalRevenue),
+      averageBookingValue,
+      conversionRate: totalRevenue > 0 ? 
+        Number(((confirmedBookings.length / Math.max(bookings.length, 1)) * 100).toFixed(1)) : 
+        0,
+      totalTrips: allTrips.length,
+      totalUsers: allUsers.length
+    }
+
+    res.json({
+      bookingTrends: bookingTrendsData,
+      categoryDistribution: {
+        labels: Array.from(categoryMap.keys()),
+        data: Array.from(categoryMap.values())
+      },
+      experienceDistribution: {
+        labels: Array.from(experienceMap.keys()),
+        data: Array.from(experienceMap.values())
+      },
+      locationPopularity: {
+        labels: Array.from(locationMap.keys()).slice(0, 10),
+        data: Array.from(locationMap.values()).slice(0, 10)
+      },
+      monthlyRevenue,
+      userGrowth,
+      stats
+    })
+  } catch (error) {
+    console.error('Analytics error:', error)
+    console.error('Error stack:', error.stack)
+    res.status(500).json({ message: 'Analytics error', error: error.message })
+  }
+})
+
+app.get('/api/admin/bookings', async (_req, res, next) => {
+  try {
+    const bookings = await prisma.booking.findMany({
+      include: {
+        user: true
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    const formattedBookings = bookings.map(booking => {
+      const payload = booking.payload || {}
+      const travelers = Number(payload.travelers || 1)
+      const price = toMoneyNumber(payload.price || 0)
+      const total = price * travelers
+
+      return {
+        bookingId: booking.id,
+        customerName: booking.user?.name || payload.name || 'N/A',
+        customerEmail: booking.user?.email || payload.email || 'N/A',
+        tripName: payload.tripName || payload.title || 'N/A',
+        location: payload.location || 'N/A',
+        travelers,
+        price,
+        total,
+        status: payload.status || 'Pending',
+        paymentStatus: payload.paymentStatus || 'Pending Payment',
+        bookingDate: new Date(booking.createdAt).toLocaleDateString('en-IN')
+      }
+    })
+
+    res.json(formattedBookings)
+  } catch (error) {
+    console.error('Bookings fetch error:', error)
+    next(error)
+  }
+})
+
+function generateBookingTrends(bookings, range) {
+  if (range === '7d') {
+    // Last 7 days
+    const labels = []
+    const data = []
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dayStr = date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+      labels.push(dayStr)
+      
+      const count = bookings.filter(b => {
+        const bookingDate = new Date(b.createdAt)
+        return bookingDate.toDateString() === date.toDateString()
+      }).length
+      data.push(count)
+    }
+    return { labels, data }
+  } else {
+    // Weekly view for 30d, 90d, 1y
+    const weeks = range === '30d' ? 4 : range === '90d' ? 12 : 52
+    const labels = []
+    const data = []
+    
+    for (let i = weeks - 1; i >= 0; i--) {
+      labels.push(`Week ${weeks - i}`)
+      const weekStart = new Date()
+      weekStart.setDate(weekStart.getDate() - (i + 1) * 7)
+      const weekEnd = new Date()
+      weekEnd.setDate(weekEnd.getDate() - i * 7)
+      
+      const count = bookings.filter(b => {
+        const bookingDate = new Date(b.createdAt)
+        return bookingDate >= weekStart && bookingDate < weekEnd
+      }).length
+      data.push(count)
+    }
+    return { labels, data }
+  }
+}
+
+function generateMonthlyRevenue(bookings) {
+  const labels = []
+  const data = []
+  const now = new Date()
+  
+  for (let i = 11; i >= 0; i--) {
+    const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const monthStr = month.toLocaleDateString('en-IN', { month: 'short' })
+    labels.push(monthStr)
+    
+    const monthRevenue = bookings.filter(b => {
+      const bookingDate = new Date(b.createdAt)
+      return bookingDate.getMonth() === month.getMonth() && 
+             bookingDate.getFullYear() === month.getFullYear() &&
+             (b.payload?.status === 'Confirmed' || 
+              b.payload?.paymentStatus === 'Paid' ||
+              b.payload?.paymentStatus === 'Online')
+    }).reduce((sum, booking) => {
+      const travelers = Number(booking.payload?.travelers || 1)
+      const price = toMoneyNumber(booking.payload?.price || 0)
+      return sum + (price * travelers)
+    }, 0)
+    
+    data.push(Math.round(monthRevenue))
+  }
+  
+  return { labels, data }
+}
+
+function generateUserGrowth(users) {
+  const labels = []
+  const data = []
+  const now = new Date()
+  
+  for (let i = 5; i >= 0; i--) {
+    const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const monthStr = month.toLocaleDateString('en-IN', { month: 'short' })
+    labels.push(monthStr)
+    
+    const monthUsers = users.filter(u => {
+      const userDate = new Date(u.joinedAt)
+      return userDate.getMonth() === month.getMonth() && 
+             userDate.getFullYear() === month.getFullYear()
+    }).length
+    
+    data.push(monthUsers)
+  }
+  
+  return { labels, data }
+}
 
 app.get('/api/admin/payment-updates', async (_req, res, next) => {
   try {

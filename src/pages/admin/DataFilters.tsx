@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { MaterialReactTable, type MRT_ColumnDef, useMaterialReactTable } from 'material-react-table'
 import { Button, ThemeProvider, createTheme } from '@mui/material'
-import { Filter, Database, Users, Package, FileDown, ArrowLeft } from 'lucide-react'
+import { Filter, Database, Users, Package, FileDown, ArrowLeft, Calendar } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import PermissionGuard from '../../components/PermissionGuard'
@@ -28,10 +28,25 @@ type User = {
   lastLoginAt: string
 }
 
+type Booking = {
+  bookingId: string
+  customerName: string
+  customerEmail: string
+  tripName: string
+  location: string
+  travelers: number
+  price: number
+  total: number
+  status: string
+  paymentStatus: string
+  bookingDate: string
+}
+
 const DataFilters = () => {
   const [trips, setTrips] = useState<Trip[]>([])
   const [users, setUsers] = useState<User[]>([])
-  const [activeTab, setActiveTab] = useState<'trips' | 'users'>('trips')
+  const [bookings, setBookings] = useState<Booking[]>([])
+  const [activeTab, setActiveTab] = useState<'trips' | 'users' | 'bookings'>('trips')
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
@@ -46,9 +61,10 @@ const DataFilters = () => {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [tripsRes, usersRes] = await Promise.all([
+      const [tripsRes, usersRes, bookingsRes] = await Promise.all([
         fetch('/api/trips'),
-        fetch('/api/users')
+        fetch('/api/users'),
+        fetch('/api/admin/bookings')
       ])
 
       if (tripsRes.ok) {
@@ -64,6 +80,11 @@ const DataFilters = () => {
           joinedAt: new Date(u.joinedAt).toLocaleDateString('en-IN'),
           lastLoginAt: new Date(u.lastLoginAt).toLocaleDateString('en-IN')
         })))
+      }
+
+      if (bookingsRes.ok) {
+        const bookingsData = await bookingsRes.json()
+        setBookings(bookingsData)
       }
     } catch (error) {
       console.error('Failed to load data:', error)
@@ -213,6 +234,106 @@ const DataFilters = () => {
     []
   )
 
+  // Booking columns
+  const bookingColumns = useMemo<MRT_ColumnDef<Booking>[]>(
+    () => [
+      {
+        accessorKey: 'bookingId',
+        header: 'Booking ID',
+        size: 140,
+        grow: false,
+      },
+      {
+        accessorKey: 'customerName',
+        header: 'Customer',
+        size: 150,
+        grow: true,
+      },
+      {
+        accessorKey: 'customerEmail',
+        header: 'Email',
+        size: 200,
+        grow: true,
+      },
+      {
+        accessorKey: 'tripName',
+        header: 'Trip Name',
+        size: 180,
+        grow: true,
+      },
+      {
+        accessorKey: 'location',
+        header: 'Location',
+        size: 140,
+        grow: true,
+      },
+      {
+        accessorKey: 'travelers',
+        header: 'Travelers',
+        size: 100,
+        grow: false,
+      },
+      {
+        accessorKey: 'total',
+        header: 'Total',
+        size: 120,
+        grow: false,
+        Cell: ({ cell }) => `₹${cell.getValue<number>().toLocaleString('en-IN')}`,
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        size: 120,
+        grow: false,
+        filterVariant: 'select',
+        Cell: ({ cell }) => {
+          const status = cell.getValue<string>()
+          const colors: Record<string, string> = {
+            'Confirmed': 'bg-green-100 text-green-800 border-green-200',
+            'Pending': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            'Cancelled': 'bg-red-100 text-red-800 border-red-200',
+            'Payment Pending': 'bg-orange-100 text-orange-800 border-orange-200'
+          }
+          return (
+            <span className={`px-2 py-1 rounded-lg text-[10px] font-bold border ${colors[status] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+              {status}
+            </span>
+          )
+        }
+      },
+      {
+        accessorKey: 'paymentStatus',
+        header: 'Payment',
+        size: 130,
+        grow: false,
+        filterVariant: 'select',
+        Cell: ({ cell }) => {
+          const status = cell.getValue<string>()
+          const colors: Record<string, string> = {
+            'Paid': 'bg-green-100 text-green-800 border-green-200',
+            'Pending Payment': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            'Failed': 'bg-red-100 text-red-800 border-red-200',
+            'Refunded': 'bg-blue-100 text-blue-800 border-blue-200',
+            'Cash': 'bg-purple-100 text-purple-800 border-purple-200',
+            'Online': 'bg-green-100 text-green-800 border-green-200'
+          }
+          return (
+            <span className={`px-2 py-1 rounded-lg text-[10px] font-bold border ${colors[status] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+              {status}
+            </span>
+          )
+        }
+      },
+      {
+        accessorKey: 'bookingDate',
+        header: 'Booking Date',
+        size: 130,
+        grow: false,
+      },
+    ],
+    []
+  )
+
   // PDF Export handlers
   const handleExportTripsPDF = (selectedRows?: Trip[]) => {
     const doc = new jsPDF()
@@ -285,11 +406,49 @@ const DataFilters = () => {
     doc.save(filename)
   }
 
+  const handleExportBookingsPDF = (selectedRows?: Booking[]) => {
+    const doc = new jsPDF('landscape')
+    const dataToExport = selectedRows && selectedRows.length > 0 ? selectedRows : bookings
+    
+    doc.setFontSize(18)
+    doc.text('WayBond Bookings Data', 14, 22)
+    doc.setFontSize(11)
+    doc.setTextColor(100)
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 30)
+    doc.text(`Total Records: ${dataToExport.length}`, 14, 36)
+    
+    autoTable(doc, {
+      head: [['Booking ID', 'Customer', 'Email', 'Trip', 'Location', 'Travelers', 'Total', 'Status', 'Payment', 'Date']],
+      body: dataToExport.map(booking => [
+        booking.bookingId,
+        booking.customerName,
+        booking.customerEmail,
+        booking.tripName,
+        booking.location,
+        booking.travelers,
+        `₹${booking.total.toLocaleString('en-IN')}`,
+        booking.status,
+        booking.paymentStatus,
+        booking.bookingDate
+      ]),
+      startY: 40,
+      styles: { fontSize: 7, cellPadding: 2 },
+      headStyles: { fillColor: [100, 149, 237], textColor: 255, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      margin: { top: 40 },
+    })
+    
+    const filename = selectedRows && selectedRows.length > 0 
+      ? `waybond-bookings-selected-${dataToExport.length}.pdf`
+      : 'waybond-bookings-all.pdf'
+    doc.save(filename)
+  }
+
   const stats = [
     { label: 'Total Trips', value: trips.length, icon: Package, color: 'bg-blue-500/20 text-blue-400 border-blue-500/20' },
     { label: 'Total Users', value: users.length, icon: Users, color: 'bg-green-500/20 text-green-400 border-green-500/20' },
-    { label: 'Categories', value: new Set(trips.map(t => t.category)).size, icon: Filter, color: 'bg-purple-500/20 text-purple-400 border-purple-500/20' },
-    { label: 'Experiences', value: new Set(trips.map(t => t.experience)).size, icon: Database, color: 'bg-orange-500/20 text-orange-400 border-orange-500/20' },
+    { label: 'Total Bookings', value: bookings.length, icon: Calendar, color: 'bg-purple-500/20 text-purple-400 border-purple-500/20' },
+    { label: 'Categories', value: new Set(trips.map(t => t.category)).size, icon: Filter, color: 'bg-orange-500/20 text-orange-400 border-orange-500/20' },
   ]
 
   // Trips Table Component
@@ -642,6 +801,181 @@ const DataFilters = () => {
     return <MaterialReactTable table={table} />
   }
 
+  // Bookings Table Component
+  const BookingsTable = () => {
+    const [rowSelection, setRowSelection] = useState({})
+
+    const table = useMaterialReactTable({
+      columns: bookingColumns,
+      data: bookings,
+      enableColumnFilterModes: true,
+      enableColumnOrdering: true,
+      enableGrouping: true,
+      enablePinning: true,
+      enableRowSelection: true,
+      enableColumnResizing: true,
+      enableStickyHeader: true,
+      enableStickyFooter: true,
+      onRowSelectionChange: setRowSelection,
+      state: { 
+        isLoading: loading,
+        rowSelection 
+      },
+      initialState: {
+        showColumnFilters: false,
+        showGlobalFilter: true,
+        density: 'compact',
+        pagination: { pageSize: 20, pageIndex: 0 },
+      },
+      muiTableProps: {
+        sx: { 
+          backgroundColor: '#ffffff',
+          width: '100%',
+          tableLayout: 'auto',
+        },
+      },
+      muiTableContainerProps: {
+        sx: {
+          width: '100%',
+          maxHeight: { xs: '400px', sm: '500px', md: '600px', lg: '700px', xl: '800px' },
+          '&::-webkit-scrollbar': { width: '8px', height: '8px' },
+          '&::-webkit-scrollbar-track': { background: '#f1f5f9', borderRadius: '4px' },
+          '&::-webkit-scrollbar-thumb': { background: '#6495ED', borderRadius: '4px' },
+          '&::-webkit-scrollbar-thumb:hover': { background: '#5080d9' },
+        },
+      },
+      muiTableHeadCellProps: {
+        sx: {
+          backgroundColor: '#6495ED',
+          color: '#ffffff',
+          fontWeight: '900',
+          fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' },
+          textTransform: 'uppercase',
+          letterSpacing: '0.03em',
+          borderBottom: '2px solid #5080d9',
+          padding: { xs: '6px', sm: '8px', md: '10px' },
+        },
+      },
+      muiTableBodyCellProps: {
+        sx: {
+          backgroundColor: '#ffffff',
+          color: '#1e293b',
+          fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.875rem' },
+          padding: { xs: '8px', sm: '10px', md: '12px' },
+          borderBottom: '1px solid #e2e8f0',
+        },
+      },
+      muiTableBodyRowProps: ({ row }) => ({
+        sx: {
+          backgroundColor: row.index % 2 === 0 ? '#ffffff' : '#f8fafc',
+          '&:hover': { backgroundColor: '#e0e7ff' },
+        },
+      }),
+      muiTablePaperProps: {
+        sx: {
+          width: '100%',
+          backgroundColor: '#ffffff',
+          boxShadow: 'none',
+          borderRadius: '12px',
+          overflow: 'hidden',
+        },
+      },
+      muiTopToolbarProps: {
+        sx: {
+          backgroundColor: '#f8fafc',
+          borderRadius: '12px',
+          marginBottom: '16px',
+          padding: { xs: '8px', md: '12px' },
+        },
+      },
+      muiBottomToolbarProps: {
+        sx: {
+          backgroundColor: '#f8fafc',
+          borderRadius: '12px',
+          marginTop: '16px',
+          color: '#1e293b',
+        },
+      },
+      muiSearchTextFieldProps: {
+        sx: {
+          '& .MuiInputBase-root': {
+            backgroundColor: '#ffffff',
+            color: '#1e293b',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0',
+            fontSize: { xs: '0.75rem', md: '0.875rem' },
+          },
+          '& .MuiInputBase-input': { color: '#1e293b' },
+          '& .MuiInputLabel-root': { color: '#64748b' },
+          '& .MuiSvgIcon-root': { color: '#6495ED' },
+        },
+      },
+      muiPaginationProps: {
+        sx: {
+          '& .MuiPaginationItem-root': {
+            color: '#1e293b',
+            fontSize: { xs: '0.75rem', md: '0.875rem' },
+          },
+          '& .Mui-selected': { backgroundColor: '#6495ED !important', color: '#fff' },
+        },
+      },
+      renderTopToolbarCustomActions: () => {
+        const selectedRows = table.getSelectedRowModel().rows.map(row => row.original)
+        const hasSelection = selectedRows.length > 0
+        
+        return (
+          <div className="flex gap-2">
+            <Button
+              onClick={() => handleExportBookingsPDF()}
+              startIcon={<FileDown size={14} />}
+              variant="outlined"
+              size="small"
+              sx={{
+                borderColor: '#6495ED',
+                color: '#6495ED',
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+                fontSize: '0.65rem',
+                letterSpacing: '0.05em',
+                padding: '6px 16px',
+                borderRadius: '8px',
+                '&:hover': {
+                  borderColor: '#5080d9',
+                  backgroundColor: 'rgba(100, 149, 237, 0.1)',
+                },
+              }}
+            >
+              Export All
+            </Button>
+            {hasSelection && (
+              <Button
+                onClick={() => handleExportBookingsPDF(selectedRows)}
+                startIcon={<FileDown size={14} />}
+                variant="contained"
+                size="small"
+                sx={{
+                  backgroundColor: '#6495ED',
+                  color: '#fff',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
+                  fontSize: '0.65rem',
+                  letterSpacing: '0.05em',
+                  padding: '6px 16px',
+                  borderRadius: '8px',
+                  '&:hover': { backgroundColor: '#5080d9' },
+                }}
+              >
+                Export Selected ({selectedRows.length})
+              </Button>
+            )}
+          </div>
+        )
+      },
+    })
+
+    return <MaterialReactTable table={table} />
+  }
+
   return (
     <PermissionGuard requiredPermission="view_data_filters">
       <div className="min-h-screen bg-white text-white p-6 md:p-10 lg:p-12">
@@ -662,7 +996,7 @@ const DataFilters = () => {
               Data <span className="text-primary">Filters</span>
             </h1>
             <p className="text-white/45 font-medium italic mt-3 max-w-2xl">
-              Filter and analyze trips by category, experience type, and view all registered users with advanced search capabilities and booking status.
+              Filter and analyze trips by category, experience type, view all registered users with advanced search capabilities and booking status, and manage all bookings with detailed customer and payment information.
             </p>
           </header>
 
@@ -708,6 +1042,17 @@ const DataFilters = () => {
               <Users size={16} />
               Users Data
             </button>
+            <button
+              onClick={() => setActiveTab('bookings')}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] transition-all whitespace-nowrap ${
+                activeTab === 'bookings'
+                  ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
+                  : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
+              }`}
+            >
+              <Calendar size={16} />
+              Bookings Data
+            </button>
           </div>
 
           {/* Data Tables */}
@@ -715,6 +1060,7 @@ const DataFilters = () => {
             <ThemeProvider theme={lightTheme}>
               {activeTab === 'trips' && <TripsTable />}
               {activeTab === 'users' && <UsersTable />}
+              {activeTab === 'bookings' && <BookingsTable />}
             </ThemeProvider>
           </div>
 
