@@ -35,22 +35,14 @@ const BookingConfirmation = () => {
 
   const [paying, setPaying] = useState(false)
   const [cashSubmitting, setCashSubmitting] = useState(false)
-  const [showSuccessPopup, setShowSuccessPopup] = useState(true)
+  const [paymentConfirmedOpen, setPaymentConfirmedOpen] = useState(false)
+  const [dashboardPath, setDashboardPath] = useState('')
 
   useEffect(() => {
     if (!bookingData) {
       navigate('/discover')
     }
   }, [bookingData, navigate])
-
-  // Auto-hide popup after 2 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSuccessPopup(false)
-    }, 4000)
-    
-    return () => clearTimeout(timer)
-  }, [])
 
   if (!bookingData) return null
 
@@ -149,8 +141,9 @@ const BookingConfirmation = () => {
             })
             const verified = await verifyResponse.json()
             if (!verifyResponse.ok || !verified.success) throw new Error(verified.message || 'Payment verification failed')
-            alert('Payment successful. Your trip is confirmed!')
-            navigate(`/dashboard/${user.id}`)
+            haptics.success()
+            setDashboardPath(`/dashboard/${user.id}`)
+            setPaymentConfirmedOpen(true)
           } catch (error) {
             console.error('Payment verification failed:', error)
             alert('Payment was received but verification failed. Please contact support.')
@@ -205,6 +198,48 @@ const BookingConfirmation = () => {
       <Helmet>
         <title>Booking Confirmation - {trip.title} | WAYBOND</title>
       </Helmet>
+
+      <AnimatePresence>
+        {paymentConfirmedOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/55 px-4 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 28, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 18, scale: 0.96 }}
+              transition={{ type: 'spring', damping: 22, stiffness: 260 }}
+              className="relative w-full max-w-md rounded-[2rem] border border-green-200 bg-white p-7 text-center shadow-2xl"
+            >
+              <button
+                type="button"
+                onClick={() => navigate(dashboardPath || '/dashboard')}
+                className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close payment confirmation"
+              >
+                <X size={20} />
+              </button>
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <CheckCircle size={34} strokeWidth={2.5} />
+              </div>
+              <p className="text-2xl font-black text-slate-950">Payment Confirmed</p>
+              <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">
+                Your trip is confirmed. You can view your booking and download the invoice from your dashboard.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate(dashboardPath || '/dashboard')}
+                className="mt-6 h-12 w-full rounded-full bg-secondary px-6 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-secondary/20 transition-all hover:bg-secondary/90 active:scale-[0.98]"
+              >
+                Go to Dashboard
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="min-h-screen bg-gray-50 pt-24 pb-20">
         <div className="max-w-2xl mx-auto px-4">
@@ -344,7 +379,7 @@ const BookingConfirmation = () => {
           </motion.div>
 
           <p className="text-center text-xs text-gray-500 mt-4">
-            Online payments are powered by Razorpay. Cash bookings need admin confirmation before invoice access.
+            Online payments are powered by Razorpay.
           </p>
         </div>
       </div>

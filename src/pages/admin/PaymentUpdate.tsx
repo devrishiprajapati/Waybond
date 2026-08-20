@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, CreditCard, Mail, MapPin, Search, UserRound } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CheckCircle2, CreditCard, Mail, MapPin, Search, UserRound, X } from 'lucide-react'
 import PermissionGuard from '../../components/PermissionGuard'
 
 type BookingUser = {
@@ -39,6 +39,7 @@ export default function PaymentUpdate() {
   const [error, setError] = useState('')
   const [updatingBookingId, setUpdatingBookingId] = useState('')
   const [loading, setLoading] = useState(true)
+  const [confirmedPopup, setConfirmedPopup] = useState<{ bookingId: string; paymentStatus: string } | null>(null)
 
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
@@ -106,6 +107,12 @@ export default function PaymentUpdate() {
           bookings: trip.bookings.map((booking) => booking.bookingDbId === bookingId ? { ...booking, ...updatedBooking } : booking)
         }))
       }))
+      if (['Cash', 'Online', 'Paid'].includes(paymentStatus)) {
+        setConfirmedPopup({
+          bookingId: bookingText(updatedBooking, 'bookingId', bookingId),
+          paymentStatus
+        })
+      }
     } catch (updateError) {
       setError(updateError instanceof Error ? updateError.message : 'Unable to update payment status.')
     } finally {
@@ -116,6 +123,34 @@ export default function PaymentUpdate() {
   return (
     <PermissionGuard requiredPermission="view_bookings">
       <div className="min-h-screen bg-white text-white px-6 md:px-10 lg:px-16 pt-32 pb-20">
+        {confirmedPopup && (
+          <div className="fixed inset-0 z-[220] flex items-center justify-center bg-slate-950/55 px-4 backdrop-blur-sm">
+            <div className="relative w-full max-w-md rounded-[2rem] border border-green-500/20 bg-white p-7 text-center text-slate-950 shadow-2xl">
+              <button
+                type="button"
+                onClick={() => setConfirmedPopup(null)}
+                className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close payment confirmation"
+              >
+                <X size={20} />
+              </button>
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
+                <CheckCircle2 size={34} strokeWidth={2.5} />
+              </div>
+              <p className="text-2xl font-black">Payment Confirmed</p>
+              <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">
+                Booking {confirmedPopup.bookingId} is confirmed with {confirmedPopup.paymentStatus} payment. The user can now view and download the invoice.
+              </p>
+              <button
+                type="button"
+                onClick={() => setConfirmedPopup(null)}
+                className="mt-6 h-12 w-full rounded-full bg-secondary px-6 text-sm font-black uppercase tracking-[0.14em] text-white shadow-lg shadow-secondary/20 transition-all hover:bg-secondary/90 active:scale-[0.98]"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
         <div className="max-w-[1500px] mx-auto">
           <div className="mb-9">
             <Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.22em] mb-5"><ArrowLeft size={15} /> Admin dashboard</Link>
