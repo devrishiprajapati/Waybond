@@ -36,6 +36,8 @@ export interface Trip {
     description: string;
   }[];
   pdfUrl?: string;
+  thingsToCarry?: string[];
+  termsAndConditions?: string;
 }
 
 const DEFAULT_CAPTAIN = {

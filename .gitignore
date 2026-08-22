@@ -6,3 +6,5 @@ dist/
 tsconfig.tsbuildinfo
 
 /src/generated/prisma
+.kiro/settings/mcp.json
+.gitignore

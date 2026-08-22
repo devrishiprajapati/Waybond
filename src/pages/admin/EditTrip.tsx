@@ -67,7 +67,9 @@ const EditTrip = () => {
       trips: 0
     },
     itinerary: [],
-    pdfUrl: ''
+    pdfUrl: '',
+    thingsToCarry: [''],
+    termsAndConditions: ''
   })
   const [mediaError, setMediaError] = useState('')
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false })
@@ -180,6 +182,8 @@ const EditTrip = () => {
       images: formData.images && formData.images.length > 0 ? formData.images : [formData.image || ''],
       inclusion: (formData.inclusion || []).filter(item => item.trim()),
       exclusion: (formData.exclusion || []).filter(item => item.trim()),
+      thingsToCarry: (formData.thingsToCarry || []).filter(item => item.trim()),
+      termsAndConditions: (formData.termsAndConditions || '').trim(),
       departureDates: mergeUniqueDates([cleanData.nextBatch, ...(formData.departureDates || [])]),
       itinerary: formData.itinerary || []
     }
@@ -636,6 +640,89 @@ const EditTrip = () => {
               )}
             </div>
           </section>
+
+          <motion.section 
+            initial={{ opacity: 0, y: 16 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.1 }}
+            className={sectionClass}
+          >
+            <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
+              <List size={20} className="mr-3 text-secondary" /> Things to Carry
+            </h3>
+            <p className="text-xs text-white/45 ml-2 mb-4">Essential items travelers should bring for this trip</p>
+
+            <div className="space-y-2">
+              {(formData.thingsToCarry || []).map((item, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={e => {
+                      const newThingsToCarry = [...(formData.thingsToCarry || [])]
+                      newThingsToCarry[index] = e.target.value
+                      setFormData({ ...formData, thingsToCarry: newThingsToCarry })
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        setFormData({ 
+                          ...formData, 
+                          thingsToCarry: [...(formData.thingsToCarry || []), ''] 
+                        })
+                      }
+                    }}
+                    placeholder="e.g., Warm Clothes, Trekking Shoes, Sunscreen"
+                    className={`${inputClass} flex-1`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newThingsToCarry = [...(formData.thingsToCarry || [])]
+                      newThingsToCarry.splice(index, 1)
+                      setFormData({ ...formData, thingsToCarry: newThingsToCarry })
+                    }}
+                    className="w-12 shrink-0 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
+                    aria-label="Remove item"
+                  >
+                    <Trash2 size={16} className="mx-auto" />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => setFormData({ 
+                  ...formData, 
+                  thingsToCarry: [...(formData.thingsToCarry || []), ''] 
+                })}
+                className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm"
+              >
+                <Plus size={16} /> Add Item
+              </button>
+            </div>
+          </motion.section>
+
+          <motion.section 
+            initial={{ opacity: 0, y: 16 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.15 }}
+            className={sectionClass}
+          >
+            <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
+              <FileText size={20} className="mr-3 text-secondary" /> Terms & Conditions
+            </h3>
+            <p className="text-xs text-white/45 ml-2 mb-4">Package-specific terms, cancellation policy, and important guidelines</p>
+
+            <div className="space-y-2">
+              <textarea
+                value={formData.termsAndConditions}
+                onChange={e => setFormData({ ...formData, termsAndConditions: e.target.value })}
+                placeholder="Enter terms and conditions, cancellation policy, payment terms, safety guidelines, etc.&#10;&#10;Example:&#10;• Full payment required 15 days before departure&#10;• 50% refund if cancelled 7 days before trip&#10;• No refund for cancellations within 3 days&#10;• Travel insurance recommended&#10;• Valid ID proof mandatory"
+                className={`${textareaClass} min-h-[200px]`}
+              />
+              <p className="text-[10px] text-white/30 ml-2">Use bullet points (•) or numbers for better readability</p>
+            </div>
+          </motion.section>
 
           <section className={sectionClass}>
             <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Helmet } from 'react-helmet-async'
-import { Search, Calendar, User, BookOpen, ArrowRight, X } from 'lucide-react'
+import { Search, Calendar, User, BookOpen, ArrowRight, X, ChevronDown } from 'lucide-react'
 import { getAllBlogs, Blog, getYouTubeThumbnailUrl } from '../lib/blogs'
 
 export default function Blogs() {
@@ -45,7 +45,7 @@ export default function Blogs() {
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-gradient-to-br from-secondary/10 to-blue-50 py-16 md:py-20 border-b-2 border-secondary/10"
+          className="bg-gradient-to-br from-secondary/10 to-blue-50 py-8 md:py-10 border-b-2 border-secondary/10"
         >
           <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20">
             <h1 className="text-2xl md:text-4xl font-sans font-black text-gray-900 uppercase tracking-tight mb-4 font-bungee">
@@ -58,7 +58,7 @@ export default function Blogs() {
         </motion.div>
 
         {/* Main Content */}
-        <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 py-12">
+        <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 py-10">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Sidebar - Filters */}
             <motion.div
@@ -90,7 +90,28 @@ export default function Blogs() {
                   <label className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-4">
                     Categories
                   </label>
-                  <div className="space-y-3">
+                  
+                  {/* Mobile Dropdown */}
+                  <div className="md:hidden">
+                    <div className="relative">
+                      <select
+                        value={selectedCategory || ''}
+                        onChange={(e) => setSelectedCategory(e.target.value || null)}
+                        className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-secondary transition-colors text-gray-900 font-semibold appearance-none cursor-pointer"
+                      >
+                        <option value="">All Categories</option>
+                        {categories.map(category => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-3.5 text-gray-400 pointer-events-none" size={20} />
+                    </div>
+                  </div>
+
+                  {/* Desktop Buttons */}
+                  <div className="hidden md:block space-y-3">
                     <button
                       onClick={() => setSelectedCategory(null)}
                       className={`w-full text-left px-4 py-2.5 rounded-xl font-semibold transition-all duration-300 ${selectedCategory === null
@@ -116,7 +137,7 @@ export default function Blogs() {
                 </div>
 
                 {/* Tags Filter */}
-                <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 shadow-lg">
+                {/* <div className="bg-white rounded-2xl p-6 border-2 border-gray-100 shadow-lg">
                   <label className="block text-sm font-black text-gray-900 uppercase tracking-wide mb-4">
                     Popular Tags
                   </label>
@@ -134,7 +155,7 @@ export default function Blogs() {
                       </button>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Active Filters */}
                 {(searchQuery || selectedCategory || selectedTag) && (
