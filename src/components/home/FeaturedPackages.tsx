@@ -57,7 +57,7 @@ export default function FeaturedPackages() {
   }, [])
 
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
+    <section className="py-10 bg-white relative overflow-hidden">
       <div className="absolute left-1/2 top-0 h-80 w-2/3 -translate-x-1/2 rounded-full bg-secondary/5 blur-[110px] pointer-events-none" />
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
         <div className="text-center mb-10 md:mb-12">
@@ -77,7 +77,6 @@ export default function FeaturedPackages() {
               }
               title={`${filter.label}`}
             >
-              <span className="inline-block mr-1 text-sm sm:text-base" aria-hidden="true">{filter.icon}</span>
               <span className="hidden sm:inline font-bungee">{filter.label}</span>
               <span className="sm:hidden">{filter.label.split(' ')[0]}</span>
             </button>

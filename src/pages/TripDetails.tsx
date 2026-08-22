@@ -66,6 +66,18 @@ const TripDetails = () => {
     return () => window.clearTimeout(timer)
   }, [trip])
 
+  // Auto-slide images every 5 seconds
+  useEffect(() => {
+    if (!trip || !trip.images || trip.images.length <= 1) return
+    
+    const totalImages = trip.images.length > 0 ? trip.images.length : 1
+    const timer = setInterval(() => {
+      setActiveImage((prev) => (prev + 1) % totalImages)
+    }, 5000) // Change image every 5 seconds
+
+    return () => clearInterval(timer)
+  }, [trip])
+
 
   // Scroll handler for sticky booking bar
   useEffect(() => {
@@ -239,11 +251,18 @@ const TripDetails = () => {
               data-main-image
               className="relative h-[230px] overflow-hidden rounded-3xl border border-white/10 shadow-[0_14px_32px_rgba(0,0,0,0.24)] sm:h-[350px] sm:rounded-[3rem] md:h-[500px] md:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
             >
-              <img
-                src={trip.images[activeImage] || trip.image}
-                alt="Main Trip"
-                className="w-full h-full object-cover transition-transform duration-[2s] hover:scale-105"
-              />
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={activeImage}
+                  src={trip.images[activeImage] || trip.image}
+                  alt="Main Trip"
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  transition={{ duration: 1.2, ease: "easeInOut" }}
+                  className="w-full h-full object-cover"
+                />
+              </AnimatePresence>
               <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/60 via-transparent to-transparent"></div>
               <div className="absolute right-4 top-4 sm:right-8 sm:top-8">
                 <button
@@ -259,21 +278,6 @@ const TripDetails = () => {
                 </button>
               </div>
             </motion.div>
-
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-4">
-              {(trip.images.length > 0 ? trip.images : [trip.image]).map((img: string, idx: number) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    haptics.light();
-                    setActiveImage(idx);
-                  }}
-                  className={`h-16 sm:h-20 md:h-24 rounded-2xl sm:rounded-[2rem] overflow-hidden border-2 transition-all duration-500 ${activeImage === idx ? 'border-secondary scale-95 shadow-xl shadow-secondary/20' : 'border-white/10 opacity-50 hover:opacity-100 hover:scale-105'}`}
-                >
-                  <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
 
           </div>
 
