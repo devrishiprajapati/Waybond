@@ -251,7 +251,6 @@ const TripDetails = () => {
               data-main-image
               className="relative h-[230px] overflow-hidden rounded-3xl border border-white/10 shadow-[0_14px_32px_rgba(0,0,0,0.24)] sm:h-[350px] sm:rounded-[3rem] md:h-[500px] md:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
             >
-<<<<<<< HEAD
               <AnimatePresence mode="wait">
                 <motion.img
                   key={activeImage}
@@ -264,15 +263,6 @@ const TripDetails = () => {
                   className="w-full h-full object-cover"
                 />
               </AnimatePresence>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/60 via-transparent to-transparent"></div>
-=======
-              <img
-                src={trip.images[activeImage] || trip.image}
-                alt="Main Trip"
-                className="w-full h-full object-cover transition-transform duration-[2s] hover:scale-105"
-              />
-
->>>>>>> 710225d73255ee3e6815b397cf4e8b468767092a
               <div className="absolute right-4 top-4 sm:right-8 sm:top-8">
                 <button
                   type="button"

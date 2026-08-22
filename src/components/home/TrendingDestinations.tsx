@@ -42,15 +42,9 @@ export default function TrendingDestinations() {
         </motion.div>
 
         {/* Horizontal Scrolling Cards - All Devices with Responsiveness */}
-<<<<<<< HEAD
         <div className="relative">
           <div 
             className="flex gap-3 md:gap-4 lg:gap-5 overflow-x-auto px-4 sm:px-6 md:px-8 lg:px-0 snap-x snap-mandatory scroll-smooth hide-scrollbar"
-=======
-        <div className="relative mb-16">
-          <div
-            className="flex gap-3 md:gap-4 lg:gap-5 overflow-x-auto pb-8 px-4 sm:px-6 md:px-8 lg:px-0 snap-x snap-mandatory scroll-smooth hide-scrollbar"
->>>>>>> 710225d73255ee3e6815b397cf4e8b468767092a
           >
             {trendingCards.map((card, idx) => (
               <motion.div
