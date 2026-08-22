@@ -69,7 +69,7 @@ const TripDetails = () => {
   // Auto-slide images every 5 seconds
   useEffect(() => {
     if (!trip || !trip.images || trip.images.length <= 1) return
-    
+
     const totalImages = trip.images.length > 0 ? trip.images.length : 1
     const timer = setInterval(() => {
       setActiveImage((prev) => (prev + 1) % totalImages)
@@ -212,13 +212,7 @@ const TripDetails = () => {
 
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
             <div>
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <span className="liquid-glass text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20">Most Popular</span>
-                <div className="flex items-center text-accent bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
-                  <Star size={14} fill="currentColor" />
-                  <span className="ml-1.5 text-xs font-black text-white">{trip.rating} ({trip.reviews} reviews)</span>
-                </div>
-              </div>
+
               <h1 className="text-2xl md:text-4xl font-bungee font-black text-white liquid-text italic uppercase tracking-tighter">{trip.title}</h1>
               <div className="flex items-center text-white/60 mt-4 font-black uppercase tracking-widest text-xs min-w-0">
                 <MapPin size={16} className="mr-2 text-secondary shrink-0" /> <span className="break-words">{trip.location}</span>
@@ -251,7 +245,6 @@ const TripDetails = () => {
               data-main-image
               className="relative h-[230px] overflow-hidden rounded-3xl border border-white/10 shadow-[0_14px_32px_rgba(0,0,0,0.24)] sm:h-[350px] sm:rounded-[3rem] md:h-[500px] md:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
             >
-<<<<<<< HEAD
               <AnimatePresence mode="wait">
                 <motion.img
                   key={activeImage}
@@ -265,14 +258,6 @@ const TripDetails = () => {
                 />
               </AnimatePresence>
               <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/60 via-transparent to-transparent"></div>
-=======
-              <img
-                src={trip.images[activeImage] || trip.image}
-                alt="Main Trip"
-                className="w-full h-full object-cover transition-transform duration-[2s] hover:scale-105"
-              />
-
->>>>>>> 710225d73255ee3e6815b397cf4e8b468767092a
               <div className="absolute right-4 top-4 sm:right-8 sm:top-8">
                 <button
                   type="button"
