@@ -154,7 +154,7 @@ const Discover = () => {
                     : { border: '1px solid rgba(0, 0, 0, 0.8)' }
                   }
                 >
-                  <span className="mr-1.5" aria-hidden="true">{experience.icon}</span>{experience.label}
+                  {experience.label}
                 </button>
               ))}
             </div>

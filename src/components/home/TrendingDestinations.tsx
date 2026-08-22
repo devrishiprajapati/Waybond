@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowUpRight, Bus, X, Mountain, Tent, Snowflake } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { getTrendingCards, optimizeImageUrl, TrendingCard } from '../../lib/dataService'
 
 export default function TrendingDestinations() {
@@ -12,7 +12,7 @@ export default function TrendingDestinations() {
   }, [])
 
   return (
-    <section className="py-20 md:py-32 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
+    <section className="py-16 md:py-28 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -ml-48 -mb-48 pointer-events-none" />
@@ -42,9 +42,15 @@ export default function TrendingDestinations() {
         </motion.div>
 
         {/* Horizontal Scrolling Cards - All Devices with Responsiveness */}
+<<<<<<< HEAD
+        <div className="relative">
+          <div 
+            className="flex gap-3 md:gap-4 lg:gap-5 overflow-x-auto px-4 sm:px-6 md:px-8 lg:px-0 snap-x snap-mandatory scroll-smooth hide-scrollbar"
+=======
         <div className="relative mb-16">
           <div
             className="flex gap-3 md:gap-4 lg:gap-5 overflow-x-auto pb-8 px-4 sm:px-6 md:px-8 lg:px-0 snap-x snap-mandatory scroll-smooth hide-scrollbar"
+>>>>>>> 710225d73255ee3e6815b397cf4e8b468767092a
           >
             {trendingCards.map((card, idx) => (
               <motion.div
@@ -96,33 +102,7 @@ export default function TrendingDestinations() {
                     </motion.div>
                   </div>
 
-                  {/* NEW: Icon Buttons Row */}
-                  {card.badge && (
-                    <div className="absolute bottom-3 sm:bottom-4 md:bottom-5 left-1/2 -translate-x-1/2 z-10">
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.12 + 0.3, duration: 0.5 }}
-                        viewport={{ once: true }}
-                        className="flex gap-2 sm:gap-2.5"
-                      >
-                        {/* Bus Icon */}
-                        <Bus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
 
-                        {/* Close/X Icon */}
-                        <X className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
-
-                        {/* Mountain Icon */}
-                        <Mountain className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
-
-                        {/* Tent Icon */}
-                        <Tent className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
-
-                        {/* Snowflake Icon */}
-                        <Snowflake className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#ffffff' }} />
-                      </motion.div>
-                    </div>
-                  )}
                 </Link>
               </motion.div>
             ))}
