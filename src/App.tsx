@@ -129,6 +129,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
 function App() {
   const location = useLocation();
   const [showSplash, setShowSplash] = useState(true);
+  const isAdminSection = isAdminSubdomain || location.pathname.startsWith('/admin')
 
   // Handle splash screen - show on every reload
   useEffect(() => {
@@ -166,8 +167,8 @@ function App() {
             {isAdminSubdomain ? <AdminRoutes location={location} /> : <PublicRoutes location={location} />}
           </AnimatePresence>
         </main>
-        <Footer />
-        <FloatingWhatsApp />
+        {!isAdminSection && <Footer />}
+        {!isAdminSection && <FloatingWhatsApp />}
       </div>
     </>
   )

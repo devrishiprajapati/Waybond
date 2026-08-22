@@ -193,7 +193,7 @@ const TripDetails = () => {
           <Link
             to="/discover"
             onClick={() => haptics.light()}
-            className="inline-flex items-center text-secondary font-black tracking-widest text-xs uppercase hover:gap-3 transition-all mb-8 drop-shadow-md"
+            className="inline-flex items-center text-secondary font-black tracking-widest text-xs uppercase hover:gap-3 transition-all mb-8"
           >
             <ArrowLeft size={16} className="mr-2" /> Back to Discover
           </Link>
@@ -244,7 +244,7 @@ const TripDetails = () => {
                 alt="Main Trip"
                 className="w-full h-full object-cover transition-transform duration-[2s] hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/60 via-transparent to-transparent"></div>
+
               <div className="absolute right-4 top-4 sm:right-8 sm:top-8">
                 <button
                   type="button"
@@ -282,12 +282,23 @@ const TripDetails = () => {
             <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-3xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] space-y-5 md:rounded-[3rem] md:p-10 md:space-y-8 md:shadow-[0_15px_60px_rgba(0,0,0,0.5)]">
               <div className="flex justify-between items-center gap-4 pb-5 border-b border-white/10 md:pb-8">
                 <div className="min-w-0 flex-1 overflow-hidden">
-                  <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em] drop-shadow-sm">Price per person</span>
+                  <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
                   <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
                 </div>
-                <div className="liquid-glass p-3 md:p-4 rounded-2xl text-center shrink-0 min-w-[64px] md:min-w-[72px] border border-white/5">
-                  <div className="text-white font-black text-xl md:text-2xl drop-shadow-md">{trip.duration.split(' ')[0]}</div>
-                  <div className="text-[8px] md:text-[9px] text-white/60 font-black uppercase tracking-[0.2em] mt-1">Days</div>
+                <div className="liquid-glass shrink-0 rounded-xl border border-white/5 overflow-hidden flex">
+                  <div className="px-3 py-2.5 text-center min-w-[46px] md:min-w-[52px]">
+                    <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Day/i)?.[1] ?? trip.duration.split(' ')[0]}</div>
+                    <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Days</div>
+                  </div>
+                  {String(trip.duration || '').match(/(\d+)\s*Night/i) && (
+                    <>
+                      <div className="w-px bg-white/10 my-2" />
+                      <div className="px-3 py-2.5 text-center min-w-[46px] md:min-w-[52px]">
+                        <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Night/i)![1]}</div>
+                        <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Nights</div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -417,6 +428,25 @@ const TripDetails = () => {
               >
                 Book Your Slot
               </button>
+
+              {trip.pdfUrl ? (
+                <a
+                  href={trip.pdfUrl}
+                  download={`${trip.title.replace(/\s+/g, '_')}_Brochure.pdf`}
+                  className="flex items-center justify-center gap-2 w-full py-4 md:py-5 rounded-2xl border border-white/20 bg-white/5 text-white font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] hover:bg-white/10 hover:border-white/30 transition-all"
+                  onClick={() => haptics.light()}
+                >
+                  <Download size={16} /> Download Brochure
+                </a>
+              ) : (
+                <button
+                  disabled
+                  className="flex items-center justify-center gap-2 w-full py-4 md:py-5 rounded-2xl border border-white/10 bg-white/5 text-white/30 font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] cursor-not-allowed"
+                >
+                  <Download size={16} /> Download Brochure
+                </button>
+              )}
+
               <p className="text-center text-[9px] md:text-[10px] text-white/40 font-bold uppercase tracking-widest">No cancellation fee up to 15 days before departure</p>
 
               <div className="pt-5 md:pt-6 space-y-3 md:space-y-4 border-t border-white/10">
@@ -426,16 +456,6 @@ const TripDetails = () => {
                 <div className="flex items-center text-xs font-black tracking-widest uppercase text-white/60">
                   <CheckCircle2 size={18} className="text-green-400 mr-3" /> Secure Payments
                 </div>
-                {trip.pdfUrl && (
-                  <a
-                    href={trip.pdfUrl}
-                    download={`${trip.title.replace(/\s+/g, '_')}_Brochure.pdf`}
-                    className="flex items-center justify-center gap-2 w-full h-11 rounded-2xl border border-secondary/30 bg-secondary/10 text-secondary font-black text-[10px] uppercase tracking-[0.16em] hover:bg-secondary hover:text-white transition-all"
-                    onClick={() => haptics.light()}
-                  >
-                    <Download size={15} /> Download Brochure
-                  </a>
-                )}
               </div>
             </div>
           </div>
@@ -728,11 +748,11 @@ const TripDetails = () => {
                     className="w-full h-full object-cover"
                     style={{ display: 'block' }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-secondary/95 via-secondary/25 to-transparent" />
+
                   <div className="absolute bottom-4 left-4 right-4 z-10 text-white sm:bottom-5 sm:left-5 sm:right-5">
                     <p className="inline-flex rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-xs font-black leading-none shadow-sm backdrop-blur sm:text-sm">{trip.duration}</p>
-                    <p className="mt-2 text-xl font-black leading-tight tracking-tight drop-shadow sm:text-3xl">{trip.title}</p>
-                    <p className="mt-1.5 text-sm font-semibold leading-tight text-white/85 drop-shadow sm:text-lg">{trip.location}</p>
+                    <p className="mt-2 text-xl font-black leading-tight tracking-tight sm:text-3xl">{trip.title}</p>
+                    <p className="mt-1.5 text-sm font-semibold leading-tight text-white/85 sm:text-lg">{trip.location}</p>
                   </div>
                 </div>
 
@@ -803,11 +823,12 @@ const TripDetails = () => {
       {!enquiryOpen && (
         <button
           onClick={() => { haptics.medium(); setEnquiryOpen(true) }}
-          className="fixed bottom-6 sm:bottom-6 left-1/2 -translate-x-1/2 z-[150] flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2.5 whitespace-nowrap bg-secondary text-white px-8 sm:px-7 py-4 sm:py-3.5 rounded-full shadow-[0_8px_30px_rgba(100,149,237,0.6)] hover:shadow-[0_8px_40px_rgba(100,149,237,0.8)] hover:scale-105 active:scale-95 transition-all duration-200 font-black text-sm sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] border-2 border-white/30 backdrop-blur-sm"
+          className="fixed left-1/2 -translate-x-1/2 z-[150] flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2.5 whitespace-nowrap bg-secondary text-white px-8 sm:px-7 py-4 sm:py-3.5 rounded-full shadow-[0_8px_30px_rgba(100,149,237,0.6)] hover:shadow-[0_8px_40px_rgba(100,149,237,0.8)] hover:scale-105 active:scale-95 transition-all duration-200 font-black text-sm sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] border-2 border-white/30 backdrop-blur-sm"
           aria-label="Open enquiry form"
           style={{
             WebkitTapHighlightColor: 'transparent',
-            touchAction: 'manipulation'
+            touchAction: 'manipulation',
+            bottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))'
           }}
         >
           <MessageCircle size={20} className="sm:w-[18px] sm:h-[18px]" />

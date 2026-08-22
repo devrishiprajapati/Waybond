@@ -92,7 +92,7 @@ const TeamMemberModal = ({ member, onClose }: { member: TeamMember; onClose: () 
         {/* Image */}
         <div className="relative h-72 w-full bg-white/5">
           <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent" />
+
           <button
             onClick={onClose}
             className="absolute top-4 right-4 w-11 h-11 rounded-full bg-black/40 border border-white/20 backdrop-blur-sm text-white hover:bg-white/20 flex items-center justify-center transition-all"
@@ -100,7 +100,7 @@ const TeamMemberModal = ({ member, onClose }: { member: TeamMember; onClose: () 
             <X size={18} />
           </button>
           <div className="absolute bottom-6 left-6">
-            <p className="text-3xl font-bungee font-black text-white italic tracking-tighter drop-shadow-xl">{member.name}</p>
+            <p className="text-3xl font-bungee font-black text-white italic tracking-tighter">{member.name}</p>
             <p className="text-[10px] text-secondary font-black uppercase tracking-[0.25em] mt-1">{member.designation}</p>
           </div>
         </div>
@@ -175,7 +175,7 @@ const TeamMembersSection = () => {
           <span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">The People Behind The Adventure</span>
         </div>
         <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
-          Meet The <span className="text-primary px-2 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>Team</span>
+          Meet The <span className="text-primary px-2" style={{ WebkitTextStroke: '2px white' }}>Team</span>
         </h2>
         <p className="text-white/40 italic mt-6 text-sm font-medium max-w-xl mx-auto leading-relaxed">
           The passionate explorers and visionaries who make every WayBond journey unforgettable.
@@ -203,7 +203,7 @@ const TeamMembersSection = () => {
                 loading="lazy"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/80 via-black/10 to-transparent" />
+
             </div>
             {/* Info */}
             <div className="p-6 space-y-2">
@@ -248,7 +248,7 @@ const About = () => (
             Born from a simple desire: to make travel meaningful, accessible, and deeply community-driven for the people of Ahmedabad. We believe that every journey should be an exploration of both the world and the inner self.
           </p>
         </div>
-     
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {[
             { icon: UserCheck, title: "Verified Captains", desc: "Led by Ahmedabad-local experts who live and breathe the terrain." },
@@ -274,10 +274,10 @@ const About = () => (
         className="relative rounded-[2rem] md:rounded-[4rem] overflow-hidden group shadow-2xl aspect-square w-full border border-white/10"
       >
         <img src="/assets/LBK.jpeg" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a] via-black/20 to-transparent"></div>
+
         <div className="absolute bottom-6 md:bottom-12 left-6 right-6 md:left-12 md:right-12">
           <div className="liquid-glass p-4 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-white/20 text-center shadow-2xl backdrop-blur-xl">
-            <p className="text-2xl md:text-4xl lg:text-5xl font-bungee font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
+            <p className="text-2xl md:text-4xl lg:text-5xl font-bungee font-black text-white italic tracking-tighter">"100+ Journeys Crafted"</p>
             {/* <p className="text-[8px] md:text-[9px] text-white/50 uppercase font-black tracking-[0.3em] md:tracking-[0.4em] mt-2 md:mt-3">Founded for the Ahmedabad Spirit</p> */}
           </div>
         </div>
@@ -329,7 +329,7 @@ const Community = () => {
           {galleries.map((gallery, index) => {
             const currentImageIndex = activeImageIndex[gallery.destination] || 0
             const imagesToShow = gallery.images.slice(0, 4) // Show only first 4 images
-            
+
             return (
               <motion.div
                 key={gallery.destination}
@@ -352,10 +352,10 @@ const Community = () => {
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 </AnimatePresence>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent pointer-events-none z-10"></div>
+
                 <Link to={`/community/${gallery.slug}`} aria-label={`View ${gallery.destination} gallery`} className="absolute inset-0 z-20" />
                 <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 z-20">
-                  <p className="text-2xl md:text-3xl font-sans font-black text-white italic drop-shadow-xl tracking-tighter">{gallery.destination}</p>
+                  <p className="text-2xl md:text-3xl font-sans font-black text-white italic tracking-tighter">{gallery.destination}</p>
                   <p className="text-[9px] md:text-[10px] text-white uppercase font-black tracking-[0.25em] md:tracking-[0.3em] mt-2">{gallery.label}</p>
                 </div>
               </motion.div>
@@ -405,7 +405,7 @@ const Community = () => {
               { value: " #1", label: "RATED IN AHMEDABAD" }
             ].map((stat, i) => (
               <div key={i} className="space-y-3">
-                <p className="text-4xl md:text-5xl font-sans font-black text-secondary tracking-tighter italic drop-shadow-md">{stat.value}</p>
+                <p className="text-4xl md:text-5xl font-sans font-black text-secondary tracking-tighter italic">{stat.value}</p>
                 <p className="text-[9px] text-white/50 font-black uppercase tracking-[0.3em]">{stat.label}</p>
               </div>
             ))}
@@ -423,7 +423,7 @@ const Wishlist = () => {
     <PageLayout
       seoTitle="Your Wishlist — Future Expeditions with WAYBOND"
       seoDescription="Your personal vault of saved travel adventures. Keep track of trips you want to conquer."
-      title={<>YOUR<br /><span className="text-primary italic px-4 drop-shadow-2xl" style={{ WebkitTextStroke: '2px white' }}>DREAMS</span></>}
+      title={<>YOUR<br /><span className="text-primary italic px-4" style={{ WebkitTextStroke: '2px white' }}>DREAMS</span></>}
       subtitle="The vault of adventures awaiting your signal. Keep track of the soul-stirring voyages you're planning to conquer."
     >
       {isLoading ? (
@@ -480,7 +480,7 @@ const Wishlist = () => {
                 {/* Image Section */}
                 <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
                   <img src={trip.image} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/55 via-transparent to-transparent" />
+
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                     {Array.from({ length: 4 }).map((_, dot) => (
                       <span key={dot} className={`h-2 w-2 rounded-full border border-white/60 ${dot === 0 ? 'bg-secondary' : 'bg-white/70'}`} />

@@ -163,13 +163,13 @@ const AllTripsPage = () => {
                         alt={trip.title}
                         className={`absolute inset-0 w-full h-full object-cover ${isCancelled ? 'grayscale' : ''}`}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+
                       <span
                         className={`absolute left-5 bottom-5 rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.18em] ${isCancelled
-                            ? 'bg-red-500 text-white'
-                            : trip.status === 'Confirmed'
-                              ? 'bg-green-500 text-white'
-                              : 'bg-secondary text-white'
+                          ? 'bg-red-500 text-white'
+                          : trip.status === 'Confirmed'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-secondary text-white'
                           }`}
                       >
                         {trip.status}
@@ -231,8 +231,8 @@ const AllTripsPage = () => {
                           <span
                             key={highlight}
                             className={`rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.16em] ${isCancelled
-                                ? 'bg-red-500/10 text-red-300 border border-red-500/20'
-                                : 'bg-secondary/10 text-secondary border border-secondary/20'
+                              ? 'bg-red-500/10 text-red-300 border border-red-500/20'
+                              : 'bg-secondary/10 text-secondary border border-secondary/20'
                               }`}
                           >
                             {highlight}

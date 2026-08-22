@@ -114,7 +114,7 @@ const Discover = () => {
           </div>}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2">
-              <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px] drop-shadow-lg">COLLECTIONS 2026</span>
+              <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">COLLECTIONS 2026</span>
               <h1 className="text-2xl md:text-4xl font-bungee font-black tracking-tighter uppercase italic leading-none liquid-text">
                 The <span className="text-primary font-bungee" style={{ WebkitTextStroke: '1px white' }}>Adventures</span> Hub
               </h1>
@@ -277,7 +277,7 @@ const Discover = () => {
                       {/* Image Section - Fixed */}
                       <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
                         <img src={trip.image} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/55 via-transparent to-transparent" />
+
                         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">{Array.from({ length: 4 }).map((_, dot) => <span key={dot} className={`h-2 w-2 rounded-full border border-white/60 ${dot === 0 ? 'bg-secondary' : 'bg-white/70'}`} />)}</div>
                       </div>
 
