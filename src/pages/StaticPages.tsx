@@ -339,61 +339,11 @@ const TeamMembersSection = () => {
 // ─── About Page ──────────────────────────────────────────────────────────────
 
 const About = () => (
-
-
   <PageLayout
     seoTitle="About WAYBOND — Ahmedabad's Premier Travel Community"
     seoDescription="Learn about Way Bond's mission to make travel meaningful, accessible, and community-driven for Ahmedabad."
     title=''
   >
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        className="space-y-12"
-      >
-        <div className="space-y-6">
-          <h2 className="text-4xl font-bungee font-black uppercase italic tracking-tighter">Our <span className='text-secondary font-bungee'>Manifest</span></h2>
-          <p className="text-lg text-white/60 leading-relaxed font-sarif italic">
-            Born from a simple desire: to make travel meaningful, accessible, and deeply community-driven for the people of Ahmedabad. We believe that every journey should be an exploration of both the world and the inner self.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {[
-            { icon: UserCheck, title: "Verified Captains", desc: "Led by Ahmedabad-local experts who live and breathe the terrain." },
-            { icon: ShieldCheck, title: "Safety First", desc: "Rigorous safety protocols and 24/7 SOS support for peace of mind." },
-            { icon: Users, title: "Community First", desc: "Not just travelers, but a tribe of explorers bound by curiosity." },
-            { icon: Compass, title: "Pure Discovery", desc: "Uncovering hidden trails and authentic local stories." }
-          ].map((item, i) => (
-            <div key={i} className="liquid-glass-dark p-8 rounded-[2.5rem] border border-white/10 space-y-4 hover:border-secondary/30 transition-all shadow-xl group">
-              <div className="bg-secondary/20 p-4 rounded-2xl w-fit group-hover:scale-110 transition-transform">
-                <item.icon className="text-secondary" size={24} />
-              </div>
-              <h4 className="font-bungee font-black text-xl uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{item.title}</h4>
-              <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-loose">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        className="relative rounded-[2rem] md:rounded-[4rem] overflow-hidden group shadow-2xl aspect-square w-full border border-white/10"
-      >
-        <img src="/assets/LBK.jpeg" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-
-        <div className="absolute bottom-6 md:bottom-12 left-6 right-6 md:left-12 md:right-12">
-          <div className="liquid-glass p-4 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-white/20 text-center shadow-2xl backdrop-blur-xl">
-            <p className="text-2xl md:text-4xl lg:text-5xl font-bungee font-black text-white italic tracking-tighter">"100+ Journeys Crafted"</p>
-            {/* <p className="text-[8px] md:text-[9px] text-white/50 uppercase font-black tracking-[0.3em] md:tracking-[0.4em] mt-2 md:mt-3">Founded for the Ahmedabad Spirit</p> */}
-          </div>
-        </div>
-      </motion.div>
-    </div>
     <TeamMembersSection />
   </PageLayout>
 )
