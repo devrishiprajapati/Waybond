@@ -302,7 +302,17 @@ const Discover = () => {
                           </div>
                           <div className="text-right">
                             <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Difficulty</p>
-                            <div className="flex justify-end gap-1">{[0, 1, 2].map(level => <span key={level} className={`h-1 w-4 rounded-full ${level === 0 ? 'bg-secondary' : 'bg-white/20'}`} />)}</div>
+                            {(() => {
+                              const filledBars = trip.difficulty === 'Difficult' ? 3 : trip.difficulty === 'Medium' ? 2 : 1
+                              const barColor = trip.difficulty === 'Difficult' ? 'bg-rose-500' : trip.difficulty === 'Medium' ? 'bg-amber-400' : 'bg-emerald-400'
+                              return (
+                                <div className="flex justify-end gap-1">
+                                  {[0, 1, 2].map(level => (
+                                    <span key={level} className={`h-1 w-4 rounded-full ${level < filledBars ? barColor : 'bg-white/20'}`} />
+                                  ))}
+                                </div>
+                              )
+                            })()}
                           </div>
                         </div>
 
