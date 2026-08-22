@@ -156,7 +156,17 @@ export default function FeaturedPackages() {
                           </div>
                           <div className="text-right">
                             <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-white/45 mb-0.5 md:mb-1">Difficulty</p>
-                            <div className="flex justify-end gap-1">{[0, 1, 2].map(level => <span key={level} className={`h-1 w-3 md:w-4 rounded-full ${level === 0 ? 'bg-secondary' : 'bg-white/20'}`} />)}</div>
+                            {(() => {
+                              const filledBars = trip.difficulty === 'Difficult' ? 3 : trip.difficulty === 'Medium' ? 2 : 1
+                              const barColor = trip.difficulty === 'Difficult' ? 'bg-rose-500' : trip.difficulty === 'Medium' ? 'bg-amber-400' : 'bg-emerald-400'
+                              return (
+                                <div className="flex justify-end gap-1">
+                                  {[0, 1, 2].map(level => (
+                                    <span key={level} className={`h-1 w-3 md:w-4 rounded-full ${level < filledBars ? barColor : 'bg-white/20'}`} />
+                                  ))}
+                                </div>
+                              )
+                            })()}
                           </div>
                         </div>
 
@@ -226,8 +236,8 @@ export default function FeaturedPackages() {
                                           }
                                         }}
                                         className={`px-1.5 md:px-2 py-0.5 md:py-1 text-[6px] md:text-[7px] font-black uppercase tracking-wider rounded transition-colors ${isActive
-                                            ? 'bg-secondary text-white'
-                                            : 'bg-transparent text-white/50 hover:text-white'
+                                          ? 'bg-secondary text-white'
+                                          : 'bg-transparent text-white/50 hover:text-white'
                                           }`}
                                       >
                                         {monthName} {year}
@@ -255,8 +265,8 @@ export default function FeaturedPackages() {
                                             }))
                                           }}
                                           className={`w-6 h-6 md:w-7 md:h-7 rounded-full font-black text-[10px] md:text-xs flex items-center justify-center transition-all ${isSelected
-                                              ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
-                                              : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
+                                            ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
+                                            : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
                                             }`}
                                           title={date}
                                         >
