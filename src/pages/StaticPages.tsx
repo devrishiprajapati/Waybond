@@ -38,32 +38,6 @@ const PageLayout = ({ children, title, subtitle, seoTitle, seoDescription, class
       </Helmet>
     )}
     <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20">
-      <div className="mb-20 space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="liquid-glass inline-block px-5 py-2 rounded-full border-white/10 shadow-lg"
-        >
-          <span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">CRAFTING MEMORIES</span>
-        </motion.div>
-        <motion.h1
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="text-3xl md:text-5xl lg:text-[7rem] font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] liquid-text italic"
-        >
-          {title}
-        </motion.h1>
-        {subtitle && (
-          <motion.p
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="text-lg text-white/50 mt-8 font-medium max-w-2xl italic leading-relaxed"
-          >
-            {subtitle}
-          </motion.p>
-        )}
-      </div>
       {children}
     </div>
   </motion.div>
@@ -171,13 +145,13 @@ const TeamMembersSection = () => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: 0.1 }}
-      className="mt-24"
+      className=""
     >
       {/* Section Heading */}
       <div className="mb-14 text-center">
-        <div className="liquid-glass inline-block px-5 py-2 rounded-full border border-white/10 shadow-lg mb-6">
+        {/* <div className="liquid-glass inline-block px-5 py-2 rounded-full border border-white/10 shadow-lg mb-6">
           <span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">The People Behind The Adventure</span>
-        </div>
+        </div> */}
         <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
           Meet The <span className="text-primary px-2" style={{ WebkitTextStroke: '2px white' }}>Team</span>
         </h2>
@@ -313,7 +287,6 @@ const TeamMembersSection = () => {
                     loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/80 via-black/10 to-transparent" />
                 </div>
                 {/* Info */}
                 <div className="p-6 space-y-2">
