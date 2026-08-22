@@ -115,8 +115,8 @@ export default function Blogs() {
                     <button
                       onClick={() => setSelectedCategory(null)}
                       className={`w-full text-left px-4 py-2.5 rounded-xl font-semibold transition-all duration-300 ${selectedCategory === null
-                          ? 'bg-secondary text-white shadow-lg shadow-secondary/30'
-                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                        ? 'bg-secondary text-white shadow-lg shadow-secondary/30'
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                         }`}
                     >
                       All Categories
@@ -126,8 +126,8 @@ export default function Blogs() {
                         key={category}
                         onClick={() => setSelectedCategory(category)}
                         className={`w-full text-left px-4 py-2.5 rounded-xl font-semibold transition-all duration-300 ${selectedCategory === category
-                            ? 'bg-secondary text-white shadow-lg shadow-secondary/30'
-                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                          ? 'bg-secondary text-white shadow-lg shadow-secondary/30'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                           }`}
                       >
                         {category}
@@ -147,8 +147,8 @@ export default function Blogs() {
                         key={tag}
                         onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${selectedTag === tag
-                            ? 'bg-secondary text-white shadow-lg'
-                            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          ? 'bg-secondary text-white shadow-lg'
+                          : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                           }`}
                       >
                         #{tag}
@@ -238,10 +238,10 @@ export default function Blogs() {
                               className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative block"
                               title={`Open video for ${blog.title}`}
                             >   src={imageSrc}
-                                alt={blog.title}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                              
-                              <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                              alt={blog.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+
+
                             </a>
                           ) : (
                             <div className="md:w-80 h-64 md:h-auto overflow-hidden flex-shrink-0 bg-gray-200 relative">
@@ -250,7 +250,7 @@ export default function Blogs() {
                                 alt={blog.title}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
                             </div>
                           )}
 

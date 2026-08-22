@@ -36,7 +36,7 @@ export default function CommunityGallery() {
           {gallery.images.map((image, index) => (
             <motion.figure key={image.src} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.08 }} className="relative h-[300px] sm:h-[380px] lg:h-[460px] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl group">
               <img src={image.src} alt={image.alt} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none" />
+
               <figcaption className="absolute left-8 bottom-7 text-[9px] uppercase font-black tracking-[0.25em] text-white/80">{gallery.destination}</figcaption>
             </motion.figure>
           ))}

@@ -105,7 +105,7 @@ const ConfirmedTripsPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-[280px_1fr]">
                       <div className="relative h-56 md:h-full min-h-[280px]">
                         <img src={trip.image} alt={trip.title} className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+
                         <span className="absolute left-5 bottom-5 bg-green-500 text-white rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.18em] flex items-center gap-2">
                           <CheckCircle2 size={12} />
                           {trip.status}

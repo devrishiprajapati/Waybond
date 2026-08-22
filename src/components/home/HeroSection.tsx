@@ -86,8 +86,8 @@ export default function HeroSection() {
         );
       })}
 
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/55 to-black/10 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-black/20 z-10" />
+
+
 
       {/* Text Content — Dynamic but synchronized */}
       <div className="absolute inset-0 flex items-center z-20 pt-20 pb-20 sm:pb-0">

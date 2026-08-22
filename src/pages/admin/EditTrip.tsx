@@ -314,16 +314,41 @@ const EditTrip = () => {
                   required
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 xl:col-span-1">
                 <label className={labelClass}>Duration</label>
-                <input
-                  type="text"
-                  value={formData.duration}
-                  onChange={e => setFormData({ ...formData, duration: e.target.value })}
-                  placeholder="6 Days / 5 Nights"
-                  className={inputClass}
-                  required
-                />
+                <div className="flex gap-2">
+                  <div className="flex-1 relative">
+                    <input
+                      type="number"
+                      min="1"
+                      value={(() => { const m = String(formData.duration || '').match(/(\d+)\s*Day/i); return m ? m[1] : '' })()}
+                      onChange={e => {
+                        const days = e.target.value
+                        const nights = String(formData.duration || '').match(/(\d+)\s*Night/i)?.[1] || ''
+                        setFormData({ ...formData, duration: days && nights ? `${days} Days / ${nights} Nights` : days ? `${days} Days` : '' })
+                      }}
+                      placeholder="6"
+                      className={inputClass}
+                      required
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-white/30 pointer-events-none">D</span>
+                  </div>
+                  <div className="flex-1 relative">
+                    <input
+                      type="number"
+                      min="0"
+                      value={(() => { const m = String(formData.duration || '').match(/(\d+)\s*Night/i); return m ? m[1] : '' })()}
+                      onChange={e => {
+                        const nights = e.target.value
+                        const days = String(formData.duration || '').match(/(\d+)\s*Day/i)?.[1] || ''
+                        setFormData({ ...formData, duration: days && nights ? `${days} Days / ${nights} Nights` : days ? `${days} Days` : '' })
+                      }}
+                      placeholder="5"
+                      className={inputClass}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-white/30 pointer-events-none">N</span>
+                  </div>
+                </div>
               </div>
               <div className="space-y-2">
                 <label className={labelClass}>Category</label>
@@ -356,11 +381,10 @@ const EditTrip = () => {
                     key={level.value}
                     type="button"
                     onClick={() => setFormData({ ...formData, difficulty: level.value })}
-                    className={`h-14 rounded-2xl border-2 font-black text-xs uppercase tracking-[0.16em] transition-all ${
-                      formData.difficulty === level.value
-                        ? `${level.color} scale-[1.02] shadow-lg`
-                        : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20'
-                    }`}
+                    className={`h-14 rounded-2xl border-2 font-black text-xs uppercase tracking-[0.16em] transition-all ${formData.difficulty === level.value
+                      ? `${level.color} scale-[1.02] shadow-lg`
+                      : 'bg-white/5 border-white/10 text-white/40 hover:border-white/20'
+                      }`}
                   >
                     {level.label}
                   </button>
@@ -451,9 +475,9 @@ const EditTrip = () => {
                         onKeyDown={e => {
                           if (e.key === 'Enter') {
                             e.preventDefault()
-                            setFormData({ 
-                              ...formData, 
-                              inclusion: [...(formData.inclusion || []), ''] 
+                            setFormData({
+                              ...formData,
+                              inclusion: [...(formData.inclusion || []), '']
                             })
                           }
                         }}
@@ -476,9 +500,9 @@ const EditTrip = () => {
                   ))}
                   <button
                     type="button"
-                    onClick={() => setFormData({ 
-                      ...formData, 
-                      inclusion: [...(formData.inclusion || []), ''] 
+                    onClick={() => setFormData({
+                      ...formData,
+                      inclusion: [...(formData.inclusion || []), '']
                     })}
                     className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm"
                   >
@@ -504,9 +528,9 @@ const EditTrip = () => {
                         onKeyDown={e => {
                           if (e.key === 'Enter') {
                             e.preventDefault()
-                            setFormData({ 
-                              ...formData, 
-                              exclusion: [...(formData.exclusion || []), ''] 
+                            setFormData({
+                              ...formData,
+                              exclusion: [...(formData.exclusion || []), '']
                             })
                           }
                         }}
@@ -529,9 +553,9 @@ const EditTrip = () => {
                   ))}
                   <button
                     type="button"
-                    onClick={() => setFormData({ 
-                      ...formData, 
-                      exclusion: [...(formData.exclusion || []), ''] 
+                    onClick={() => setFormData({
+                      ...formData,
+                      exclusion: [...(formData.exclusion || []), '']
                     })}
                     className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm"
                   >

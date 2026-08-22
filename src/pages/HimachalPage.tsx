@@ -25,7 +25,7 @@ export default function HimachalPage() {
           alt="Himachal"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-[#003d6a]"></div>
+
 
         <div className="absolute inset-0 flex items-center justify-center pt-20">
           <div className="text-center px-6 max-w-5xl">
@@ -40,7 +40,7 @@ export default function HimachalPage() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-6xl md:text-[8rem] font-bungee font-black leading-[0.8] tracking-tighter uppercase drop-shadow-2xl liquid-text mb-8"
+              className="text-6xl md:text-[8rem] font-bungee font-black leading-[0.8] tracking-tighter uppercase liquid-text mb-8"
             >
               HIMACHAL<br />
               <span className="text-transparent px-4 italic" style={{ WebkitTextStroke: '2px white' }}>MYSTIQUE</span>
