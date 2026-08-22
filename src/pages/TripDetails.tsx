@@ -633,6 +633,64 @@ const TripDetails = () => {
             </div>
           </section>
         )}
+
+        {/* Things to Carry Section */}
+        {trip.thingsToCarry && trip.thingsToCarry.length > 0 && (
+          <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 pb-12 md:pb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-12"
+            >
+              <h3 className="text-xl md:text-2xl lg:text-4xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-10 liquid-text flex items-center gap-3">
+                <FileText size={28} className="text-secondary" />
+                Things to Carry
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                {trip.thingsToCarry.map((item: string, idx: number) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="flex items-start gap-3 md:gap-4 p-4 md:p-5 liquid-glass rounded-xl md:rounded-2xl border border-white/10 hover:border-secondary/30 transition-colors"
+                  >
+                    <CheckCircle2 className="text-secondary shrink-0 mt-0.5" size={22} strokeWidth={2.5} />
+                    <span className="text-white/90 text-sm md:text-base lg:text-lg font-medium leading-relaxed">
+                      {item}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </section>
+        )}
+
+        {/* Terms & Conditions Section */}
+        {trip.termsAndConditions && trip.termsAndConditions.trim() && (
+          <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 pb-12 md:pb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-12"
+            >
+              <h3 className="text-xl md:text-2xl lg:text-4xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-10 liquid-text flex items-center gap-3">
+                <ShieldCheck size={28} className="text-secondary" />
+                Terms & Conditions
+              </h3>
+              <div className="prose prose-invert prose-lg max-w-none">
+                <div className="text-white/80 text-sm md:text-base lg:text-lg font-medium leading-relaxed whitespace-pre-line">
+                  {trip.termsAndConditions}
+                </div>
+              </div>
+            </motion.div>
+          </section>
+        )}
       </div>
 
       <AnimatePresence>

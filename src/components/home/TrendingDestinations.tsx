@@ -24,7 +24,7 @@ export default function TrendingDestinations() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
-          className="mb-16 md:mb-24 text-center"
+          className="mb-8 md:mb-15 text-center"
         >
           {/* <div className="inline-block mb-6">
             <span className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] md:text-[11px] drop-shadow-sm bg-gradient-to-r from-secondary to-[#003d6a] bg-clip-text text-transparent">
@@ -96,23 +96,6 @@ export default function TrendingDestinations() {
                     </motion.div>
                   </div>
 
-                  {/* Bottom Badge - Experience Type */}
-                  {/* CHIP VERSION - COMMENTED OUT
-                  {card.badge && (
-                    <div className="absolute bottom-3 sm:bottom-4 md:bottom-5 left-1/2 -translate-x-1/2 z-10">
-                      <motion.span
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.12 + 0.3, duration: 0.5 }}
-                        viewport={{ once: true }}
-                        className="inline-block bg-white/95 backdrop-blur-sm text-slate-800 text-[7px] sm:text-[8px] font-black uppercase px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full tracking-widest shadow-lg border border-white/50 group-hover:bg-secondary group-hover:text-white transition-all duration-300"
-                      >
-                        {card.badge}
-                      </motion.span>
-                    </div>
-                  )}
-                  */}
-
                   {/* NEW: Icon Buttons Row */}
                   {card.badge && (
                     <div className="absolute bottom-3 sm:bottom-4 md:bottom-5 left-1/2 -translate-x-1/2 z-10">
@@ -145,23 +128,6 @@ export default function TrendingDestinations() {
             ))}
           </div>
         </div>
-
-        {/* View All Button */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6 }}
-          viewport={{ once: true }}
-          className="flex justify-center"
-        >
-          <Link
-            to="/discover"
-            className="inline-flex items-center space-x-3 px-8 md:px-10 py-4 md:py-5 rounded-full font-black text-xs md:text-sm uppercase tracking-[0.2em] text-white bg-gradient-to-r from-secondary to-[#003d6a] hover:shadow-2xl hover:shadow-secondary/40 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl shadow-secondary/30 border border-white/20"
-          >
-            <span className="!text-white font-bungee" style={{ fontWeight:800 }}>View All Experiences</span>
-            <ArrowUpRight size={20} className='!text-white' />
-          </Link>
-        </motion.div> */}
       </div>
     </section> 
   )

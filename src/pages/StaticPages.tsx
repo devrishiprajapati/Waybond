@@ -161,6 +161,10 @@ const TeamMembersSection = () => {
 
   if (loading || members.length === 0) return null
 
+  // First member (position 0) is pinned/featured
+  const pinnedMember = members.find(m => m.position === 0) || members[0]
+  const otherMembers = members.filter(m => m.id !== pinnedMember?.id)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -182,41 +186,150 @@ const TeamMembersSection = () => {
         </p>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {members.map((member, i) => (
-          <motion.button
-            key={member.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.07 }}
-            whileHover={{ y: -8 }}
-            onClick={() => setSelected(member)}
-            className="group text-left liquid-glass-dark border border-white/10 rounded-[2.5rem] overflow-hidden hover:border-secondary/30 transition-all shadow-xl w-full"
-          >
-            {/* Image */}
-            <div className="relative h-64 w-full overflow-hidden bg-white/5">
+      {/* Pinned/Featured Member - Full Details */}
+      {pinnedMember && (
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="liquid-glass-dark border-2 border-secondary/30 rounded-[3rem] overflow-hidden mb-16 shadow-[0_20px_60px_rgba(100,149,237,0.3)] relative"
+        >
+          {/* Pinned Badge */}
+          <div className="absolute top-6 right-6 z-10 bg-secondary text-white px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl border-2 border-white/30 flex items-center gap-2">
+            <Star size={14} fill="currentColor" />
+            Featured Leader
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+            {/* Image Section */}
+            <div className="relative h-96 lg:h-auto lg:min-h-[600px] overflow-hidden bg-white/5">
               <img
-                src={member.image}
-                alt={member.name}
-                loading="lazy"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                src={pinnedMember.image}
+                alt={pinnedMember.name}
+                className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/80 via-black/10 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/90 via-black/20 to-transparent lg:bg-gradient-to-r lg:from-[#003d6a]/90 lg:via-[#003d6a]/50 lg:to-transparent" />
             </div>
-            {/* Info */}
-            <div className="p-6 space-y-2">
-              <p className="text-xl font-bungee font-black text-white uppercase italic tracking-tight group-hover:text-secondary transition-colors">{member.name}</p>
-              <p className="text-[9px] text-secondary font-black uppercase tracking-[0.25em]">{member.designation}</p>
-              <p className="text-white/45 text-xs leading-relaxed line-clamp-2 mt-1">{member.shortBio}</p>
-              <p className="text-[8px] font-black uppercase tracking-[0.2em] text-secondary/60 mt-2 flex items-center gap-1">
-                <Users2 size={10} /> View Profile
-              </p>
+
+            {/* Content Section */}
+            <div className="p-8 md:p-12 lg:p-16 space-y-8 flex flex-col justify-center">
+              {/* Name & Designation */}
+              <div className="space-y-4">
+                <h3 className="text-4xl md:text-5xl lg:text-6xl font-bungee font-black text-white italic tracking-tighter liquid-text leading-none">
+                  {pinnedMember.name}
+                </h3>
+                <p className="text-secondary font-black uppercase tracking-[0.3em] text-xs md:text-sm">
+                  {pinnedMember.designation}
+                </p>
+              </div>
+
+              {/* Bio */}
+              <div className="space-y-4">
+                {pinnedMember.fullBio && (
+                  <p className="text-white/80 leading-relaxed text-base md:text-lg font-medium italic">
+                    {pinnedMember.fullBio}
+                  </p>
+                )}
+                {!pinnedMember.fullBio && pinnedMember.shortBio && (
+                  <p className="text-white/80 leading-relaxed text-base md:text-lg font-medium italic">
+                    {pinnedMember.shortBio}
+                  </p>
+                )}
+              </div>
+
+              {/* Contact & Social Links */}
+              <div className="flex flex-wrap gap-3 pt-4">
+                {pinnedMember.email && (
+                  <a
+                    href={`mailto:${pinnedMember.email}`}
+                    className="inline-flex items-center gap-2 bg-white/5 border-2 border-white/20 hover:border-secondary/60 hover:bg-secondary/10 text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+                  >
+                    <Mail size={16} className="text-secondary" />
+                    {pinnedMember.email}
+                  </a>
+                )}
+                {pinnedMember.phone && (
+                  <a
+                    href={`tel:${pinnedMember.phone}`}
+                    className="inline-flex items-center gap-2 bg-white/5 border-2 border-white/20 hover:border-secondary/60 hover:bg-secondary/10 text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+                  >
+                    <Phone size={16} className="text-secondary" />
+                    {pinnedMember.phone}
+                  </a>
+                )}
+                {pinnedMember.linkedin && (
+                  <a
+                    href={pinnedMember.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-white/5 border-2 border-white/20 hover:border-secondary/60 hover:bg-secondary/10 text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+                  >
+                    <Linkedin size={16} className="text-secondary" />
+                    LinkedIn
+                  </a>
+                )}
+                {pinnedMember.twitter && (
+                  <a
+                    href={pinnedMember.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-white/5 border-2 border-white/20 hover:border-secondary/60 hover:bg-secondary/10 text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+                  >
+                    <Twitter size={16} className="text-secondary" />
+                    Twitter / X
+                  </a>
+                )}
+              </div>
             </div>
-          </motion.button>
-        ))}
-      </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Other Team Members - Cards Grid */}
+      {otherMembers.length > 0 && (
+        <>
+          <div className="text-center mb-10">
+            <h3 className="text-2xl md:text-4xl font-bungee font-black text-white tracking-tighter uppercase italic">
+              Our <span className="text-secondary">Team</span>
+            </h3>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {otherMembers.map((member, i) => (
+              <motion.button
+                key={member.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.07 }}
+                whileHover={{ y: -8 }}
+                onClick={() => setSelected(member)}
+                className="group text-left liquid-glass-dark border border-white/10 rounded-[2.5rem] overflow-hidden hover:border-secondary/30 transition-all shadow-xl w-full"
+              >
+                {/* Image */}
+                <div className="relative h-64 w-full overflow-hidden bg-white/5">
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    loading="lazy"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/80 via-black/10 to-transparent" />
+                </div>
+                {/* Info */}
+                <div className="p-6 space-y-2">
+                  <p className="text-xl font-bungee font-black text-white uppercase italic tracking-tight group-hover:text-secondary transition-colors">{member.name}</p>
+                  <p className="text-[9px] text-secondary font-black uppercase tracking-[0.25em]">{member.designation}</p>
+                  <p className="text-white/45 text-xs leading-relaxed line-clamp-2 mt-1">{member.shortBio}</p>
+                  <p className="text-[8px] font-black uppercase tracking-[0.2em] text-secondary/60 mt-2 flex items-center gap-1">
+                    <Users2 size={10} /> View Profile
+                  </p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Modal */}
       {selected && <TeamMemberModal member={selected} onClose={() => setSelected(null)} />}
@@ -233,56 +346,7 @@ const About = () => (
     seoTitle="About WAYBOND — Ahmedabad's Premier Travel Community"
     seoDescription="Learn about Way Bond's mission to make travel meaningful, accessible, and community-driven for Ahmedabad."
     title=''
-  // subtitle="Way Bond is Ahmedabad's premier authentic travel community. We don't just book tours; we craft soul-stirring memories that resonate for a lifetime."
   >
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true }}
-        className="space-y-12"
-      >
-        <div className="space-y-6">
-          <h2 className="text-4xl font-bungee font-black uppercase italic tracking-tighter">Our <span className='text-secondary font-bungee'>Manifest</span></h2>
-          <p className="text-lg text-white/60 leading-relaxed font-sarif italic">
-            Born from a simple desire: to make travel meaningful, accessible, and deeply community-driven for the people of Ahmedabad. We believe that every journey should be an exploration of both the world and the inner self.
-          </p>
-        </div>
-     
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {[
-            { icon: UserCheck, title: "Verified Captains", desc: "Led by Ahmedabad-local experts who live and breathe the terrain." },
-            { icon: ShieldCheck, title: "Safety First", desc: "Rigorous safety protocols and 24/7 SOS support for peace of mind." },
-            { icon: Users, title: "Community First", desc: "Not just travelers, but a tribe of explorers bound by curiosity." },
-            { icon: Compass, title: "Pure Discovery", desc: "Uncovering hidden trails and authentic local stories." }
-          ].map((item, i) => (
-            <div key={i} className="liquid-glass-dark p-8 rounded-[2.5rem] border border-white/10 space-y-4 hover:border-secondary/30 transition-all shadow-xl group">
-              <div className="bg-secondary/20 p-4 rounded-2xl w-fit group-hover:scale-110 transition-transform">
-                <item.icon className="text-secondary" size={24} />
-              </div>
-              <h4 className="font-bungee font-black text-xl uppercase italic tracking-tighter text-white group-hover:text-secondary transition-all">{item.title}</h4>
-              <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-loose">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        className="relative rounded-[2rem] md:rounded-[4rem] overflow-hidden group shadow-2xl aspect-square w-full border border-white/10"
-      >
-        <img src="/assets/LBK.jpeg" loading="lazy" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-[3s]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a] via-black/20 to-transparent"></div>
-        <div className="absolute bottom-6 md:bottom-12 left-6 right-6 md:left-12 md:right-12">
-          <div className="liquid-glass p-4 md:p-8 rounded-[2rem] md:rounded-[3rem] border border-white/20 text-center shadow-2xl backdrop-blur-xl">
-            <p className="text-2xl md:text-4xl lg:text-5xl font-bungee font-black text-white italic drop-shadow-xl tracking-tighter">"100+ Journeys Crafted"</p>
-            {/* <p className="text-[8px] md:text-[9px] text-white/50 uppercase font-black tracking-[0.3em] md:tracking-[0.4em] mt-2 md:mt-3">Founded for the Ahmedabad Spirit</p> */}
-          </div>
-        </div>
-      </motion.div>
-    </div>
     <TeamMembersSection />
   </PageLayout>
 )
