@@ -257,7 +257,6 @@ const TripDetails = () => {
                   className="w-full h-full object-cover"
                 />
               </AnimatePresence>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#003d6a]/60 via-transparent to-transparent"></div>
               <div className="absolute right-4 top-4 sm:right-8 sm:top-8">
                 <button
                   type="button"
