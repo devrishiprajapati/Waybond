@@ -336,62 +336,6 @@ const TripDetails = () => {
           </motion.div>
         </section>
 
-        {/* Quick Links & Policies - Full Width Section */}
-        <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-8 lg:mb-12">
-          <div className="bg-white rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg">
-            <h3 className="text-lg md:text-xl font-black text-gray-900 mb-5 md:mb-6">
-              Quick Links & Policies
-            </h3>
-            <div className="flex flex-wrap gap-4 md:gap-6">
-              {/* Things to Carry Button */}
-              {trip.thingsToCarry && trip.thingsToCarry.length > 0 && (
-                <button
-                  onClick={() => {
-                    haptics.light()
-                    setThingsToCarryOpen(true)
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
-                    <FileText size={18} className="text-orange-600" />
-                  </div>
-                  <span className="text-gray-900 text-sm md:text-base font-semibold">Things to Carry</span>
-                </button>
-              )}
-
-              {/* Terms & Conditions Button */}
-              {trip.termsAndConditions && trip.termsAndConditions.trim() && (
-                <button
-                  onClick={() => {
-                    haptics.light()
-                    setTermsOpen(true)
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                    <ShieldCheck size={18} className="text-blue-600" />
-                  </div>
-                  <span className="text-gray-900 text-sm md:text-base font-semibold">Terms & Conditions</span>
-                </button>
-              )}
-
-              {/* Cancellation Policy Button */}
-              <button
-                onClick={() => {
-                  haptics.light()
-                  setCancellationPolicyOpen(true)
-                }}
-                className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                  <X size={18} className="text-red-600" />
-                </div>
-                <span className="text-gray-900 text-sm md:text-base font-semibold">Cancellation Policy</span>
-              </button>
-            </div>
-          </div>
-        </section>
-
         {/* Booking Widget Container - Now includes Trip Overview on left */}
         <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-12 lg:mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
@@ -899,6 +843,62 @@ const TripDetails = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Links & Policies - Full Width Section */}
+        <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-12 lg:mb-16">
+          <div className="bg-white rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg">
+            <h3 className="text-lg md:text-xl font-black text-gray-900 mb-5 md:mb-6">
+              Quick Links & Policies
+            </h3>
+            <div className="flex flex-wrap gap-4 md:gap-6">
+              {/* Things to Carry Button */}
+              {trip.thingsToCarry && trip.thingsToCarry.length > 0 && (
+                <button
+                  onClick={() => {
+                    haptics.light()
+                    setThingsToCarryOpen(true)
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                    <FileText size={18} className="text-orange-600" />
+                  </div>
+                  <span className="text-gray-900 text-sm md:text-base font-semibold">Things to Carry</span>
+                </button>
+              )}
+
+              {/* Terms & Conditions Button */}
+              {trip.termsAndConditions && trip.termsAndConditions.trim() && (
+                <button
+                  onClick={() => {
+                    haptics.light()
+                    setTermsOpen(true)
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                    <ShieldCheck size={18} className="text-blue-600" />
+                  </div>
+                  <span className="text-gray-900 text-sm md:text-base font-semibold">Terms & Conditions</span>
+                </button>
+              )}
+
+              {/* Cancellation Policy Button */}
+              <button
+                onClick={() => {
+                  haptics.light()
+                  setCancellationPolicyOpen(true)
+                }}
+                className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                  <X size={18} className="text-red-600" />
+                </div>
+                <span className="text-gray-900 text-sm md:text-base font-semibold">Cancellation Policy</span>
+              </button>
             </div>
           </div>
         </section>
