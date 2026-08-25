@@ -5,7 +5,7 @@ import {
   MapPin, Users, Star, ArrowLeft,
   CheckCircle2, Clock, ShieldCheck, ChevronDown,
   ChevronUp, Instagram, MessageCircle, FileText, Download, X,
-  Share2, Link2, Check, Calendar
+  Share2, Link2, Check, Calendar, ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
@@ -32,6 +32,9 @@ const TripDetails = () => {
   const [shareOpen, setShareOpen] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const [showStickyBar, setShowStickyBar] = useState(false)
+  const [thingsToCarryOpen, setThingsToCarryOpen] = useState(false)
+  const [termsOpen, setTermsOpen] = useState(false)
+  const [cancellationPolicyOpen, setCancellationPolicyOpen] = useState(false)
   const travelDateInputRef = React.useRef<HTMLInputElement>(null)
 
   const openTravelDatePicker = () => {
@@ -237,45 +240,332 @@ const TripDetails = () => {
           </div>
         </div>
 
-        {/* Gallery Section */}
-        <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-12 lg:mb-16">
-          <div className="lg:col-span-8 space-y-4 sm:space-y-6">
-            <motion.div
-              layoutId="main-image"
-              data-main-image
-              className="relative h-[230px] overflow-hidden rounded-3xl border border-white/10 shadow-[0_14px_32px_rgba(0,0,0,0.24)] sm:h-[350px] sm:rounded-[3rem] md:h-[500px] md:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
-            >
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={activeImage}
-                  src={trip.images[activeImage] || trip.image}
-                  alt="Main Trip"
-                  initial={{ opacity: 0, scale: 1.1 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
-                  transition={{ duration: 1.2, ease: "easeInOut" }}
-                  className="w-full h-full object-cover"
-                />
-              </AnimatePresence>
-              <div className="absolute right-4 top-4 sm:right-8 sm:top-8">
+        {/* Full-Width Image Gallery Section */}
+        {/* Full-Width Hero Image - With Side Margins */}
+        <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-12 lg:mb-16">
+          <motion.div
+            layoutId="main-image"
+            data-main-image
+            className="relative h-[280px] sm:h-[350px] md:h-[450px] lg:h-[550px] overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] sm:rounded-[3rem]"
+          >
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={activeImage}
+                src={trip.images[activeImage] || trip.image}
+                alt="Main Trip"
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.05 }}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+                className="w-full h-full object-contain bg-[#003d6a]/20"
+              />
+            </AnimatePresence>
+            
+            {/* Share Button */}
+            <div className="absolute right-6 top-6 sm:right-10 sm:top-10 z-20">
+              <button
+                type="button"
+                onClick={() => {
+                  haptics.light()
+                  setShareOpen(true)
+                }}
+                className="liquid-glass rounded-full border border-white/20 p-4 shadow-2xl transition-all hover:scale-110 hover:bg-secondary/20"
+                aria-label="Share trip"
+              >
+                <Share2 size={24} className="text-white sm:size-8" />
+              </button>
+            </div>
+
+            {/* Navigation Arrows - Only show if there are multiple images */}
+            {(trip.images.length > 1) && (
+              <>
+                {/* Previous Button */}
                 <button
-                  type="button"
                   onClick={() => {
                     haptics.light()
-                    setShareOpen(true)
+                    setActiveImage((prev) => (prev - 1 + trip.images.length) % trip.images.length)
                   }}
-                  className="liquid-glass rounded-full border border-white/20 p-3 shadow-2xl transition-all hover:scale-110 hover:bg-secondary/20 sm:p-5"
-                  aria-label="Share trip"
+                  className="absolute left-6 top-1/2 -translate-y-1/2 z-20 liquid-glass rounded-full border border-white/20 p-4 shadow-2xl transition-all hover:scale-110 hover:bg-secondary/20"
+                  aria-label="Previous image"
                 >
-                  <Share2 size={24} className="text-white sm:size-8" />
+                  <ChevronLeft size={28} className="text-white" />
                 </button>
+
+                {/* Next Button */}
+                <button
+                  onClick={() => {
+                    haptics.light()
+                    setActiveImage((prev) => (prev + 1) % trip.images.length)
+                  }}
+                  className="absolute right-6 top-1/2 -translate-y-1/2 z-20 liquid-glass rounded-full border border-white/20 p-4 shadow-2xl transition-all hover:scale-110 hover:bg-secondary/20"
+                  aria-label="Next image"
+                >
+                  <ChevronRight size={28} className="text-white" />
+                </button>
+              </>
+            )}
+
+            {/* Image Counter & Dots */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 z-20">
+              {/* Image Counter */}
+              <div className="liquid-glass px-5 py-2.5 rounded-full border border-white/20 text-white text-sm font-black tracking-wider shadow-xl">
+                {activeImage + 1} / {trip.images.length}
               </div>
-            </motion.div>
+              
+              {/* Dots Indicator */}
+              {trip.images.length <= 10 && (
+                <div className="flex gap-2.5">
+                  {trip.images.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        haptics.light()
+                        setActiveImage(idx)
+                      }}
+                      className={`h-2.5 rounded-full transition-all duration-300 ${
+                        idx === activeImage 
+                          ? 'w-10 bg-secondary shadow-lg' 
+                          : 'w-2.5 bg-white/50 hover:bg-white/70'
+                      }`}
+                      aria-label={`View image ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </section>
 
+        {/* Quick Links & Policies - Full Width Section */}
+        <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-8 lg:mb-12">
+          <div className="bg-white rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-lg">
+            <h3 className="text-lg md:text-xl font-black text-gray-900 mb-5 md:mb-6">
+              Quick Links & Policies
+            </h3>
+            <div className="flex flex-wrap gap-4 md:gap-6">
+              {/* Things to Carry Button */}
+              {trip.thingsToCarry && trip.thingsToCarry.length > 0 && (
+                <button
+                  onClick={() => {
+                    haptics.light()
+                    setThingsToCarryOpen(true)
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                    <FileText size={18} className="text-orange-600" />
+                  </div>
+                  <span className="text-gray-900 text-sm md:text-base font-semibold">Things to Carry</span>
+                </button>
+              )}
+
+              {/* Terms & Conditions Button */}
+              {trip.termsAndConditions && trip.termsAndConditions.trim() && (
+                <button
+                  onClick={() => {
+                    haptics.light()
+                    setTermsOpen(true)
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                    <ShieldCheck size={18} className="text-blue-600" />
+                  </div>
+                  <span className="text-gray-900 text-sm md:text-base font-semibold">Terms & Conditions</span>
+                </button>
+              )}
+
+              {/* Cancellation Policy Button */}
+              <button
+                onClick={() => {
+                  haptics.light()
+                  setCancellationPolicyOpen(true)
+                }}
+                className="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                  <X size={18} className="text-red-600" />
+                </div>
+                <span className="text-gray-900 text-sm md:text-base font-semibold">Cancellation Policy</span>
+              </button>
+            </div>
           </div>
+        </section>
 
-          {/* Desktop Booking Widget */}
-          <div className="lg:col-span-4">
+        {/* Booking Widget Container - Now includes Trip Overview on left */}
+        <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-12 lg:mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+            {/* Left Side - Trip Overview (shown on desktop) */}
+            <div className="hidden lg:block lg:col-span-8 space-y-12 md:space-y-16 overflow-y-auto max-h-[calc(100vh-12rem)] pr-4 scrollbar-thin scrollbar-thumb-secondary/30 scrollbar-track-white/5 hover:scrollbar-thumb-secondary/50">
+              {/* Trip Overview */}
+              <div>
+                <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic mb-5 md:mb-8 liquid-text">Trip Overview</h2>
+                <p className="text-base md:text-lg text-white/60 leading-relaxed font-medium italic">
+                  {trip.description}
+                </p>
+
+                {trip.highlights && trip.highlights.length > 0 && (
+                  <div className="mt-6 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    {trip.highlights.map((highlight: string, idx: number) => (
+                      <div key={idx} className="flex items-center gap-3 p-4 md:gap-4 md:p-5 liquid-glass-dark border border-white/10 rounded-2xl shadow-lg">
+                        <CheckCircle2 className="text-secondary shrink-0" size={18} />
+                        <span className="text-white font-bold text-sm tracking-wide">{highlight}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Itinerary */}
+              <div>
+                <div className="flex justify-between items-end gap-4 mb-6 md:mb-10">
+                  <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
+                  <button
+                    onClick={() => {
+                      haptics.light();
+                      setExpandedDay(expandedDay === null ? 1 : null);
+                    }}
+                    className="text-secondary font-black text-[10px] uppercase tracking-[0.2em] border-b border-secondary/30 pb-1 hover:border-secondary transition-all"
+                  >
+                    {expandedDay === null ? 'Expand All' : 'Collapse All'}
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {trip.itinerary.map((item: any) => (
+                    <div
+                      key={item.day}
+                      className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
+                      onClick={() => {
+                        haptics.light();
+                        setExpandedDay(expandedDay === item.day ? null : item.day);
+                      }}
+                    >
+                      <div className="p-4 md:p-8 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 md:gap-6 min-w-0">
+                          <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
+                            <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
+                            <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
+                          </div>
+                          <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
+                        </div>
+                        {expandedDay === item.day ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
+                      </div>
+
+                      <AnimatePresence>
+                        {expandedDay === item.day && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 md:px-8 pb-6 md:pb-8 md:pl-[7.5rem]">
+                              <div className="w-full h-px bg-white/10 mb-6"></div>
+                              <p className="text-white/60 font-medium leading-relaxed italic">
+                                {item.description}
+                              </p>
+                              <div className="mt-8 flex items-center text-xs text-secondary font-black uppercase tracking-widest bg-secondary/10 w-fit px-4 py-2 rounded-full border border-secondary/20">
+                                <Clock size={14} className="mr-2" /> Typical Activity: 4-6 Hours
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Inclusion & Exclusion - Side by Side */}
+              {((trip.inclusion && trip.inclusion.length > 0) || (trip.exclusion && trip.exclusion.length > 0)) && (
+                <div className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                    {/* Inclusion */}
+                    {trip.inclusion && trip.inclusion.length > 0 && (
+                      <div>
+                        <h3 className="text-lg md:text-xl font-bold text-green-500 uppercase tracking-tight mb-6 flex items-center gap-2">
+                          <CheckCircle2 size={24} strokeWidth={2.5} />
+                          Inclusions
+                        </h3>
+                        <div className="space-y-3">
+                          {trip.inclusion.map((item: string, idx: number) => (
+                            <div key={idx} className="flex items-start gap-3">
+                              <CheckCircle2 className="text-green-500 shrink-0 mt-1" size={18} strokeWidth={2.5} />
+                              <span className="text-white/90 text-sm font-medium leading-relaxed">
+                                {item}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Exclusion */}
+                    {trip.exclusion && trip.exclusion.length > 0 && (
+                      <div>
+                        <h3 className="text-lg md:text-xl font-bold text-red-500 uppercase tracking-tight mb-6 flex items-center gap-2">
+                          <X size={24} strokeWidth={2.5} />
+                          Exclusions
+                        </h3>
+                        <div className="space-y-3">
+                          {trip.exclusion.map((item: string, idx: number) => (
+                            <div key={idx} className="flex items-start gap-3">
+                              <X className="text-red-500 shrink-0 mt-1" size={18} strokeWidth={2.5} />
+                              <span className="text-white/90 text-sm font-medium leading-relaxed">
+                                {item}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Captain Profile */}
+              <div className="p-5 md:p-12 liquid-glass-dark border border-white/10 rounded-3xl md:rounded-[3rem] text-white overflow-hidden relative group shadow-[0_12px_36px_rgba(0,0,0,0.18)] md:shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-transform duration-1000 group-hover:scale-150"></div>
+
+                <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
+                  <div className="relative shrink-0">
+                    <img
+                      src={trip.captain.avatar}
+                      alt="Captain"
+                      className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] object-cover border-2 border-white/20 shadow-2xl group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute -bottom-3 -right-3 bg-secondary text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-secondary/30 border border-white/20">
+                      Top Rated
+                    </div>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div>
+                      <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{trip.captain.name}</h3>
+                      <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{trip.captain.role}</p>
+                    </div>
+                    <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">
+                      {trip.captain.bio}
+                    </p>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-white/10">
+                      <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
+                        <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Experience</span>
+                        <span className="text-lg font-black tracking-tighter">{trip.captain.trips}+ Trips</span>
+                      </div>
+                      <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
+                        <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Rating</span>
+                        <span className="text-lg font-black tracking-tighter flex items-center gap-1.5">{trip.captain.rating} <Star size={16} fill="#FFD700" className="text-accent" /></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side - Desktop Booking Widget */}
+            <div className="lg:col-span-4">
             <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-3xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] space-y-5 md:rounded-[3rem] md:p-10 md:space-y-8 md:shadow-[0_15px_60px_rgba(0,0,0,0.5)]">
               <div className="flex justify-between items-center gap-4 pb-5 border-b border-white/10 md:pb-8">
                 <div className="min-w-0 flex-1 overflow-hidden">
@@ -443,271 +733,175 @@ const TripDetails = () => {
                   <Download size={16} /> Download Brochure
                 </button>
               )}
-
-              <p className="text-center text-[9px] md:text-[10px] text-white/40 font-bold uppercase tracking-widest">No cancellation fee up to 15 days before departure</p>
-
-              <div className="pt-5 md:pt-6 space-y-3 md:space-y-4 border-t border-white/10">
-                <div className="flex items-center text-xs font-black tracking-widest uppercase text-white/60">
-                  <ShieldCheck size={18} className="text-green-400 mr-3" /> Verified Captains
-                </div>
-                <div className="flex items-center text-xs font-black tracking-widest uppercase text-white/60">
-                  <CheckCircle2 size={18} className="text-green-400 mr-3" /> Secure Payments
-                </div>
-              </div>
             </div>
+          </div>
           </div>
         </section>
 
-        {/* Details Grid */}
-        <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pb-24">
-          <div className="lg:col-span-8 space-y-12 md:space-y-20">
-            {/* Overview */}
-            <div>
-              <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic mb-5 md:mb-8 liquid-text">Trip Overview</h2>
-              <p className="text-base md:text-lg text-white/60 leading-relaxed font-medium italic">
-                {trip.description}
-              </p>
+        {/* Mobile-only sections - Shows Trip Overview and Itinerary for mobile devices */}
+        <section className="lg:hidden max-w-[1920px] mx-auto px-4 md:px-12 pb-12 space-y-12">
+          {/* Overview - Mobile Only */}
+          <div>
+            <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic mb-5 md:mb-8 liquid-text">Trip Overview</h2>
+            <p className="text-base md:text-lg text-white/60 leading-relaxed font-medium italic">
+              {trip.description}
+            </p>
 
+            {trip.highlights && trip.highlights.length > 0 && (
               <div className="mt-6 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                {(trip.highlights || []).map((highlight: string, idx: number) => (
+                {trip.highlights.map((highlight: string, idx: number) => (
                   <div key={idx} className="flex items-center gap-3 p-4 md:gap-4 md:p-5 liquid-glass-dark border border-white/10 rounded-2xl shadow-lg">
                     <CheckCircle2 className="text-secondary shrink-0" size={18} />
                     <span className="text-white font-bold text-sm tracking-wide">{highlight}</span>
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* Itinerary - Mobile Only */}
+          <div>
+            <div className="flex justify-between items-end gap-4 mb-6 md:mb-10">
+              <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
+              <button
+                onClick={() => {
+                  haptics.light();
+                  setExpandedDay(expandedDay === null ? 1 : null);
+                }}
+                className="text-secondary font-black text-[10px] uppercase tracking-[0.2em] border-b border-secondary/30 pb-1 hover:border-secondary transition-all"
+              >
+                {expandedDay === null ? 'Expand All' : 'Collapse All'}
+              </button>
             </div>
 
-            {/* Itinerary */}
-            <div>
-              <div className="flex justify-between items-end gap-4 mb-6 md:mb-10">
-                <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
-                <button
+            <div className="space-y-4">
+              {trip.itinerary.map((item: any) => (
+                <div
+                  key={item.day}
+                  className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
                   onClick={() => {
                     haptics.light();
-                    setExpandedDay(expandedDay === null ? 1 : null);
+                    setExpandedDay(expandedDay === item.day ? null : item.day);
                   }}
-                  className="text-secondary font-black text-[10px] uppercase tracking-[0.2em] border-b border-secondary/30 pb-1 hover:border-secondary transition-all"
                 >
-                  {expandedDay === null ? 'Expand All' : 'Collapse All'}
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {trip.itinerary.map((item: any) => (
-                  <div
-                    key={item.day}
-                    className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
-                    onClick={() => {
-                      haptics.light();
-                      setExpandedDay(expandedDay === item.day ? null : item.day);
-                    }}
-                  >
-                    <div className="p-4 md:p-8 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 md:gap-6 min-w-0">
-                        <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
-                          <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
-                          <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
-                        </div>
-                        <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
+                  <div className="p-4 md:p-8 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 md:gap-6 min-w-0">
+                      <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
+                        <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
+                        <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
                       </div>
-                      {expandedDay === item.day ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
+                      <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
                     </div>
-
-                    <AnimatePresence>
-                      {expandedDay === item.day && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.4, ease: "easeInOut" }}
-                          className="overflow-hidden"
-                        >
-                          <div className="px-4 md:px-8 pb-6 md:pb-8 md:pl-[7.5rem]">
-                            <div className="w-full h-px bg-white/10 mb-6"></div>
-                            <p className="text-white/60 font-medium leading-relaxed italic">
-                              {item.description}
-                            </p>
-                            <div className="mt-8 flex items-center text-xs text-secondary font-black uppercase tracking-widest bg-secondary/10 w-fit px-4 py-2 rounded-full border border-secondary/20">
-                              <Clock size={14} className="mr-2" /> Typical Activity: 4-6 Hours
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {expandedDay === item.day ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
                   </div>
-                ))}
-              </div>
+
+                  <AnimatePresence>
+                    {expandedDay === item.day && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 md:px-8 pb-6 md:pb-8 md:pl-[7.5rem]">
+                          <div className="w-full h-px bg-white/10 mb-6"></div>
+                          <p className="text-white/60 font-medium leading-relaxed italic">
+                            {item.description}
+                          </p>
+                          <div className="mt-8 flex items-center text-xs text-secondary font-black uppercase tracking-widest bg-secondary/10 w-fit px-4 py-2 rounded-full border border-secondary/20">
+                            <Clock size={14} className="mr-2" /> Typical Activity: 4-6 Hours
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Captain Profile */}
-            <div className="p-5 md:p-12 liquid-glass-dark border border-white/10 rounded-3xl md:rounded-[3rem] text-white overflow-hidden relative group shadow-[0_12px_36px_rgba(0,0,0,0.18)] md:shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
-              <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-transform duration-1000 group-hover:scale-150"></div>
-
-              <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
-                <div className="relative shrink-0">
-                  <img
-                    src={trip.captain.avatar}
-                    alt="Captain"
-                    className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] object-cover border-2 border-white/20 shadow-2xl group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute -bottom-3 -right-3 bg-secondary text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-secondary/30 border border-white/20">
-                    Top Rated
+          {/* Inclusion & Exclusion - Mobile Only */}
+          {((trip.inclusion && trip.inclusion.length > 0) || (trip.exclusion && trip.exclusion.length > 0)) && (
+            <div className="grid grid-cols-1 gap-6">
+              {/* Inclusion */}
+              {trip.inclusion && trip.inclusion.length > 0 && (
+                <div className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8">
+                  <h3 className="text-xl md:text-2xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-8">
+                    Inclusions
+                  </h3>
+                  <div className="space-y-4">
+                    {trip.inclusion.map((item: string, idx: number) => (
+                      <div key={idx} className="flex items-start gap-3 md:gap-4">
+                        <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={22} strokeWidth={2.5} />
+                        <span className="text-white/90 text-sm md:text-base font-medium leading-relaxed">
+                          {item}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
+              )}
 
-                <div className="space-y-5">
-                  <div>
-                    <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{trip.captain.name}</h3>
-                    <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{trip.captain.role}</p>
+              {/* Exclusion */}
+              {trip.exclusion && trip.exclusion.length > 0 && (
+                <div className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8">
+                  <h3 className="text-xl md:text-2xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-8">
+                    Exclusions
+                  </h3>
+                  <div className="space-y-4">
+                    {trip.exclusion.map((item: string, idx: number) => (
+                      <div key={idx} className="flex items-start gap-3 md:gap-4">
+                        <X className="text-red-500 shrink-0 mt-0.5" size={22} strokeWidth={2.5} />
+                        <span className="text-white/90 text-sm md:text-base font-medium leading-relaxed">
+                          {item}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">
-                    {trip.captain.bio}
-                  </p>
-                  <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-white/10">
-                    <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
-                      <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Experience</span>
-                      <span className="text-lg font-black tracking-tighter">{trip.captain.trips}+ Trips</span>
-                    </div>
-                    <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
-                      <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Rating</span>
-                      <span className="text-lg font-black tracking-tighter flex items-center gap-1.5">{trip.captain.rating} <Star size={16} fill="#FFD700" className="text-accent" /></span>
-                    </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Captain Profile - Mobile Only */}
+          <div className="p-5 md:p-12 liquid-glass-dark border border-white/10 rounded-3xl md:rounded-[3rem] text-white overflow-hidden relative group shadow-[0_12px_36px_rgba(0,0,0,0.18)] md:shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-transform duration-1000 group-hover:scale-150"></div>
+
+            <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
+              <div className="relative shrink-0">
+                <img
+                  src={trip.captain.avatar}
+                  alt="Captain"
+                  className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] object-cover border-2 border-white/20 shadow-2xl group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute -bottom-3 -right-3 bg-secondary text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-secondary/30 border border-white/20">
+                  Top Rated
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{trip.captain.name}</h3>
+                  <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{trip.captain.role}</p>
+                </div>
+                <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">
+                  {trip.captain.bio}
+                </p>
+                <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-white/10">
+                  <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
+                    <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Experience</span>
+                    <span className="text-lg font-black tracking-tighter">{trip.captain.trips}+ Trips</span>
+                  </div>
+                  <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
+                    <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Rating</span>
+                    <span className="text-lg font-black tracking-tighter flex items-center gap-1.5">{trip.captain.rating} <Star size={16} fill="#FFD700" className="text-accent" /></span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
-
-        {/* Inclusion & Exclusion - Full Width */}
-        {((trip.inclusion && trip.inclusion.length > 0) || (trip.exclusion && trip.exclusion.length > 0)) && (
-          <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 pb-12 md:pb-20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:items-start">
-              {/* Inclusion */}
-              {trip.inclusion && trip.inclusion.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                  className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-10 h-full"
-                >
-                  <h3 className="text-xl md:text-2xl lg:text-3xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-8">
-                    Inclusions
-                  </h3>
-                  <div className="space-y-4 md:space-y-5">
-                    {trip.inclusion.map((item: string, idx: number) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="flex items-start gap-3 md:gap-4"
-                      >
-                        <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={22} strokeWidth={2.5} />
-                        <span className="text-white/90 text-sm md:text-base lg:text-lg font-medium leading-relaxed">
-                          {item}
-                        </span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Exclusion */}
-              {trip.exclusion && trip.exclusion.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-10 h-full"
-                >
-                  <h3 className="text-xl md:text-2xl lg:text-3xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-8">
-                    Exclusions
-                  </h3>
-                  <div className="space-y-4 md:space-y-5">
-                    {trip.exclusion.map((item: string, idx: number) => (
-                      <motion.div
-                        key={idx}
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="flex items-start gap-3 md:gap-4"
-                      >
-                        <X className="text-red-500 shrink-0 mt-0.5" size={22} strokeWidth={2.5} />
-                        <span className="text-white/90 text-sm md:text-base lg:text-lg font-medium leading-relaxed">
-                          {item}
-                        </span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </div>
-          </section>
-        )}
-
-        {/* Things to Carry Section */}
-        {trip.thingsToCarry && trip.thingsToCarry.length > 0 && (
-          <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 pb-12 md:pb-20">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-12"
-            >
-              <h3 className="text-xl md:text-2xl lg:text-4xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-10 liquid-text flex items-center gap-3">
-                <FileText size={28} className="text-secondary" />
-                Things to Carry
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                {trip.thingsToCarry.map((item: string, idx: number) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="flex items-start gap-3 md:gap-4 p-4 md:p-5 liquid-glass rounded-xl md:rounded-2xl border border-white/10 hover:border-secondary/30 transition-colors"
-                  >
-                    <CheckCircle2 className="text-secondary shrink-0 mt-0.5" size={22} strokeWidth={2.5} />
-                    <span className="text-white/90 text-sm md:text-base lg:text-lg font-medium leading-relaxed">
-                      {item}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          </section>
-        )}
-
-        {/* Terms & Conditions Section */}
-        {trip.termsAndConditions && trip.termsAndConditions.trim() && (
-          <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 pb-12 md:pb-20">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 lg:p-12"
-            >
-              <h3 className="text-xl md:text-2xl lg:text-4xl font-bungee font-black text-white uppercase italic tracking-tighter mb-6 md:mb-10 liquid-text flex items-center gap-3">
-                <ShieldCheck size={28} className="text-secondary" />
-                Terms & Conditions
-              </h3>
-              <div className="prose prose-invert prose-lg max-w-none">
-                <div className="text-white/80 text-sm md:text-base lg:text-lg font-medium leading-relaxed whitespace-pre-line">
-                  {trip.termsAndConditions}
-                </div>
-              </div>
-            </motion.div>
-          </section>
-        )}
       </div>
 
       <AnimatePresence>
@@ -935,6 +1129,169 @@ const TripDetails = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Things to Carry Modal */}
+      <AnimatePresence>
+        {thingsToCarryOpen && trip.thingsToCarry && trip.thingsToCarry.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm"
+            onClick={(e) => { if (e.target === e.currentTarget) setThingsToCarryOpen(false) }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 36, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.96 }}
+              transition={{ type: 'spring', damping: 24, stiffness: 320 }}
+              className="w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-[1.5rem] bg-white text-[#171717] shadow-2xl sm:rounded-[2rem]"
+            >
+              <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-5 sm:px-7 py-4 sm:py-5 flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                    <FileText size={22} className="text-secondary" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight">Things to Carry</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setThingsToCarryOpen(false)}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-black transition-colors hover:bg-black/5"
+                  aria-label="Close things to carry"
+                >
+                  <X size={27} strokeWidth={3} />
+                </button>
+              </div>
+
+              <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
+                <div className="space-y-4">
+                  {trip.thingsToCarry.map((item: string, idx: number) => (
+                    <div key={idx} className="flex items-start gap-3 sm:gap-4 p-4 sm:p-5 bg-gray-50 rounded-xl border border-gray-200">
+                      <CheckCircle2 className="text-secondary shrink-0 mt-0.5" size={20} strokeWidth={2.5} />
+                      <span className="text-gray-800 text-sm sm:text-base font-medium leading-relaxed">
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Terms & Conditions Modal */}
+      <AnimatePresence>
+        {termsOpen && trip.termsAndConditions && trip.termsAndConditions.trim() && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm"
+            onClick={(e) => { if (e.target === e.currentTarget) setTermsOpen(false) }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 36, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.96 }}
+              transition={{ type: 'spring', damping: 24, stiffness: 320 }}
+              className="w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-[1.5rem] bg-white text-[#171717] shadow-2xl sm:rounded-[2rem]"
+            >
+              <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-5 sm:px-7 py-4 sm:py-5 flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                    <ShieldCheck size={22} className="text-secondary" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight">Terms & Conditions</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTermsOpen(false)}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-black transition-colors hover:bg-black/5"
+                  aria-label="Close terms and conditions"
+                >
+                  <X size={27} strokeWidth={3} />
+                </button>
+              </div>
+
+              <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
+                <div className="prose prose-sm sm:prose-base max-w-none">
+                  <div className="text-gray-800 leading-relaxed whitespace-pre-line">
+                    {trip.termsAndConditions}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cancellation Policy Modal */}
+      <AnimatePresence>
+        {cancellationPolicyOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm"
+            onClick={(e) => { if (e.target === e.currentTarget) setCancellationPolicyOpen(false) }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 36, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.96 }}
+              transition={{ type: 'spring', damping: 24, stiffness: 320 }}
+              className="w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-[1.5rem] bg-white text-[#171717] shadow-2xl sm:rounded-[2rem]"
+            >
+              <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-5 sm:px-7 py-4 sm:py-5 flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                    <X size={22} className="text-secondary" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight">Cancellation Policy</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCancellationPolicyOpen(false)}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-black transition-colors hover:bg-black/5"
+                  aria-label="Close cancellation policy"
+                >
+                  <X size={27} strokeWidth={3} />
+                </button>
+              </div>
+
+              <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
+                <div className="space-y-4">
+                  <p className="text-gray-800 text-sm sm:text-base leading-relaxed">
+                    No cancellation fee up to 15 days before departure. After that, the following cancellation charges apply:
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                      <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={20} strokeWidth={2.5} />
+                      <span className="text-gray-800 text-sm sm:text-base font-medium">
+                        <strong>15+ days before:</strong> Free cancellation, full refund
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                      <CheckCircle2 className="text-yellow-500 shrink-0 mt-0.5" size={20} strokeWidth={2.5} />
+                      <span className="text-gray-800 text-sm sm:text-base font-medium">
+                        <strong>7-14 days before:</strong> 50% refund
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                      <X className="text-red-500 shrink-0 mt-0.5" size={20} strokeWidth={2.5} />
+                      <span className="text-gray-800 text-sm sm:text-base font-medium">
+                        <strong>Less than 7 days:</strong> No refund
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
