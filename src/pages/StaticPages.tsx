@@ -153,7 +153,7 @@ const TeamMembersSection = () => {
           <span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">The People Behind The Adventure</span>
         </div> */}
         <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
-          Meet The <span className="text-primary px-2" style={{ WebkitTextStroke: '2px white' }}>Team</span>
+          Meet The <span className="text-primary px-2">Team</span>
         </h2>
         <p className="text-white/40 italic mt-6 text-sm font-medium max-w-xl mx-auto leading-relaxed">
           The passionate explorers and visionaries who make every WayBond journey unforgettable.

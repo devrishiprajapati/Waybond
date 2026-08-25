@@ -116,7 +116,7 @@ const Discover = () => {
             <div className="space-y-2">
               <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">COLLECTIONS 2026</span>
               <h1 className="text-2xl md:text-4xl font-bungee font-black tracking-tighter uppercase italic leading-none liquid-text">
-                The <span className="text-primary font-bungee" style={{ WebkitTextStroke: '1px white' }}>Adventures</span> Hub
+                The <span className="text-primary font-bungee">Adventures</span> Hub
               </h1>
               {/* <p className="text-white/40 font-medium text-sm max-w-xl italic leading-relaxed">Curated escapes for the Ahmedabad spirit. From the rugged north to tropical islands.</p> */}
             </div>
