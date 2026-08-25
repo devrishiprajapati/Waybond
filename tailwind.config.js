@@ -33,13 +33,13 @@ export default {
         sans: ['Manrope', 'sans-serif'],
         serif: ['Manrope', 'sans-serif'],
         display: ['Manrope', 'sans-serif'],
-        bungee: ['Bungee', 'cursive'],
+        bungee: ['Manrope', 'sans-serif'],
         body: ['Manrope', 'sans-serif'],
       },
       fontWeight: {
         regular: '400',
         semibold: '600',
-        bold: '700',
+        bold: '800',
       },
       keyframes: {
         fadeIn: {

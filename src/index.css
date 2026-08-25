@@ -36,8 +36,9 @@ body {
   h6,
   .heading,
   .title {
-    font-family: 'Bungee', cursive;
-    font-weight: 400;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-style: normal !important;
   }
 
   body {
@@ -180,17 +181,18 @@ label {
   @apply font-sans;
 }
 
-/* Custom utility for Bungee font on headings */
+/* Legacy heading utility kept for existing class names. */
 .font-bungee {
-  font-family: 'Bungee', cursive !important;
-  font-weight: 400 !important;
-  /* Bungee Regular */
+  font-family: 'Manrope', sans-serif !important;
+  font-weight: 800 !important;
+  font-style: normal !important;
 }
 
 /* Utility classes for consistent typography */
 .text-title {
-  font-family: 'Bungee', cursive !important;
-  font-weight: 400 !important;
+  font-family: 'Manrope', sans-serif !important;
+  font-weight: 800 !important;
+  font-style: normal !important;
 }
 
 .text-subtitle {
