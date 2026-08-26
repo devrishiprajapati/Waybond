@@ -195,13 +195,6 @@ const Navbar = () => {
                   </Link>
                 </div>
               </div>
-
-              <button
-                onClick={() => { setIsOpen(false); handleBookNow('/discover') }}
-                className="w-full bg-secondary text-white py-4 rounded-2xl flex items-center justify-center font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-secondary/30 active:scale-95 transition-all outline-none relative z-10 mt-auto font-sans font-bold"
-              >
-                Book Now
-              </button>
             </motion.div>
           </div>
         )}

@@ -149,15 +149,9 @@ const TeamMembersSection = () => {
     >
       {/* Section Heading */}
       <div className="mb-14 text-center">
-        {/* <div className="liquid-glass inline-block px-5 py-2 rounded-full border border-white/10 shadow-lg mb-6">
-          <span className="text-secondary font-black uppercase tracking-[0.4em] text-[9px]">The People Behind The Adventure</span>
-        </div> */}
         <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
-          Meet The <span className="text-primary px-2" style={{ WebkitTextStroke: '2px white' }}>Team</span>
+          Meet The <span className="text-primary px-2">Team</span>
         </h2>
-        <p className="text-white/40 italic mt-6 text-sm font-medium max-w-xl mx-auto leading-relaxed">
-          The passionate explorers and visionaries who make every WayBond journey unforgettable.
-        </p>
       </div>
 
       {/* Pinned/Featured Member - Full Details */}
@@ -267,7 +261,7 @@ const TeamMembersSection = () => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {otherMembers.map((member, i) => (
               <motion.button
                 key={member.id}
@@ -277,25 +271,21 @@ const TeamMembersSection = () => {
                 transition={{ delay: i * 0.07 }}
                 whileHover={{ y: -8 }}
                 onClick={() => setSelected(member)}
-                className="group text-left liquid-glass-dark border border-white/10 rounded-[2.5rem] overflow-hidden hover:border-secondary/30 transition-all shadow-xl w-full"
+                className="group text-left bg-white rounded-2xl md:rounded-3xl overflow-hidden hover:shadow-2xl transition-all w-full"
               >
-                {/* Image */}
-                <div className="relative h-64 w-full overflow-hidden bg-white/5">
+                {/* Image with Rounded Corners */}
+                <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
                   <img
                     src={member.image}
                     alt={member.name}
                     loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 rounded-2xl md:rounded-3xl"
                   />
                 </div>
                 {/* Info */}
-                <div className="p-6 space-y-2">
-                  <p className="text-xl font-bungee font-black text-white uppercase italic tracking-tight group-hover:text-secondary transition-colors">{member.name}</p>
-                  <p className="text-[9px] text-secondary font-black uppercase tracking-[0.25em]">{member.designation}</p>
-                  <p className="text-white/45 text-xs leading-relaxed line-clamp-2 mt-1">{member.shortBio}</p>
-                  <p className="text-[8px] font-black uppercase tracking-[0.2em] text-secondary/60 mt-2 flex items-center gap-1">
-                    <Users2 size={10} /> View Profile
-                  </p>
+                <div className="p-3 md:p-5 space-y-1">
+                  <p className="text-base md:text-xl font-black text-gray-900 leading-tight group-hover:text-secondary transition-colors">{member.name}</p>
+                  <p className="text-[10px] md:text-xs font-semibold">{member.designation}</p>
                 </div>
               </motion.button>
             ))}

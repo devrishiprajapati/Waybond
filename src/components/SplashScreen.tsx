@@ -55,7 +55,7 @@ const SplashScreen: React.FC = () => {
       {/* Main Content */}
       <div className="relative z-10 text-center px-6">
         {/* Animated Camper with Glow Effect */}
-        <div className="relative mb-8 flex justify-center">
+        <div className="relative flex justify-center">
           {/* Glow background */}
           <motion.div
             initial={{ opacity: 0, scale: 0 }}
@@ -74,7 +74,7 @@ const SplashScreen: React.FC = () => {
               scale: { duration: 0.8, ease: [0.34, 1.56, 0.64, 1] },
               opacity: { duration: 0.5 }
             }}
-            className="relative w-48 h-48 md:w-64 md:h-64"
+            className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48"
           >
             <img
               src="/camper-van.svg"
@@ -83,33 +83,6 @@ const SplashScreen: React.FC = () => {
             />
           </motion.div>
         </div>
-
-        {/* Brand Name with Stagger Animation */}
-        {/* <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="mb-4"
-        >
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-sans font-black tracking-tighter">
-            <motion.span
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6, duration: 0.5, ease: "easeOut" }}
-              className="inline-block text-white"
-            >
-              WAY
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8, duration: 0.5, ease: "easeOut" }}
-              className="inline-block text-secondary ml-2"
-            >
-              BOND
-            </motion.span>
-          </h1>
-        </motion.div> */}
 
         {/* Tagline */}
         <motion.p
@@ -120,40 +93,6 @@ const SplashScreen: React.FC = () => {
         >
           Your Journey, Our Passion
         </motion.p>
-
-        {/* Loading Bar Animation */}
-        {/* <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.2, duration: 0.5 }}
-          className="w-64 max-w-full mx-auto"
-        >
-          <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-            <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: '100%' }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="h-full w-1/2 bg-gradient-to-r from-transparent via-secondary to-transparent"
-            ></motion.div>
-          </div>
-          
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ 
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="text-white/50 text-xs uppercase tracking-widest font-black mt-3"
-          >
-            Loading Adventure
-          </motion.p>
-        </motion.div> */}
 
         {/* Floating Particles */}
         {[...Array(6)].map((_, index) => (
