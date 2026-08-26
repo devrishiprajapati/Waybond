@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Star, Users, Globe, Upload, FileText, CheckCircle } from 'lucide-react'
 import { getTripById, updateTrip, addTrip } from '../../lib/dataService'
-import { Trip } from '../../lib/trips'
+import { DEFAULT_CANCELLATION_POLICY, Trip } from '../../lib/trips'
 import { parseDateOnly } from '../../lib/date'
 
 const CATEGORIES = ['Adventure', 'Beach', 'Luxury', 'Nature', 'Honeymoon', 'Backpacking']
@@ -69,7 +69,8 @@ const EditTrip = () => {
     itinerary: [],
     pdfUrl: '',
     thingsToCarry: [''],
-    termsAndConditions: ''
+    termsAndConditions: '',
+    cancellationPolicy: DEFAULT_CANCELLATION_POLICY
   })
   const [mediaError, setMediaError] = useState('')
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false })
@@ -100,7 +101,7 @@ const EditTrip = () => {
     }
     if (id && id !== 'new') {
       getTripById(parseInt(id)).then(trip => {
-        if (trip) setFormData(trip)
+        if (trip) setFormData({ ...trip, cancellationPolicy: trip.cancellationPolicy || DEFAULT_CANCELLATION_POLICY })
       })
     }
   }, [id, navigate])
@@ -184,6 +185,7 @@ const EditTrip = () => {
       exclusion: (formData.exclusion || []).filter(item => item.trim()),
       thingsToCarry: (formData.thingsToCarry || []).filter(item => item.trim()),
       termsAndConditions: (formData.termsAndConditions || '').trim(),
+      cancellationPolicy: (formData.cancellationPolicy || DEFAULT_CANCELLATION_POLICY).trim(),
       departureDates: mergeUniqueDates([cleanData.nextBatch, ...(formData.departureDates || [])]),
       itinerary: formData.itinerary || []
     }
@@ -711,16 +713,38 @@ const EditTrip = () => {
             <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
               <FileText size={20} className="mr-3 text-secondary" /> Terms & Conditions
             </h3>
-            <p className="text-xs text-white/45 ml-2 mb-4">Package-specific terms, cancellation policy, and important guidelines</p>
+            <p className="text-xs text-white/45 ml-2 mb-4">Package-specific terms, payment terms, safety guidelines, and important notes</p>
 
             <div className="space-y-2">
               <textarea
                 value={formData.termsAndConditions}
                 onChange={e => setFormData({ ...formData, termsAndConditions: e.target.value })}
-                placeholder="Enter terms and conditions, cancellation policy, payment terms, safety guidelines, etc.&#10;&#10;Example:&#10;• Full payment required 15 days before departure&#10;• 50% refund if cancelled 7 days before trip&#10;• No refund for cancellations within 3 days&#10;• Travel insurance recommended&#10;• Valid ID proof mandatory"
+                placeholder="Enter terms and conditions, payment terms, safety guidelines, etc.&#10;&#10;Example:&#10;• Full payment required 15 days before departure&#10;• Travel insurance recommended&#10;• Valid ID proof mandatory"
                 className={`${textareaClass} min-h-[200px]`}
               />
               <p className="text-[10px] text-white/30 ml-2">Use bullet points (•) or numbers for better readability</p>
+            </div>
+          </motion.section>
+
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className={sectionClass}
+          >
+            <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
+              <FileText size={20} className="mr-3 text-secondary" /> Cancellation Policy
+            </h3>
+            <p className="text-xs text-white/45 ml-2 mb-4">Package-specific cancellation and refund rules shown in Quick Links & Policies</p>
+
+            <div className="space-y-2">
+              <textarea
+                value={formData.cancellationPolicy}
+                onChange={e => setFormData({ ...formData, cancellationPolicy: e.target.value })}
+                placeholder={DEFAULT_CANCELLATION_POLICY}
+                className={`${textareaClass} min-h-[180px]`}
+              />
+              <p className="text-[10px] text-white/30 ml-2">Leave the default text or customize it for this package.</p>
             </div>
           </motion.section>
 

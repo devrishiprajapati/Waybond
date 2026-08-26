@@ -10,6 +10,7 @@ import {
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
 import { getTripBySlug, createSlug } from '../lib/dataService'
+import { DEFAULT_CANCELLATION_POLICY } from '../lib/trips'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
 import { formatDateOnly } from '../lib/date'
@@ -196,6 +197,8 @@ const TripDetails = () => {
     )
   }
 
+  const cancellationPolicy = String(trip.cancellationPolicy || DEFAULT_CANCELLATION_POLICY).trim()
+
   return (
     <>
       <div className="bg-white min-h-screen pt-28 pb-28 relative">
@@ -260,7 +263,7 @@ const TripDetails = () => {
                 className="w-full h-full object-contain bg-[#003d6a]/20"
               />
             </AnimatePresence>
-            
+
             {/* Share Button */}
             <div className="absolute right-6 top-6 sm:right-10 sm:top-10 z-20">
               <button
@@ -311,7 +314,7 @@ const TripDetails = () => {
               <div className="liquid-glass px-5 py-2.5 rounded-full border border-white/20 text-white text-sm font-black tracking-wider shadow-xl">
                 {activeImage + 1} / {trip.images.length}
               </div>
-              
+
               {/* Dots Indicator */}
               {trip.images.length <= 10 && (
                 <div className="flex gap-2.5">
@@ -322,11 +325,10 @@ const TripDetails = () => {
                         haptics.light()
                         setActiveImage(idx)
                       }}
-                      className={`h-2.5 rounded-full transition-all duration-300 ${
-                        idx === activeImage 
-                          ? 'w-10 bg-secondary shadow-lg' 
-                          : 'w-2.5 bg-white/50 hover:bg-white/70'
-                      }`}
+                      className={`h-2.5 rounded-full transition-all duration-300 ${idx === activeImage
+                        ? 'w-10 bg-secondary shadow-lg'
+                        : 'w-2.5 bg-white/50 hover:bg-white/70'
+                        }`}
                       aria-label={`View image ${idx + 1}`}
                     />
                   ))}
@@ -340,13 +342,15 @@ const TripDetails = () => {
         <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-12 lg:mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
             {/* Left Side - Trip Overview (shown on desktop) */}
-            <div className="hidden lg:block lg:col-span-8 space-y-12 md:space-y-16 overflow-y-auto max-h-[calc(100vh-12rem)] pr-4 scrollbar-thin scrollbar-thumb-secondary/30 scrollbar-track-white/5 hover:scrollbar-thumb-secondary/50">
+            <div className="hidden lg:block lg:col-span-8 space-y-12 md:space-y-16 overflow-y-auto max-h-[calc(100vh-7rem)] pr-4 scrollbar-thin scrollbar-thumb-secondary/30 scrollbar-track-white/5 hover:scrollbar-thumb-secondary/50">
               {/* Trip Overview */}
               <div>
-                <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic mb-5 md:mb-8 liquid-text">Trip Overview</h2>
-                <p className="text-base md:text-lg text-white/60 leading-relaxed font-medium italic">
-                  {trip.description}
-                </p>
+                <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
+                  <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
+                  <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg">
+                    {trip.description}
+                  </p>
+                </div>
 
                 {trip.highlights && trip.highlights.length > 0 && (
                   <div className="mt-6 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -506,179 +510,180 @@ const TripDetails = () => {
                   </div>
                 </div>
               </div>
+
             </div>
 
             {/* Right Side - Desktop Booking Widget */}
             <div className="lg:col-span-4">
-            <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-3xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] space-y-5 md:rounded-[3rem] md:p-10 md:space-y-8 md:shadow-[0_15px_60px_rgba(0,0,0,0.5)]">
-              <div className="flex justify-between items-center gap-4 pb-5 border-b border-white/10 md:pb-8">
-                <div className="min-w-0 flex-1 overflow-hidden">
-                  <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
-                  <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
-                </div>
-                <div className="liquid-glass shrink-0 rounded-xl border border-white/5 overflow-hidden flex">
-                  <div className="px-3 py-2.5 text-center min-w-[46px] md:min-w-[52px]">
-                    <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Day/i)?.[1] ?? trip.duration.split(' ')[0]}</div>
-                    <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Days</div>
+              <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-3xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] space-y-5 md:rounded-[3rem] md:p-8 md:space-y-6 md:shadow-[0_15px_60px_rgba(0,0,0,0.5)]">
+                <div className="flex justify-between items-center gap-4 pb-5 border-b border-white/10 md:pb-6">
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
+                    <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
                   </div>
-                  {String(trip.duration || '').match(/(\d+)\s*Night/i) && (
-                    <>
-                      <div className="w-px bg-white/10 my-2" />
-                      <div className="px-3 py-2.5 text-center min-w-[46px] md:min-w-[52px]">
-                        <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Night/i)![1]}</div>
-                        <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Nights</div>
-                      </div>
-                    </>
-                  )}
+                  <div className="liquid-glass shrink-0 rounded-xl border border-white/5 overflow-hidden flex">
+                    <div className="px-3 py-2.5 text-center min-w-[46px] md:min-w-[52px]">
+                      <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Day/i)?.[1] ?? trip.duration.split(' ')[0]}</div>
+                      <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Days</div>
+                    </div>
+                    {String(trip.duration || '').match(/(\d+)\s*Night/i) && (
+                      <>
+                        <div className="w-px bg-white/10 my-2" />
+                        <div className="px-3 py-2.5 text-center min-w-[46px] md:min-w-[52px]">
+                          <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Night/i)![1]}</div>
+                          <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Nights</div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3 md:space-y-4">
-                {/* Date Picker - Same as Discover */}
-                <div className="p-4 md:p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                  <div className="space-y-2">
-                    <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
+                <div className="space-y-3 md:space-y-4">
+                  {/* Date Picker - Same as Discover */}
+                  <div className="p-4 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                    <div className="space-y-2">
+                      <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
 
-                    {(() => {
-                      const dates = trip.departureDates || []
-                      if (!dates.length) return <p className="text-[7px] text-white/30">No dates available</p>
+                      {(() => {
+                        const dates = trip.departureDates || []
+                        if (!dates.length) return <p className="text-[7px] text-white/30">No dates available</p>
 
-                      // Create month groups
-                      const monthGroups: Record<string, string[]> = {}
-                      dates.forEach(date => {
-                        const monthKey = date.slice(0, 7)
-                        if (!monthGroups[monthKey]) {
-                          monthGroups[monthKey] = []
-                        }
-                        monthGroups[monthKey].push(date)
-                      })
+                        // Create month groups
+                        const monthGroups: Record<string, string[]> = {}
+                        dates.forEach(date => {
+                          const monthKey = date.slice(0, 7)
+                          if (!monthGroups[monthKey]) {
+                            monthGroups[monthKey] = []
+                          }
+                          monthGroups[monthKey].push(date)
+                        })
 
-                      // Sort each month's dates
-                      Object.keys(monthGroups).forEach(month => {
-                        monthGroups[month].sort()
-                      })
+                        // Sort each month's dates
+                        Object.keys(monthGroups).forEach(month => {
+                          monthGroups[month].sort()
+                        })
 
-                      // Get sorted month keys
-                      const sortedMonths = Object.keys(monthGroups).sort()
-                      const firstMonth = sortedMonths[0]
+                        // Get sorted month keys
+                        const sortedMonths = Object.keys(monthGroups).sort()
+                        const firstMonth = sortedMonths[0]
 
-                      // Get current selected month
-                      let currentSelectedMonth = firstMonth
-                      let currentSelectedDate = selectedDeparture
+                        // Get current selected month
+                        let currentSelectedMonth = firstMonth
+                        let currentSelectedDate = selectedDeparture
 
-                      if (currentSelectedDate) {
-                        const dateMonthKey = currentSelectedDate.slice(0, 7)
-                        if (monthGroups[dateMonthKey]) {
-                          currentSelectedMonth = dateMonthKey
+                        if (currentSelectedDate) {
+                          const dateMonthKey = currentSelectedDate.slice(0, 7)
+                          if (monthGroups[dateMonthKey]) {
+                            currentSelectedMonth = dateMonthKey
+                          } else {
+                            currentSelectedMonth = firstMonth
+                            currentSelectedDate = monthGroups[firstMonth]?.[0]
+                          }
                         } else {
-                          currentSelectedMonth = firstMonth
                           currentSelectedDate = monthGroups[firstMonth]?.[0]
                         }
-                      } else {
-                        currentSelectedDate = monthGroups[firstMonth]?.[0]
-                      }
 
-                      // Get dates in current month
-                      const datesInMonth = monthGroups[currentSelectedMonth] || []
+                        // Get dates in current month
+                        const datesInMonth = monthGroups[currentSelectedMonth] || []
 
-                      return (
-                        <div className="space-y-2">
-                          {/* Month tabs */}
-                          <div className="flex gap-1 flex-wrap">
-                            {sortedMonths.map(monthKey => {
-                              const isActive = monthKey === currentSelectedMonth
-                              const [year, month] = monthKey.split('-')
-                              const monthName = formatDateOnly(`${year}-${month}-01`, { month: 'short' })
-
-                              return (
-                                <button
-                                  key={monthKey}
-                                  type="button"
-                                  onClick={() => {
-                                    const firstDate = monthGroups[monthKey]?.[0]
-                                    if (firstDate) {
-                                      handleDateChange(firstDate)
-                                    }
-                                  }}
-                                  className={`px-2 py-1 text-[7px] font-black uppercase tracking-wider rounded transition-colors ${isActive
-                                    ? 'bg-secondary text-white'
-                                    : 'bg-transparent text-white/50 hover:text-white'
-                                    }`}
-                                >
-                                  {monthName} {year}
-                                </button>
-                              )
-                            })}
-                          </div>
-
-                          {/* Date circles */}
-                          <div className="flex gap-1.5 flex-wrap">
-                            {datesInMonth && datesInMonth.length > 0 ? (
-                              datesInMonth.map(date => {
-                                const day = date.slice(8, 10)
-                                const isSelected = currentSelectedDate === date
+                        return (
+                          <div className="space-y-2">
+                            {/* Month tabs */}
+                            <div className="flex gap-1 flex-wrap">
+                              {sortedMonths.map(monthKey => {
+                                const isActive = monthKey === currentSelectedMonth
+                                const [year, month] = monthKey.split('-')
+                                const monthName = formatDateOnly(`${year}-${month}-01`, { month: 'short' })
 
                                 return (
                                   <button
-                                    key={date}
+                                    key={monthKey}
                                     type="button"
                                     onClick={() => {
-                                      handleDateChange(date)
+                                      const firstDate = monthGroups[monthKey]?.[0]
+                                      if (firstDate) {
+                                        handleDateChange(firstDate)
+                                      }
                                     }}
-                                    className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${isSelected
-                                      ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
-                                      : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
+                                    className={`px-2 py-1 text-[7px] font-black uppercase tracking-wider rounded transition-colors ${isActive
+                                      ? 'bg-secondary text-white'
+                                      : 'bg-transparent text-white/50 hover:text-white'
                                       }`}
-                                    title={date}
                                   >
-                                    {day}
+                                    {monthName} {year}
                                   </button>
                                 )
-                              })
-                            ) : (
-                              <p className="text-[7px] text-white/30">No dates for this month</p>
-                            )}
+                              })}
+                            </div>
+
+                            {/* Date circles */}
+                            <div className="flex gap-1.5 flex-wrap">
+                              {datesInMonth && datesInMonth.length > 0 ? (
+                                datesInMonth.map(date => {
+                                  const day = date.slice(8, 10)
+                                  const isSelected = currentSelectedDate === date
+
+                                  return (
+                                    <button
+                                      key={date}
+                                      type="button"
+                                      onClick={() => {
+                                        handleDateChange(date)
+                                      }}
+                                      className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${isSelected
+                                        ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
+                                        : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
+                                        }`}
+                                      title={date}
+                                    >
+                                      {day}
+                                    </button>
+                                  )
+                                })
+                              ) : (
+                                <p className="text-[7px] text-white/30">No dates for this month</p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )
-                    })()}
+                        )
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                    <div className="flex items-center text-white/80 font-black uppercase tracking-widest text-xs">
+                      <Users size={18} className="mr-3 text-secondary" /> Group Size
+                    </div>
+                    <span className="text-white font-black">{trip.groupSize}</span>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 md:p-5 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                  <div className="flex items-center text-white/80 font-black uppercase tracking-widest text-xs">
-                    <Users size={18} className="mr-3 text-secondary" /> Group Size
-                  </div>
-                  <span className="text-white font-black">{trip.groupSize}</span>
-                </div>
-              </div>
-
-              <button
-                onClick={handleBookSlot}
-                className="w-full bg-secondary text-white py-4 md:py-6 rounded-2xl font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20 font-sans font-bold"
-              >
-                Book Your Slot
-              </button>
-
-              {trip.pdfUrl ? (
-                <a
-                  href={trip.pdfUrl}
-                  download={`${trip.title.replace(/\s+/g, '_')}_Brochure.pdf`}
-                  className="flex items-center justify-center gap-2 w-full py-4 md:py-5 rounded-2xl border border-white/20 bg-white/5 text-white font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] hover:bg-white/10 hover:border-white/30 transition-all"
-                  onClick={() => haptics.light()}
-                >
-                  <Download size={16} /> Download Brochure
-                </a>
-              ) : (
                 <button
-                  disabled
-                  className="flex items-center justify-center gap-2 w-full py-4 md:py-5 rounded-2xl border border-white/10 bg-white/5 text-white/30 font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] cursor-not-allowed"
+                  onClick={handleBookSlot}
+                  className="w-full bg-secondary text-white py-4 md:py-5 rounded-2xl font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] transition-all shadow-2xl shadow-secondary/30 text-center transform hover:scale-105 active:scale-95 border border-transparent hover:border-white/20 font-sans font-bold"
                 >
-                  <Download size={16} /> Download Brochure
+                  Book Your Slot
                 </button>
-              )}
+
+                {trip.pdfUrl ? (
+                  <a
+                    href={trip.pdfUrl}
+                    download={`${trip.title.replace(/\s+/g, '_')}_Brochure.pdf`}
+                    className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl border border-white/20 bg-white/5 text-white font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] hover:bg-white/10 hover:border-white/30 transition-all"
+                    onClick={() => haptics.light()}
+                  >
+                    <Download size={16} /> Download Brochure
+                  </a>
+                ) : (
+                  <button
+                    disabled
+                    className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl border border-white/10 bg-white/5 text-white/30 font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] cursor-not-allowed"
+                  >
+                    <Download size={16} /> Download Brochure
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
           </div>
         </section>
 
@@ -686,10 +691,12 @@ const TripDetails = () => {
         <section className="lg:hidden max-w-[1920px] mx-auto px-4 md:px-12 pb-12 space-y-12">
           {/* Overview - Mobile Only */}
           <div>
-            <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic mb-5 md:mb-8 liquid-text">Trip Overview</h2>
-            <p className="text-base md:text-lg text-white/60 leading-relaxed font-medium italic">
-              {trip.description}
-            </p>
+            <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
+              <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
+              <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg">
+                {trip.description}
+              </p>
+            </div>
 
             {trip.highlights && trip.highlights.length > 0 && (
               <div className="mt-6 md:mt-10 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -1262,31 +1269,9 @@ const TripDetails = () => {
               </div>
 
               <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
-                <div className="space-y-4">
-                  <p className="text-gray-800 text-sm sm:text-base leading-relaxed">
-                    No cancellation fee up to 15 days before departure. After that, the following cancellation charges apply:
-                  </p>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                      <CheckCircle2 className="text-green-500 shrink-0 mt-0.5" size={20} strokeWidth={2.5} />
-                      <span className="text-gray-800 text-sm sm:text-base font-medium">
-                        <strong>15+ days before:</strong> Free cancellation, full refund
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                      <CheckCircle2 className="text-yellow-500 shrink-0 mt-0.5" size={20} strokeWidth={2.5} />
-                      <span className="text-gray-800 text-sm sm:text-base font-medium">
-                        <strong>7-14 days before:</strong> 50% refund
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                      <X className="text-red-500 shrink-0 mt-0.5" size={20} strokeWidth={2.5} />
-                      <span className="text-gray-800 text-sm sm:text-base font-medium">
-                        <strong>Less than 7 days:</strong> No refund
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <p className="whitespace-pre-line text-gray-800 text-sm sm:text-base leading-relaxed font-medium">
+                  {cancellationPolicy}
+                </p>
               </div>
             </motion.div>
           </motion.div>

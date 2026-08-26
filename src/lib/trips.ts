@@ -38,7 +38,14 @@ export interface Trip {
   pdfUrl?: string;
   thingsToCarry?: string[];
   termsAndConditions?: string;
+  cancellationPolicy?: string;
 }
+
+export const DEFAULT_CANCELLATION_POLICY = `No cancellation fee up to 15 days before departure. After that, the following cancellation charges apply:
+
+15+ days before: Free cancellation, full refund
+7-14 days before: 50% refund
+Less than 7 days: No refund`;
 
 const DEFAULT_CAPTAIN = {
   name: 'Captain Rohan Shah',
