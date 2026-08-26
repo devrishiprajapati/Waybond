@@ -953,28 +953,35 @@ app.post('/api/trips', async (req, res, next) => {
 app.put('/api/trips/:id', async (req, res, next) => {
   try {
     const id = Number(req.params.id)
+    if (!Number.isInteger(id)) return res.status(400).json({ message: 'Invalid trip id.' })
     const current = await prisma.trip.findUnique({ where: { id } })
     if (!current) return res.status(404).json({ message: 'Not found' })
     const { _confirmedDateChange, ...requestPayload } = req.body
     const nextPayload = { ...current.payload, ...requestPayload }
     const updatedTrip = await prisma.trip.update({ where: { id }, data: { payload: nextPayload } })
-    const notificationResult = await updateBookingsForTripDate({
-      tripId: id,
-      tripTitle: nextPayload.title,
-      oldPayload: current.payload,
-      newPayload: nextPayload,
-      explicitDateChange: _confirmedDateChange
-    })
-    if (notificationResult.updated > 0) {
-      console.log('[Trip Date Update]', {
+
+    try {
+      const notificationResult = await updateBookingsForTripDate({
         tripId: id,
-        oldDate: notificationResult.oldDate,
-        newDate: notificationResult.newDate,
-        bookingsUpdated: notificationResult.updated,
-        emailsSent: notificationResult.emailsSent,
-        emailFailures: notificationResult.emailFailures
+        tripTitle: nextPayload.title,
+        oldPayload: current.payload,
+        newPayload: nextPayload,
+        explicitDateChange: _confirmedDateChange
       })
+      if (notificationResult.updated > 0) {
+        console.log('[Trip Date Update]', {
+          tripId: id,
+          oldDate: notificationResult.oldDate,
+          newDate: notificationResult.newDate,
+          bookingsUpdated: notificationResult.updated,
+          emailsSent: notificationResult.emailsSent,
+          emailFailures: notificationResult.emailFailures
+        })
+      }
+    } catch (notificationError) {
+      console.error('[Trip Date Update] Package saved, but booking sync failed:', notificationError)
     }
+
     res.json(toTrip(updatedTrip))
   } catch (error) { next(error) }
 })
