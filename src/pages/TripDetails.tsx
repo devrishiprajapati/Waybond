@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  MapPin, Users, Star, ArrowLeft,
+  MapPin, Star, ArrowLeft,
   CheckCircle2, Clock, ShieldCheck, ChevronDown,
   ChevronUp, Instagram, MessageCircle, FileText, Download, X,
   Share2, Link2, Check, Calendar, ChevronLeft, ChevronRight
@@ -342,7 +342,7 @@ const TripDetails = () => {
         <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-12 lg:mb-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
             {/* Left Side - Trip Overview (shown on desktop) */}
-            <div className="hidden lg:block lg:col-span-8 space-y-12 md:space-y-16 overflow-y-auto max-h-[calc(100vh-7rem)] pr-4 scrollbar-thin scrollbar-thumb-secondary/30 scrollbar-track-white/5 hover:scrollbar-thumb-secondary/50">
+            <div className="hidden lg:block lg:col-span-8 space-y-12 md:space-y-16 overflow-y-auto max-h-[calc(100vh-6rem)] pr-4 scrollbar-thin scrollbar-thumb-secondary/30 scrollbar-track-white/5 hover:scrollbar-thumb-secondary/50">
               {/* Trip Overview */}
               <div>
                 <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
@@ -650,12 +650,6 @@ const TripDetails = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
-                    <div className="flex items-center text-white/80 font-black uppercase tracking-widest text-xs">
-                      <Users size={18} className="mr-3 text-secondary" /> Group Size
-                    </div>
-                    <span className="text-white font-black">{trip.groupSize}</span>
-                  </div>
                 </div>
 
                 <button

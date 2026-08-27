@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Star, Users, Globe, Upload, FileText, CheckCircle } from 'lucide-react'
+import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Globe, Upload, FileText, CheckCircle } from 'lucide-react'
 import { getTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { DEFAULT_CANCELLATION_POLICY, Trip } from '../../lib/trips'
 import { parseDateOnly } from '../../lib/date'
@@ -254,23 +254,6 @@ const EditTrip = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <Star size={17} className="mx-auto text-secondary mb-2" />
-              <p className="text-[10px] uppercase font-black tracking-widest text-white/35">Rating</p>
-              <p className="font-black">{formData.rating}</p>
-            </div>
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <List size={17} className="mx-auto text-secondary mb-2" />
-              <p className="text-[10px] uppercase font-black tracking-widest text-white/35">Days</p>
-              <p className="font-black">{formData.itinerary?.length || 0}</p>
-            </div>
-            <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-              <Users size={17} className="mx-auto text-secondary mb-2" />
-              <p className="text-[10px] uppercase font-black tracking-widest text-white/35">Group</p>
-              <p className="font-black">{formData.groupSize || '--'}</p>
-            </div>
-          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -643,9 +626,9 @@ const EditTrip = () => {
             </div>
           </section>
 
-          <motion.section 
-            initial={{ opacity: 0, y: 16 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className={sectionClass}
           >
@@ -668,9 +651,9 @@ const EditTrip = () => {
                     onKeyDown={e => {
                       if (e.key === 'Enter') {
                         e.preventDefault()
-                        setFormData({ 
-                          ...formData, 
-                          thingsToCarry: [...(formData.thingsToCarry || []), ''] 
+                        setFormData({
+                          ...formData,
+                          thingsToCarry: [...(formData.thingsToCarry || []), '']
                         })
                       }
                     }}
@@ -693,9 +676,9 @@ const EditTrip = () => {
               ))}
               <button
                 type="button"
-                onClick={() => setFormData({ 
-                  ...formData, 
-                  thingsToCarry: [...(formData.thingsToCarry || []), ''] 
+                onClick={() => setFormData({
+                  ...formData,
+                  thingsToCarry: [...(formData.thingsToCarry || []), '']
                 })}
                 className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm"
               >
@@ -704,9 +687,9 @@ const EditTrip = () => {
             </div>
           </motion.section>
 
-          <motion.section 
-            initial={{ opacity: 0, y: 16 }} 
-            animate={{ opacity: 1, y: 0 }} 
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
             className={sectionClass}
           >
@@ -753,23 +736,13 @@ const EditTrip = () => {
               <Clock size={20} className="mr-3 text-secondary" /> Logistics & Batches
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6">
               <div className="space-y-2">
                 <label className={labelClass}>Next Batch Date</label>
                 <input
                   type="date"
                   value={toDateInputValue(formData.nextBatch)}
                   onChange={e => handleNextBatchChange(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className={labelClass}>Group Size</label>
-                <input
-                  type="text"
-                  value={formData.groupSize}
-                  onChange={e => setFormData({ ...formData, groupSize: e.target.value })}
-                  placeholder="e.g. 12-15 Persons"
                   className={inputClass}
                 />
               </div>
