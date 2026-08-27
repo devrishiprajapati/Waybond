@@ -84,7 +84,7 @@ const Footer = () => {
         </div>
       </section>
       
-      <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-4 gap-16 relative z-10">
+      <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 grid grid-cols-1 md:grid-cols-4 gap-10 relative z-10">
         <div className="space-y-6">
           <h3 className="text-3xl font-sans font-black text-slate-100 tracking-tighter">
             WAY
