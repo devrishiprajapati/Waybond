@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { MaterialReactTable, type MRT_ColumnDef, useMaterialReactTable } from 'material-react-table'
-import { Button, ThemeProvider, createTheme } from '@mui/material'
-import { Filter, Database, Users, Package, FileDown, ArrowLeft, Calendar } from 'lucide-react'
+import { Button, ThemeProvider, createTheme, MenuItem } from '@mui/material'
+import { Filter, Database, Users, Package, FileDown, ArrowLeft, Calendar, Edit2 } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import PermissionGuard from '../../components/PermissionGuard'
@@ -48,6 +48,7 @@ const DataFilters = () => {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [activeTab, setActiveTab] = useState<'trips' | 'users' | 'bookings'>('trips')
   const [loading, setLoading] = useState(true)
+  const [currentAdminPermissions, setCurrentAdminPermissions] = useState<string[]>([])
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -55,8 +56,30 @@ const DataFilters = () => {
       navigate('/admin/login')
       return
     }
+    
+    // Get admin permissions
+    const adminData = JSON.parse(sessionStorage.getItem('adminData') || '{}')
+    setCurrentAdminPermissions(adminData.permissions || [])
+    
+    // Check if admin has view or edit permission or is Master Admin
+    const hasViewPermission = adminData.permissions?.includes('data_filters_view')
+    const hasEditPermission = adminData.permissions?.includes('data_filters_edit')
+    const isMasterAdmin = adminData.role === 'MASTER_ADMIN'
+    
+    if (!hasViewPermission && !hasEditPermission && !isMasterAdmin) {
+      navigate('/admin/dashboard')
+      return
+    }
+    
     loadData()
   }, [navigate])
+
+  const hasEditPermission = () => {
+    const adminData = JSON.parse(sessionStorage.getItem('adminData') || '{}')
+    const isMasterAdmin = adminData.role === 'MASTER_ADMIN'
+    const hasEditPerm = adminData.permissions?.includes('data_filters_edit')
+    return isMasterAdmin || hasEditPerm
+  }
 
   const loadData = async () => {
     setLoading(true)
@@ -93,6 +116,95 @@ const DataFilters = () => {
     }
   }
 
+  // Save edited trip data
+  const handleSaveTrip = async (trip: Trip): Promise<void> => {
+    try {
+      // Send only the fields that can be edited in the table
+      const updateData = {
+        title: trip.title,
+        location: trip.location,
+        category: trip.category,
+        experience: trip.experience,
+        price: typeof trip.price === 'string' ? trip.price : String(trip.price),
+        duration: trip.duration,
+        nextBatch: trip.nextBatch
+      }
+
+      const response = await fetch(`/api/trips/${trip.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to update trip')
+      }
+
+      // Reload data to get fresh data
+      await loadData()
+      
+      // Show success message
+      console.log('Trip updated successfully!')
+    } catch (error) {
+      console.error('Error updating trip:', error)
+      throw error // Re-throw to let the caller handle it
+    }
+  }
+
+  // Save edited user data
+  const handleSaveUser = async (user: User): Promise<void> => {
+    try {
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user)
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to update user')
+      }
+
+      await loadData()
+      console.log('User updated successfully!')
+    } catch (error) {
+      console.error('Error updating user:', error)
+      throw error
+    }
+  }
+
+  // Save edited booking data
+  const handleSaveBooking = async (booking: Booking): Promise<void> => {
+    try {
+      // Use the payment status endpoint since a general update endpoint doesn't exist
+      const response = await fetch(`/api/bookings/${booking.bookingId}/payment-status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentStatus: booking.paymentStatus
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to update booking')
+      }
+
+      // Reload all data to ensure we have fresh booking information
+      const bookingsRes = await fetch('/api/admin/bookings')
+      if (bookingsRes.ok) {
+        const bookingsData = await bookingsRes.json()
+        setBookings(bookingsData)
+      }
+      
+      console.log('Booking updated successfully!')
+    } catch (error) {
+      console.error('Error updating booking:', error)
+      throw error
+    }
+  }
+
   // Light theme for Material React Table
   const lightTheme = createTheme({
     palette: {
@@ -118,18 +230,27 @@ const DataFilters = () => {
         header: 'ID',
         size: 80,
         grow: false,
+        muiTableHeadCellProps: {
+          title: 'Trip ID - Unique identifier for each trip',
+        },
       },
       {
         accessorKey: 'title',
         header: 'Trip',
         size: 200,
         grow: true,
+        muiTableHeadCellProps: {
+          title: 'Trip Title - Name of the travel package',
+        },
       },
       {
         accessorKey: 'location',
         header: 'Location',
         size: 150,
         grow: true,
+        muiTableHeadCellProps: {
+          title: 'Location - Destination or route of the trip',
+        },
       },
       {
         accessorKey: 'category',
@@ -137,6 +258,9 @@ const DataFilters = () => {
         size: 130,
         grow: false,
         filterVariant: 'select',
+        muiTableHeadCellProps: {
+          title: 'Category - Type of travel experience (Adventure, Beach, etc.)',
+        },
       },
       {
         accessorKey: 'experience',
@@ -144,6 +268,9 @@ const DataFilters = () => {
         size: 140,
         grow: false,
         filterVariant: 'select',
+        muiTableHeadCellProps: {
+          title: 'Experience - Travel season or style (Monsoon, Weekend, Road, Snow)',
+        },
       },
       {
         accessorKey: 'price',
@@ -151,18 +278,27 @@ const DataFilters = () => {
         size: 120,
         grow: false,
         Cell: ({ cell }) => `₹${cell.getValue<number>().toLocaleString('en-IN')}`,
+        muiTableHeadCellProps: {
+          title: 'Price - Base price per person in Indian Rupees',
+        },
       },
       {
         accessorKey: 'duration',
         header: 'Duration',
         size: 120,
         grow: false,
+        muiTableHeadCellProps: {
+          title: 'Duration - Length of the trip (Days/Nights)',
+        },
       },
       {
         accessorKey: 'nextBatch',
         header: 'Next Batch',
         size: 150,
         grow: false,
+        muiTableHeadCellProps: {
+          title: 'Next Batch - Next available departure date',
+        },
       },
     ],
     []
@@ -176,18 +312,27 @@ const DataFilters = () => {
         header: 'User ID',
         size: 100,
         grow: false,
+        muiTableHeadCellProps: {
+          title: 'User ID - Unique identifier for each registered user',
+        },
       },
       {
         accessorKey: 'name',
         header: 'Name',
         size: 150,
         grow: true,
+        muiTableHeadCellProps: {
+          title: 'Name - Full name of the user',
+        },
       },
       {
         accessorKey: 'email',
         header: 'Email',
         size: 220,
         grow: true,
+        muiTableHeadCellProps: {
+          title: 'Email - User\'s email address for contact',
+        },
       },
       {
         accessorKey: 'role',
@@ -195,6 +340,9 @@ const DataFilters = () => {
         size: 110,
         grow: false,
         filterVariant: 'select',
+        muiTableHeadCellProps: {
+          title: 'Role - User permission level (Admin, User, etc.)',
+        },
       },
       {
         accessorKey: 'bookingStatus',
@@ -202,6 +350,9 @@ const DataFilters = () => {
         size: 140,
         grow: false,
         filterVariant: 'select',
+        muiTableHeadCellProps: {
+          title: 'Booking Status - Current booking state for this user',
+        },
         Cell: ({ cell }) => {
           const status = cell.getValue<string>()
           const colors: Record<string, string> = {
@@ -223,12 +374,18 @@ const DataFilters = () => {
         header: 'Joined',
         size: 120,
         grow: false,
+        muiTableHeadCellProps: {
+          title: 'Joined Date - When the user registered on the platform',
+        },
       },
       {
         accessorKey: 'lastLoginAt',
         header: 'Last Login',
         size: 120,
         grow: false,
+        muiTableHeadCellProps: {
+          title: 'Last Login - Most recent login date and time',
+        },
       },
     ],
     []
@@ -242,43 +399,71 @@ const DataFilters = () => {
         header: 'Booking ID',
         size: 140,
         grow: false,
+        enableEditing: false,
+        muiTableHeadCellProps: {
+          title: 'Booking ID - Unique identifier for each booking',
+        },
       },
       {
         accessorKey: 'customerName',
         header: 'Customer',
         size: 150,
         grow: true,
+        enableEditing: false,
+        muiTableHeadCellProps: {
+          title: 'Customer Name - Full name of the person who made the booking',
+        },
       },
       {
         accessorKey: 'customerEmail',
         header: 'Email',
         size: 200,
         grow: true,
+        enableEditing: false,
+        muiTableHeadCellProps: {
+          title: 'Customer Email - Contact email for the customer',
+        },
       },
       {
         accessorKey: 'tripName',
         header: 'Trip Name',
         size: 180,
         grow: true,
+        enableEditing: false,
+        muiTableHeadCellProps: {
+          title: 'Trip Name - Name of the booked travel package',
+        },
       },
       {
         accessorKey: 'location',
         header: 'Location',
         size: 140,
         grow: true,
+        enableEditing: false,
+        muiTableHeadCellProps: {
+          title: 'Location - Destination of the booked trip',
+        },
       },
       {
         accessorKey: 'travelers',
         header: 'Travelers',
         size: 100,
         grow: false,
+        enableEditing: false,
+        muiTableHeadCellProps: {
+          title: 'Travelers - Number of people in this booking',
+        },
       },
       {
         accessorKey: 'total',
         header: 'Total',
         size: 120,
         grow: false,
+        enableEditing: false,
         Cell: ({ cell }) => `₹${cell.getValue<number>().toLocaleString('en-IN')}`,
+        muiTableHeadCellProps: {
+          title: 'Total Amount - Total booking amount in Indian Rupees',
+        },
       },
       {
         accessorKey: 'status',
@@ -286,6 +471,10 @@ const DataFilters = () => {
         size: 120,
         grow: false,
         filterVariant: 'select',
+        enableEditing: false,
+        muiTableHeadCellProps: {
+          title: 'Booking Status - Current state of the booking (Confirmed, Pending, Cancelled)',
+        },
         Cell: ({ cell }) => {
           const status = cell.getValue<string>()
           const colors: Record<string, string> = {
@@ -307,6 +496,17 @@ const DataFilters = () => {
         size: 130,
         grow: false,
         filterVariant: 'select',
+        muiTableHeadCellProps: {
+          title: 'Payment Status - Payment state (Paid, Pending, Failed, Cash, Online)',
+        },
+        muiEditTextFieldProps: {
+          select: true,
+          children: ['Paid', 'Pending Payment', 'Failed', 'Refunded', 'Cash', 'Online'].map((status) => (
+            <MenuItem key={status} value={status}>
+              {status}
+            </MenuItem>
+          )),
+        },
         Cell: ({ cell }) => {
           const status = cell.getValue<string>()
           const colors: Record<string, string> = {
@@ -329,6 +529,10 @@ const DataFilters = () => {
         header: 'Booking Date',
         size: 130,
         grow: false,
+        enableEditing: false,
+        muiTableHeadCellProps: {
+          title: 'Booking Date - When the booking was made',
+        },
       },
     ],
     []
@@ -454,6 +658,7 @@ const DataFilters = () => {
   // Trips Table Component
   const TripsTable = () => {
     const [rowSelection, setRowSelection] = useState({})
+    const canEdit = hasEditPermission()
 
     const table = useMaterialReactTable({
       columns: tripColumns,
@@ -466,6 +671,37 @@ const DataFilters = () => {
       enableColumnResizing: true,
       enableStickyHeader: true,
       enableStickyFooter: true,
+      enableEditing: canEdit,
+      editDisplayMode: 'row',
+      enableRowActions: canEdit,
+      positionActionsColumn: 'last',
+      displayColumnDefOptions: {
+        'mrt-row-actions': {
+          header: 'Actions',
+          size: 100,
+        },
+      },
+      onEditingRowSave: async ({ row, values, table }) => {
+        try {
+          const updatedTrip = { ...row.original, ...values }
+          await handleSaveTrip(updatedTrip)
+          table.setEditingRow(null)
+        } catch (error) {
+          console.error('Error saving trip:', error)
+          alert('Failed to save changes. Please try again.')
+        }
+      },
+      renderRowActions: ({ row, table }) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => table.setEditingRow(row)}
+            className="p-2 rounded-lg bg-secondary/20 text-secondary hover:bg-secondary hover:text-white transition-all"
+            title="Edit row"
+          >
+            <Edit2 size={16} />
+          </button>
+        </div>
+      ),
       onRowSelectionChange: setRowSelection,
       state: { 
         isLoading: loading,
@@ -629,6 +865,7 @@ const DataFilters = () => {
   // Users Table Component
   const UsersTable = () => {
     const [rowSelection, setRowSelection] = useState({})
+    const canEdit = hasEditPermission()
 
     const table = useMaterialReactTable({
       columns: userColumns,
@@ -641,6 +878,37 @@ const DataFilters = () => {
       enableColumnResizing: true,
       enableStickyHeader: true,
       enableStickyFooter: true,
+      enableEditing: canEdit,
+      editDisplayMode: 'row',
+      enableRowActions: canEdit,
+      positionActionsColumn: 'last',
+      displayColumnDefOptions: {
+        'mrt-row-actions': {
+          header: 'Actions',
+          size: 100,
+        },
+      },
+      onEditingRowSave: async ({ row, values, table }) => {
+        try {
+          const updatedUser = { ...row.original, ...values }
+          await handleSaveUser(updatedUser)
+          table.setEditingRow(null)
+        } catch (error) {
+          console.error('Error saving user:', error)
+          alert('Failed to save changes. Please try again.')
+        }
+      },
+      renderRowActions: ({ row, table }) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => table.setEditingRow(row)}
+            className="p-2 rounded-lg bg-secondary/20 text-secondary hover:bg-secondary hover:text-white transition-all"
+            title="Edit row"
+          >
+            <Edit2 size={16} />
+          </button>
+        </div>
+      ),
       onRowSelectionChange: setRowSelection,
       state: { 
         isLoading: loading,
@@ -804,6 +1072,7 @@ const DataFilters = () => {
   // Bookings Table Component
   const BookingsTable = () => {
     const [rowSelection, setRowSelection] = useState({})
+    const canEdit = hasEditPermission()
 
     const table = useMaterialReactTable({
       columns: bookingColumns,
@@ -816,6 +1085,37 @@ const DataFilters = () => {
       enableColumnResizing: true,
       enableStickyHeader: true,
       enableStickyFooter: true,
+      enableEditing: canEdit,
+      editDisplayMode: 'row',
+      enableRowActions: canEdit,
+      positionActionsColumn: 'last',
+      displayColumnDefOptions: {
+        'mrt-row-actions': {
+          header: 'Actions',
+          size: 100,
+        },
+      },
+      onEditingRowSave: async ({ row, values, table }) => {
+        try {
+          const updatedBooking = { ...row.original, ...values }
+          await handleSaveBooking(updatedBooking)
+          table.setEditingRow(null)
+        } catch (error) {
+          console.error('Error saving booking:', error)
+          alert('Failed to save changes. Please try again.')
+        }
+      },
+      renderRowActions: ({ row, table }) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => table.setEditingRow(row)}
+            className="p-2 rounded-lg bg-secondary/20 text-secondary hover:bg-secondary hover:text-white transition-all"
+            title="Edit row"
+          >
+            <Edit2 size={16} />
+          </button>
+        </div>
+      ),
       onRowSelectionChange: setRowSelection,
       state: { 
         isLoading: loading,

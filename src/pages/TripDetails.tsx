@@ -391,49 +391,73 @@ const TripDetails = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {trip.itinerary.map((item: any) => (
-                    <div
-                      key={item.day}
-                      className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
-                      onClick={() => {
-                        haptics.light();
-                        setExpandedDay(expandedDay === item.day ? null : item.day);
-                      }}
-                    >
-                      <div className="p-4 md:p-8 flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 md:gap-6 min-w-0">
-                          <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
-                            <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
-                            <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
-                          </div>
-                          <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
-                        </div>
-                        {expandedDay === item.day ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
-                      </div>
-
-                      <AnimatePresence>
-                        {expandedDay === item.day && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.4, ease: "easeInOut" }}
-                            className="overflow-hidden"
-                          >
-                            <div className="px-4 md:px-8 pb-6 md:pb-8 md:pl-[7.5rem]">
-                              <div className="w-full h-px bg-white/10 mb-6"></div>
-                              <p className="text-white/60 font-medium leading-relaxed italic">
-                                {item.description}
-                              </p>
-                              <div className="mt-8 flex items-center text-xs text-secondary font-black uppercase tracking-widest bg-secondary/10 w-fit px-4 py-2 rounded-full border border-secondary/20">
-                                <Clock size={14} className="mr-2" /> Typical Activity: 4-6 Hours
-                              </div>
+                  {(() => {
+                    // Get the correct itinerary based on selected departure
+                    const currentItinerary = trip.departureItineraries?.[selectedDeparture] || trip.itinerary;
+                    
+                    return currentItinerary.map((item: any) => (
+                      <div
+                        key={item.day}
+                        className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
+                        onClick={() => {
+                          haptics.light();
+                          setExpandedDay(expandedDay === item.day ? null : item.day);
+                        }}
+                      >
+                        <div className="p-4 md:p-8 flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 md:gap-6 min-w-0">
+                            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
+                              <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
+                              <span className="text-lg md:text-2xl font-black italic">{item.day < 10 ? `0${item.day}` : item.day}</span>
                             </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ))}
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-base md:text-2xl font-bold text-white tracking-tight">{item.title}</h3>
+                              {item.date && (
+                                <p className="text-xs md:text-sm text-white/50 font-semibold mt-1">
+                                  {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          {expandedDay === item.day ? <ChevronUp className="text-secondary shrink-0" size={24} /> : <ChevronDown className="text-white/30 shrink-0" size={24} />}
+                        </div>
+
+                        <AnimatePresence>
+                          {expandedDay === item.day && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.4, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-4 md:px-8 pb-6 md:pb-8 md:pl-[7.5rem]">
+                                <div className="w-full h-px bg-white/10 mb-6"></div>
+                                
+                                {/* Itinerary Image */}
+                                {item.image && (
+                                  <div className="mb-6 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
+                                    <img 
+                                      src={item.image} 
+                                      alt={item.title}
+                                      className="w-full h-48 md:h-64 object-cover"
+                                    />
+                                  </div>
+                                )}
+                                
+                                <p className="text-white/60 font-medium leading-relaxed italic">
+                                  {item.description}
+                                </p>
+                                <div className="mt-8 flex items-center text-xs text-secondary font-black uppercase tracking-widest bg-secondary/10 w-fit px-4 py-2 rounded-full border border-secondary/20">
+                                  <Clock size={14} className="mr-2" /> Typical Activity: 4-6 Hours
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ));
+                  })()}
                 </div>
               </div>
 

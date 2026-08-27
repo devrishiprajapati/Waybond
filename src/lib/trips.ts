@@ -34,7 +34,18 @@ export interface Trip {
     day: number;
     title: string;
     description: string;
+    image?: string;
+    date?: string;
   }[];
+  departureItineraries?: {
+    [departureDate: string]: {
+      day: number;
+      title: string;
+      description: string;
+      image?: string;
+      date?: string;
+    }[];
+  };
   pdfUrl?: string;
   thingsToCarry?: string[];
   termsAndConditions?: string;
@@ -80,15 +91,37 @@ export const ALL_TRIPS: Trip[] = [
     highlights: ['Key Monastery Visit', 'Chandratal Lake Camping', 'Kibber Village', 'Kunzum Pass'],
     captain: DEFAULT_CAPTAIN,
     itinerary: [
-      { day: 1, title: 'Arrival in Shimla & Drive to Narkanda', description: 'Meet your group and start the beautiful drive through pine forests.' },
-      { day: 2, title: 'Narkanda to Chitkul/Sangla', description: 'Drive to the last Indian village before the Tibet border, breathing in the fresh mountain air.' },
-      { day: 3, title: 'Chitkul to Kalpa', description: 'Witness the majestic Kinnaur Kailash range from the beautiful village of Kalpa.' },
-      { day: 4, title: 'Kalpa to Kaza', description: 'Cross into the barren landscapes of Spiti, visiting the Nako Lake and Tabo Monastery en route.' },
-      { day: 5, title: 'Kaza Local Sightseeing', description: 'Visit Key Monastery, the high-altitude villages of Kibber, Hikkim (highest post office), and Komic.' },
-      { day: 6, title: 'Kaza to Chandratal', description: 'Drive over the mighty Kunzum Pass and camp near the crescent-shaped Chandratal Lake.' },
-      { day: 7, title: 'Chandratal to Manali', description: 'Off-roading experience over the Rohtang Pass down into the lush Kullu Valley.' },
-      { day: 8, title: 'Departure from Manali', description: 'Trip ends with a lifetime of memories.' }
-    ]
+      { day: 1, title: 'Arrival in Shimla & Drive to Narkanda', description: 'Meet your group and start the beautiful drive through pine forests.', image: '/assets/spiti.jpg', date: '2026-08-05' },
+      { day: 2, title: 'Narkanda to Chitkul/Sangla', description: 'Drive to the last Indian village before the Tibet border, breathing in the fresh mountain air.', date: '2026-08-06' },
+      { day: 3, title: 'Chitkul to Kalpa', description: 'Witness the majestic Kinnaur Kailash range from the beautiful village of Kalpa.', date: '2026-08-07' },
+      { day: 4, title: 'Kalpa to Kaza', description: 'Cross into the barren landscapes of Spiti, visiting the Nako Lake and Tabo Monastery en route.', date: '2026-08-08' },
+      { day: 5, title: 'Kaza Local Sightseeing', description: 'Visit Key Monastery, the high-altitude villages of Kibber, Hikkim (highest post office), and Komic.', date: '2026-08-09' },
+      { day: 6, title: 'Kaza to Chandratal', description: 'Drive over the mighty Kunzum Pass and camp near the crescent-shaped Chandratal Lake.', date: '2026-08-10' },
+      { day: 7, title: 'Chandratal to Manali', description: 'Off-roading experience over the Rohtang Pass down into the lush Kullu Valley.', date: '2026-08-11' },
+      { day: 8, title: 'Departure from Manali', description: 'Trip ends with a lifetime of memories.', date: '2026-08-12' }
+    ],
+    departureItineraries: {
+      '2026-08-05': [
+        { day: 1, title: 'Arrival in Shimla & Drive to Narkanda', description: 'Meet your group and start the beautiful drive through pine forests. Special monsoon route.', image: '/assets/spiti.jpg', date: '2026-08-05' },
+        { day: 2, title: 'Narkanda to Chitkul/Sangla', description: 'Drive to the last Indian village before the Tibet border, breathing in the fresh mountain air.', date: '2026-08-06' },
+        { day: 3, title: 'Chitkul to Kalpa', description: 'Witness the majestic Kinnaur Kailash range from the beautiful village of Kalpa.', date: '2026-08-07' },
+        { day: 4, title: 'Kalpa to Kaza', description: 'Cross into the barren landscapes of Spiti, visiting the Nako Lake and Tabo Monastery en route.', date: '2026-08-08' },
+        { day: 5, title: 'Kaza Local Sightseeing', description: 'Visit Key Monastery, the high-altitude villages of Kibber, Hikkim (highest post office), and Komic. August batch special: Extended photography session.', date: '2026-08-09' },
+        { day: 6, title: 'Kaza to Chandratal', description: 'Drive over the mighty Kunzum Pass and camp near the crescent-shaped Chandratal Lake.', date: '2026-08-10' },
+        { day: 7, title: 'Chandratal to Manali', description: 'Off-roading experience over the Rohtang Pass down into the lush Kullu Valley.', date: '2026-08-11' },
+        { day: 8, title: 'Departure from Manali', description: 'Trip ends with a lifetime of memories.', date: '2026-08-12' }
+      ],
+      '2026-09-02': [
+        { day: 1, title: 'Arrival in Shimla & Drive to Narkanda', description: 'Meet your group and start the beautiful drive through pine forests. September special weather!', image: '/assets/spiti.jpg', date: '2026-09-02' },
+        { day: 2, title: 'Narkanda to Chitkul/Sangla', description: 'Drive to the last Indian village before the Tibet border, breathing in the fresh mountain air.', date: '2026-09-03' },
+        { day: 3, title: 'Chitkul to Kalpa via Rakcham', description: 'Extended route through Rakcham village. Witness the majestic Kinnaur Kailash range from the beautiful village of Kalpa.', date: '2026-09-04' },
+        { day: 4, title: 'Kalpa to Kaza', description: 'Cross into the barren landscapes of Spiti, visiting the Nako Lake and Tabo Monastery en route.', date: '2026-09-05' },
+        { day: 5, title: 'Kaza Local Sightseeing + Langza', description: 'Visit Key Monastery, the high-altitude villages of Kibber, Hikkim (highest post office), Komic, and Langza (Buddha Statue).', date: '2026-09-06' },
+        { day: 6, title: 'Kaza to Chandratal', description: 'Drive over the mighty Kunzum Pass and camp near the crescent-shaped Chandratal Lake. September batch: Clear skies guaranteed!', date: '2026-09-07' },
+        { day: 7, title: 'Chandratal to Manali', description: 'Off-roading experience over the Rohtang Pass down into the lush Kullu Valley.', date: '2026-09-08' },
+        { day: 8, title: 'Departure from Manali', description: 'Trip ends with a lifetime of memories and clear mountain views.', date: '2026-09-09' }
+      ]
+    }
   },
   {
     id: 2,
