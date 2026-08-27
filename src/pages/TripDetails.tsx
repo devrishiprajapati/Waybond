@@ -216,9 +216,9 @@ const TripDetails = () => {
             <ArrowLeft size={16} className="mr-2" /> Back to Discover
           </Link>
 
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
+          {/* Desktop Header */}
+          <div className="hidden md:flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
             <div>
-
               <h1 className="text-2xl md:text-4xl font-bungee font-black text-white liquid-text italic uppercase tracking-tighter">{trip.title}</h1>
               <div className="flex items-center text-white/60 mt-4 font-black uppercase tracking-widest text-xs min-w-0">
                 <MapPin size={16} className="mr-2 text-secondary shrink-0" /> <span className="break-words">{trip.location}</span>
@@ -245,11 +245,11 @@ const TripDetails = () => {
 
         {/* Full-Width Image Gallery Section */}
         {/* Full-Width Hero Image - With Side Margins */}
-        <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-12 lg:mb-16">
+        <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-6 md:mb-12 lg:mb-16">
           <motion.div
             layoutId="main-image"
             data-main-image
-            className="relative h-[280px] sm:h-[350px] md:h-[450px] lg:h-[550px] overflow-hidden rounded-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] sm:rounded-[3rem]"
+            className="relative h-[280px] sm:h-[350px] md:h-[450px] lg:h-[550px] overflow-hidden rounded-3xl border border-white/10 sm:rounded-[3rem]"
           >
             <AnimatePresence mode="wait">
               <motion.img
@@ -337,6 +337,17 @@ const TripDetails = () => {
             </div>
           </motion.div>
         </section>
+
+        {/* Mobile Header - Styled like second image - After Image */}
+        <div className="md:hidden max-w-[1920px] mx-auto px-4 mb-8">
+          <div className="bg-white rounded-2xl p-5 shadow-lg">
+            <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight leading-tight mb-3">{trip.title}</h1>
+            <div className="flex items-center text-gray-600 text-sm font-semibold">
+              <MapPin size={16} className="mr-2 text-secondary shrink-0" /> 
+              <span className="uppercase tracking-wide">{trip.location}</span>
+            </div>
+          </div>
+        </div>
 
         {/* Booking Widget Container - Now includes Trip Overview on left */}
         <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-12 lg:mb-16">
@@ -631,7 +642,7 @@ const TripDetails = () => {
                                         handleDateChange(date)
                                       }}
                                       className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${isSelected
-                                        ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
+                                        ? 'bg-secondary text-white'
                                         : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
                                         }`}
                                       title={date}
@@ -650,12 +661,12 @@ const TripDetails = () => {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
+                  {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 liquid-glass rounded-2xl border border-white/10 hover:border-white/20 transition-colors">
                     <div className="flex items-center text-white/80 font-black uppercase tracking-widest text-xs">
                       <Users size={18} className="mr-3 text-secondary" /> Group Size
                     </div>
                     <span className="text-white font-black">{trip.groupSize}</span>
-                  </div>
+                  </div> */}
                 </div>
 
                 <button

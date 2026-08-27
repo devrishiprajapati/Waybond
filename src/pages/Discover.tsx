@@ -147,7 +147,7 @@ const Discover = () => {
                     setActiveExperience(activeExperience === experience.key ? 'All' : experience.key);
                   }}
                   className={`px-3 sm:px-5 py-3 rounded-full text-[10px] font-black font-bungee transition-all duration-500 ${activeExperience === experience.key
-                    ? 'bg-secondary text-white shadow-2xl shadow-secondary/40'
+                    ? 'bg-secondary text-white'
                     : ' text-white/40 hover:text-white hover:bg-white/10'}`}
                   style={activeExperience === experience.key
                     ? { border: '2px solid var(--secondary)' }
@@ -199,7 +199,7 @@ const Discover = () => {
                                 toggleFilter(cat);
                               }}
                             />
-                            <div className={`w-6 h-6 rounded-xl border-2 mr-4 flex items-center justify-center transition-all ${activeFilters.includes(cat) ? 'bg-secondary border-secondary scale-110 shadow-lg shadow-secondary/40' : 'border-white/10 group-hover:border-secondary'}`}>
+                            <div className={`w-6 h-6 rounded-xl border-2 mr-4 flex items-center justify-center transition-all ${activeFilters.includes(cat) ? 'bg-secondary border-secondary scale-110' : 'border-white/10 group-hover:border-secondary'}`}>
                               {activeFilters.includes(cat) && <CheckCircle2 className="text-white" size={14} />}
                             </div>
                             <span className={`text-xs font-black uppercase tracking-widest transition-colors ${activeFilters.includes(cat) ? 'text-white' : 'text-white/30 group-hover:text-white'}`}>{cat}</span>
@@ -251,7 +251,7 @@ const Discover = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col relative cursor-pointer"
+                      className="group overflow-hidden rounded-[2rem] liquid-glass text-white border border-white/10 transition-transform duration-500 hover:-translate-y-2 flex flex-col relative cursor-pointer"
                       onClick={() => {
                         haptics.medium()
                         navigate(`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`)
@@ -423,7 +423,7 @@ const Discover = () => {
                                             }))
                                           }}
                                           className={`w-7 h-7 rounded-full font-black text-xs flex items-center justify-center transition-all ${isSelected
-                                            ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
+                                            ? 'bg-secondary text-white'
                                             : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
                                             }`}
                                           title={date}
