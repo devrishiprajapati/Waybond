@@ -5,12 +5,12 @@ import {
   MapPin, Star, ArrowLeft,
   CheckCircle2, Clock, ShieldCheck, ChevronDown,
   ChevronUp, Instagram, MessageCircle, FileText, Download, X,
-  Share2, Link2, Check, Calendar, ChevronLeft, ChevronRight
+  Share2, Link2, Check, Calendar, ChevronLeft, ChevronRight, User
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
 import { getTripBySlug, createSlug } from '../lib/dataService'
-import { DEFAULT_CANCELLATION_POLICY } from '../lib/trips'
+import { DEFAULT_CANCELLATION_POLICY, formatAgeLimit } from '../lib/trips'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
 import { formatDateOnly } from '../lib/date'
@@ -23,7 +23,7 @@ const TripDetails = () => {
   const [trip, setTrip] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [activeImage, setActiveImage] = useState(0)
-  const [expandedDay, setExpandedDay] = useState<number | null>(1)
+  const [expandedDays, setExpandedDays] = useState<number[]>([1])
   const [selectedDeparture, setSelectedDeparture] = useState('')
   const [enquiryOpen, setEnquiryOpen] = useState(false)
   const [enquiryForm, setEnquiryForm] = useState({ name: '', phone: '', email: '', travelDate: '', travellers: '', message: '' })
@@ -198,6 +198,9 @@ const TripDetails = () => {
   }
 
   const cancellationPolicy = String(trip.cancellationPolicy || DEFAULT_CANCELLATION_POLICY).trim()
+  const expeditionLeads = Array.isArray(trip.captains) && trip.captains.length > 0
+    ? trip.captains
+    : trip.captain ? [trip.captain] : []
 
   return (
     <>
@@ -382,11 +385,11 @@ const TripDetails = () => {
                   <button
                     onClick={() => {
                       haptics.light();
-                      setExpandedDay(expandedDay === null ? 1 : null);
+                      setExpandedDays(expandedDays.length === trip.itinerary.length ? [] : trip.itinerary.map((item: any) => item.day));
                     }}
                     className="text-secondary font-black text-[10px] uppercase tracking-[0.2em] border-b border-secondary/30 pb-1 hover:border-secondary transition-all"
                   >
-                    {expandedDay === null ? 'Expand All' : 'Collapse All'}
+                    {expandedDays.length === trip.itinerary.length ? 'Collapse All' : 'Expand All'}
                   </button>
                 </div>
 
@@ -394,25 +397,51 @@ const TripDetails = () => {
                   {trip.itinerary.map((item: any) => (
                     <div
                       key={item.day}
-                      className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
+                      className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDays.includes(item.day) ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
                       onClick={() => {
                         haptics.light();
-                        setExpandedDay(expandedDay === item.day ? null : item.day);
+                        setExpandedDays((current) => current.includes(item.day) ? current.filter((day) => day !== item.day) : [...current, item.day]);
                       }}
                     >
                       <div className="p-4 md:p-8 flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 md:gap-6 min-w-0">
-                          <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
+                          <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDays.includes(item.day) ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
                             <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
                             <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
                           </div>
                           <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
                         </div>
-                        {expandedDay === item.day ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
+                        <div className="flex shrink-0 items-center gap-3">
+                          {item.day === 1 && (
+                            trip.pdfUrl ? (
+                              <a
+                                href={trip.pdfUrl}
+                                download={`${trip.title.replace(/\s+/g, '_')}_Itinerary.pdf`}
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  haptics.light()
+                                }}
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-secondary/25 bg-secondary/15 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-secondary transition-all hover:bg-secondary hover:text-white md:px-4"
+                              >
+                                <Download size={14} /> Get PDF
+                              </a>
+                            ) : (
+                              <button
+                                type="button"
+                                disabled
+                                onClick={(event) => event.stopPropagation()}
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-white/30 md:px-4"
+                              >
+                                <Download size={14} /> Get PDF
+                              </button>
+                            )
+                          )}
+                          {expandedDays.includes(item.day) ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
+                        </div>
                       </div>
 
                       <AnimatePresence>
-                        {expandedDay === item.day && (
+                        {expandedDays.includes(item.day) && (
                           <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
@@ -484,42 +513,52 @@ const TripDetails = () => {
                 </div>
               )}
 
-              {/* Captain Profile */}
-              <div className="p-5 md:p-12 liquid-glass-dark border border-white/10 rounded-3xl md:rounded-[3rem] text-white overflow-hidden relative group shadow-[0_12px_36px_rgba(0,0,0,0.18)] md:shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-transform duration-1000 group-hover:scale-150"></div>
+              {/* Captain Profiles */}
+              <div className="space-y-5">
+                {expeditionLeads.map((lead: any, index: number) => (
+                  <div key={`${lead.name}-${index}`} className="p-5 md:p-12 liquid-glass-dark border border-white/10 rounded-3xl md:rounded-[3rem] text-white overflow-hidden relative group shadow-[0_12px_36px_rgba(0,0,0,0.18)] md:shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-transform duration-1000 group-hover:scale-150"></div>
 
-                <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
-                  <div className="relative shrink-0">
-                    <img
-                      src={trip.captain.avatar}
-                      alt="Captain"
-                      className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] object-cover border-2 border-white/20 shadow-2xl group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute -bottom-3 -right-3 bg-secondary text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-secondary/30 border border-white/20">
-                      Top Rated
+                    <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
+                      <div className="relative shrink-0">
+                        {lead.avatar ? (
+                          <img
+                            src={lead.avatar}
+                            alt={lead.name || 'Expedition lead'}
+                            className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] object-cover border-2 border-white/20 shadow-2xl group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] border-2 border-white/20 bg-white/5 flex items-center justify-center text-white/20 shadow-2xl">
+                            <User size={44} />
+                          </div>
+                        )}
+                        <div className="absolute -bottom-3 -right-3 bg-secondary text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-secondary/30 border border-white/20">
+                          Lead {index + 1}
+                        </div>
+                      </div>
+
+                      <div className="space-y-5">
+                        <div>
+                          <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{lead.name}</h3>
+                          <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{lead.role}</p>
+                        </div>
+                        <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">
+                          {lead.bio}
+                        </p>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-white/10">
+                          <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
+                            <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Experience</span>
+                            <span className="text-lg font-black tracking-tighter">{lead.trips}+ Trips</span>
+                          </div>
+                          <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
+                            <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Rating</span>
+                            <span className="text-lg font-black tracking-tighter flex items-center gap-1.5">{lead.rating} <Star size={16} fill="#FFD700" className="text-accent" /></span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="space-y-5">
-                    <div>
-                      <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{trip.captain.name}</h3>
-                      <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{trip.captain.role}</p>
-                    </div>
-                    <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">
-                      {trip.captain.bio}
-                    </p>
-                    <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-white/10">
-                      <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
-                        <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Experience</span>
-                        <span className="text-lg font-black tracking-tighter">{trip.captain.trips}+ Trips</span>
-                      </div>
-                      <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
-                        <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Rating</span>
-                        <span className="text-lg font-black tracking-tighter flex items-center gap-1.5">{trip.captain.rating} <Star size={16} fill="#FFD700" className="text-accent" /></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
 
             </div>
@@ -532,21 +571,25 @@ const TripDetails = () => {
                     <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
                     <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
                   </div>
-                  <div className="liquid-glass shrink-0 rounded-xl border border-white/5 overflow-hidden flex">
-                    <div className="px-3 py-2.5 text-center min-w-[46px] md:min-w-[52px]">
+                  <div className="shrink-0 flex items-center gap-5">
+                    <div className="text-center min-w-[46px] md:min-w-[52px]">
                       <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Day/i)?.[1] ?? trip.duration.split(' ')[0]}</div>
                       <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Days</div>
                     </div>
                     {String(trip.duration || '').match(/(\d+)\s*Night/i) && (
                       <>
-                        <div className="w-px bg-white/10 my-2" />
-                        <div className="px-3 py-2.5 text-center min-w-[46px] md:min-w-[52px]">
+                        <div className="text-center min-w-[46px] md:min-w-[52px]">
                           <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Night/i)![1]}</div>
                           <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Nights</div>
                         </div>
                       </>
                     )}
                   </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5 md:pb-6">
+                  <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Age Limit</span>
+                  <span className="text-sm md:text-base text-white font-black uppercase tracking-[0.14em]">{formatAgeLimit(trip.ageLimit)}</span>
                 </div>
 
                 <div className="space-y-3 md:space-y-4">
@@ -671,23 +714,6 @@ const TripDetails = () => {
                   Book Your Slot
                 </button>
 
-                {trip.pdfUrl ? (
-                  <a
-                    href={trip.pdfUrl}
-                    download={`${trip.title.replace(/\s+/g, '_')}_Brochure.pdf`}
-                    className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl border border-white/20 bg-white/5 text-white font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] hover:bg-white/10 hover:border-white/30 transition-all"
-                    onClick={() => haptics.light()}
-                  >
-                    <Download size={16} /> Download Brochure
-                  </a>
-                ) : (
-                  <button
-                    disabled
-                    className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl border border-white/10 bg-white/5 text-white/30 font-black text-[11px] md:text-xs uppercase tracking-[0.22em] md:tracking-[0.3em] cursor-not-allowed"
-                  >
-                    <Download size={16} /> Download Brochure
-                  </button>
-                )}
               </div>
             </div>
           </div>
@@ -723,11 +749,11 @@ const TripDetails = () => {
               <button
                 onClick={() => {
                   haptics.light();
-                  setExpandedDay(expandedDay === null ? 1 : null);
+                  setExpandedDays(expandedDays.length === trip.itinerary.length ? [] : trip.itinerary.map((item: any) => item.day));
                 }}
                 className="text-secondary font-black text-[10px] uppercase tracking-[0.2em] border-b border-secondary/30 pb-1 hover:border-secondary transition-all"
               >
-                {expandedDay === null ? 'Expand All' : 'Collapse All'}
+                {expandedDays.length === trip.itinerary.length ? 'Collapse All' : 'Expand All'}
               </button>
             </div>
 
@@ -735,25 +761,51 @@ const TripDetails = () => {
               {trip.itinerary.map((item: any) => (
                 <div
                   key={item.day}
-                  className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDay === item.day ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
+                  className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDays.includes(item.day) ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
                   onClick={() => {
                     haptics.light();
-                    setExpandedDay(expandedDay === item.day ? null : item.day);
+                    setExpandedDays((current) => current.includes(item.day) ? current.filter((day) => day !== item.day) : [...current, item.day]);
                   }}
                 >
                   <div className="p-4 md:p-8 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 md:gap-6 min-w-0">
-                      <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDay === item.day ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
+                      <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDays.includes(item.day) ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
                         <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
                         <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
                       </div>
                       <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
                     </div>
-                    {expandedDay === item.day ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
+                    <div className="flex shrink-0 items-center gap-3">
+                      {item.day === 1 && (
+                        trip.pdfUrl ? (
+                          <a
+                            href={trip.pdfUrl}
+                            download={`${trip.title.replace(/\s+/g, '_')}_Itinerary.pdf`}
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              haptics.light()
+                            }}
+                            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-secondary/25 bg-secondary/15 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-secondary transition-all hover:bg-secondary hover:text-white md:px-4"
+                          >
+                            <Download size={14} /> Get PDF
+                          </a>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled
+                            onClick={(event) => event.stopPropagation()}
+                            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 text-[9px] font-black uppercase tracking-[0.16em] text-white/30 md:px-4"
+                          >
+                            <Download size={14} /> Get PDF
+                          </button>
+                        )
+                      )}
+                      {expandedDays.includes(item.day) ? <ChevronUp className="text-secondary" size={24} /> : <ChevronDown className="text-white/30" size={24} />}
+                    </div>
                   </div>
 
                   <AnimatePresence>
-                    {expandedDay === item.day && (
+                    {expandedDays.includes(item.day) && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
@@ -821,42 +873,52 @@ const TripDetails = () => {
             </div>
           )}
 
-          {/* Captain Profile - Mobile Only */}
-          <div className="p-5 md:p-12 liquid-glass-dark border border-white/10 rounded-3xl md:rounded-[3rem] text-white overflow-hidden relative group shadow-[0_12px_36px_rgba(0,0,0,0.18)] md:shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-transform duration-1000 group-hover:scale-150"></div>
+          {/* Captain Profiles - Mobile Only */}
+          <div className="space-y-5">
+            {expeditionLeads.map((lead: any, index: number) => (
+              <div key={`${lead.name}-${index}`} className="p-5 md:p-12 liquid-glass-dark border border-white/10 rounded-3xl md:rounded-[3rem] text-white overflow-hidden relative group shadow-[0_12px_36px_rgba(0,0,0,0.18)] md:shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
+                <div className="absolute top-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 transition-transform duration-1000 group-hover:scale-150"></div>
 
-            <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
-              <div className="relative shrink-0">
-                <img
-                  src={trip.captain.avatar}
-                  alt="Captain"
-                  className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] object-cover border-2 border-white/20 shadow-2xl group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute -bottom-3 -right-3 bg-secondary text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-secondary/30 border border-white/20">
-                  Top Rated
+                <div className="relative z-10 flex flex-col md:flex-row gap-10 items-center md:items-start text-center md:text-left">
+                  <div className="relative shrink-0">
+                    {lead.avatar ? (
+                      <img
+                        src={lead.avatar}
+                        alt={lead.name || 'Expedition lead'}
+                        className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] object-cover border-2 border-white/20 shadow-2xl group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] border-2 border-white/20 bg-white/5 flex items-center justify-center text-white/20 shadow-2xl">
+                        <User size={44} />
+                      </div>
+                    )}
+                    <div className="absolute -bottom-3 -right-3 bg-secondary text-white px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-secondary/30 border border-white/20">
+                      Lead {index + 1}
+                    </div>
+                  </div>
+
+                  <div className="space-y-5">
+                    <div>
+                      <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{lead.name}</h3>
+                      <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{lead.role}</p>
+                    </div>
+                    <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">
+                      {lead.bio}
+                    </p>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-white/10">
+                      <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
+                        <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Experience</span>
+                        <span className="text-lg font-black tracking-tighter">{lead.trips}+ Trips</span>
+                      </div>
+                      <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
+                        <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Rating</span>
+                        <span className="text-lg font-black tracking-tighter flex items-center gap-1.5">{lead.rating} <Star size={16} fill="#FFD700" className="text-accent" /></span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div className="space-y-5">
-                <div>
-                  <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{trip.captain.name}</h3>
-                  <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{trip.captain.role}</p>
-                </div>
-                <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">
-                  {trip.captain.bio}
-                </p>
-                <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-white/10">
-                  <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
-                    <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Experience</span>
-                    <span className="text-lg font-black tracking-tighter">{trip.captain.trips}+ Trips</span>
-                  </div>
-                  <div className="liquid-glass px-5 py-3 rounded-2xl border border-white/10">
-                    <span className="text-[9px] text-white/40 block font-black uppercase tracking-[0.2em] mb-1">Rating</span>
-                    <span className="text-lg font-black tracking-tighter flex items-center gap-1.5">{trip.captain.rating} <Star size={16} fill="#FFD700" className="text-accent" /></span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 

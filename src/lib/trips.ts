@@ -22,14 +22,8 @@ export interface Trip {
   highlights?: string[];
   inclusion?: string[];
   exclusion?: string[];
-  captain: {
-    name: string;
-    role: string;
-    bio: string;
-    avatar: string;
-    rating: number;
-    trips: number;
-  };
+  captain: ExpeditionLead;
+  captains?: ExpeditionLead[];
   itinerary: {
     day: number;
     title: string;
@@ -39,7 +33,49 @@ export interface Trip {
   thingsToCarry?: string[];
   termsAndConditions?: string;
   cancellationPolicy?: string;
+  ageLimit?: {
+    min?: number | string;
+    max?: number | string;
+  };
+  isVisible?: boolean;
 }
+
+export interface ExpeditionLead {
+    name: string;
+    role: string;
+    bio: string;
+    avatar: string;
+    rating: number;
+    trips: number;
+}
+
+export const DEFAULT_AGE_LIMIT = { min: '', max: 40 };
+
+const toPositiveAge = (value?: number | string) => {
+  const age = Number(value);
+  return Number.isFinite(age) && age > 0 ? Math.floor(age) : undefined;
+};
+
+export const normalizeAgeLimit = (ageLimit?: Trip['ageLimit']) => ({
+  min: toPositiveAge(ageLimit?.min ?? DEFAULT_AGE_LIMIT.min),
+  max: toPositiveAge(ageLimit?.max ?? DEFAULT_AGE_LIMIT.max)
+});
+
+export const formatAgeLimit = (ageLimit?: Trip['ageLimit']) => {
+  const { min, max } = normalizeAgeLimit(ageLimit);
+  if (min && max) return `${min}-${max} yrs`;
+  if (min) return `${min}+ yrs`;
+  if (max) return `Up to ${max} yrs`;
+  return 'All ages';
+};
+
+export const isAgeWithinLimit = (age: number, ageLimit?: Trip['ageLimit']) => {
+  const { min, max } = normalizeAgeLimit(ageLimit);
+  if (!Number.isFinite(age) || age <= 0) return false;
+  if (min && age < min) return false;
+  if (max && age > max) return false;
+  return true;
+};
 
 export const DEFAULT_CANCELLATION_POLICY = `No cancellation fee up to 15 days before departure. After that, the following cancellation charges apply:
 

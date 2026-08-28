@@ -22,9 +22,11 @@ import {
   Shield,
   Filter,
   CreditCard,
+  Eye,
+  EyeOff,
   TrendingUp
 } from 'lucide-react'
-import { getTrips, deleteTrip } from '../../lib/dataService'
+import { deleteTrip, updateTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
 import PermissionGuard from '../../components/PermissionGuard'
 
@@ -109,6 +111,22 @@ const AdminDashboard = () => {
         setTrips([])
       }
     }
+  }
+
+  const refreshDashboard = async () => {
+    const response = await fetch('/api/admin/dashboard')
+    if (response.ok) {
+      const data = await response.json()
+      setTrips(data.trips)
+      setLiveStats(data.stats)
+    }
+  }
+
+  const handleVisibilityToggle = async (trip: Trip) => {
+    const nextVisibility = trip.isVisible === false
+    const updatedTrip = await updateTrip({ ...trip, isVisible: nextVisibility })
+    setTrips((current) => current.map((item) => item.id === trip.id ? updatedTrip : item))
+    void refreshDashboard()
   }
 
   const handleLogout = () => {
@@ -301,6 +319,12 @@ const AdminDashboard = () => {
                         <span className="text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full bg-white/5 text-white/50 border border-white/10">
                           {trip.category}
                         </span>
+                        <span className={`text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full border ${trip.isVisible === false
+                          ? 'bg-red-500/10 text-red-300 border-red-500/20'
+                          : 'bg-green-500/10 text-green-300 border-green-500/20'
+                          }`}>
+                          {trip.isVisible === false ? 'Hidden' : 'Shown'}
+                        </span>
                       </div>
                       <h3 className="text-xl md:text-2xl font-bungee font-black uppercase italic text-white leading-tight break-words">{trip.title}</h3>
                       <div className="flex flex-wrap items-center gap-4 text-white/45 text-[10px] font-black uppercase tracking-[0.16em]">
@@ -320,7 +344,18 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 xl:ml-auto xl:flex xl:items-center">
+                    <div className="grid grid-cols-4 gap-3 xl:ml-auto xl:flex xl:items-center">
+                      <button
+                        onClick={() => handleVisibilityToggle(trip)}
+                        className={`h-12 rounded-2xl border transition-all flex items-center justify-center xl:px-5 ${trip.isVisible === false
+                          ? 'bg-green-500/10 text-green-300 border-green-500/20 hover:bg-green-500 hover:text-white'
+                          : 'bg-white/5 text-white border-white/10 hover:bg-white/20 hover:border-white/30'
+                          }`}
+                        title={trip.isVisible === false ? 'Show package to users' : 'Hide package from users'}
+                        aria-label={trip.isVisible === false ? 'Show package to users' : 'Hide package from users'}
+                      >
+                        {trip.isVisible === false ? <Eye size={17} /> : <EyeOff size={17} />}
+                      </button>
                       <Link
                         to="/admin/analytics"
                         className="h-12 rounded-2xl bg-white/5 text-white border border-white/10 hover:bg-white/20 hover:border-white/30 transition-all flex items-center justify-center xl:px-5"

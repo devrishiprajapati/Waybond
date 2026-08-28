@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, ClipboardList, CreditCard, Mail, MapPin, MessageSquareText, Phone, ShieldCheck, Star, UserRound, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, CalendarDays, ClipboardList, CreditCard, Mail, MapPin, MessageSquareText, Percent, Phone, ShieldCheck, Star, UserRound, type LucideIcon } from 'lucide-react'
 
 type UserDetailData = {
   user: {
@@ -16,11 +16,23 @@ type UserDetailData = {
   testimonials: Array<{ id: string; trip: string; review: string; rating: number; createdAt: string }>
 }
 
-const PAYMENT_STATUS_OPTIONS = ['Online', 'Cash', 'Cancelled', 'Pending Payment', 'Paid', 'Failed', 'Refunded', 'Partially Paid']
+const PAYMENT_METHOD_OPTIONS = ['Online', 'Cash', 'Cheque', 'Credit Card']
+const PAYMENT_STATUS_OPTIONS = ['Pending Payment', 'Paid', 'Failed', 'Refunded', 'Partially Paid', 'Cancelled']
+const REFUND_PERCENTAGES = [25, 50, 75, 100]
 const formatDate = (value?: string) => value ? new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not available'
 const profileValue = (profile: Record<string, unknown> | undefined, key: string) => String(profile?.[key] || 'Not provided')
 const bookingText = (booking: Record<string, unknown>, key: string, fallback = '') => String(booking[key] || fallback)
+const bookingNumber = (booking: Record<string, unknown>, key: string, fallback = 0) => {
+  const value = Number(booking[key] ?? fallback)
+  return Number.isFinite(value) ? value : fallback
+}
 const bookingDbId = (booking: Record<string, unknown>) => bookingText(booking, 'bookingDbId', bookingText(booking, 'id'))
+const bookingPaymentMethod = (booking: Record<string, unknown>) => bookingText(booking, 'paymentMethod') || (PAYMENT_METHOD_OPTIONS.includes(bookingText(booking, 'paymentStatus')) ? bookingText(booking, 'paymentStatus') : '')
+const bookingPaymentStatus = (booking: Record<string, unknown>) => {
+  const status = bookingText(booking, 'paymentStatus', 'Pending Payment')
+  return PAYMENT_METHOD_OPTIONS.includes(status) ? 'Paid' : status
+}
+const bookingRefundPercentage = (booking: Record<string, unknown>) => bookingNumber(booking, 'refundPercentage', 100)
 
 export default function AdminUserDetail() {
   const { id } = useParams()
@@ -71,7 +83,7 @@ export default function AdminUserDetail() {
     { label: 'Profile details', value: details.filter(([, value]) => value !== 'Not provided').length, Icon: UserRound }
   ]
 
-  const handlePaymentStatusChange = async (booking: Record<string, unknown>, paymentStatus: string) => {
+  const handlePaymentFieldChange = async (booking: Record<string, unknown>, payload: { paymentMethod?: string; paymentStatus?: string; refundPercentage?: number }) => {
     const currentBookingDbId = bookingDbId(booking)
     if (!currentBookingDbId) return
 
@@ -82,17 +94,17 @@ export default function AdminUserDetail() {
       const response = await fetch(`/api/bookings/${currentBookingDbId}/payment-status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentStatus })
+        body: JSON.stringify(payload)
       })
       const updatedBooking = await response.json()
-      if (!response.ok) throw new Error(updatedBooking.message || 'Unable to update payment status.')
+      if (!response.ok) throw new Error(updatedBooking.message || 'Unable to update payment details.')
 
       setData((current) => current ? {
         ...current,
         bookings: current.bookings.map((item) => bookingDbId(item) === currentBookingDbId ? updatedBooking : item)
       } : current)
     } catch (updateError) {
-      setPaymentError(updateError instanceof Error ? updateError.message : 'Unable to update payment status.')
+      setPaymentError(updateError instanceof Error ? updateError.message : 'Unable to update payment details.')
     } finally {
       setUpdatingPaymentId('')
     }
@@ -116,10 +128,92 @@ export default function AdminUserDetail() {
 
         <section className="mb-7"><div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4"><h2 className="text-2xl font-sans font-black uppercase italic text-white">Booked <span className="text-secondary">Trips</span></h2>{paymentError && <p className="text-xs font-bold text-red-300">{paymentError}</p>}</div><div className="space-y-4">{bookings.length ? bookings.map((booking, index) => {
           const currentBookingDbId = bookingDbId(booking)
-          const paymentStatus = bookingText(booking, 'paymentStatus', 'Pending Payment')
+          const paymentMethod = bookingPaymentMethod(booking)
+          const paymentStatus = bookingPaymentStatus(booking)
+          const refundPercentage = bookingRefundPercentage(booking)
+          const refundAmount = bookingNumber(booking, 'refundAmount')
           const isUpdating = updatingPaymentId === currentBookingDbId
 
-          return <article key={currentBookingDbId || String(index)} className="liquid-glass-dark border border-white/10 rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-5"><div><p className="text-lg font-sans font-black uppercase italic text-white">{bookingText(booking, 'title', bookingText(booking, 'tripTitle', 'WayBond Trip'))}</p><p className="text-sm text-white/50 mt-2">{bookingText(booking, 'location', bookingText(booking, 'destination', 'Location pending'))}</p><div className="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-[0.14em] mt-4"><span className="px-3 py-2 rounded-full bg-secondary/15 text-secondary">{bookingText(booking, 'status', 'Booked')}</span><span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{bookingText(booking, 'bookingId', `Booking ${index + 1}`)}</span><span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{bookingText(booking, 'travelers', '1')} traveller(s)</span></div></div><label className="w-full xl:w-72"><span className="mb-2 flex items-center gap-2 text-[9px] text-white/40 font-black uppercase tracking-[0.18em]"><CreditCard size={14} className="text-secondary" /> Payment status</span><select disabled={isUpdating} value={paymentStatus} onChange={(event) => void handlePaymentStatusChange(booking, event.target.value)} className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 px-4 text-sm text-white outline-none focus:border-secondary disabled:opacity-60">{PAYMENT_STATUS_OPTIONS.map((status) => <option key={status} value={status}>{status}</option>)}</select>{isUpdating && <span className="mt-2 block text-[9px] font-black uppercase tracking-[0.16em] text-white/40">Updating...</span>}</label></article>
+          return (
+            <article key={currentBookingDbId || String(index)} className="liquid-glass-dark border border-white/10 rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+              <div>
+                <p className="text-lg font-sans font-black uppercase italic text-white">{bookingText(booking, 'title', bookingText(booking, 'tripTitle', 'WayBond Trip'))}</p>
+                <p className="text-sm text-white/50 mt-2">{bookingText(booking, 'location', bookingText(booking, 'destination', 'Location pending'))}</p>
+                <div className="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-[0.14em] mt-4">
+                  <span className="px-3 py-2 rounded-full bg-secondary/15 text-secondary">{bookingText(booking, 'status', 'Booked')}</span>
+                  <span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{bookingText(booking, 'bookingId', `Booking ${index + 1}`)}</span>
+                  <span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{bookingText(booking, 'travelers', '1')} traveller(s)</span>
+                </div>
+              </div>
+              <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 xl:w-[48rem]">
+                <label>
+                  <span className="mb-2 flex items-center gap-2 text-[9px] text-white/40 font-black uppercase tracking-[0.18em]"><CreditCard size={14} className="text-secondary" /> Payment method</span>
+                  <select disabled={isUpdating} value={paymentMethod} onChange={(event) => void handlePaymentFieldChange(booking, { paymentMethod: event.target.value })} className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 px-4 text-sm text-white outline-none focus:border-secondary disabled:opacity-60">
+                    <option value="">Select method</option>
+                    {PAYMENT_METHOD_OPTIONS.map((method) => <option key={method} value={method}>{method}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span className="mb-2 flex items-center gap-2 text-[9px] text-white/40 font-black uppercase tracking-[0.18em]"><CreditCard size={14} className="text-secondary" /> Payment status</span>
+                  <select disabled={isUpdating} value={paymentStatus} onChange={(event) => {
+                    const nextStatus = event.target.value
+                    void handlePaymentFieldChange(booking, {
+                      paymentStatus: nextStatus,
+                      ...(nextStatus === 'Refunded' ? { refundPercentage } : {})
+                    })
+                  }} className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 px-4 text-sm text-white outline-none focus:border-secondary disabled:opacity-60">
+                    {PAYMENT_STATUS_OPTIONS.map((status) => <option key={status} value={status}>{status}</option>)}
+                  </select>
+                </label>
+                <label>
+                  <span className="mb-2 flex items-center gap-2 text-[9px] text-white/40 font-black uppercase tracking-[0.18em]"><Percent size={14} className="text-secondary" /> Refund</span>
+                  {paymentStatus === 'Refunded' ? (
+                    <>
+                      <div className="relative">
+                        <input
+                          key={`${currentBookingDbId}-${refundPercentage}`}
+                          disabled={isUpdating}
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          defaultValue={refundPercentage}
+                          onBlur={(event) => {
+                            const nextPercentage = Number(event.target.value)
+                            if (!Number.isFinite(nextPercentage)) return
+                            void handlePaymentFieldChange(booking, { paymentStatus: 'Refunded', refundPercentage: nextPercentage })
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key !== 'Enter') return
+                            event.currentTarget.blur()
+                          }}
+                          className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 px-4 pr-9 text-sm text-white outline-none focus:border-secondary disabled:opacity-60"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-white/35">%</span>
+                      </div>
+                      <div className="mt-2 grid grid-cols-4 gap-1">
+                        {REFUND_PERCENTAGES.map((percentage) => (
+                          <button
+                            key={percentage}
+                            type="button"
+                            disabled={isUpdating}
+                            onClick={() => void handlePaymentFieldChange(booking, { paymentStatus: 'Refunded', refundPercentage: percentage })}
+                            className="h-7 rounded-lg bg-white/5 text-[9px] font-black text-white/45 transition-colors hover:bg-secondary/15 hover:text-secondary disabled:opacity-60"
+                          >
+                            {percentage}%
+                          </button>
+                        ))}
+                      </div>
+                      <span className="mt-2 block text-[9px] font-black uppercase tracking-[0.16em] text-white/40">Rs. {refundAmount.toLocaleString('en-IN')}</span>
+                    </>
+                  ) : (
+                    <span className="flex h-12 items-center rounded-2xl bg-white/5 border border-white/10 px-4 text-sm text-white/30">-</span>
+                  )}
+                </label>
+                {isUpdating && <span className="sm:col-span-3 mt-1 block text-[9px] font-black uppercase tracking-[0.16em] text-white/40">Updating...</span>}
+              </div>
+            </article>
+          )
         }) : <div className="liquid-glass-dark border border-white/10 rounded-2xl p-8 text-white/45">No booked trips yet.</div>}</div></section>
 
         <section><h2 className="text-2xl font-sans font-black uppercase italic text-white mb-4">User <span className="text-secondary">Testimonials</span></h2><div className="grid grid-cols-1 lg:grid-cols-2 gap-4">{testimonials.length ? testimonials.map((testimonial) => <article key={testimonial.id} className="liquid-glass-dark border border-white/10 rounded-2xl p-5"><p className="text-secondary text-[10px] font-black uppercase tracking-[0.16em] mb-3">{testimonial.trip}</p><p className="text-white/75 italic leading-relaxed">&ldquo;{testimonial.review}&rdquo;</p><div className="flex items-center justify-between border-t border-white/10 mt-5 pt-4"><span className="flex gap-1">{Array.from({ length: 5 }).map((_, index) => <Star key={index} size={14} className={index < testimonial.rating ? 'text-secondary fill-secondary' : 'text-white/15'} />)}</span><span className="text-[9px] text-white/35 font-black uppercase tracking-[0.14em]">{formatDate(testimonial.createdAt)}</span></div></article>) : <div className="liquid-glass-dark border border-white/10 rounded-2xl p-8 text-white/45">No testimonials yet.</div>}</div></section>

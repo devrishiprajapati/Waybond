@@ -62,7 +62,7 @@ const DataFilters = () => {
     setLoading(true)
     try {
       const [tripsRes, usersRes, bookingsRes] = await Promise.all([
-        fetch('/api/trips'),
+        fetch('/api/admin/trips'),
         fetch('/api/users'),
         fetch('/api/admin/bookings')
       ])

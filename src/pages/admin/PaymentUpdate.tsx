@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, CheckCircle2, CreditCard, Mail, MapPin, Search, UserRound, X } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CheckCircle2, CreditCard, Mail, MapPin, Percent, Search, UserRound, X } from 'lucide-react'
 import PermissionGuard from '../../components/PermissionGuard'
 
 type BookingUser = {
@@ -24,22 +24,35 @@ type PaymentTrip = {
 }
 
 type PaymentUpdateData = {
+  paymentMethods: string[]
   paymentStatuses: string[]
   trips: PaymentTrip[]
 }
 
-const DEFAULT_PAYMENT_STATUSES = ['Online', 'Cash', 'Cancelled', 'Pending Payment', 'Paid', 'Failed', 'Refunded', 'Partially Paid']
+const DEFAULT_PAYMENT_METHODS = ['Online', 'Cash', 'Cheque', 'Credit Card']
+const DEFAULT_PAYMENT_STATUSES = ['Pending Payment', 'Paid', 'Failed', 'Refunded', 'Partially Paid', 'Cancelled']
+const REFUND_PERCENTAGES = [25, 50, 75, 100]
 const bookingText = (booking: Record<string, unknown>, key: string, fallback = '') => String(booking[key] || fallback)
+const bookingNumber = (booking: Record<string, unknown>, key: string, fallback = 0) => {
+  const value = Number(booking[key] ?? fallback)
+  return Number.isFinite(value) ? value : fallback
+}
+const bookingPaymentMethod = (booking: Record<string, unknown>) => bookingText(booking, 'paymentMethod') || (DEFAULT_PAYMENT_METHODS.includes(bookingText(booking, 'paymentStatus')) ? bookingText(booking, 'paymentStatus') : '')
+const bookingPaymentStatus = (booking: Record<string, unknown>) => {
+  const status = bookingText(booking, 'paymentStatus', 'Pending Payment')
+  return DEFAULT_PAYMENT_METHODS.includes(status) ? 'Paid' : status
+}
+const bookingRefundPercentage = (booking: Record<string, unknown>) => bookingNumber(booking, 'refundPercentage', 100)
 const formatDate = (value?: string) => value ? new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Date pending'
 
 export default function PaymentUpdate() {
   const navigate = useNavigate()
-  const [data, setData] = useState<PaymentUpdateData>({ paymentStatuses: DEFAULT_PAYMENT_STATUSES, trips: [] })
+  const [data, setData] = useState<PaymentUpdateData>({ paymentMethods: DEFAULT_PAYMENT_METHODS, paymentStatuses: DEFAULT_PAYMENT_STATUSES, trips: [] })
   const [search, setSearch] = useState('')
   const [error, setError] = useState('')
   const [updatingBookingId, setUpdatingBookingId] = useState('')
   const [loading, setLoading] = useState(true)
-  const [confirmedPopup, setConfirmedPopup] = useState<{ bookingId: string; paymentStatus: string } | null>(null)
+  const [confirmedPopup, setConfirmedPopup] = useState<{ bookingId: string; paymentMethod: string; paymentStatus: string } | null>(null)
 
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
@@ -52,7 +65,11 @@ export default function PaymentUpdate() {
         const response = await fetch('/api/admin/payment-updates')
         const payload = await response.json()
         if (!response.ok) throw new Error(payload.message || 'Unable to load payment updates.')
-        setData(payload)
+        setData({
+          paymentMethods: payload.paymentMethods || DEFAULT_PAYMENT_METHODS,
+          paymentStatuses: payload.paymentStatuses || DEFAULT_PAYMENT_STATUSES,
+          trips: payload.trips || []
+        })
       } catch (loadError) {
         setError(loadError instanceof Error ? loadError.message : 'Unable to load payment updates.')
       } finally {
@@ -77,7 +94,8 @@ export default function PaymentUpdate() {
             booking.user?.name,
             booking.user?.email,
             bookingText(booking, 'bookingId'),
-            bookingText(booking, 'paymentStatus', 'Pending Payment')
+            bookingPaymentMethod(booking),
+            bookingPaymentStatus(booking)
           ].join(' ').toLowerCase()
           return haystack.includes(query)
         })
@@ -87,7 +105,7 @@ export default function PaymentUpdate() {
 
   const totalBookings = data.trips.reduce((count, trip) => count + trip.bookings.length, 0)
 
-  const updatePaymentStatus = async (bookingId: string, paymentStatus: string) => {
+  const updatePaymentField = async (bookingId: string, payload: { paymentMethod?: string; paymentStatus?: string; refundPercentage?: number }) => {
     setError('')
     setUpdatingBookingId(bookingId)
 
@@ -95,10 +113,10 @@ export default function PaymentUpdate() {
       const response = await fetch(`/api/bookings/${bookingId}/payment-status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentStatus })
+        body: JSON.stringify(payload)
       })
       const updatedBooking = await response.json()
-      if (!response.ok) throw new Error(updatedBooking.message || 'Unable to update payment status.')
+      if (!response.ok) throw new Error(updatedBooking.message || 'Unable to update payment details.')
 
       setData((current) => ({
         ...current,
@@ -107,14 +125,15 @@ export default function PaymentUpdate() {
           bookings: trip.bookings.map((booking) => booking.bookingDbId === bookingId ? { ...booking, ...updatedBooking } : booking)
         }))
       }))
-      if (['Cash', 'Online', 'Paid'].includes(paymentStatus)) {
+      if (payload.paymentStatus === 'Paid') {
         setConfirmedPopup({
           bookingId: bookingText(updatedBooking, 'bookingId', bookingId),
-          paymentStatus
+          paymentMethod: bookingPaymentMethod(updatedBooking) || 'Not specified',
+          paymentStatus: bookingText(updatedBooking, 'paymentStatus', 'Paid')
         })
       }
     } catch (updateError) {
-      setError(updateError instanceof Error ? updateError.message : 'Unable to update payment status.')
+      setError(updateError instanceof Error ? updateError.message : 'Unable to update payment details.')
     } finally {
       setUpdatingBookingId('')
     }
@@ -139,7 +158,7 @@ export default function PaymentUpdate() {
               </div>
               <p className="text-2xl font-black">Payment Confirmed</p>
               <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">
-                Booking {confirmedPopup.bookingId} is confirmed with {confirmedPopup.paymentStatus} payment. The user can now view and download the invoice.
+                Booking {confirmedPopup.bookingId} is confirmed with {confirmedPopup.paymentMethod} payment marked {confirmedPopup.paymentStatus}. The user can now view and download the invoice.
               </p>
               <button
                 type="button"
@@ -189,19 +208,25 @@ export default function PaymentUpdate() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[920px] text-left">
+                  <table className="w-full min-w-[1220px] text-left">
                     <thead className="text-[9px] uppercase tracking-[0.18em] text-white/35 border-b border-white/10">
                       <tr>
                         <th className="p-5">Traveller</th>
                         <th className="p-5">Booking</th>
                         <th className="p-5">Travellers</th>
                         <th className="p-5">Booking Status</th>
-                        <th className="p-5 w-72">Payment Status</th>
+                        <th className="p-5 w-60">Payment Method</th>
+                        <th className="p-5 w-60">Payment Status</th>
+                        <th className="p-5 w-56">Refund</th>
                       </tr>
                     </thead>
                     <tbody>
                       {trip.bookings.map((booking, index) => {
-                        const paymentStatus = bookingText(booking, 'paymentStatus', 'Pending Payment')
+                        const paymentStatus = bookingPaymentStatus(booking)
+                        const paymentMethod = bookingPaymentMethod(booking)
+                        const refundPercentage = bookingRefundPercentage(booking)
+                        const refundAmount = bookingNumber(booking, 'refundAmount')
+                        const methodOptions = paymentMethod && data.paymentMethods.includes(paymentMethod) ? data.paymentMethods : [paymentMethod, ...data.paymentMethods].filter(Boolean)
                         const statusOptions = data.paymentStatuses.includes(paymentStatus) ? data.paymentStatuses : [paymentStatus, ...data.paymentStatuses]
                         const isUpdating = updatingBookingId === booking.bookingDbId
 
@@ -220,10 +245,69 @@ export default function PaymentUpdate() {
                             <td className="p-5 text-white/60 text-sm font-bold">{bookingText(booking, 'travelers', '1')}</td>
                             <td className="p-5"><span className="px-3 py-2 rounded-full bg-white/5 text-white/55 text-[9px] font-black uppercase tracking-[0.14em]">{bookingText(booking, 'status', 'Booked')}</span></td>
                             <td className="p-5">
-                              <select disabled={isUpdating} value={paymentStatus} onChange={(event) => void updatePaymentStatus(booking.bookingDbId, event.target.value)} className="w-full h-11 rounded-xl bg-white/5 border border-white/10 px-3 text-sm text-white outline-none focus:border-secondary disabled:opacity-60">
+                              <select disabled={isUpdating} value={paymentMethod} onChange={(event) => void updatePaymentField(booking.bookingDbId, { paymentMethod: event.target.value })} className="w-full h-11 rounded-xl bg-white/5 border border-white/10 px-3 text-sm text-white outline-none focus:border-secondary disabled:opacity-60">
+                                <option value="">Select method</option>
+                                {methodOptions.map((method) => <option key={method} value={method}>{method}</option>)}
+                              </select>
+                            </td>
+                            <td className="p-5">
+                              <select disabled={isUpdating} value={paymentStatus} onChange={(event) => {
+                                const nextStatus = event.target.value
+                                void updatePaymentField(booking.bookingDbId, {
+                                  paymentStatus: nextStatus,
+                                  ...(nextStatus === 'Refunded' ? { refundPercentage } : {})
+                                })
+                              }} className="w-full h-11 rounded-xl bg-white/5 border border-white/10 px-3 text-sm text-white outline-none focus:border-secondary disabled:opacity-60">
                                 {statusOptions.map((status) => <option key={status} value={status}>{status}</option>)}
                               </select>
                               {isUpdating && <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.14em] mt-2">Updating...</p>}
+                            </td>
+                            <td className="p-5">
+                              {paymentStatus === 'Refunded' ? (
+                                <div className="space-y-2">
+                                  <label className="relative block">
+                                    <Percent size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary" />
+                                    <input
+                                      key={`${booking.bookingDbId}-${refundPercentage}`}
+                                      disabled={isUpdating}
+                                      type="number"
+                                      min="0"
+                                      max="100"
+                                      step="0.01"
+                                      defaultValue={refundPercentage}
+                                      onBlur={(event) => {
+                                        const nextPercentage = Number(event.target.value)
+                                        if (!Number.isFinite(nextPercentage)) return
+                                        void updatePaymentField(booking.bookingDbId, { paymentStatus: 'Refunded', refundPercentage: nextPercentage })
+                                      }}
+                                      onKeyDown={(event) => {
+                                        if (event.key !== 'Enter') return
+                                        event.currentTarget.blur()
+                                      }}
+                                      className="w-full h-11 rounded-xl bg-white/5 border border-white/10 pl-9 pr-8 text-sm text-white outline-none focus:border-secondary disabled:opacity-60"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-white/35">%</span>
+                                  </label>
+                                  <div className="grid grid-cols-4 gap-1">
+                                    {REFUND_PERCENTAGES.map((percentage) => (
+                                      <button
+                                        key={percentage}
+                                        type="button"
+                                        disabled={isUpdating}
+                                        onClick={() => void updatePaymentField(booking.bookingDbId, { paymentStatus: 'Refunded', refundPercentage: percentage })}
+                                        className="h-7 rounded-lg bg-white/5 text-[9px] font-black text-white/45 transition-colors hover:bg-secondary/15 hover:text-secondary disabled:opacity-60"
+                                      >
+                                        {percentage}%
+                                      </button>
+                                    ))}
+                                  </div>
+                                  <p className="text-[9px] font-black uppercase tracking-[0.14em] text-white/40">
+                                    Refund Rs. {refundAmount.toLocaleString('en-IN')}
+                                  </p>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-bold text-white/30">-</span>
+                              )}
                             </td>
                           </tr>
                         )

@@ -15,37 +15,83 @@ app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',').map((origin) => origi
 app.use(express.json({ limit: '100mb' }))
 
 const toTrip = (record) => ({ id: record.id, ...record.payload })
+const isTripVisible = (trip) => trip?.payload?.isVisible !== false
 const toHeroSlide = (record) => ({ id: record.id, ...record.payload })
 
 const toTrendingCard = (record) => ({ id: record.id, ...record.payload })
 const toBooking = (record) => ({ id: record.id, bookingDbId: record.id, ...record.payload })
-const PAYMENT_STATUS_OPTIONS = [
+const DEFAULT_AGE_LIMIT = { min: '', max: 40 }
+const PAYMENT_METHOD_OPTIONS = [
   'Online',
   'Cash',
-  'Cancelled',
+  'Cheque',
+  'Credit Card'
+]
+const PAYMENT_STATUS_OPTIONS = [
   'Pending Payment',
   'Paid',
   'Failed',
   'Refunded',
-  'Partially Paid'
+  'Partially Paid',
+  'Cancelled'
 ]
 const PAYMENT_RECORD_STATUSES = {
-  Online: 'PAID',
-  Cash: 'CASH',
-  Cancelled: 'CANCELLED',
   'Pending Payment': 'PENDING',
   Paid: 'PAID',
   Failed: 'FAILED',
   Refunded: 'REFUNDED',
-  'Partially Paid': 'PARTIALLY_PAID'
+  'Partially Paid': 'PARTIALLY_PAID',
+  Cancelled: 'CANCELLED'
+}
+
+const toPositiveAge = (value) => {
+  const age = Number(value)
+  return Number.isFinite(age) && age > 0 ? Math.floor(age) : undefined
+}
+
+const normalizeAgeLimit = (ageLimit = {}) => ({
+  min: toPositiveAge(ageLimit.min ?? DEFAULT_AGE_LIMIT.min),
+  max: toPositiveAge(ageLimit.max ?? DEFAULT_AGE_LIMIT.max)
+})
+
+const formatAgeLimit = (ageLimit = {}) => {
+  const { min, max } = normalizeAgeLimit(ageLimit)
+  if (min && max) return `${min}-${max} yrs`
+  if (min) return `${min}+ yrs`
+  if (max) return `Up to ${max} yrs`
+  return 'All ages'
+}
+
+const calculateAge = (dateOfBirth) => {
+  if (!dateOfBirth) return 0
+  const birth = new Date(dateOfBirth)
+  if (Number.isNaN(birth.getTime())) return 0
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--
+  return age
+}
+
+const isAgeWithinLimit = (age, ageLimit = {}) => {
+  const { min, max } = normalizeAgeLimit(ageLimit)
+  if (!Number.isFinite(age) || age <= 0) return false
+  if (min && age < min) return false
+  if (max && age > max) return false
+  return true
 }
 const normalizePaymentStatus = (value) => {
   const status = String(value || '').trim()
   return PAYMENT_STATUS_OPTIONS.find((option) => option.toLowerCase() === status.toLowerCase()) || ''
 }
+const normalizePaymentMethod = (value) => {
+  const method = String(value || '').trim()
+  return PAYMENT_METHOD_OPTIONS.find((option) => option.toLowerCase() === method.toLowerCase()) || ''
+}
+const normalizeStoredPaymentStatus = (value) => normalizePaymentStatus(value) || (normalizePaymentMethod(value) ? 'Paid' : '')
 const getBookingStatusForPaymentStatus = (paymentStatus, currentStatus = '') => {
   if (paymentStatus === 'Cancelled') return 'Cancelled'
-  if (['Cash', 'Online', 'Paid'].includes(paymentStatus)) return 'Confirmed'
+  if (paymentStatus === 'Paid') return 'Confirmed'
   if (paymentStatus === 'Refunded') return 'Refunded'
   return currentStatus === 'Cancelled' ? currentStatus : 'Payment Pending'
 }
@@ -133,6 +179,24 @@ const formatTripDate = (value) => {
     : date.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 const toMoneyNumber = (value) => Number(String(value || '').replace(/[^\d.]/g, '')) || 0
+const getBookingAmount = (booking) => {
+  const travelers = Number(booking.payload?.travelers || 1)
+  const price = toMoneyNumber(booking.payload?.price || 0)
+  return price * travelers
+}
+const normalizeRefundPercentage = (value, fallback = 100) => {
+  const percentage = Number(value ?? fallback)
+  if (!Number.isFinite(percentage)) return fallback
+  return Math.min(100, Math.max(0, Math.round(percentage * 100) / 100))
+}
+const getRefundAmount = (booking) => {
+  const payload = booking.payload || {}
+  if (payload.paymentStatus !== 'Refunded') return 0
+  const storedRefundAmount = Number(payload.refundAmount)
+  if (Number.isFinite(storedRefundAmount) && storedRefundAmount >= 0) return storedRefundAmount
+  return Math.round(getBookingAmount(booking) * (normalizeRefundPercentage(payload.refundPercentage) / 100))
+}
+const getNetBookingRevenue = (booking) => Math.max(0, getBookingAmount(booking) - getRefundAmount(booking))
 const escapePdfText = (value) => normalizeText(value)
   .replace(/\\/g, '\\\\')
   .replace(/\(/g, '\\(')
@@ -934,11 +998,11 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
   }
 })
 
-app.get('/api/trips', async (_req, res, next) => {
+app.get('/api/admin/trips', async (_req, res, next) => {
   try { res.json((await prisma.trip.findMany({ orderBy: { id: 'asc' } })).map(toTrip)) } catch (error) { next(error) }
 })
 
-app.get('/api/trips/:id', async (req, res, next) => {
+app.get('/api/admin/trips/:id', async (req, res, next) => {
   try {
     const trip = await prisma.trip.findUnique({ where: { id: Number(req.params.id) } })
     if (!trip) return res.status(404).json({ message: 'Not found' })
@@ -946,8 +1010,22 @@ app.get('/api/trips/:id', async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
+app.get('/api/trips', async (_req, res, next) => {
+  try {
+    res.json((await prisma.trip.findMany({ orderBy: { id: 'asc' } })).filter(isTripVisible).map(toTrip))
+  } catch (error) { next(error) }
+})
+
+app.get('/api/trips/:id', async (req, res, next) => {
+  try {
+    const trip = await prisma.trip.findUnique({ where: { id: Number(req.params.id) } })
+    if (!trip || !isTripVisible(trip)) return res.status(404).json({ message: 'Not found' })
+    res.json(toTrip(trip))
+  } catch (error) { next(error) }
+})
+
 app.post('/api/trips', async (req, res, next) => {
-  try { res.status(201).json(toTrip(await prisma.trip.create({ data: { payload: req.body } }))) } catch (error) { next(error) }
+  try { res.status(201).json(toTrip(await prisma.trip.create({ data: { payload: { isVisible: true, ...req.body } } }))) } catch (error) { next(error) }
 })
 
 app.put('/api/trips/:id', async (req, res, next) => {
@@ -1117,16 +1195,15 @@ app.get('/api/analytics', async (req, res, next) => {
     const bookings = allBookings.filter(b => new Date(b.createdAt) >= startDate)
     const confirmedBookings = bookings.filter(b => 
       b.payload?.status === 'Confirmed' || 
+      b.payload?.status === 'Refunded' ||
       b.payload?.paymentStatus === 'Paid' ||
-      b.payload?.paymentStatus === 'Online'
+      b.payload?.paymentStatus === 'Online' ||
+      b.payload?.paymentStatus === 'Refunded'
     )
 
-    // Calculate total revenue
-    const totalRevenue = confirmedBookings.reduce((sum, booking) => {
-      const travelers = Number(booking.payload?.travelers || 1)
-      const price = toMoneyNumber(booking.payload?.price || 0)
-      return sum + (price * travelers)
-    }, 0)
+    // Calculate net revenue after refunds
+    const totalRefunds = confirmedBookings.reduce((sum, booking) => sum + getRefundAmount(booking), 0)
+    const totalRevenue = confirmedBookings.reduce((sum, booking) => sum + getNetBookingRevenue(booking), 0)
 
     // Calculate average booking value
     const averageBookingValue = confirmedBookings.length > 0 
@@ -1159,6 +1236,7 @@ app.get('/api/analytics', async (req, res, next) => {
 
     // Monthly revenue (last 12 months)
     const monthlyRevenue = generateMonthlyRevenue(allBookings)
+    const monthlyRefunds = generateMonthlyRefunds(allBookings)
 
     // User growth (last 6 months)
     const userGrowth = generateUserGrowth(allUsers)
@@ -1167,6 +1245,7 @@ app.get('/api/analytics', async (req, res, next) => {
     const stats = {
       totalBookings: confirmedBookings.length,
       totalRevenue: Math.round(totalRevenue),
+      totalRefunds: Math.round(totalRefunds),
       averageBookingValue,
       conversionRate: totalRevenue > 0 ? 
         Number(((confirmedBookings.length / Math.max(bookings.length, 1)) * 100).toFixed(1)) : 
@@ -1190,6 +1269,7 @@ app.get('/api/analytics', async (req, res, next) => {
         data: Array.from(locationMap.values()).slice(0, 10)
       },
       monthlyRevenue,
+      monthlyRefunds,
       userGrowth,
       stats
     })
@@ -1293,15 +1373,36 @@ function generateMonthlyRevenue(bookings) {
       return bookingDate.getMonth() === month.getMonth() && 
              bookingDate.getFullYear() === month.getFullYear() &&
              (b.payload?.status === 'Confirmed' || 
+              b.payload?.status === 'Refunded' ||
               b.payload?.paymentStatus === 'Paid' ||
-              b.payload?.paymentStatus === 'Online')
-    }).reduce((sum, booking) => {
-      const travelers = Number(booking.payload?.travelers || 1)
-      const price = toMoneyNumber(booking.payload?.price || 0)
-      return sum + (price * travelers)
-    }, 0)
+              b.payload?.paymentStatus === 'Online' ||
+              b.payload?.paymentStatus === 'Refunded')
+    }).reduce((sum, booking) => sum + getNetBookingRevenue(booking), 0)
     
     data.push(Math.round(monthRevenue))
+  }
+  
+  return { labels, data }
+}
+
+function generateMonthlyRefunds(bookings) {
+  const labels = []
+  const data = []
+  const now = new Date()
+  
+  for (let i = 11; i >= 0; i--) {
+    const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const monthStr = month.toLocaleDateString('en-IN', { month: 'short' })
+    labels.push(monthStr)
+    
+    const monthRefunds = bookings.filter(b => {
+      const refundDate = new Date(b.payload?.refundedAt || b.payload?.paymentStatusUpdatedAt || b.createdAt)
+      return b.payload?.paymentStatus === 'Refunded' &&
+             refundDate.getMonth() === month.getMonth() && 
+             refundDate.getFullYear() === month.getFullYear()
+    }).reduce((sum, booking) => sum + getRefundAmount(booking), 0)
+    
+    data.push(Math.round(monthRefunds))
   }
   
   return { labels, data }
@@ -1361,6 +1462,7 @@ app.get('/api/admin/payment-updates', async (_req, res, next) => {
     })
 
     res.json({
+      paymentMethods: PAYMENT_METHOD_OPTIONS,
       paymentStatuses: PAYMENT_STATUS_OPTIONS,
       trips: Array.from(tripMap.values()).sort((a, b) => a.title.localeCompare(b.title))
     })
@@ -1390,6 +1492,35 @@ app.post('/api/users/:id/bookings', async (req, res, next) => {
     if (req.params.id === 'waybond-admin') {
       return res.status(403).json({ message: 'Admin accounts cannot make bookings.' })
     }
+
+    const tripId = Number(req.body?.id)
+    if (!Number.isInteger(tripId)) {
+      return res.status(400).json({ message: 'A valid trip is required to create a booking.' })
+    }
+
+    const trip = await prisma.trip.findUnique({ where: { id: tripId } })
+    if (!trip) return res.status(404).json({ message: 'Trip not found.' })
+    if (!isTripVisible(trip)) {
+      return res.status(403).json({ message: 'This trip is currently unavailable for booking.' })
+    }
+
+    const ageLimit = trip.payload?.ageLimit || DEFAULT_AGE_LIMIT
+    const travellers = Array.isArray(req.body?.travellerDetails) ? req.body.travellerDetails : []
+    if (!travellers.length) {
+      return res.status(400).json({ message: 'At least one traveller is required.' })
+    }
+
+    const ineligibleTraveller = travellers.find((traveller) => {
+      const age = calculateAge(traveller?.dateOfBirth) || Number(traveller?.age)
+      return !isAgeWithinLimit(age, ageLimit)
+    })
+
+    if (ineligibleTraveller) {
+      return res.status(400).json({
+        message: `Booking is allowed only for travellers within the age limit: ${formatAgeLimit(ageLimit)}.`
+      })
+    }
+
     const booking = await prisma.booking.create({ data: { userId: req.params.id, payload: req.body } })
     res.status(201).json(toBooking(booking))
   } catch (error) { next(error) }
@@ -1434,22 +1565,48 @@ app.put('/api/bookings/:bookingId/cancel', async (req, res, next) => {
 
 app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
   try {
-    const paymentStatus = normalizePaymentStatus(req.body.paymentStatus)
-    if (!paymentStatus) {
+    const paymentMethod = req.body.paymentMethod === undefined ? undefined : normalizePaymentMethod(req.body.paymentMethod)
+    const paymentStatus = req.body.paymentStatus === undefined ? undefined : normalizePaymentStatus(req.body.paymentStatus)
+    if (req.body.paymentMethod !== undefined && !paymentMethod) {
+      return res.status(400).json({
+        message: `Payment method must be one of: ${PAYMENT_METHOD_OPTIONS.join(', ')}.`
+      })
+    }
+    if (req.body.paymentStatus !== undefined && !paymentStatus) {
       return res.status(400).json({
         message: `Payment status must be one of: ${PAYMENT_STATUS_OPTIONS.join(', ')}.`
       })
+    }
+    if (paymentMethod === undefined && paymentStatus === undefined) {
+      return res.status(400).json({ message: 'Payment method or payment status is required.' })
     }
 
     const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId }, include: { user: true } })
     if (!booking) return res.status(404).json({ message: 'Booking not found' })
 
     const wasConfirmed = booking.payload?.status === 'Confirmed'
+    const nextPaymentStatus = paymentStatus || normalizeStoredPaymentStatus(booking.payload?.paymentStatus) || 'Pending Payment'
+    const nextPaymentMethod = paymentMethod || booking.payload?.paymentMethod || normalizePaymentMethod(booking.payload?.paymentStatus) || ''
+    const isRefunded = nextPaymentStatus === 'Refunded'
+    const refundPercentage = isRefunded ? normalizeRefundPercentage(req.body.refundPercentage, booking.payload?.refundPercentage ?? 100) : undefined
+    const refundAmount = isRefunded ? Math.round(getBookingAmount(booking) * (refundPercentage / 100)) : undefined
     const updatedPayload = {
       ...booking.payload,
-      status: getBookingStatusForPaymentStatus(paymentStatus, booking.payload?.status),
-      paymentStatus,
-      paymentStatusUpdatedAt: new Date().toISOString()
+      status: paymentStatus ? getBookingStatusForPaymentStatus(paymentStatus, booking.payload?.status) : booking.payload?.status,
+      paymentMethod: nextPaymentMethod,
+      paymentStatus: nextPaymentStatus,
+      paymentStatusUpdatedAt: new Date().toISOString(),
+      ...(isRefunded
+        ? {
+            refundPercentage,
+            refundAmount,
+            refundedAt: booking.payload?.refundedAt || new Date().toISOString()
+          }
+        : {
+            refundPercentage: null,
+            refundAmount: null,
+            refundedAt: null
+          })
     }
 
     const latestPayment = await prisma.payment.findFirst({
@@ -1464,7 +1621,7 @@ app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
       })
     ]
 
-    if (latestPayment) {
+    if (latestPayment && paymentStatus) {
       updates.push(prisma.payment.update({
         where: { id: latestPayment.id },
         data: { status: PAYMENT_RECORD_STATUSES[paymentStatus] }
@@ -1493,14 +1650,15 @@ app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
                   <h2 style="color: #10b981; margin: 0 0 20px 0; font-size: 24px;">Booking Confirmed!</h2>
                   <p style="color: #475569; margin: 0 0 20px 0; font-size: 16px;">Dear ${escapeHtml(booking.user.name)},</p>
                   <p style="color: #475569; margin: 0 0 30px 0; line-height: 1.6;">
-                    Your ${escapeHtml(paymentStatus)} payment for <strong>${escapeHtml(bookingData.title)}</strong> has been confirmed by the WayBond team.
+                    Your ${escapeHtml(updatedPayload.paymentMethod || 'selected')} payment for <strong>${escapeHtml(bookingData.title)}</strong> has been confirmed by the WayBond team.
                   </p>
                   <div style="background: #f1f5f9; border-left: 4px solid #0ea5e9; padding: 20px; margin: 0 0 30px 0;">
                     <p style="margin: 0 0 10px 0; color: #64748b; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Booking Details</p>
                     <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Booking ID:</strong> ${escapeHtml(bookingData.bookingId)}</p>
                     <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Trip:</strong> ${escapeHtml(bookingData.title)}</p>
                     <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Departure:</strong> ${escapeHtml(formatTripDate(bookingData.nextBatch))}</p>
-                    <p style="margin: 0; color: #1e293b;"><strong>Payment:</strong> ${escapeHtml(paymentStatus)}</p>
+                    <p style="margin: 0 0 8px 0; color: #1e293b;"><strong>Payment Method:</strong> ${escapeHtml(updatedPayload.paymentMethod || 'Not specified')}</p>
+                    <p style="margin: 0; color: #1e293b;"><strong>Payment Status:</strong> ${escapeHtml(updatedPayload.paymentStatus)}</p>
                   </div>
                   <p style="color: #475569; margin: 0; line-height: 1.6;">
                     Your formatted WayBond invoice with the official logo is attached to this email.
@@ -1940,12 +2098,16 @@ app.get('/api/analytics', async (req, res, next) => {
     })
     
     // Calculate stats
+    const revenueBookings = bookings.filter((booking) =>
+      booking.payload?.status === 'Confirmed' ||
+      booking.payload?.status === 'Refunded' ||
+      booking.payload?.paymentStatus === 'Paid' ||
+      booking.payload?.paymentStatus === 'Online' ||
+      booking.payload?.paymentStatus === 'Refunded'
+    )
     const totalBookings = bookings.length
-    const totalRevenue = bookings.reduce((sum, booking) => {
-      const price = Number(booking.payload?.price?.toString().replace(/[^\d]/g, '')) || 0
-      const travelers = Number(booking.payload?.travelers) || 1
-      return sum + (price * travelers)
-    }, 0)
+    const totalRefunds = revenueBookings.reduce((sum, booking) => sum + getRefundAmount(booking), 0)
+    const totalRevenue = revenueBookings.reduce((sum, booking) => sum + getNetBookingRevenue(booking), 0)
     
     const averageBookingValue = totalBookings > 0 ? Math.round(totalRevenue / totalBookings) : 0
     
@@ -1989,8 +2151,20 @@ app.get('/api/analytics', async (req, res, next) => {
     // Booking trends (last 4 weeks)
     const bookingTrendsData = [45, 67, 82, 95] // Placeholder
     
-    // Monthly revenue (placeholder with realistic data)
-    const monthlyRevenueData = last6Months.map(() => Math.floor(Math.random() * 500000) + 200000)
+    const monthlyRevenueData = last6Months.map((month, index) => {
+      const monthIndex = (currentMonth - 5 + index + 12) % 12
+      return Math.round(revenueBookings.filter((booking) => {
+        const bookingDate = new Date(booking.createdAt)
+        return bookingDate.getMonth() === monthIndex
+      }).reduce((sum, booking) => sum + getNetBookingRevenue(booking), 0))
+    })
+    const monthlyRefundData = last6Months.map((month, index) => {
+      const monthIndex = (currentMonth - 5 + index + 12) % 12
+      return Math.round(revenueBookings.filter((booking) => {
+        const refundDate = new Date(booking.payload?.refundedAt || booking.payload?.paymentStatusUpdatedAt || booking.createdAt)
+        return booking.payload?.paymentStatus === 'Refunded' && refundDate.getMonth() === monthIndex
+      }).reduce((sum, booking) => sum + getRefundAmount(booking), 0))
+    })
     
     const analyticsData = {
       bookingTrends: {
@@ -2013,6 +2187,10 @@ app.get('/api/analytics', async (req, res, next) => {
         labels: last6Months,
         data: monthlyRevenueData
       },
+      monthlyRefunds: {
+        labels: last6Months,
+        data: monthlyRefundData
+      },
       userGrowth: {
         labels: last6Months,
         data: userGrowthData
@@ -2020,6 +2198,7 @@ app.get('/api/analytics', async (req, res, next) => {
       stats: {
         totalBookings,
         totalRevenue,
+        totalRefunds,
         averageBookingValue,
         conversionRate: 12.5, // Placeholder
         totalTrips: tripData.length,

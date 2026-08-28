@@ -70,6 +70,7 @@ const BookingConfirmation = () => {
       highlights: trip.highlights || [],
       itinerary: trip.itinerary || [],
       departureDates: trip.departureDates || [],
+      ageLimit: trip.ageLimit,
       bookingId: uniqueBookingId,
       status: 'Payment Pending',
       paymentStatus: 'Pending Payment',
