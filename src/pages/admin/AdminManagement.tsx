@@ -16,12 +16,7 @@ import {
   AlertCircle,
   ArrowLeft
 } from 'lucide-react'
-
-type Permission = {
-  key: string
-  label: string
-  description: string
-}
+import { ALL_PERMISSIONS, type Permission } from '../../lib/permissions'
 
 type Admin = {
   id: string
@@ -82,13 +77,12 @@ const AdminManagement = () => {
 
   const loadData = async () => {
     try {
-      const [adminsRes, permsRes] = await Promise.all([
-        fetch('/api/admins'),
-        fetch('/api/admins/permissions/list')
-      ])
+      const adminsRes = await fetch('/api/admins')
 
       if (adminsRes.ok) setAdmins(await adminsRes.json())
-      if (permsRes.ok) setPermissions(await permsRes.json())
+      
+      // Set permissions from our config file
+      setPermissions(ALL_PERMISSIONS)
     } catch (error) {
       console.error('Failed to load data:', error)
     }

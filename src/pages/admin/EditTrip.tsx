@@ -94,6 +94,7 @@ const EditTrip = () => {
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false })
   const [confirmedDateIndex, setConfirmedDateIndex] = useState('')
   const [confirmedDateValue, setConfirmedDateValue] = useState('')
+  const [selectedDepartureForItinerary, setSelectedDepartureForItinerary] = useState<string>('default')
 
   const showToast = (message: string) => {
     setToast({ message, visible: true })
@@ -247,7 +248,8 @@ const EditTrip = () => {
       },
       isVisible: formData.isVisible !== false,
       departureDates: mergeUniqueDates([cleanData.nextBatch, ...(formData.departureDates || [])]),
-      itinerary: formData.itinerary || []
+      itinerary: formData.itinerary || [],
+      departureItineraries: formData.departureItineraries || undefined
     }
 
     try {
@@ -262,7 +264,7 @@ const EditTrip = () => {
     } catch (error) {
       setMediaError(error instanceof Error ? error.message : 'Unable to save the package.')
     }
-  }
+  } 
 
   const handleApplyConfirmedDateChange = () => {
     const index = Number(confirmedDateIndex)
@@ -673,70 +675,307 @@ const EditTrip = () => {
               </h3>
               <button
                 type="button"
-                onClick={() => setFormData({
-                  ...formData,
-                  itinerary: [...(formData.itinerary || []), { day: (formData.itinerary?.length || 0) + 1, title: '', description: '' }]
-                })}
+                onClick={() => {
+                  const currentItinerary = selectedDepartureForItinerary === 'default' 
+                    ? formData.itinerary 
+                    : formData.departureItineraries?.[selectedDepartureForItinerary];
+                  
+                  const newDay = { 
+                    day: (currentItinerary?.length || 0) + 1, 
+                    title: '', 
+                    description: '',
+                    image: undefined
+                  };
+
+                  if (selectedDepartureForItinerary === 'default') {
+                    setFormData({
+                      ...formData,
+                      itinerary: [...(formData.itinerary || []), newDay]
+                    });
+                  } else {
+                    setFormData({
+                      ...formData,
+                      departureItineraries: {
+                        ...(formData.departureItineraries || {}),
+                        [selectedDepartureForItinerary]: [...(currentItinerary || []), newDay]
+                      }
+                    });
+                  }
+                }}
                 className="h-11 px-5 rounded-2xl bg-secondary/15 text-secondary border border-secondary/20 uppercase font-black text-[10px] tracking-[0.18em] flex items-center justify-center gap-2 hover:bg-secondary hover:text-white transition-colors"
               >
                 <Plus size={14} /> Add Day
               </button>
             </div>
 
-            <div className="space-y-5">
-              {formData.itinerary?.map((item, index) => (
-                <div key={index} className="p-5 md:p-6 bg-white/[0.04] rounded-[2rem] border border-white/10 relative group">
+            {/* Departure Date Selector for Itinerary */}
+            <div className="space-y-3">
+              <label className={labelClass}>Select Departure Date for Itinerary</label>
+              <p className="text-xs text-white/45 ml-2">Choose which departure date this itinerary is for, or use the default itinerary for all dates</p>
+              
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDepartureForItinerary('default')}
+                  className={`px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${
+                    selectedDepartureForItinerary === 'default'
+                      ? 'bg-secondary text-white border-2 border-secondary shadow-lg'
+                      : 'bg-white/5 text-white/60 border border-white/10 hover:border-white/30'
+                  }`}
+                >
+                  Default Itinerary
+                </button>
+                
+                {(formData.departureDates || []).map((date) => (
+                  <button
+                    key={date}
+                    type="button"
+                    onClick={() => setSelectedDepartureForItinerary(date)}
+                    className={`px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${
+                      selectedDepartureForItinerary === date
+                        ? 'bg-secondary text-white border-2 border-secondary shadow-lg'
+                        : 'bg-white/5 text-white/60 border border-white/10 hover:border-white/30'
+                    }`}
+                  >
+                    {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </button>
+                ))}
+              </div>
+
+              {selectedDepartureForItinerary !== 'default' && (
+                <div className="mt-3 p-4 rounded-xl bg-blue-500/10 border border-blue-400/20">
+                  <p className="text-xs text-blue-300 font-bold flex items-center gap-2">
+                    <Info size={14} />
+                    Creating a custom itinerary for {new Date(selectedDepartureForItinerary).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                  </p>
                   <button
                     type="button"
                     onClick={() => {
-                      const newItinerary = [...(formData.itinerary || [])]
-                      newItinerary.splice(index, 1)
-                      newItinerary.forEach((it, idx) => { it.day = idx + 1 })
-                      setFormData({ ...formData, itinerary: newItinerary })
+                      if (window.confirm('Copy the default itinerary to this departure date?')) {
+                        const newItinerary = JSON.parse(JSON.stringify(formData.itinerary || []));
+                        setFormData({
+                          ...formData,
+                          departureItineraries: {
+                            ...(formData.departureItineraries || {}),
+                            [selectedDepartureForItinerary]: newItinerary
+                          }
+                        });
+                        showToast('Default itinerary copied');
+                      }
                     }}
-                    className="absolute -top-3 -right-3 bg-red-500/15 text-red-300 border border-red-400/20 w-9 h-9 rounded-2xl flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white z-10"
-                    aria-label="Remove day"
+                    className="mt-2 text-xs text-blue-400 underline hover:text-blue-300"
                   >
-                    <Trash2 size={14} />
+                    Copy from default itinerary
                   </button>
+                </div>
+              )}
+            </div>
 
-                  <div className="flex flex-col md:flex-row gap-4 mb-4">
-                    <div className="w-16 h-16 bg-secondary/15 rounded-2xl flex flex-col items-center justify-center shrink-0 border border-secondary/20">
-                      <span className="text-[8px] uppercase font-black text-white/35">Day</span>
-                      <span className="font-black text-secondary text-xl">{item.day}</span>
-                    </div>
-                    <input
-                      type="text"
-                      value={item.title}
-                      onChange={e => {
-                        const newItinerary = [...(formData.itinerary || [])]
-                        newItinerary[index].title = e.target.value
-                        setFormData({ ...formData, itinerary: newItinerary })
+            <div className="space-y-5">
+              {(() => {
+                const currentItinerary = selectedDepartureForItinerary === 'default' 
+                  ? formData.itinerary 
+                  : formData.departureItineraries?.[selectedDepartureForItinerary];
+
+                return currentItinerary?.map((item, index) => (
+                  <div key={index} className="p-5 md:p-6 bg-white/[0.04] rounded-[2rem] border border-white/10 relative group">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedDepartureForItinerary === 'default') {
+                          const newItinerary = [...(formData.itinerary || [])];
+                          newItinerary.splice(index, 1);
+                          newItinerary.forEach((it, idx) => { it.day = idx + 1 });
+                          setFormData({ ...formData, itinerary: newItinerary });
+                        } else {
+                          const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
+                          newItinerary.splice(index, 1);
+                          newItinerary.forEach((it, idx) => { it.day = idx + 1 });
+                          setFormData({
+                            ...formData,
+                            departureItineraries: {
+                              ...(formData.departureItineraries || {}),
+                              [selectedDepartureForItinerary]: newItinerary
+                            }
+                          });
+                        }
                       }}
-                      placeholder="Day Title (e.g. Arrival in Manali)"
-                      className={inputClass}
+                      className="absolute -top-3 -right-3 bg-red-500/15 text-red-300 border border-red-400/20 w-9 h-9 rounded-2xl flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white z-10"
+                      aria-label="Remove day"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+
+                    <div className="flex flex-col md:flex-row gap-4 mb-4">
+                      <div className="w-16 h-16 bg-secondary/15 rounded-2xl flex flex-col items-center justify-center shrink-0 border border-secondary/20">
+                        <span className="text-[8px] uppercase font-black text-white/35">Day</span>
+                        <span className="font-black text-secondary text-xl">{item.day}</span>
+                      </div>
+                      <div className="flex-1 space-y-3">
+                        <input
+                          type="text"
+                          value={item.title}
+                          onChange={e => {
+                            if (selectedDepartureForItinerary === 'default') {
+                              const newItinerary = [...(formData.itinerary || [])];
+                              newItinerary[index].title = e.target.value;
+                              setFormData({ ...formData, itinerary: newItinerary });
+                            } else {
+                              const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
+                              newItinerary[index].title = e.target.value;
+                              setFormData({
+                                ...formData,
+                                departureItineraries: {
+                                  ...(formData.departureItineraries || {}),
+                                  [selectedDepartureForItinerary]: newItinerary
+                                }
+                              });
+                            }
+                          }}
+                          placeholder="Day Title (e.g. Arrival in Manali)"
+                          className={inputClass}
+                          required
+                        />
+                        <div className="space-y-1">
+                          <label className="text-[9px] uppercase font-black text-white/35 tracking-[0.2em] ml-2">Date (Optional)</label>
+                          <input
+                            type="date"
+                            value={item.date || ''}
+                            onChange={e => {
+                              if (selectedDepartureForItinerary === 'default') {
+                                const newItinerary = [...(formData.itinerary || [])];
+                                newItinerary[index] = { ...newItinerary[index], date: e.target.value || undefined };
+                                setFormData({ ...formData, itinerary: newItinerary });
+                              } else {
+                                const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
+                                newItinerary[index] = { ...newItinerary[index], date: e.target.value || undefined };
+                                setFormData({
+                                  ...formData,
+                                  departureItineraries: {
+                                    ...(formData.departureItineraries || {}),
+                                    [selectedDepartureForItinerary]: newItinerary
+                                  }
+                                });
+                              }
+                            }}
+                            className={`${inputClass} text-sm`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Day Image Upload */}
+                    <div className="mb-4">
+                      <label className="text-[9px] uppercase font-black text-white/35 tracking-[0.2em] ml-2 mb-2 block">Day Image (Optional)</label>
+                      <div className="flex gap-3 items-center">
+                        {item.image ? (
+                          <div className="relative w-32 h-20 rounded-xl overflow-hidden border border-white/10 shrink-0">
+                            <img src={item.image} alt={`Day ${item.day}`} className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (selectedDepartureForItinerary === 'default') {
+                                  const newItinerary = [...(formData.itinerary || [])];
+                                  newItinerary[index] = { ...newItinerary[index], image: undefined };
+                                  setFormData({ ...formData, itinerary: newItinerary });
+                                } else {
+                                  const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
+                                  newItinerary[index] = { ...newItinerary[index], image: undefined };
+                                  setFormData({
+                                    ...formData,
+                                    departureItineraries: {
+                                      ...(formData.departureItineraries || {}),
+                                      [selectedDepartureForItinerary]: newItinerary
+                                    }
+                                  });
+                                }
+                              }}
+                              className="absolute top-1 right-1 w-6 h-6 rounded-lg bg-black/70 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
+                              aria-label="Remove image"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        ) : null}
+                        <label className="flex-1 h-12 rounded-xl border border-dashed border-white/20 bg-white/[0.03] text-white/55 font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:border-secondary hover:text-secondary transition-all">
+                          <Upload size={14} /> {item.image ? 'Change Image' : 'Upload Day Image'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="sr-only"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0]
+                              if (!file) return
+                              try {
+                                validateImage(file)
+                                const imageData = await readImage(file)
+                                
+                                if (selectedDepartureForItinerary === 'default') {
+                                  const newItinerary = [...(formData.itinerary || [])];
+                                  newItinerary[index] = { ...newItinerary[index], image: imageData };
+                                  setFormData({ ...formData, itinerary: newItinerary });
+                                } else {
+                                  const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
+                                  newItinerary[index] = { ...newItinerary[index], image: imageData };
+                                  setFormData({
+                                    ...formData,
+                                    departureItineraries: {
+                                      ...(formData.departureItineraries || {}),
+                                      [selectedDepartureForItinerary]: newItinerary
+                                    }
+                                  });
+                                }
+                                setMediaError('')
+                              } catch (error) {
+                                setMediaError(error instanceof Error ? error.message : 'Unable to upload image.')
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <textarea
+                      value={item.description}
+                      onChange={e => {
+                        if (selectedDepartureForItinerary === 'default') {
+                          const newItinerary = [...(formData.itinerary || [])];
+                          newItinerary[index].description = e.target.value;
+                          setFormData({ ...formData, itinerary: newItinerary });
+                        } else {
+                          const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
+                          newItinerary[index].description = e.target.value;
+                          setFormData({
+                            ...formData,
+                            departureItineraries: {
+                              ...(formData.departureItineraries || {}),
+                              [selectedDepartureForItinerary]: newItinerary
+                            }
+                          });
+                        }
+                      }}
+                      placeholder="Day description..."
+                      className={textareaClass}
                       required
                     />
                   </div>
-                  <textarea
-                    value={item.description}
-                    onChange={e => {
-                      const newItinerary = [...(formData.itinerary || [])]
-                      newItinerary[index].description = e.target.value
-                      setFormData({ ...formData, itinerary: newItinerary })
-                    }}
-                    placeholder="Day description..."
-                    className={textareaClass}
-                    required
-                  />
-                </div>
-              ))}
+                ));
+              })()}
 
-              {(!formData.itinerary || formData.itinerary.length === 0) && (
-                <p className="text-center text-white/35 font-bold italic py-8 border border-dashed border-white/10 rounded-[2rem]">
-                  No itinerary days added yet. Add a day to get started.
-                </p>
-              )}
+              {(() => {
+                const currentItinerary = selectedDepartureForItinerary === 'default' 
+                  ? formData.itinerary 
+                  : formData.departureItineraries?.[selectedDepartureForItinerary];
+
+                if (!currentItinerary || currentItinerary.length === 0) {
+                  return (
+                    <p className="text-center text-white/35 font-bold italic py-8 border border-dashed border-white/10 rounded-[2rem]">
+                      No itinerary days added yet. Add a day to get started.
+                    </p>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </section>
 
