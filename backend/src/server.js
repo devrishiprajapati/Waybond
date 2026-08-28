@@ -1217,8 +1217,8 @@ app.get('/api/admin/bookings', async (_req, res, next) => {
 
       return {
         bookingId: booking.id,
-        customerName: booking.user?.name || payload.name || 'N/A',
-        customerEmail: booking.user?.email || payload.email || 'N/A',
+        customerName: booking.user?.name || payload.name || payload.customerName || 'N/A',
+        customerEmail: booking.user?.email || payload.email || payload.customerEmail || 'N/A',
         tripName: payload.tripName || payload.title || 'N/A',
         location: payload.location || 'N/A',
         travelers,
@@ -1226,7 +1226,8 @@ app.get('/api/admin/bookings', async (_req, res, next) => {
         total,
         status: payload.status || 'Pending',
         paymentStatus: payload.paymentStatus || 'Pending Payment',
-        bookingDate: new Date(booking.createdAt).toLocaleDateString('en-IN')
+        bookingDate: payload.bookingDate || new Date(booking.createdAt).toLocaleDateString('en-IN'),
+        travellerDetails: payload.travellerDetails || []
       }
     })
 
@@ -1519,6 +1520,31 @@ app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
         console.error('Failed to send confirmed payment invoice email:', emailError)
       }
     }
+    res.json(toBooking(updated))
+  } catch (error) { next(error) }
+})
+
+// General booking update endpoint for admin
+app.put('/api/admin/bookings/:bookingId', async (req, res, next) => {
+  try {
+    const booking = await prisma.booking.findUnique({ 
+      where: { id: req.params.bookingId }, 
+      include: { user: true } 
+    })
+    if (!booking) return res.status(404).json({ message: 'Booking not found' })
+
+    // Update the booking payload with new data
+    const updatedPayload = {
+      ...booking.payload,
+      ...req.body,
+      updatedAt: new Date().toISOString()
+    }
+
+    const updated = await prisma.booking.update({
+      where: { id: booking.id },
+      data: { payload: updatedPayload }
+    })
+
     res.json(toBooking(updated))
   } catch (error) { next(error) }
 })

@@ -204,7 +204,7 @@ const EditTrip = () => {
     } catch (error) {
       setMediaError(error instanceof Error ? error.message : 'Unable to save the package.')
     }
-  }
+  } 
 
   const handleApplyConfirmedDateChange = () => {
     const index = Number(confirmedDateIndex)
