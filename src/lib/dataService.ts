@@ -66,6 +66,21 @@ export const getTripById = async (id: number): Promise<Trip | undefined> => {
   return trips.find(t => t.id === id);
 }
 
+export const getAdminTrips = async (): Promise<Trip[]> => {
+  const res = await fetchWithTimeout('/api/admin/trips', undefined, 8000)
+  if (!res.ok) throw new Error('Unable to load admin trips from the database.')
+  const data = await res.json()
+  if (!Array.isArray(data)) throw new Error('The database returned an invalid admin trips response.')
+  return data
+}
+
+export const getAdminTripById = async (id: number): Promise<Trip | undefined> => {
+  const res = await fetchWithTimeout(`/api/admin/trips/${id}`, undefined, 8000)
+  if (res.status === 404) return undefined
+  if (!res.ok) throw new Error('Unable to load the package from the database.')
+  return await res.json() as Trip
+}
+
 // Create a URL-friendly slug from trip title
 export const createSlug = (title: string): string => {
   return title

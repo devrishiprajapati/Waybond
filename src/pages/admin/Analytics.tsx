@@ -11,7 +11,8 @@ import {
   MapPin,
   BarChart3,
   PieChart as PieChartIcon,
-  Activity
+  Activity,
+  RotateCcw
 } from 'lucide-react'
 import { Line, Bar, Doughnut, Pie } from 'react-chartjs-2'
 import {
@@ -64,6 +65,10 @@ type AnalyticsData = {
     labels: string[]
     data: number[]
   }
+  monthlyRefunds: {
+    labels: string[]
+    data: number[]
+  }
   userGrowth: {
     labels: string[]
     data: number[]
@@ -71,6 +76,7 @@ type AnalyticsData = {
   stats: {
     totalBookings: number
     totalRevenue: number
+    totalRefunds: number
     averageBookingValue: number
     conversionRate: number
     totalTrips: number
@@ -133,6 +139,10 @@ const Analytics = () => {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         data: [245000, 189000, 310000, 425000, 567000, 489000, 523000, 612000, 534000, 489000, 456000, 678000]
       },
+      monthlyRefunds: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        data: [12000, 0, 25000, 18000, 0, 32000, 15000, 44000, 21000, 0, 19000, 36000]
+      },
       userGrowth: {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
         data: [120, 145, 178, 210, 245, 289]
@@ -140,6 +150,7 @@ const Analytics = () => {
       stats: {
         totalBookings: 289,
         totalRevenue: 5917000,
+        totalRefunds: 222000,
         averageBookingValue: 20473,
         conversionRate: 12.5,
         totalTrips: 9,
@@ -232,6 +243,19 @@ const Analytics = () => {
         data: data?.monthlyRevenue.data || [],
         backgroundColor: 'rgba(16, 185, 129, 0.8)',
         borderColor: '#10b981',
+        borderWidth: 2
+      }
+    ]
+  })
+
+  const getRefundData = () => ({
+    labels: data?.monthlyRefunds.labels || [],
+    datasets: [
+      {
+        label: 'Refunds (₹)',
+        data: data?.monthlyRefunds.data || [],
+        backgroundColor: 'rgba(239, 68, 68, 0.75)',
+        borderColor: '#ef4444',
         borderWidth: 2
       }
     ]
@@ -373,7 +397,7 @@ const Analytics = () => {
           </header>
 
           {/* Key Metrics */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-5 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 md:gap-5 mb-8">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -425,6 +449,25 @@ const Analytics = () => {
               </p>
               <p className="text-2xl font-sans font-black text-white">
                 ₹{(data?.stats.averageBookingValue || 0).toLocaleString('en-IN')}
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12 }}
+              className="liquid-glass-dark border border-white/10 rounded-2xl p-5"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-red-400">
+                  <RotateCcw size={20} />
+                </div>
+              </div>
+              <p className="text-[8px] text-white/35 font-black uppercase tracking-[0.2em] mb-1">
+                Refunds
+              </p>
+              <p className="text-2xl font-sans font-black text-white">
+                ₹{((data?.stats.totalRefunds || 0) / 100000).toFixed(1)}L
               </p>
             </motion.div>
 
@@ -484,8 +527,8 @@ const Analytics = () => {
 
           {/* Charts Grid */}
           <div className="space-y-6">
-            {/* Row 1: Booking Trends & Revenue */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Row 1: Booking Trends, Revenue & Refunds */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -517,6 +560,23 @@ const Analytics = () => {
                 </div>
                 <div style={{ height: '300px' }}>
                   <Bar data={getRevenueData()} options={barChartOptions} />
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="liquid-glass-dark border border-white/10 rounded-[2rem] p-6"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <RotateCcw className="text-red-400" size={20} />
+                  <h2 className="text-xl font-bungee font-black uppercase italic tracking-tighter text-white">
+                    Monthly Refunds
+                  </h2>
+                </div>
+                <div style={{ height: '300px' }}>
+                  <Bar data={getRefundData()} options={barChartOptions} />
                 </div>
               </motion.div>
             </div>

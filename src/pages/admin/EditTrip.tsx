@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Globe, Upload, FileText, CheckCircle } from 'lucide-react'
-import { getTripById, updateTrip, addTrip } from '../../lib/dataService'
-import { DEFAULT_CANCELLATION_POLICY, Trip } from '../../lib/trips'
+import { getAdminTripById, updateTrip, addTrip } from '../../lib/dataService'
+import { DEFAULT_AGE_LIMIT, DEFAULT_CANCELLATION_POLICY, ExpeditionLead, Trip } from '../../lib/trips'
 import { parseDateOnly } from '../../lib/date'
 
 const CATEGORIES = ['Adventure', 'Beach', 'Luxury', 'Nature', 'Honeymoon', 'Backpacking']
@@ -23,6 +23,21 @@ const sectionClass = 'liquid-glass-dark border border-white/10 rounded-[2.5rem] 
 const labelClass = 'text-[10px] uppercase font-black text-white/45 tracking-[0.2em] ml-2 flex items-center'
 const inputClass = 'w-full bg-white/5 border border-white/10 p-4 md:p-5 rounded-2xl text-white placeholder:text-white/25 focus:border-secondary focus:bg-white/10 outline-none transition-all font-bold'
 const textareaClass = `${inputClass} min-h-[120px] resize-none leading-relaxed`
+
+const createEmptyLead = (): ExpeditionLead => ({
+  name: '',
+  role: '',
+  bio: '',
+  avatar: '',
+  rating: 5.0,
+  trips: 0
+})
+
+const getFormLeads = (formData: Partial<Trip>): ExpeditionLead[] => {
+  if (Array.isArray(formData.captains) && formData.captains.length > 0) return formData.captains
+  if (formData.captain) return [formData.captain]
+  return [createEmptyLead()]
+}
 
 const toDateInputValue = (value?: string) => {
   const parsed = parseDateOnly(String(value || '').trim())
@@ -66,11 +81,14 @@ const EditTrip = () => {
       rating: 5.0,
       trips: 0
     },
+    captains: [createEmptyLead()],
     itinerary: [],
     pdfUrl: '',
     thingsToCarry: [''],
     termsAndConditions: '',
-    cancellationPolicy: DEFAULT_CANCELLATION_POLICY
+    cancellationPolicy: DEFAULT_CANCELLATION_POLICY,
+    ageLimit: DEFAULT_AGE_LIMIT,
+    isVisible: true
   })
   const [mediaError, setMediaError] = useState('')
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false })
@@ -101,8 +119,14 @@ const EditTrip = () => {
       navigate('/admin/login')
     }
     if (id && id !== 'new') {
-      getTripById(parseInt(id)).then(trip => {
-        if (trip) setFormData({ ...trip, cancellationPolicy: trip.cancellationPolicy || DEFAULT_CANCELLATION_POLICY })
+      getAdminTripById(parseInt(id)).then(trip => {
+        if (trip) setFormData({
+          ...trip,
+          cancellationPolicy: trip.cancellationPolicy || DEFAULT_CANCELLATION_POLICY,
+          ageLimit: { ...DEFAULT_AGE_LIMIT, ...(trip.ageLimit || {}) },
+          captains: Array.isArray(trip.captains) && trip.captains.length > 0 ? trip.captains : [trip.captain],
+          isVisible: trip.isVisible !== false
+        })
       })
     }
   }, [id, navigate])
@@ -144,12 +168,33 @@ const EditTrip = () => {
     }
   }
 
-  const handleCaptainUpload = async (file?: File) => {
+  const updateLead = (index: number, updates: Partial<ExpeditionLead>) => {
+    const captains = getFormLeads(formData).map((lead, leadIndex) => (
+      leadIndex === index ? { ...lead, ...updates } : lead
+    ))
+    setFormData({ ...formData, captains, captain: captains[0] })
+  }
+
+  const addLead = () => {
+    const captains = [...getFormLeads(formData), createEmptyLead()]
+    setFormData({ ...formData, captains, captain: captains[0] })
+  }
+
+  const removeLead = (index: number) => {
+    const captains = getFormLeads(formData).filter((_, leadIndex) => leadIndex !== index)
+    const nextCaptains = captains.length > 0 ? captains : [createEmptyLead()]
+    setFormData({ ...formData, captains: nextCaptains, captain: nextCaptains[0] })
+  }
+
+  const handleCaptainUpload = async (index: number, file?: File) => {
     if (!file) return
     try {
       validateImage(file)
       const avatar = await readImage(file)
-      setFormData((current) => ({ ...current, captain: { ...current.captain!, avatar } }))
+      const captains = getFormLeads(formData).map((lead, leadIndex) => (
+        leadIndex === index ? { ...lead, avatar } : lead
+      ))
+      setFormData((current) => ({ ...current, captains, captain: captains[0] }))
       setMediaError('')
     } catch (error) {
       setMediaError(error instanceof Error ? error.message : 'Unable to upload image.')
@@ -177,16 +222,31 @@ const EditTrip = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const minAge = formData.ageLimit?.min ? Number(formData.ageLimit.min) : undefined
+    const maxAge = formData.ageLimit?.max ? Number(formData.ageLimit.max) : undefined
+    if (minAge && maxAge && minAge > maxAge) {
+      setMediaError('Minimum age cannot be greater than maximum age.')
+      return
+    }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _pdfName, ...cleanData } = formData as any
+    const captains = getFormLeads(formData).filter((lead) => lead.name.trim() || lead.role.trim() || lead.bio.trim() || lead.avatar.trim())
+    const assignedLeads = captains.length > 0 ? captains : [createEmptyLead()]
     const finalData = {
       ...cleanData,
+      captain: assignedLeads[0],
+      captains: assignedLeads,
       images: formData.images && formData.images.length > 0 ? formData.images : [formData.image || ''],
       inclusion: (formData.inclusion || []).filter(item => item.trim()),
       exclusion: (formData.exclusion || []).filter(item => item.trim()),
       thingsToCarry: (formData.thingsToCarry || []).filter(item => item.trim()),
       termsAndConditions: (formData.termsAndConditions || '').trim(),
       cancellationPolicy: (formData.cancellationPolicy || DEFAULT_CANCELLATION_POLICY).trim(),
+      ageLimit: {
+        min: formData.ageLimit?.min ? Number(formData.ageLimit.min) : '',
+        max: formData.ageLimit?.max ? Number(formData.ageLimit.max) : ''
+      },
+      isVisible: formData.isVisible !== false,
       departureDates: mergeUniqueDates([cleanData.nextBatch, ...(formData.departureDates || [])]),
       itinerary: formData.itinerary || [],
       departureItineraries: formData.departureItineraries || undefined
@@ -359,6 +419,37 @@ const EditTrip = () => {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className={labelClass}>Age Limit</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 relative">
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.ageLimit?.min ?? ''}
+                      onChange={e => setFormData({ ...formData, ageLimit: { ...(formData.ageLimit || {}), min: e.target.value } })}
+                      placeholder="Min"
+                      className={inputClass}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-white/30 pointer-events-none">MIN</span>
+                  </div>
+                  <div className="flex-1 relative">
+                    <input
+                      type="number"
+                      min="1"
+                      value={formData.ageLimit?.max ?? ''}
+                      onChange={e => setFormData({ ...formData, ageLimit: { ...(formData.ageLimit || {}), max: e.target.value } })}
+                      placeholder="Max"
+                      className={inputClass}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-widest text-white/30 pointer-events-none">MAX</span>
+                  </div>
+                </div>
+                <p className="text-[10px] text-white/30 ml-2">Leave min or max blank for open-ended eligibility.</p>
+              </div>
+            </div>
+
             <div className="space-y-3">
               <label className={labelClass}>Difficulty Level</label>
               <p className="text-xs text-white/45 ml-2 mb-3">Select the physical difficulty level for this package</p>
@@ -374,6 +465,29 @@ const EditTrip = () => {
                       }`}
                   >
                     {level.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className={labelClass}>Package Visibility</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { value: true, label: 'Show', help: 'Visible to users' },
+                  { value: false, label: 'Hide', help: 'Hidden from users' }
+                ].map(option => (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, isVisible: option.value })}
+                    className={`h-16 rounded-2xl border-2 px-5 text-left transition-all ${formData.isVisible !== false === option.value
+                      ? 'bg-secondary/15 text-secondary border-secondary/40 shadow-lg'
+                      : 'bg-white/5 border-white/10 text-white/45 hover:border-white/20 hover:text-white'
+                      }`}
+                  >
+                    <span className="block text-xs font-black uppercase tracking-[0.18em]">{option.label}</span>
+                    <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.12em] opacity-70">{option.help}</span>
                   </button>
                 ))}
               </div>
@@ -1071,53 +1185,113 @@ const EditTrip = () => {
           </section>
 
           <section className={sectionClass}>
-            <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
-              <User size={20} className="mr-3 text-secondary" /> Expedition Lead
-            </h3>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
+                <User size={20} className="mr-3 text-secondary" /> Expedition Lead
+              </h3>
+              <button
+                type="button"
+                onClick={addLead}
+                className="h-11 px-5 rounded-2xl bg-secondary/15 text-secondary border border-secondary/20 uppercase font-black text-[10px] tracking-[0.18em] flex items-center justify-center gap-2 hover:bg-secondary hover:text-white transition-colors"
+              >
+                <Plus size={14} /> Add Lead
+              </button>
+            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-7">
-              <div className="space-y-4">
-                <div className="aspect-square rounded-[2rem] overflow-hidden bg-white/[0.03] border border-white/10">
-                  {formData.captain?.avatar ? (
-                    <img src={formData.captain.avatar} alt="Captain preview" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="h-full flex items-center justify-center text-white/20">
-                      <User size={44} />
-                    </div>
+            <div className="space-y-5">
+              {getFormLeads(formData).map((lead, index) => (
+                <div key={index} className="relative grid grid-cols-1 lg:grid-cols-[180px_1fr] gap-6 rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 md:p-6">
+                  {getFormLeads(formData).length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeLead(index)}
+                      className="absolute -right-3 -top-3 z-10 flex h-9 w-9 items-center justify-center rounded-2xl border border-red-400/20 bg-red-500/15 text-red-300 transition-all hover:bg-red-500 hover:text-white"
+                      aria-label="Remove expedition lead"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   )}
-                </div>
-                <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase font-black tracking-widest">
-                  <MapPin size={13} className="text-secondary" /> Lead Preview
-                </div>
-              </div>
 
-              <div className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className={labelClass}>Captain Name</label>
-                    <input
-                      type="text"
-                      value={formData.captain?.name}
-                      onChange={e => setFormData({ ...formData, captain: { ...formData.captain!, name: e.target.value } })}
-                      placeholder="e.g. Captain Rohan Shah"
-                      className={inputClass}
-                    />
+                  <div className="space-y-4">
+                    <div className="aspect-square rounded-[2rem] overflow-hidden bg-white/[0.03] border border-white/10">
+                      {lead.avatar ? (
+                        <img src={lead.avatar} alt={`${lead.name || 'Lead'} preview`} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="h-full flex items-center justify-center text-white/20">
+                          <User size={44} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase font-black tracking-widest">
+                      <MapPin size={13} className="text-secondary" /> Lead {index + 1}
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className={labelClass}>Captain Image</label>
-                    <label className="h-14 rounded-2xl border border-secondary/35 bg-secondary/10 text-secondary font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:bg-secondary hover:text-white transition-all"><Upload size={16} /> Upload Captain Image<input type="file" accept="image/*" className="sr-only" onChange={(event) => handleCaptainUpload(event.target.files?.[0])} /></label>
+
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className={labelClass}>Captain Name</label>
+                        <input
+                          type="text"
+                          value={lead.name}
+                          onChange={e => updateLead(index, { name: e.target.value })}
+                          placeholder="e.g. Captain Rohan Shah"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className={labelClass}>Captain Role</label>
+                        <input
+                          type="text"
+                          value={lead.role}
+                          onChange={e => updateLead(index, { role: e.target.value })}
+                          placeholder="e.g. Lead Expedition Specialist"
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="space-y-2">
+                        <label className={labelClass}>Captain Image</label>
+                        <label className="h-14 rounded-2xl border border-secondary/35 bg-secondary/10 text-secondary font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:bg-secondary hover:text-white transition-all"><Upload size={16} /> Upload Image<input type="file" accept="image/*" className="sr-only" onChange={(event) => handleCaptainUpload(index, event.target.files?.[0])} /></label>
+                      </div>
+                      <div className="space-y-2">
+                        <label className={labelClass}>Trips Led</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={lead.trips}
+                          onChange={e => updateLead(index, { trips: Number(e.target.value) || 0 })}
+                          className={inputClass}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className={labelClass}>Rating</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="5"
+                          step="0.1"
+                          value={lead.rating}
+                          onChange={e => updateLead(index, { rating: Number(e.target.value) || 0 })}
+                          className={inputClass}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className={labelClass}>Captain Bio</label>
+                      <textarea
+                        value={lead.bio}
+                        onChange={e => updateLead(index, { bio: e.target.value })}
+                        placeholder="Professional background and expertise..."
+                        className={textareaClass}
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className={labelClass}>Captain Bio</label>
-                  <textarea
-                    value={formData.captain?.bio}
-                    onChange={e => setFormData({ ...formData, captain: { ...formData.captain!, bio: e.target.value } })}
-                    placeholder="Professional background and expertise..."
-                    className={textareaClass}
-                  />
-                </div>
-              </div>
+              ))}
             </div>
           </section>
 

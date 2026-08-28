@@ -7,7 +7,7 @@ import { communityGalleries, loadCommunityGalleries } from '../lib/communityGall
 import { useWishlist } from '../lib/wishlist'
 import { haptics } from '../lib/haptics'
 import { getTripWhatsAppLink } from '../lib/trips'
-import { createSlug } from '../lib/dataService'
+import { createSlug, getTrips } from '../lib/dataService'
 
 type TeamMember = {
   id: number | string
@@ -442,6 +442,26 @@ const Community = () => {
 
 const Wishlist = () => {
   const { wishlist, remove, isLoading } = useWishlist()
+  const [visibleTripIds, setVisibleTripIds] = React.useState<Set<number> | null>(null)
+
+  React.useEffect(() => {
+    let isMounted = true
+    void getTrips()
+      .then((trips) => {
+        if (isMounted) setVisibleTripIds(new Set(trips.map((trip) => trip.id)))
+      })
+      .catch(() => {
+        if (isMounted) setVisibleTripIds(null)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const visibleWishlist = visibleTripIds
+    ? wishlist.filter((trip) => visibleTripIds.has(trip.id))
+    : wishlist
 
   return (
     <PageLayout
@@ -454,7 +474,7 @@ const Wishlist = () => {
         <div className="liquid-glass-dark py-32 md:py-40 rounded-[4rem] border border-white/10 text-center shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           <p className="text-white/50 italic text-lg">Loading your wishlist...</p>
         </div>
-      ) : wishlist.length === 0 ? (
+      ) : visibleWishlist.length === 0 ? (
         <div className="liquid-glass-dark py-32 md:py-40 rounded-[4rem] border border-white/10 text-center shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
           <div className="relative inline-block mb-10">
             <Heart size={80} className="mx-auto text-white/10 fill-white/10 group-hover:fill-secondary/20 transition-all scale-110" />
@@ -473,12 +493,12 @@ const Wishlist = () => {
         <div className="space-y-8">
           <div className="flex items-center justify-between">
             <p className="text-white/50 text-sm font-medium">
-              <span className="text-secondary font-black">{wishlist.length}</span> {wishlist.length === 1 ? 'adventure' : 'adventures'} saved
+              <span className="text-secondary font-black">{visibleWishlist.length}</span> {visibleWishlist.length === 1 ? 'adventure' : 'adventures'} saved
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {wishlist.map((trip, index) => (
+            {visibleWishlist.map((trip, index) => (
               <motion.div
                 key={trip.id}
                 initial={{ opacity: 0, y: 20 }}

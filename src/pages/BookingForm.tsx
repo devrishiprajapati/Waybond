@@ -5,6 +5,7 @@ import { ArrowLeft, Users } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { getTripById } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
+import { formatAgeLimit, isAgeWithinLimit } from '../lib/trips'
 
 interface TravellerInfo {
   name: string
@@ -34,6 +35,8 @@ const BookingForm = () => {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
+
+  const isTravellerEligible = (age: number) => isAgeWithinLimit(age, trip?.ageLimit)
 
   // Calculate age from date of birth
   const calculateAge = (birthDate: string): number => {
@@ -89,7 +92,7 @@ const BookingForm = () => {
       (updated[index] as any)[field] = value
       const age = calculateAge(value)
       updated[index].age = age > 0 ? age.toString() : ''
-      updated[index].isEligible = age <= 40 && age > 0
+      updated[index].isEligible = isTravellerEligible(age)
     } else {
       (updated[index] as any)[field] = value
     }
@@ -117,8 +120,8 @@ const BookingForm = () => {
         const age = calculateAge(traveller.dateOfBirth)
         if (age <= 0) {
           newErrors[`dob_${idx}`] = 'Please enter a valid date of birth'
-        } else if (age > 40) {
-          newErrors[`dob_${idx}`] = 'Not eligible (Age must be 40 or below)'
+        } else if (!isTravellerEligible(age)) {
+          newErrors[`dob_${idx}`] = `Not eligible for this trip. Age limit: ${formatAgeLimit(trip?.ageLimit)}`
         }
       }
       
@@ -220,6 +223,9 @@ const BookingForm = () => {
           </button>
 
           <h1 className="text-3xl font-black text-gray-900 mb-8">Booking Details</h1>
+          <p className="mb-6 rounded-2xl border border-secondary/15 bg-secondary/5 px-4 py-3 text-sm font-semibold text-gray-700">
+            Age limit: <span className="font-black text-secondary">{formatAgeLimit(trip.ageLimit)}</span>
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Number of Travellers */}
