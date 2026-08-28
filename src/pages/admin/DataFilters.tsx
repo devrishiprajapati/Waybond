@@ -674,136 +674,320 @@ const DataFilters = () => {
     const doc = new jsPDF('portrait')
     const dataToExport = selectedRows && selectedRows.length > 0 ? selectedRows : bookings
     
-    doc.setFontSize(20)
-    doc.setFont('helvetica', 'bold')
-    doc.text('WayBond Bookings & Traveller Details', 14, 20)
-    doc.setFontSize(10)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(100)
-    doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 14, 28)
-    doc.text(`Total Bookings: ${dataToExport.length}`, 14, 34)
-    
-    let yPosition = 44
+    const pageWidth = doc.internal.pageSize.width
     const pageHeight = doc.internal.pageSize.height
-    const margin = 14
-    const lineHeight = 6
+    const margin = 15
+    const contentWidth = pageWidth - (margin * 2)
+    
+    // Header with gradient effect (simulated with rectangles)
+    doc.setFillColor(100, 149, 237)
+    doc.rect(0, 0, pageWidth, 45, 'F')
+    doc.setFillColor(59, 130, 246)
+    doc.rect(0, 30, pageWidth, 15, 'F')
+    
+    // WayBond Logo/Title
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(28)
+    doc.setFont('helvetica', 'bold')
+    doc.text('WAYBOND', margin, 20)
+    
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Travel Experiences', margin, 28)
+    
+    // Document title
+    doc.setFontSize(14)
+    doc.setFont('helvetica', 'bold')
+    doc.text('BOOKINGS & TRAVELLER DETAILS REPORT', margin, 38)
+    
+    // Report info box
+    doc.setFillColor(248, 250, 252)
+    doc.rect(margin, 50, contentWidth, 20, 'F')
+    doc.setDrawColor(226, 232, 240)
+    doc.rect(margin, 50, contentWidth, 20, 'S')
+    
+    doc.setTextColor(71, 85, 105)
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Generated: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })} at ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`, margin + 3, 57)
+    doc.text(`Total Bookings: ${dataToExport.length}`, margin + 3, 63)
+    
+    const totalTravellers = dataToExport.reduce((sum, b) => sum + (b.travellerDetails?.length || 0), 0)
+    doc.text(`Total Travellers: ${totalTravellers}`, margin + 3, 69)
+    
+    let yPosition = 78
+    const lineHeight = 5
     
     dataToExport.forEach((booking, bookingIndex) => {
-      // Check if we need a new page
-      if (yPosition > pageHeight - 60) {
+      // Check if we need a new page for booking header
+      if (yPosition > pageHeight - 80) {
         doc.addPage()
         yPosition = 20
       }
       
-      // Booking header
+      // Booking header with gradient
       doc.setFillColor(100, 149, 237)
-      doc.rect(margin, yPosition, 182, 8, 'F')
+      doc.rect(margin, yPosition, contentWidth, 10, 'F')
+      doc.setFillColor(79, 128, 217)
+      doc.rect(margin, yPosition + 7, contentWidth, 3, 'F')
+      
       doc.setTextColor(255, 255, 255)
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text(`BOOKING #${bookingIndex + 1}`, margin + 3, yPosition + 7)
+      
+      // Booking ID badge
+      doc.setFillColor(255, 255, 255)
+      doc.roundedRect(contentWidth - 45, yPosition + 2, 55, 6, 1, 1, 'F')
+      doc.setTextColor(100, 149, 237)
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'bold')
+      doc.text(booking.bookingId, contentWidth - 42, yPosition + 6)
+      
+      yPosition += 12
+      
+      // Booking details card
+      doc.setFillColor(255, 255, 255)
+      doc.roundedRect(margin, yPosition, contentWidth, 32, 2, 2, 'FD')
+      doc.setDrawColor(226, 232, 240)
+      doc.roundedRect(margin, yPosition, contentWidth, 32, 2, 2, 'S')
+      
+      doc.setTextColor(15, 23, 42)
       doc.setFontSize(11)
       doc.setFont('helvetica', 'bold')
-      doc.text(`Booking ${bookingIndex + 1}: ${booking.bookingId}`, margin + 2, yPosition + 5.5)
-      yPosition += 10
+      doc.text(booking.customerName, margin + 4, yPosition + 6)
       
-      // Booking details
-      doc.setTextColor(50, 50, 50)
-      doc.setFontSize(9)
+      doc.setTextColor(100, 116, 139)
+      doc.setFontSize(8)
       doc.setFont('helvetica', 'normal')
-      doc.text(`Customer: ${booking.customerName} | Email: ${booking.customerEmail}`, margin + 2, yPosition)
-      yPosition += lineHeight
-      doc.text(`Trip: ${booking.tripName} | Location: ${booking.location}`, margin + 2, yPosition)
-      yPosition += lineHeight
-      doc.text(`Total: ₹${booking.total.toLocaleString('en-IN')} | Status: ${booking.status} | Payment: ${booking.paymentStatus} | Date: ${booking.bookingDate}`, margin + 2, yPosition)
-      yPosition += lineHeight + 2
+      doc.text(booking.customerEmail, margin + 4, yPosition + 11)
       
-      // Traveller details
+      // Trip info with icon simulation
+      doc.setFillColor(239, 246, 255)
+      doc.roundedRect(margin + 4, yPosition + 14, contentWidth - 8, 14, 1, 1, 'F')
+      
+      doc.setTextColor(59, 130, 246)
+      doc.setFontSize(7)
+      doc.setFont('helvetica', 'bold')
+      doc.text('TRIP', margin + 6, yPosition + 18)
+      
+      doc.setTextColor(30, 41, 59)
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'bold')
+      doc.text(booking.tripName, margin + 6, yPosition + 22)
+      
+      doc.setTextColor(100, 116, 139)
+      doc.setFontSize(7)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`${booking.location} | ${booking.travelers} ${booking.travelers === 1 ? 'Traveller' : 'Travellers'}`, margin + 6, yPosition + 26)
+      
+      // Payment info badges
+      const badgeY = yPosition + 16
+      let badgeX = contentWidth - 55
+      
+      // Status badge
+      const statusColors: Record<string, { bg: [number, number, number], text: [number, number, number] }> = {
+        'Confirmed': { bg: [16, 185, 129], text: [255, 255, 255] },
+        'Pending': { bg: [251, 191, 36], text: [120, 53, 15] },
+        'Cancelled': { bg: [239, 68, 68], text: [255, 255, 255] },
+        'Payment Pending': { bg: [249, 115, 22], text: [255, 255, 255] }
+      }
+      
+      const statusColor = statusColors[booking.status] || { bg: [156, 163, 175] as [number, number, number], text: [255, 255, 255] as [number, number, number] }
+      doc.setFillColor(statusColor.bg[0], statusColor.bg[1], statusColor.bg[2])
+      doc.roundedRect(badgeX, badgeY, 25, 5, 1, 1, 'F')
+      doc.setTextColor(statusColor.text[0], statusColor.text[1], statusColor.text[2])
+      doc.setFontSize(6)
+      doc.setFont('helvetica', 'bold')
+      doc.text(booking.status.toUpperCase(), badgeX + 12.5, badgeY + 3.5, { align: 'center' })
+      
+      // Payment badge
+      badgeX += 28
+      const paymentColors: Record<string, { bg: [number, number, number], text: [number, number, number] }> = {
+        'Paid': { bg: [16, 185, 129], text: [255, 255, 255] },
+        'Online': { bg: [16, 185, 129], text: [255, 255, 255] },
+        'Cash': { bg: [139, 92, 246], text: [255, 255, 255] },
+        'Pending Payment': { bg: [251, 191, 36], text: [120, 53, 15] }
+      }
+      
+      const paymentColor = paymentColors[booking.paymentStatus] || { bg: [156, 163, 175] as [number, number, number], text: [255, 255, 255] as [number, number, number] }
+      doc.setFillColor(paymentColor.bg[0], paymentColor.bg[1], paymentColor.bg[2])
+      doc.roundedRect(badgeX, badgeY, 25, 5, 1, 1, 'F')
+      doc.setTextColor(paymentColor.text[0], paymentColor.text[1], paymentColor.text[2])
+      doc.setFontSize(6)
+      doc.setFont('helvetica', 'bold')
+      doc.text(booking.paymentStatus.toUpperCase(), badgeX + 12.5, badgeY + 3.5, { align: 'center' })
+      
+      // Amount and date
+      doc.setTextColor(15, 23, 42)
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text(`₹${booking.total.toLocaleString('en-IN')}`, contentWidth + 10, yPosition + 6, { align: 'right' })
+      
+      doc.setTextColor(100, 116, 139)
+      doc.setFontSize(7)
+      doc.setFont('helvetica', 'normal')
+      doc.text(booking.bookingDate, contentWidth + 10, yPosition + 11, { align: 'right' })
+      
+      yPosition += 35
+      
+      // Traveller details section
       const travellerDetails = booking.travellerDetails || []
       if (travellerDetails.length > 0) {
-        doc.setFontSize(10)
+        // Section header
+        doc.setFillColor(13, 115, 119)
+        doc.rect(margin, yPosition, contentWidth, 7, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFontSize(9)
         doc.setFont('helvetica', 'bold')
-        doc.setTextColor(13, 115, 119)
-        doc.text(`Travellers (${travellerDetails.length}):`, margin + 2, yPosition)
-        yPosition += lineHeight
+        doc.text(`TRAVELLERS (${travellerDetails.length})`, margin + 3, yPosition + 5)
+        
+        yPosition += 9
         
         travellerDetails.forEach((traveller, travellerIndex) => {
-          // Check if we need a new page for traveller details
-          if (yPosition > pageHeight - 40) {
+          // Check if we need a new page
+          if (yPosition > pageHeight - 50) {
             doc.addPage()
             yPosition = 20
           }
           
-          doc.setFillColor(240, 249, 255)
-          doc.rect(margin + 4, yPosition - 4, 174, 30, 'F')
-          doc.setDrawColor(100, 149, 237)
-          doc.rect(margin + 4, yPosition - 4, 174, 30, 'S')
+          // Traveller card
+          doc.setFillColor(240, 253, 244)
+          doc.roundedRect(margin + 2, yPosition, contentWidth - 4, 38, 2, 2, 'F')
+          doc.setDrawColor(187, 247, 208)
+          doc.setLineWidth(0.5)
+          doc.roundedRect(margin + 2, yPosition, contentWidth - 4, 38, 2, 2, 'S')
           
-          doc.setFontSize(9)
-          doc.setFont('helvetica', 'bold')
-          doc.setTextColor(0, 0, 0)
-          doc.text(`Traveller ${travellerIndex + 1}`, margin + 6, yPosition)
-          yPosition += lineHeight - 1
-          
-          doc.setFont('helvetica', 'normal')
+          // Traveller number badge
+          doc.setFillColor(13, 115, 119)
+          doc.circle(margin + 7, yPosition + 5, 3, 'F')
+          doc.setTextColor(255, 255, 255)
           doc.setFontSize(8)
-          doc.setTextColor(60, 60, 60)
+          doc.setFont('helvetica', 'bold')
+          doc.text(`${travellerIndex + 1}`, margin + 7, yPosition + 6.5, { align: 'center' })
           
-          if (traveller.name) {
-            doc.text(`Name: ${traveller.name}`, margin + 6, yPosition)
-            yPosition += lineHeight - 1
+          // Traveller name
+          doc.setTextColor(6, 78, 59)
+          doc.setFontSize(10)
+          doc.setFont('helvetica', 'bold')
+          doc.text(traveller.name || 'N/A', margin + 12, yPosition + 6)
+          
+          doc.setTextColor(21, 128, 61)
+          doc.setFontSize(7)
+          doc.setFont('helvetica', 'normal')
+          
+          let infoY = yPosition + 12
+          const col1X = margin + 6
+          const col2X = margin + (contentWidth / 2) + 2
+          const infoGap = 6
+          
+          // Column 1
+          if (traveller.gender) {
+            doc.setFont('helvetica', 'bold')
+            doc.text('Gender:', col1X, infoY)
+            doc.setFont('helvetica', 'normal')
+            doc.text(traveller.gender, col1X + 14, infoY)
+            infoY += infoGap
           }
           
-          const line2Parts = []
-          if (traveller.gender) line2Parts.push(`Gender: ${traveller.gender}`)
-          if (traveller.dateOfBirth || traveller.dob) line2Parts.push(`DOB: ${traveller.dateOfBirth || traveller.dob}`)
-          if (line2Parts.length > 0) {
-            doc.text(line2Parts.join(' | '), margin + 6, yPosition)
-            yPosition += lineHeight - 1
+          if (traveller.dateOfBirth || traveller.dob) {
+            doc.setFont('helvetica', 'bold')
+            doc.text('DOB:', col1X, infoY)
+            doc.setFont('helvetica', 'normal')
+            const dob = traveller.dateOfBirth || traveller.dob
+            const formattedDob = dob ? new Date(dob).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : dob
+            doc.text(formattedDob || 'N/A', col1X + 14, infoY)
+            infoY += infoGap
           }
           
-          const line3Parts = []
-          if (traveller.phone) line3Parts.push(`Phone: ${traveller.phone}`)
-          if (traveller.emergencyContact) line3Parts.push(`Emergency: ${traveller.emergencyContact}`)
-          if (line3Parts.length > 0) {
-            doc.text(line3Parts.join(' | '), margin + 6, yPosition)
-            yPosition += lineHeight - 1
+          if (traveller.phone) {
+            doc.setFont('helvetica', 'bold')
+            doc.text('Phone:', col1X, infoY)
+            doc.setFont('helvetica', 'normal')
+            doc.text(traveller.phone, col1X + 14, infoY)
+            infoY += infoGap
           }
+          
+          if (traveller.emergencyContact) {
+            doc.setFont('helvetica', 'bold')
+            doc.text('Emergency:', col1X, infoY)
+            doc.setFont('helvetica', 'normal')
+            doc.text(traveller.emergencyContact, col1X + 14, infoY)
+          }
+          
+          // Column 2
+          infoY = yPosition + 12
           
           if (traveller.email) {
-            doc.text(`Email: ${traveller.email}`, margin + 6, yPosition)
-            yPosition += lineHeight - 1
+            doc.setFont('helvetica', 'bold')
+            doc.text('Email:', col2X, infoY)
+            doc.setFont('helvetica', 'normal')
+            doc.text(traveller.email.length > 28 ? traveller.email.substring(0, 25) + '...' : traveller.email, col2X + 12, infoY)
+            infoY += infoGap
           }
           
-          const locationParts = []
-          if (traveller.city) locationParts.push(traveller.city)
-          if (traveller.state) locationParts.push(traveller.state)
-          if (locationParts.length > 0) {
-            doc.text(`Location: ${locationParts.join(', ')}`, margin + 6, yPosition)
+          if (traveller.city) {
+            doc.setFont('helvetica', 'bold')
+            doc.text('City:', col2X, infoY)
+            doc.setFont('helvetica', 'normal')
+            doc.text(traveller.city, col2X + 12, infoY)
+            infoY += infoGap
           }
           
-          yPosition += lineHeight + 4
+          if (traveller.state) {
+            doc.setFont('helvetica', 'bold')
+            doc.text('State:', col2X, infoY)
+            doc.setFont('helvetica', 'normal')
+            doc.text(traveller.state, col2X + 12, infoY)
+          }
+          
+          yPosition += 40
         })
       } else {
+        // No travellers message
+        doc.setFillColor(254, 243, 199)
+        doc.roundedRect(margin + 2, yPosition, contentWidth - 4, 10, 1, 1, 'F')
+        doc.setTextColor(161, 98, 7)
         doc.setFontSize(8)
         doc.setFont('helvetica', 'italic')
-        doc.setTextColor(150, 150, 150)
-        doc.text('No traveller details available', margin + 2, yPosition)
-        yPosition += lineHeight
+        doc.text('No traveller details available for this booking', margin + 5, yPosition + 6)
+        yPosition += 12
       }
       
-      yPosition += 4
+      yPosition += 8
+      
+      // Separator line
+      if (bookingIndex < dataToExport.length - 1) {
+        doc.setDrawColor(226, 232, 240)
+        doc.setLineWidth(0.5)
+        doc.line(margin, yPosition, contentWidth + margin, yPosition)
+        yPosition += 8
+      }
     })
     
-    // Add footer with page numbers
+    // Footer on all pages
     const pageCount = doc.internal.pages.length - 1
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i)
+      
+      // Footer background
+      doc.setFillColor(248, 250, 252)
+      doc.rect(0, pageHeight - 15, pageWidth, 15, 'F')
+      
+      // Footer content
+      doc.setTextColor(100, 116, 139)
+      doc.setFontSize(7)
+      doc.setFont('helvetica', 'normal')
+      doc.text('WayBond Travel Experiences | support@waybond.com | www.waybond.com', pageWidth / 2, pageHeight - 8, { align: 'center' })
+      
       doc.setFontSize(8)
-      doc.setTextColor(150)
-      doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width / 2, pageHeight - 10, { align: 'center' })
+      doc.setFont('helvetica', 'bold')
+      doc.text(`Page ${i} of ${pageCount}`, pageWidth / 2, pageHeight - 4, { align: 'center' })
     }
     
     const filename = selectedRows && selectedRows.length > 0 
-      ? `waybond-bookings-with-travellers-${dataToExport.length}.pdf`
-      : 'waybond-bookings-with-travellers-all.pdf'
+      ? `WayBond-Bookings-Report-${dataToExport.length}-bookings.pdf`
+      : `WayBond-Bookings-Report-All.pdf`
     doc.save(filename)
   }
 
@@ -1777,7 +1961,7 @@ const DataFilters = () => {
               onClick={() => setActiveTab('trips')}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] transition-all whitespace-nowrap ${
                 activeTab === 'trips'
-                  ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
+                  ? 'bg-secondary text-white'
                   : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
               }`}
             >
@@ -1788,7 +1972,7 @@ const DataFilters = () => {
               onClick={() => setActiveTab('users')}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] transition-all whitespace-nowrap ${
                 activeTab === 'users'
-                  ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
+                  ? 'bg-secondary text-white'
                   : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
               }`}
             >
@@ -1799,7 +1983,7 @@ const DataFilters = () => {
               onClick={() => setActiveTab('bookings')}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] transition-all whitespace-nowrap ${
                 activeTab === 'bookings'
-                  ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
+                  ? 'bg-secondary text-white'
                   : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
               }`}
             >
