@@ -101,7 +101,7 @@ const Navbar = () => {
                 </Link>
                 <button
                   onClick={() => handleBookNow('/discover')}
-                  className="bg-secondary text-white px-4 md:px-5 py-2 rounded-full font-black text-[7px] md:text-[8px] uppercase tracking-widest transition-all duration-300 shadow-xl shadow-secondary/20 transform hover:scale-105 active:scale-95 whitespace-nowrap flex items-center justify-center"
+                  className="bg-secondary text-white px-4 md:px-5 py-2 rounded-full font-black text-[7px] md:text-[8px] uppercase tracking-widest transition-all duration-300 transform hover:scale-105 active:scale-95 whitespace-nowrap flex items-center justify-center"
                 >
                   Book Now
                 </button>
@@ -181,18 +181,40 @@ const Navbar = () => {
 
                 <div className="h-px bg-white/20 w-full my-4"></div>
 
-                <div className="flex items-center space-x-6">
-                  <Link to="/dashboard" onClick={() => haptics.light()} className="text-white p-3 liquid-glass border border-white/20 rounded-2xl hover:bg-white/10 transition-all">
-                    <User size={22} />
-                  </Link>
-                  <Link to="/wishlist" onClick={() => haptics.light()} className="text-white p-3 liquid-glass border border-white/20 rounded-2xl hover:bg-white/10 transition-all relative">
-                    <Heart size={22} />
-                    {count > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-secondary text-white text-[8px] font-black rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
-                        {count > 9 ? '9+' : count}
-                      </span>
-                    )}
-                  </Link>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center space-x-4">
+                    <Link to={isLoggedIn() ? '/dashboard' : '/login'} onClick={() => haptics.light()} className="text-white p-3 liquid-glass border border-white/20 rounded-2xl hover:bg-white/10 transition-all">
+                      <User size={22} />
+                    </Link>
+                    <Link to="/wishlist" onClick={() => haptics.light()} className="text-white p-3 liquid-glass border border-white/20 rounded-2xl hover:bg-white/10 transition-all relative">
+                      <Heart size={22} />
+                      {count > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-secondary text-white text-[8px] font-black rounded-full h-5 w-5 flex items-center justify-center shadow-lg">
+                          {count > 9 ? '9+' : count}
+                        </span>
+                      )}
+                    </Link>
+                  </div>
+                  
+                  <button
+                    onClick={() => {
+                      haptics.medium();
+                      setIsOpen(false);
+                      if (isLoggedIn()) {
+                        // Logout: clear session and navigate to home
+                        sessionStorage.removeItem('authToken');
+                        sessionStorage.removeItem('userId');
+                        sessionStorage.removeItem('userEmail');
+                        navigate('/');
+                      } else {
+                        // Login: navigate to login page
+                        navigate('/login');
+                      }
+                    }}
+                    className="bg-secondary text-white px-6 py-3 rounded-full font-black text-[10px] uppercase tracking-widest transition-all duration-300  active:scale-95 whitespace-nowrap"
+                  >
+                    {isLoggedIn() ? 'LOGOUT' : 'SIGN IN'}
+                  </button>
                 </div>
               </div>
             </motion.div>

@@ -146,13 +146,11 @@ const Discover = () => {
                     haptics.light();
                     setActiveExperience(activeExperience === experience.key ? 'All' : experience.key);
                   }}
-                  className={`px-3 sm:px-5 py-3 rounded-full text-[10px] font-black font-bungee transition-all duration-500 ${activeExperience === experience.key
-                    ? 'bg-secondary text-white'
-                    : ' text-white/40 hover:text-white hover:bg-white/10'}`}
-                  style={activeExperience === experience.key
-                    ? { border: '2px solid var(--secondary)' }
-                    : { border: '1px solid rgba(0, 0, 0, 0.8)' }
-                  }
+                  className={`px-3 sm:px-5 py-3 rounded-full font-black uppercase tracking-widest transition-all duration-500 ${
+                    activeExperience === experience.key
+                      ? 'bg-secondary text-white border-2 border-secondary shadow-lg shadow-secondary/30 text-[11px]'
+                      : 'bg-white text-black border-2 border-black hover:bg-gray-100 text-[10px]'
+                  }`}
                 >
                   {experience.label}
                 </button>
@@ -165,7 +163,7 @@ const Discover = () => {
         <div className="flex flex-col lg:flex-row gap-8">
 
           {/* Refined Sidebar - Collapsible */}
-          <AnimatePresence>
+          <AnimatePresence>x
             {isFiltersOpen && (
               <motion.aside
                 initial={{ width: 0, opacity: 0, x: -20 }}

@@ -232,7 +232,7 @@ const DataFilters = () => {
     palette: {
       mode: 'light',
       primary: {
-        main: '#6495ED',
+        main: '#004AAD',
       },
       secondary: {
         main: '#0D7377',
@@ -515,34 +515,39 @@ const DataFilters = () => {
       },
       {
         accessorKey: 'paymentStatus',
-        header: 'Payment',
+        header: 'Payment Method',
         size: 130,
         grow: false,
         filterVariant: 'select',
         muiTableHeadCellProps: {
-          title: 'Payment Status - Payment state (Paid, Pending, Failed, Cash, Online)',
+          title: 'Payment Method - How payment was made (Cash, Online, Credit Card, UPI, etc.)',
         },
         muiEditTextFieldProps: {
           select: true,
-          children: ['Paid', 'Pending Payment', 'Failed', 'Refunded', 'Cash', 'Online'].map((status) => (
-            <MenuItem key={status} value={status}>
-              {status}
+          children: ['Cash', 'Online', 'Credit Card', 'Debit Card', 'UPI', 'Bank Transfer'].map((method) => (
+            <MenuItem key={method} value={method}>
+              {method}
             </MenuItem>
           )),
         },
         Cell: ({ cell }) => {
-          const status = cell.getValue<string>()
+          const method = cell.getValue<string>()
           const colors: Record<string, string> = {
+            'Cash': 'bg-purple-100 text-purple-800 border-purple-200',
+            'Online': 'bg-green-100 text-green-800 border-green-200',
+            'Credit Card': 'bg-blue-100 text-blue-800 border-blue-200',
+            'Debit Card': 'bg-cyan-100 text-cyan-800 border-cyan-200',
+            'UPI': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+            'Bank Transfer': 'bg-teal-100 text-teal-800 border-teal-200',
+            // Legacy status values that might still exist in database
             'Paid': 'bg-green-100 text-green-800 border-green-200',
             'Pending Payment': 'bg-yellow-100 text-yellow-800 border-yellow-200',
             'Failed': 'bg-red-100 text-red-800 border-red-200',
-            'Refunded': 'bg-blue-100 text-blue-800 border-blue-200',
-            'Cash': 'bg-purple-100 text-purple-800 border-purple-200',
-            'Online': 'bg-green-100 text-green-800 border-green-200'
+            'Refunded': 'bg-orange-100 text-orange-800 border-orange-200'
           }
           return (
-            <span className={`px-2 py-1 rounded-lg text-[10px] font-bold border ${colors[status] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>
-              {status}
+            <span className={`px-2 py-1 rounded-lg text-[10px] font-bold border ${colors[method] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+              {method}
             </span>
           )
         }
@@ -1069,13 +1074,13 @@ const DataFilters = () => {
           maxHeight: { xs: '400px', sm: '500px', md: '600px', lg: '700px', xl: '800px' },
           '&::-webkit-scrollbar': { width: '8px', height: '8px' },
           '&::-webkit-scrollbar-track': { background: '#f1f5f9', borderRadius: '4px' },
-          '&::-webkit-scrollbar-thumb': { background: '#6495ED', borderRadius: '4px' },
+          '&::-webkit-scrollbar-thumb': { background: '#004AAD', borderRadius: '4px' },
           '&::-webkit-scrollbar-thumb:hover': { background: '#5080d9' },
         },
       },
       muiTableHeadCellProps: {
         sx: {
-          backgroundColor: '#6495ED',
+          backgroundColor: '#004AAD',
           color: '#ffffff',
           fontWeight: '900',
           fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' },
@@ -1136,7 +1141,7 @@ const DataFilters = () => {
           },
           '& .MuiInputBase-input': { color: '#1e293b' },
           '& .MuiInputLabel-root': { color: '#64748b' },
-          '& .MuiSvgIcon-root': { color: '#6495ED' },
+          '& .MuiSvgIcon-root': { color: '#004AAD' },
         },
       },
       muiPaginationProps: {
@@ -1145,7 +1150,7 @@ const DataFilters = () => {
             color: '#1e293b',
             fontSize: { xs: '0.75rem', md: '0.875rem' },
           },
-          '& .Mui-selected': { backgroundColor: '#6495ED !important', color: '#fff' },
+          '& .Mui-selected': { backgroundColor: '#004AAD !important', color: '#fff' },
         },
       },
       renderTopToolbarCustomActions: () => {
@@ -1160,8 +1165,8 @@ const DataFilters = () => {
               variant="outlined"
               size="small"
               sx={{
-                borderColor: '#6495ED',
-                color: '#6495ED',
+                borderColor: '#004AAD',
+                color: '#004AAD',
                 fontWeight: 'bold',
                 textTransform: 'uppercase',
                 fontSize: '0.65rem',
@@ -1183,7 +1188,7 @@ const DataFilters = () => {
                 variant="contained"
                 size="small"
                 sx={{
-                  backgroundColor: '#6495ED',
+                  backgroundColor: '#004AAD',
                   color: '#fff',
                   fontWeight: 'bold',
                   textTransform: 'uppercase',
@@ -1276,13 +1281,13 @@ const DataFilters = () => {
           maxHeight: { xs: '400px', sm: '500px', md: '600px', lg: '700px', xl: '800px' },
           '&::-webkit-scrollbar': { width: '8px', height: '8px' },
           '&::-webkit-scrollbar-track': { background: '#f1f5f9', borderRadius: '4px' },
-          '&::-webkit-scrollbar-thumb': { background: '#6495ED', borderRadius: '4px' },
+          '&::-webkit-scrollbar-thumb': { background: '#004AAD', borderRadius: '4px' },
           '&::-webkit-scrollbar-thumb:hover': { background: '#5080d9' },
         },
       },
       muiTableHeadCellProps: {
         sx: {
-          backgroundColor: '#6495ED',
+          backgroundColor: '#004AAD',
           color: '#ffffff',
           fontWeight: '900',
           fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' },
@@ -1343,7 +1348,7 @@ const DataFilters = () => {
           },
           '& .MuiInputBase-input': { color: '#1e293b' },
           '& .MuiInputLabel-root': { color: '#64748b' },
-          '& .MuiSvgIcon-root': { color: '#6495ED' },
+          '& .MuiSvgIcon-root': { color: '#004AAD' },
         },
       },
       muiPaginationProps: {
@@ -1352,7 +1357,7 @@ const DataFilters = () => {
             color: '#1e293b',
             fontSize: { xs: '0.75rem', md: '0.875rem' },
           },
-          '& .Mui-selected': { backgroundColor: '#6495ED !important', color: '#fff' },
+          '& .Mui-selected': { backgroundColor: '#004AAD !important', color: '#fff' },
         },
       },
       renderTopToolbarCustomActions: () => {
@@ -1367,8 +1372,8 @@ const DataFilters = () => {
               variant="outlined"
               size="small"
               sx={{
-                borderColor: '#6495ED',
-                color: '#6495ED',
+                borderColor: '#004AAD',
+                color: '#004AAD',
                 fontWeight: 'bold',
                 textTransform: 'uppercase',
                 fontSize: '0.65rem',
@@ -1390,7 +1395,7 @@ const DataFilters = () => {
                 variant="contained"
                 size="small"
                 sx={{
-                  backgroundColor: '#6495ED',
+                  backgroundColor: '#004AAD',
                   color: '#fff',
                   fontWeight: 'bold',
                   textTransform: 'uppercase',
@@ -1734,13 +1739,13 @@ const DataFilters = () => {
           maxHeight: { xs: '400px', sm: '500px', md: '600px', lg: '700px', xl: '800px' },
           '&::-webkit-scrollbar': { width: '8px', height: '8px' },
           '&::-webkit-scrollbar-track': { background: '#f1f5f9', borderRadius: '4px' },
-          '&::-webkit-scrollbar-thumb': { background: '#6495ED', borderRadius: '4px' },
+          '&::-webkit-scrollbar-thumb': { background: '#004AAD', borderRadius: '4px' },
           '&::-webkit-scrollbar-thumb:hover': { background: '#5080d9' },
         },
       },
       muiTableHeadCellProps: {
         sx: {
-          backgroundColor: '#6495ED',
+          backgroundColor: '#004AAD',
           color: '#ffffff',
           fontWeight: '900',
           fontSize: { xs: '0.6rem', sm: '0.65rem', md: '0.7rem' },
@@ -1801,7 +1806,7 @@ const DataFilters = () => {
           },
           '& .MuiInputBase-input': { color: '#1e293b' },
           '& .MuiInputLabel-root': { color: '#64748b' },
-          '& .MuiSvgIcon-root': { color: '#6495ED' },
+          '& .MuiSvgIcon-root': { color: '#004AAD' },
         },
       },
       muiPaginationProps: {
@@ -1810,7 +1815,7 @@ const DataFilters = () => {
             color: '#1e293b',
             fontSize: { xs: '0.75rem', md: '0.875rem' },
           },
-          '& .Mui-selected': { backgroundColor: '#6495ED !important', color: '#fff' },
+          '& .Mui-selected': { backgroundColor: '#004AAD !important', color: '#fff' },
         },
       },
       renderTopToolbarCustomActions: () => {
@@ -1825,8 +1830,8 @@ const DataFilters = () => {
               variant="outlined"
               size="small"
               sx={{
-                borderColor: '#6495ED',
-                color: '#6495ED',
+                borderColor: '#004AAD',
+                color: '#004AAD',
                 fontWeight: 'bold',
                 textTransform: 'uppercase',
                 fontSize: '0.65rem',
@@ -1871,7 +1876,7 @@ const DataFilters = () => {
                   variant="contained"
                   size="small"
                   sx={{
-                    backgroundColor: '#6495ED',
+                    backgroundColor: '#004AAD',
                     color: '#fff',
                     fontWeight: 'bold',
                     textTransform: 'uppercase',

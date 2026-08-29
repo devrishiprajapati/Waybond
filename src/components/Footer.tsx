@@ -51,7 +51,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-slate-900 text-slate-100 pt-24 pb-8 relative overflow-hidden border-t border-slate-700">
+    <footer className="bg-slate-900 text-slate-100 pt-top pb-8 relative overflow-hidden border-t border-slate-700">
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-secondary/10 blur-[120px] rounded-full pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/10 blur-[100px] rounded-full pointer-events-none"></div>
       

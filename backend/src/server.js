@@ -1295,6 +1295,21 @@ app.get('/api/admin/bookings', async (_req, res, next) => {
       const price = toMoneyNumber(payload.price || 0)
       const total = price * travelers
 
+      // Map old status-based payment values to actual payment methods
+      let paymentMethod = payload.paymentStatus || 'Pending Payment'
+      
+      // If paymentStatus is a status (not a method), try to get the actual method
+      // or default to a reasonable payment method
+      if (['Paid', 'Pending Payment', 'Failed', 'Refunded', 'Partially Paid'].includes(paymentMethod)) {
+        // Check if there's a separate paymentMethod field
+        if (payload.paymentMethod) {
+          paymentMethod = payload.paymentMethod
+        } else if (paymentMethod === 'Paid') {
+          // Default paid bookings to "Online" if no method specified
+          paymentMethod = 'Online'
+        }
+      }
+
       return {
         bookingId: booking.id,
         customerName: booking.user?.name || payload.name || payload.customerName || 'N/A',
@@ -1305,7 +1320,7 @@ app.get('/api/admin/bookings', async (_req, res, next) => {
         price,
         total,
         status: payload.status || 'Pending',
-        paymentStatus: payload.paymentStatus || 'Pending Payment',
+        paymentStatus: paymentMethod,
         bookingDate: payload.bookingDate || new Date(booking.createdAt).toLocaleDateString('en-IN'),
         travellerDetails: payload.travellerDetails || []
       }
