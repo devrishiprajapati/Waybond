@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Globe, Upload, FileText, CheckCircle } from 'lucide-react'
 import { getAdminTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { DEFAULT_AGE_LIMIT, DEFAULT_CANCELLATION_POLICY, ExpeditionLead, Trip } from '../../lib/trips'
-import { parseDateOnly } from '../../lib/date'
+import { formatDateOnly, parseDateOnly } from '../../lib/date'
 
 const CATEGORIES = ['Adventure', 'Beach', 'Luxury', 'Nature', 'Honeymoon', 'Backpacking']
 const DIFFICULTY_LEVELS: { value: Trip['difficulty'], label: string, color: string }[] = [
@@ -50,6 +50,15 @@ const toDateInputValue = (value?: string) => {
 
 const normalizeDateText = (value?: string) => String(value || '').trim()
 const mergeUniqueDates = (dates: string[]) => Array.from(new Set(dates.map(normalizeDateText).filter(Boolean)))
+const addDaysToDateInput = (value: string, dayOffset: number) => {
+  const parsed = parseDateOnly(value)
+  if (!parsed) return ''
+  parsed.setDate(parsed.getDate() + dayOffset)
+  const year = parsed.getFullYear()
+  const month = String(parsed.getMonth() + 1).padStart(2, '0')
+  const day = String(parsed.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 const EditTrip = () => {
   const { id } = useParams()
@@ -83,6 +92,8 @@ const EditTrip = () => {
     },
     captains: [createEmptyLead()],
     itinerary: [],
+    joinUsFrom: [],
+    joinUsFromItineraries: {},
     pdfUrl: '',
     thingsToCarry: [''],
     termsAndConditions: '',
@@ -95,6 +106,7 @@ const EditTrip = () => {
   const [confirmedDateIndex, setConfirmedDateIndex] = useState('')
   const [confirmedDateValue, setConfirmedDateValue] = useState('')
   const [selectedDepartureForItinerary, setSelectedDepartureForItinerary] = useState<string>('default')
+  const [selectedItineraryDepartureDate, setSelectedItineraryDepartureDate] = useState('')
 
   const showToast = (message: string) => {
     setToast({ message, visible: true })
@@ -232,6 +244,13 @@ const EditTrip = () => {
     const { _pdfName, ...cleanData } = formData as any
     const captains = getFormLeads(formData).filter((lead) => lead.name.trim() || lead.role.trim() || lead.bio.trim() || lead.avatar.trim())
     const assignedLeads = captains.length > 0 ? captains : [createEmptyLead()]
+    const joinUsFrom = (formData.joinUsFrom || [])
+      .filter((item) => item.location.trim())
+      .map((item) => ({ ...item, departureDates: mergeUniqueDates(item.departureDates || []) }))
+    const joinUsFromKeys = new Set(joinUsFrom.map((origin) => origin.id || origin.location))
+    const joinUsFromItineraries = Object.fromEntries(
+      Object.entries(formData.joinUsFromItineraries || {}).filter(([originId]) => joinUsFromKeys.has(originId))
+    )
     const finalData = {
       ...cleanData,
       captain: assignedLeads[0],
@@ -249,7 +268,9 @@ const EditTrip = () => {
       isVisible: formData.isVisible !== false,
       departureDates: mergeUniqueDates([cleanData.nextBatch, ...(formData.departureDates || [])]),
       itinerary: formData.itinerary || [],
-      departureItineraries: formData.departureItineraries || undefined
+      departureItineraries: formData.departureItineraries || undefined,
+      joinUsFrom,
+      joinUsFromItineraries: Object.keys(joinUsFromItineraries).length > 0 ? joinUsFromItineraries : undefined
     }
 
     try {
@@ -293,6 +314,119 @@ const EditTrip = () => {
     } as Partial<Trip>)
     setMediaError('')
     showToast('Confirmed trip date updated. Save package to notify booked users.')
+  }
+
+  const getJoinOriginKey = (origin: NonNullable<Trip['joinUsFrom']>[number]) => origin.id || origin.location
+  const isJoinOriginSelected = selectedDepartureForItinerary.startsWith('join:')
+  const selectedJoinOriginId = isJoinOriginSelected ? selectedDepartureForItinerary.slice(5) : ''
+  const selectedJoinOrigin = (formData.joinUsFrom || []).find((origin) => getJoinOriginKey(origin) === selectedJoinOriginId)
+
+  const getItineraryDepartureDates = () => {
+    if (isJoinOriginSelected) return mergeUniqueDates(selectedJoinOrigin?.departureDates || [])
+    return mergeUniqueDates(formData.departureDates || [])
+  }
+
+  const getInitialItineraryDepartureDate = (selection = selectedDepartureForItinerary) => {
+    if (selection !== 'default' && !selection.startsWith('join:')) return selection
+    if (selection.startsWith('join:')) {
+      const originId = selection.slice(5)
+      const origin = (formData.joinUsFrom || []).find((item) => getJoinOriginKey(item) === originId)
+      return mergeUniqueDates(origin?.departureDates || [])[0] || ''
+    }
+    return normalizeDateText(formData.nextBatch) || mergeUniqueDates(formData.departureDates || [])[0] || ''
+  }
+
+  const activeItineraryDepartureDate = selectedItineraryDepartureDate || getInitialItineraryDepartureDate()
+  const applyDatesToItinerary = (itinerary: NonNullable<Trip['itinerary']>, departureDate = activeItineraryDepartureDate) => (
+    departureDate
+      ? itinerary.map((item, index) => ({ ...item, date: addDaysToDateInput(departureDate, index) || item.date }))
+      : itinerary
+  )
+
+  const selectItineraryTarget = (selection: string) => {
+    setSelectedDepartureForItinerary(selection)
+    setSelectedItineraryDepartureDate(getInitialItineraryDepartureDate(selection))
+  }
+
+  useEffect(() => {
+    if (!activeItineraryDepartureDate) return
+    const currentItinerary = getSelectedItinerary()
+    if (!currentItinerary.length) return
+    const datedItinerary = applyDatesToItinerary(currentItinerary, activeItineraryDepartureDate)
+    const changed = datedItinerary.some((item, index) => item.date !== currentItinerary[index]?.date)
+    if (changed) setSelectedItinerary(datedItinerary, activeItineraryDepartureDate)
+  }, [selectedDepartureForItinerary, selectedItineraryDepartureDate])
+
+  const getSelectedItinerary = () => {
+    if (selectedDepartureForItinerary === 'default') return formData.itinerary || []
+    if (isJoinOriginSelected) return formData.joinUsFromItineraries?.[selectedJoinOriginId] || []
+    return formData.departureItineraries?.[selectedDepartureForItinerary] || []
+  }
+
+  useEffect(() => {
+    const origins = (formData.joinUsFrom || []).filter((origin) => origin.location.trim())
+    if (!origins.length) {
+      if (isJoinOriginSelected) selectItineraryTarget('default')
+      return
+    }
+
+    const hasSelectedOrigin = origins.some((origin) => getJoinOriginKey(origin) === selectedJoinOriginId)
+    if (!isJoinOriginSelected || !hasSelectedOrigin) {
+      selectItineraryTarget(`join:${getJoinOriginKey(origins[0])}`)
+    }
+  }, [formData.joinUsFrom, selectedDepartureForItinerary])
+
+  const setSelectedItinerary = (itinerary: NonNullable<Trip['itinerary']>, departureDate = activeItineraryDepartureDate) => {
+    const datedItinerary = applyDatesToItinerary(itinerary, departureDate)
+    if (selectedDepartureForItinerary === 'default') {
+      setFormData({ ...formData, itinerary: datedItinerary })
+      return
+    }
+    if (isJoinOriginSelected) {
+      setFormData({
+        ...formData,
+        joinUsFromItineraries: {
+          ...(formData.joinUsFromItineraries || {}),
+          [selectedJoinOriginId]: datedItinerary
+        }
+      })
+      return
+    }
+    setFormData({
+      ...formData,
+      departureItineraries: {
+        ...(formData.departureItineraries || {}),
+        [selectedDepartureForItinerary]: datedItinerary
+      }
+    })
+  }
+
+  const updateJoinOrigin = (index: number, updates: Partial<NonNullable<Trip['joinUsFrom']>[number]>) => {
+    const joinUsFrom = [...(formData.joinUsFrom || [])]
+    joinUsFrom[index] = { ...joinUsFrom[index], ...updates }
+    setFormData({ ...formData, joinUsFrom })
+  }
+
+  const addJoinOrigin = () => {
+    const id = `origin-${Date.now()}`
+    setFormData({
+      ...formData,
+      joinUsFrom: [
+        ...(formData.joinUsFrom || []),
+        { id, location: '', duration: formData.duration || '', price: formData.price || '', image: '', departureDates: [] }
+      ]
+    })
+    setSelectedDepartureForItinerary(`join:${id}`)
+  }
+
+  const removeJoinOrigin = (index: number) => {
+    const origin = formData.joinUsFrom?.[index]
+    const originId = origin ? getJoinOriginKey(origin) : ''
+    const joinUsFrom = (formData.joinUsFrom || []).filter((_, itemIndex) => itemIndex !== index)
+    const joinUsFromItineraries = { ...(formData.joinUsFromItineraries || {}) }
+    if (originId) delete joinUsFromItineraries[originId]
+    setFormData({ ...formData, joinUsFrom, joinUsFromItineraries })
+    if (selectedDepartureForItinerary === `join:${originId}`) setSelectedDepartureForItinerary('default')
   }
 
   return (
@@ -671,36 +805,180 @@ const EditTrip = () => {
           <section className={sectionClass}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
+                <MapPin size={20} className="mr-3 text-secondary" /> Join Us From
+              </h3>
+              <button
+                type="button"
+                onClick={addJoinOrigin}
+                className="h-11 px-5 rounded-2xl bg-secondary/15 text-secondary border border-secondary/20 uppercase font-black text-[10px] tracking-[0.18em] flex items-center justify-center gap-2 hover:bg-secondary hover:text-white transition-colors"
+              >
+                <Plus size={14} /> Add Location
+              </button>
+            </div>
+            <p className="text-xs text-white/45 ml-2">Locations added here appear as selectable itinerary origins on the package page.</p>
+
+            <div className="space-y-5">
+              {(formData.joinUsFrom || []).map((origin, index) => (
+                <div key={origin.id || index} className="p-5 md:p-6 bg-white/[0.04] rounded-[2rem] border border-white/10 relative">
+                  <button
+                    type="button"
+                    onClick={() => removeJoinOrigin(index)}
+                    className="absolute -top-3 -right-3 bg-red-500/15 text-red-300 border border-red-400/20 w-9 h-9 rounded-2xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all z-10"
+                    aria-label="Remove Join Us From location"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-[170px_1fr] gap-5">
+                    <div className="space-y-3">
+                      <div className="relative h-36 rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+                        {origin.image ? (
+                          <img src={origin.image} alt={origin.location || 'Join Us From'} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-white/30">
+                            <ImageIcon size={24} />
+                            <span className="text-[9px] uppercase font-black tracking-[0.16em]">No Image</span>
+                          </div>
+                        )}
+                        {origin.duration && (
+                          <div className="absolute left-3 bottom-3 text-white text-sm font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                            {origin.duration}
+                          </div>
+                        )}
+                      </div>
+                      <label className="h-12 rounded-xl border border-dashed border-white/20 bg-white/[0.03] text-white/55 font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:border-secondary hover:text-secondary transition-all">
+                        <Upload size={14} /> {origin.image ? 'Change Image' : 'Upload Image'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+                            try {
+                              validateImage(file)
+                              updateJoinOrigin(index, { image: await readImage(file) })
+                              setMediaError('')
+                            } catch (error) {
+                              setMediaError(error instanceof Error ? error.message : 'Unable to upload image.')
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 content-start">
+                      <div className="space-y-2">
+                        <label className={labelClass}>Location</label>
+                        <input
+                          type="text"
+                          value={origin.location}
+                          onChange={(e) => updateJoinOrigin(index, { location: e.target.value })}
+                          placeholder="e.g. Delhi"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className={labelClass}>Duration</label>
+                        <input
+                          type="text"
+                          value={origin.duration}
+                          onChange={(e) => updateJoinOrigin(index, { duration: e.target.value })}
+                          placeholder="e.g. 8 Days"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className={labelClass}>Price</label>
+                        <input
+                          type="text"
+                          value={origin.price}
+                          onChange={(e) => updateJoinOrigin(index, { price: e.target.value })}
+                          placeholder="e.g. 14,500"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div className="md:col-span-3 space-y-3">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <label className={labelClass}>Location Departure Dates</label>
+                            <p className="text-xs text-white/35 mt-1 ml-2">Shown when this Join Us From card is selected.</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => updateJoinOrigin(index, { departureDates: [...(origin.departureDates || []), ''] })}
+                            className="h-10 px-4 rounded-xl bg-secondary/15 text-secondary border border-secondary/20 uppercase font-black text-[9px] tracking-[0.16em] hover:bg-secondary hover:text-white transition-colors"
+                          >
+                            <Plus size={13} className="inline mr-1" /> Add date
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                          {(origin.departureDates || []).map((date, dateIndex) => (
+                            <div key={`${origin.id || origin.location}-${dateIndex}`} className="flex gap-2">
+                              <input
+                                type="date"
+                                value={date}
+                                onChange={(event) => {
+                                  const departureDates = [...(origin.departureDates || [])]
+                                  departureDates[dateIndex] = event.target.value
+                                  updateJoinOrigin(index, { departureDates })
+                                }}
+                                className={`${inputClass} p-3 text-sm min-w-0`}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => updateJoinOrigin(index, { departureDates: (origin.departureDates || []).filter((_, itemIndex) => itemIndex !== dateIndex) })}
+                                className="w-11 shrink-0 rounded-xl border border-red-200 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
+                                aria-label="Remove location departure date"
+                              >
+                                <Trash2 size={15} className="mx-auto" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => selectItineraryTarget(`join:${getJoinOriginKey(origin)}`)}
+                        className="md:col-span-3 h-12 rounded-xl bg-white/5 border border-white/10 text-secondary hover:bg-secondary hover:text-white transition-colors flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em]"
+                      >
+                        <List size={14} /> Edit This Location Itinerary
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {(!formData.joinUsFrom || formData.joinUsFrom.length === 0) && (
+                <button
+                  type="button"
+                  onClick={addJoinOrigin}
+                  className="w-full py-8 rounded-[2rem] border-2 border-dashed border-white/15 text-white/40 hover:border-secondary hover:text-secondary transition-all flex flex-col items-center justify-center gap-3 font-black text-xs uppercase tracking-[0.16em]"
+                >
+                  <Plus size={20} /> Add the first Join Us From location
+                </button>
+              )}
+            </div>
+          </section>
+
+          <section className={sectionClass}>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
                 <List size={20} className="mr-3 text-secondary" /> Itinerary
               </h3>
               <button
                 type="button"
                 onClick={() => {
-                  const currentItinerary = selectedDepartureForItinerary === 'default' 
-                    ? formData.itinerary 
-                    : formData.departureItineraries?.[selectedDepartureForItinerary];
-                  
+                  const currentItinerary = getSelectedItinerary()
                   const newDay = { 
                     day: (currentItinerary?.length || 0) + 1, 
                     title: '', 
                     description: '',
-                    image: undefined
+                    image: undefined,
+                    date: addDaysToDateInput(activeItineraryDepartureDate, currentItinerary?.length || 0) || undefined
                   };
 
-                  if (selectedDepartureForItinerary === 'default') {
-                    setFormData({
-                      ...formData,
-                      itinerary: [...(formData.itinerary || []), newDay]
-                    });
-                  } else {
-                    setFormData({
-                      ...formData,
-                      departureItineraries: {
-                        ...(formData.departureItineraries || {}),
-                        [selectedDepartureForItinerary]: [...(currentItinerary || []), newDay]
-                      }
-                    });
-                  }
+                  setSelectedItinerary([...(currentItinerary || []), newDay])
                 }}
                 className="h-11 px-5 rounded-2xl bg-secondary/15 text-secondary border border-secondary/20 uppercase font-black text-[10px] tracking-[0.18em] flex items-center justify-center gap-2 hover:bg-secondary hover:text-white transition-colors"
               >
@@ -708,41 +986,71 @@ const EditTrip = () => {
               </button>
             </div>
 
-            {/* Departure Date Selector for Itinerary */}
+            {/* Itinerary Date */}
             <div className="space-y-3">
-              <label className={labelClass}>Select Departure Date for Itinerary</label>
-              <p className="text-xs text-white/45 ml-2">Choose which departure date this itinerary is for, or use the default itinerary for all dates</p>
-              
+              <label className={labelClass}>Select Join Us From Place</label>
+              <p className="text-xs text-white/45 ml-2">Choose a Join Us From place to edit its location-wise itinerary.</p>
+
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedDepartureForItinerary('default')}
-                  className={`px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${
-                    selectedDepartureForItinerary === 'default'
-                      ? 'bg-secondary text-white border-2 border-secondary shadow-lg'
-                      : 'bg-white/5 text-white/60 border border-white/10 hover:border-white/30'
-                  }`}
-                >
-                  Default Itinerary
-                </button>
-                
-                {(formData.departureDates || []).map((date) => (
-                  <button
-                    key={date}
-                    type="button"
-                    onClick={() => setSelectedDepartureForItinerary(date)}
-                    className={`px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${
-                      selectedDepartureForItinerary === date
-                        ? 'bg-secondary text-white border-2 border-secondary shadow-lg'
-                        : 'bg-white/5 text-white/60 border border-white/10 hover:border-white/30'
-                    }`}
-                  >
-                    {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </button>
-                ))}
+                {(formData.joinUsFrom || []).filter((origin) => origin.location.trim()).map((origin) => {
+                  const originKey = getJoinOriginKey(origin)
+                  const selectionKey = `join:${originKey}`
+                  return (
+                    <button
+                      key={originKey}
+                      type="button"
+                      onClick={() => selectItineraryTarget(selectionKey)}
+                      className={`px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${
+                        selectedDepartureForItinerary === selectionKey
+                          ? 'bg-secondary text-white border-2 border-secondary shadow-lg'
+                          : 'bg-white/5 text-white/60 border border-white/10 hover:border-white/30'
+                      }`}
+                    >
+                      {origin.location}
+                    </button>
+                  )
+                })}
+                {!(formData.joinUsFrom || []).some((origin) => origin.location.trim()) && (
+                  <p className="w-full rounded-2xl border border-dashed border-white/10 py-5 text-center text-sm font-bold italic text-white/35">
+                    Add Join Us From places above to create location-wise itineraries.
+                  </p>
+                )}
               </div>
 
-              {selectedDepartureForItinerary !== 'default' && (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                <label className={labelClass}>Departure Date For This Itinerary</label>
+                {selectedDepartureForItinerary !== 'default' && !isJoinOriginSelected ? (
+                  <div className={`${inputClass} mt-2 p-4 text-sm`}>
+                    {formatDateOnly(selectedDepartureForItinerary)}
+                  </div>
+                ) : getItineraryDepartureDates().length > 0 ? (
+                  <select
+                    value={activeItineraryDepartureDate}
+                    onChange={(event) => {
+                      setSelectedItineraryDepartureDate(event.target.value)
+                      setSelectedItinerary(getSelectedItinerary(), event.target.value)
+                    }}
+                    className={`${inputClass} mt-2 p-4 text-sm`}
+                  >
+                    {getItineraryDepartureDates().map((date) => (
+                      <option key={date} value={date} className="bg-slate-900">{formatDateOnly(date)}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="date"
+                    value={activeItineraryDepartureDate}
+                    onChange={(event) => {
+                      setSelectedItineraryDepartureDate(event.target.value)
+                      setSelectedItinerary(getSelectedItinerary(), event.target.value)
+                    }}
+                    className={`${inputClass} mt-2 p-4 text-sm`}
+                  />
+                )}
+                <p className="mt-2 text-xs text-white/35 ml-2">Itinerary day dates are calculated automatically from this departure date.</p>
+              </div>
+
+              {selectedDepartureForItinerary !== 'default' && !isJoinOriginSelected && (
                 <div className="mt-3 p-4 rounded-xl bg-blue-500/10 border border-blue-400/20">
                   <p className="text-xs text-blue-300 font-bold flex items-center gap-2">
                     <Info size={14} />
@@ -753,14 +1061,29 @@ const EditTrip = () => {
                     onClick={() => {
                       if (window.confirm('Copy the default itinerary to this departure date?')) {
                         const newItinerary = JSON.parse(JSON.stringify(formData.itinerary || []));
-                        setFormData({
-                          ...formData,
-                          departureItineraries: {
-                            ...(formData.departureItineraries || {}),
-                            [selectedDepartureForItinerary]: newItinerary
-                          }
-                        });
+                        setSelectedItinerary(newItinerary, activeItineraryDepartureDate)
                         showToast('Default itinerary copied');
+                      }
+                    }}
+                    className="mt-2 text-xs text-blue-400 underline hover:text-blue-300"
+                  >
+                    Copy from default itinerary
+                  </button>
+                </div>
+              )}
+
+              {isJoinOriginSelected && (
+                <div className="mt-3 p-4 rounded-xl bg-blue-500/10 border border-blue-400/20">
+                  <p className="text-xs text-blue-300 font-bold flex items-center gap-2">
+                    <Info size={14} />
+                    Creating a custom itinerary for {(formData.joinUsFrom || []).find((origin) => getJoinOriginKey(origin) === selectedJoinOriginId)?.location || 'this Join Us From location'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('Copy the default itinerary to this location?')) {
+                        setSelectedItinerary(JSON.parse(JSON.stringify(formData.itinerary || [])))
+                        showToast('Default itinerary copied')
                       }
                     }}
                     className="mt-2 text-xs text-blue-400 underline hover:text-blue-300"
@@ -773,32 +1096,17 @@ const EditTrip = () => {
 
             <div className="space-y-5">
               {(() => {
-                const currentItinerary = selectedDepartureForItinerary === 'default' 
-                  ? formData.itinerary 
-                  : formData.departureItineraries?.[selectedDepartureForItinerary];
+                const currentItinerary = getSelectedItinerary()
 
                 return currentItinerary?.map((item, index) => (
                   <div key={index} className="p-5 md:p-6 bg-white/[0.04] rounded-[2rem] border border-white/10 relative group">
                     <button
                       type="button"
                       onClick={() => {
-                        if (selectedDepartureForItinerary === 'default') {
-                          const newItinerary = [...(formData.itinerary || [])];
-                          newItinerary.splice(index, 1);
-                          newItinerary.forEach((it, idx) => { it.day = idx + 1 });
-                          setFormData({ ...formData, itinerary: newItinerary });
-                        } else {
-                          const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
-                          newItinerary.splice(index, 1);
-                          newItinerary.forEach((it, idx) => { it.day = idx + 1 });
-                          setFormData({
-                            ...formData,
-                            departureItineraries: {
-                              ...(formData.departureItineraries || {}),
-                              [selectedDepartureForItinerary]: newItinerary
-                            }
-                          });
-                        }
+                        const newItinerary = [...getSelectedItinerary()];
+                        newItinerary.splice(index, 1);
+                        newItinerary.forEach((it, idx) => { it.day = idx + 1 });
+                        setSelectedItinerary(newItinerary);
                       }}
                       className="absolute -top-3 -right-3 bg-red-500/15 text-red-300 border border-red-400/20 w-9 h-9 rounded-2xl flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white z-10"
                       aria-label="Remove day"
@@ -816,50 +1124,21 @@ const EditTrip = () => {
                           type="text"
                           value={item.title}
                           onChange={e => {
-                            if (selectedDepartureForItinerary === 'default') {
-                              const newItinerary = [...(formData.itinerary || [])];
-                              newItinerary[index].title = e.target.value;
-                              setFormData({ ...formData, itinerary: newItinerary });
-                            } else {
-                              const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
-                              newItinerary[index].title = e.target.value;
-                              setFormData({
-                                ...formData,
-                                departureItineraries: {
-                                  ...(formData.departureItineraries || {}),
-                                  [selectedDepartureForItinerary]: newItinerary
-                                }
-                              });
-                            }
+                            const newItinerary = [...getSelectedItinerary()];
+                            newItinerary[index] = { ...newItinerary[index], title: e.target.value };
+                            setSelectedItinerary(newItinerary);
                           }}
                           placeholder="Day Title (e.g. Arrival in Manali)"
                           className={inputClass}
                           required
                         />
                         <div className="space-y-1">
-                          <label className="text-[9px] uppercase font-black text-white/35 tracking-[0.2em] ml-2">Date (Optional)</label>
-                          <input
-                            type="date"
-                            value={item.date || ''}
-                            onChange={e => {
-                              if (selectedDepartureForItinerary === 'default') {
-                                const newItinerary = [...(formData.itinerary || [])];
-                                newItinerary[index] = { ...newItinerary[index], date: e.target.value || undefined };
-                                setFormData({ ...formData, itinerary: newItinerary });
-                              } else {
-                                const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
-                                newItinerary[index] = { ...newItinerary[index], date: e.target.value || undefined };
-                                setFormData({
-                                  ...formData,
-                                  departureItineraries: {
-                                    ...(formData.departureItineraries || {}),
-                                    [selectedDepartureForItinerary]: newItinerary
-                                  }
-                                });
-                              }
-                            }}
-                            className={`${inputClass} text-sm`}
-                          />
+                          <label className="text-[9px] uppercase font-black text-white/35 tracking-[0.2em] ml-2">Auto Date</label>
+                          <div className={`${inputClass} text-sm text-white/70`}>
+                            {addDaysToDateInput(activeItineraryDepartureDate, index)
+                              ? formatDateOnly(addDaysToDateInput(activeItineraryDepartureDate, index))
+                              : 'Select a departure date above'}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -874,21 +1153,9 @@ const EditTrip = () => {
                             <button
                               type="button"
                               onClick={() => {
-                                if (selectedDepartureForItinerary === 'default') {
-                                  const newItinerary = [...(formData.itinerary || [])];
-                                  newItinerary[index] = { ...newItinerary[index], image: undefined };
-                                  setFormData({ ...formData, itinerary: newItinerary });
-                                } else {
-                                  const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
-                                  newItinerary[index] = { ...newItinerary[index], image: undefined };
-                                  setFormData({
-                                    ...formData,
-                                    departureItineraries: {
-                                      ...(formData.departureItineraries || {}),
-                                      [selectedDepartureForItinerary]: newItinerary
-                                    }
-                                  });
-                                }
+                                const newItinerary = [...getSelectedItinerary()];
+                                newItinerary[index] = { ...newItinerary[index], image: undefined };
+                                setSelectedItinerary(newItinerary);
                               }}
                               className="absolute top-1 right-1 w-6 h-6 rounded-lg bg-black/70 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
                               aria-label="Remove image"
@@ -909,22 +1176,9 @@ const EditTrip = () => {
                               try {
                                 validateImage(file)
                                 const imageData = await readImage(file)
-                                
-                                if (selectedDepartureForItinerary === 'default') {
-                                  const newItinerary = [...(formData.itinerary || [])];
-                                  newItinerary[index] = { ...newItinerary[index], image: imageData };
-                                  setFormData({ ...formData, itinerary: newItinerary });
-                                } else {
-                                  const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
-                                  newItinerary[index] = { ...newItinerary[index], image: imageData };
-                                  setFormData({
-                                    ...formData,
-                                    departureItineraries: {
-                                      ...(formData.departureItineraries || {}),
-                                      [selectedDepartureForItinerary]: newItinerary
-                                    }
-                                  });
-                                }
+                                const newItinerary = [...getSelectedItinerary()];
+                                newItinerary[index] = { ...newItinerary[index], image: imageData };
+                                setSelectedItinerary(newItinerary);
                                 setMediaError('')
                               } catch (error) {
                                 setMediaError(error instanceof Error ? error.message : 'Unable to upload image.')
@@ -938,21 +1192,9 @@ const EditTrip = () => {
                     <textarea
                       value={item.description}
                       onChange={e => {
-                        if (selectedDepartureForItinerary === 'default') {
-                          const newItinerary = [...(formData.itinerary || [])];
-                          newItinerary[index].description = e.target.value;
-                          setFormData({ ...formData, itinerary: newItinerary });
-                        } else {
-                          const newItinerary = [...(formData.departureItineraries?.[selectedDepartureForItinerary] || [])];
-                          newItinerary[index].description = e.target.value;
-                          setFormData({
-                            ...formData,
-                            departureItineraries: {
-                              ...(formData.departureItineraries || {}),
-                              [selectedDepartureForItinerary]: newItinerary
-                            }
-                          });
-                        }
+                        const newItinerary = [...getSelectedItinerary()];
+                        newItinerary[index] = { ...newItinerary[index], description: e.target.value };
+                        setSelectedItinerary(newItinerary);
                       }}
                       placeholder="Day description..."
                       className={textareaClass}
@@ -963,9 +1205,7 @@ const EditTrip = () => {
               })()}
 
               {(() => {
-                const currentItinerary = selectedDepartureForItinerary === 'default' 
-                  ? formData.itinerary 
-                  : formData.departureItineraries?.[selectedDepartureForItinerary];
+                const currentItinerary = getSelectedItinerary()
 
                 if (!currentItinerary || currentItinerary.length === 0) {
                   return (

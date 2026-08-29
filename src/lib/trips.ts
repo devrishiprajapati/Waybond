@@ -40,6 +40,23 @@ export interface Trip {
       date?: string;
     }[];
   };
+  joinUsFrom?: {
+    id?: string;
+    location: string;
+    duration: string;
+    price: string;
+    image: string;
+    departureDates?: string[];
+  }[];
+  joinUsFromItineraries?: {
+    [originId: string]: {
+      day: number;
+      title: string;
+      description: string;
+      image?: string;
+      date?: string;
+    }[];
+  };
   pdfUrl?: string;
   thingsToCarry?: string[];
   termsAndConditions?: string;

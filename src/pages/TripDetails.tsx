@@ -13,7 +13,7 @@ import { getTripBySlug, createSlug } from '../lib/dataService'
 import { DEFAULT_CANCELLATION_POLICY, formatAgeLimit } from '../lib/trips'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
-import { formatDateOnly } from '../lib/date'
+import { addDaysToDateInput, formatDateOnly } from '../lib/date'
 
 const TripDetails = () => {
   const { slug } = useParams()
@@ -25,6 +25,7 @@ const TripDetails = () => {
   const [activeImage, setActiveImage] = useState(0)
   const [expandedDays, setExpandedDays] = useState<number[]>([1])
   const [selectedDeparture, setSelectedDeparture] = useState('')
+  const [selectedJoinOrigin, setSelectedJoinOrigin] = useState('')
   const [enquiryOpen, setEnquiryOpen] = useState(false)
   const [enquiryForm, setEnquiryForm] = useState({ name: '', phone: '', email: '', travelDate: '', travellers: '', message: '' })
   const [enquiryErrors, setEnquiryErrors] = useState<Record<string, string>>({})
@@ -55,7 +56,9 @@ const TripDetails = () => {
     if (slug) {
       getTripBySlug(slug).then(t => {
         setTrip(t || null)
-        if (t) setSelectedDeparture(departureParam || t.departureDates?.[0] || '')
+        if (t) {
+          setSelectedDeparture(departureParam || t.departureDates?.[0] || '')
+        }
         setLoading(false)
       })
     }
@@ -146,6 +149,45 @@ const TripDetails = () => {
     }, 2500)
   }
 
+  const joinUsFromOptions = (trip?.joinUsFrom || []).filter((origin: any) => origin.location)
+  const selectedJoinOption = joinUsFromOptions.find((origin: any) => (origin.id || origin.location) === selectedJoinOrigin)
+  const selectedJoinItinerary = selectedJoinOrigin ? trip?.joinUsFromItineraries?.[selectedJoinOrigin] : undefined
+  const activeDepartureDates = selectedJoinOrigin
+    ? selectedJoinOption?.departureDates || []
+    : trip?.departureDates || []
+  const activeItinerary = selectedJoinOrigin
+    ? selectedJoinItinerary || trip?.itinerary || []
+    : trip?.departureItineraries?.[selectedDeparture] || trip?.itinerary || []
+  const allExpanded = activeItinerary.length > 0 && expandedDays.length === activeItinerary.length
+  const toggleAllDays = () => {
+    haptics.light()
+    setExpandedDays(allExpanded ? [] : activeItinerary.map((item: any) => item.day))
+  }
+  const getActiveDayDate = (item: any, index: number) => selectedDeparture
+    ? addDaysToDateInput(selectedDeparture, index) || item.date
+    : item.date
+
+  useEffect(() => {
+    if (!trip) return
+    if (!joinUsFromOptions.length) {
+      if (selectedJoinOrigin) setSelectedJoinOrigin('')
+      return
+    }
+
+    const currentOrigin = joinUsFromOptions.find((origin: any) => (origin.id || origin.location) === selectedJoinOrigin)
+    if (currentOrigin) return
+
+    const storageKey = `waybond_join_origin_${trip.id || createSlug(trip.title)}`
+    const savedOrigin = localStorage.getItem(storageKey)
+    const nextOrigin = joinUsFromOptions.find((origin: any) => (origin.id || origin.location) === savedOrigin) || joinUsFromOptions[0]
+    const nextOriginKey = nextOrigin.id || nextOrigin.location
+    const nextDates = nextOrigin.departureDates || []
+    const nextDeparture = departureParam && nextDates.includes(departureParam) ? departureParam : nextDates[0] || ''
+
+    setSelectedJoinOrigin(nextOriginKey)
+    setSelectedDeparture(nextDeparture)
+  }, [trip, joinUsFromOptions, selectedJoinOrigin, departureParam])
+
   const getTripShareLink = () => {
     const origin = window.location.origin
     const path = `/trip/${slug || (trip ? createSlug(trip.title) : '')}`
@@ -201,6 +243,44 @@ const TripDetails = () => {
   const expeditionLeads = Array.isArray(trip.captains) && trip.captains.length > 0
     ? trip.captains
     : trip.captain ? [trip.captain] : []
+  const joinUsFromSection = joinUsFromOptions.length > 0 ? (
+    <div className="rounded-[1.25rem] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
+      <h2 className="mb-5 text-xl font-extrabold tracking-tight text-slate-950 md:text-2xl">Join Us From</h2>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4 md:gap-5">
+        {joinUsFromOptions.map((origin: any) => {
+          const originKey = origin.id || origin.location
+          const isSelected = selectedJoinOrigin === originKey
+          return (
+            <button
+              key={originKey}
+              type="button"
+              onClick={() => {
+                haptics.light()
+                localStorage.setItem(`waybond_join_origin_${trip.id || createSlug(trip.title)}`, originKey)
+                setSelectedJoinOrigin(originKey)
+                setSelectedDeparture((origin.departureDates || [])[0] || '')
+                setExpandedDays([1])
+              }}
+              className="group text-left"
+            >
+              <div className={`relative aspect-[1.25/1] overflow-hidden rounded-[1.15rem] border-2 bg-slate-100 shadow-sm transition-all ${isSelected ? 'border-secondary' : 'border-slate-200 group-hover:border-secondary/70'}`}>
+                {origin.image ? (
+                  <img src={origin.image} alt={origin.location} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-slate-100 text-slate-300">
+                    <MapPin size={28} />
+                  </div>
+                )}
+              </div>
+              <p className="mt-3 text-sm font-black leading-tight text-slate-950 md:text-base">{origin.location}</p>
+              {origin.duration && <p className="mt-1 text-xs font-extrabold leading-tight text-slate-500 md:text-sm">{origin.duration}</p>}
+              {origin.price && <p className="mt-1 text-sm font-black leading-tight text-slate-950 md:text-base">₹{origin.price}</p>}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  ) : null
 
   return (
     <>
@@ -378,23 +458,22 @@ const TripDetails = () => {
                 )}
               </div>
 
+              {joinUsFromSection}
+
               {/* Itinerary */}
               <div>
                 <div className="flex justify-between items-end gap-4 mb-6 md:mb-10">
                   <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
                   <button
-                    onClick={() => {
-                      haptics.light();
-                      setExpandedDays(expandedDays.length === trip.itinerary.length ? [] : trip.itinerary.map((item: any) => item.day));
-                    }}
+                    onClick={toggleAllDays}
                     className="text-secondary font-black text-[10px] uppercase tracking-[0.2em] border-b border-secondary/30 pb-1 hover:border-secondary transition-all"
                   >
-                    {expandedDays.length === trip.itinerary.length ? 'Collapse All' : 'Expand All'}
+                    {allExpanded ? 'Collapse All' : 'Expand All'}
                   </button>
                 </div>
 
                 <div className="space-y-4">
-                  {(trip.departureItineraries?.[selectedDeparture] || trip.itinerary).map((item: any) => (
+                  {activeItinerary.map((item: any, index: number) => (
                     <div
                       key={item.day}
                       className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDays.includes(item.day) ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
@@ -411,9 +490,9 @@ const TripDetails = () => {
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3 className="text-base md:text-2xl font-bold text-white tracking-tight">{item.title}</h3>
-                            {item.date && (
+                            {getActiveDayDate(item, index) && (
                               <p className="text-xs md:text-sm text-white/50 font-semibold mt-1">
-                                {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                {formatDateOnly(getActiveDayDate(item, index), { month: 'short', day: 'numeric', year: 'numeric' })}
                               </p>
                             )}
                           </div>
@@ -617,7 +696,7 @@ const TripDetails = () => {
                       <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
 
                       {(() => {
-                        const dates = trip.departureDates || []
+                        const dates = activeDepartureDates
                         if (!dates.length) return <p className="text-[7px] text-white/30">No dates available</p>
 
                         // Create month groups
@@ -760,23 +839,22 @@ const TripDetails = () => {
             )}
           </div>
 
+          {joinUsFromSection}
+
           {/* Itinerary - Mobile Only */}
           <div>
             <div className="flex justify-between items-end gap-4 mb-6 md:mb-10">
               <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
               <button
-                onClick={() => {
-                  haptics.light();
-                  setExpandedDays(expandedDays.length === trip.itinerary.length ? [] : trip.itinerary.map((item: any) => item.day));
-                }}
+                onClick={toggleAllDays}
                 className="text-secondary font-black text-[10px] uppercase tracking-[0.2em] border-b border-secondary/30 pb-1 hover:border-secondary transition-all"
               >
-                {expandedDays.length === trip.itinerary.length ? 'Collapse All' : 'Expand All'}
+                {allExpanded ? 'Collapse All' : 'Expand All'}
               </button>
             </div>
 
             <div className="space-y-4">
-              {trip.itinerary.map((item: any) => (
+              {activeItinerary.map((item: any, index: number) => (
                 <div
                   key={item.day}
                   className={`border rounded-2xl md:rounded-3xl transition-all duration-500 overflow-hidden ${expandedDays.includes(item.day) ? 'border-secondary/50 liquid-glass-dark shadow-2xl' : 'border-white/10 liquid-glass hover:border-white/30 cursor-pointer'}`}
@@ -791,7 +869,14 @@ const TripDetails = () => {
                         <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
                         <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
                       </div>
-                      <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
+                        {getActiveDayDate(item, index) && (
+                          <p className="text-xs md:text-sm text-white/50 font-semibold mt-1">
+                            {formatDateOnly(getActiveDayDate(item, index), { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-3">
                       {item.day === 1 && (
