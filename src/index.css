@@ -462,3 +462,7 @@ input[type="range"]:focus::-webkit-slider-thumb {
 .marquee-track:focus-within {
   animation-play-state: paused;
 }
+
+.pt-top{
+  padding-top: 25px;
+}

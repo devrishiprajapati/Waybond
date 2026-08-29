@@ -193,7 +193,14 @@ const Analytics = () => {
     },
     scales: {
       x: {
-        ticks: { color: '#cbd5e1', font: { size: 11 } },
+        display: true,
+        ticks: { 
+          color: '#cbd5e1', 
+          font: { size: 11, weight: 'bold' },
+          autoSkip: false,
+          maxRotation: 45,
+          minRotation: 0
+        },
         grid: { display: false }
       },
       y: {
@@ -207,11 +214,44 @@ const Analytics = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
+        display: true,
         position: 'bottom',
         labels: {
           color: '#f8fafc',
-          font: { size: 11 },
-          padding: 15
+          font: { size: 12, weight: 'bold' },
+          padding: 15,
+          boxWidth: 20,
+          boxHeight: 12,
+          usePointStyle: false,
+          generateLabels: (chart: any) => {
+            const data = chart.data;
+            if (data.labels.length && data.datasets.length) {
+              return data.labels.map((label: string, i: number) => {
+                const meta = chart.getDatasetMeta(0);
+                const style = meta.controller.getStyle(i);
+                return {
+                  text: label,
+                  fillStyle: style.backgroundColor,
+                  strokeStyle: style.borderColor,
+                  lineWidth: style.borderWidth,
+                  hidden: !chart.getDataVisibility(i),
+                  index: i
+                };
+              });
+            }
+            return [];
+          }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${label}: ${value} (${percentage}%)`;
+          }
         }
       }
     }
