@@ -39,15 +39,6 @@ const getFormLeads = (formData: Partial<Trip>): ExpeditionLead[] => {
   return [createEmptyLead()]
 }
 
-const toDateInputValue = (value?: string) => {
-  const parsed = parseDateOnly(String(value || '').trim())
-  if (!parsed) return ''
-  const year = parsed.getFullYear()
-  const month = String(parsed.getMonth() + 1).padStart(2, '0')
-  const day = String(parsed.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
 const normalizeDateText = (value?: string) => String(value || '').trim()
 const mergeUniqueDates = (dates: string[]) => Array.from(new Set(dates.map(normalizeDateText).filter(Boolean)))
 const addDaysToDateInput = (value: string, dayOffset: number) => {
@@ -103,6 +94,7 @@ const EditTrip = () => {
   })
   const [mediaError, setMediaError] = useState('')
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false })
+  const [confirmedDateOrigin, setConfirmedDateOrigin] = useState('default')
   const [confirmedDateIndex, setConfirmedDateIndex] = useState('')
   const [confirmedDateValue, setConfirmedDateValue] = useState('')
   const [selectedDepartureForItinerary, setSelectedDepartureForItinerary] = useState<string>('default')
@@ -111,19 +103,6 @@ const EditTrip = () => {
   const showToast = (message: string) => {
     setToast({ message, visible: true })
     setTimeout(() => setToast(t => ({ ...t, visible: false })), 3000)
-  }
-
-  const handleNextBatchChange = (date: string) => {
-    const nextBatch = normalizeDateText(date)
-    const previousNextBatch = normalizeDateText(formData.nextBatch)
-    const departureDates = mergeUniqueDates([
-      nextBatch,
-      ...(formData.departureDates || []).map((item) => (
-        previousNextBatch && normalizeDateText(item) === previousNextBatch ? nextBatch : item
-      ))
-    ])
-
-    setFormData({ ...formData, nextBatch, departureDates })
   }
 
   useEffect(() => {
@@ -287,6 +266,29 @@ const EditTrip = () => {
     }
   } 
 
+  const getJoinOriginKey = (origin: NonNullable<Trip['joinUsFrom']>[number]) => origin.id || origin.location
+  const getConfirmedDateOrigin = () => {
+    if (confirmedDateOrigin === 'default') return undefined
+    return (formData.joinUsFrom || []).find((origin) => getJoinOriginKey(origin) === confirmedDateOrigin)
+  }
+  const getConfirmedDepartureDates = () => (
+    confirmedDateOrigin === 'default'
+      ? formData.departureDates || []
+      : getConfirmedDateOrigin()?.departureDates || []
+  )
+
+  const handleConfirmedDateOriginChange = (originKey: string) => {
+    setConfirmedDateOrigin(originKey)
+    setConfirmedDateIndex('')
+    setConfirmedDateValue('')
+  }
+
+  useEffect(() => {
+    if (confirmedDateOrigin === 'default') return
+    const originExists = (formData.joinUsFrom || []).some((origin) => getJoinOriginKey(origin) === confirmedDateOrigin)
+    if (!originExists) handleConfirmedDateOriginChange('default')
+  }, [confirmedDateOrigin, formData.joinUsFrom])
+
   const handleApplyConfirmedDateChange = () => {
     const index = Number(confirmedDateIndex)
     if (!Number.isInteger(index) || index < 0) {
@@ -298,7 +300,7 @@ const EditTrip = () => {
       return
     }
 
-    const departureDates = [...(formData.departureDates || [])]
+    const departureDates = [...getConfirmedDepartureDates()]
     const previousDate = departureDates[index]
     if (!previousDate) {
       setMediaError('Selected confirmed trip date is not available.')
@@ -306,17 +308,33 @@ const EditTrip = () => {
     }
 
     departureDates[index] = confirmedDateValue
-    setFormData({
-      ...formData,
-      _confirmedDateChange: { oldDate: previousDate, newDate: confirmedDateValue },
-      departureDates,
-      nextBatch: formData.nextBatch === previousDate || !formData.nextBatch ? confirmedDateValue : formData.nextBatch
-    } as Partial<Trip>)
+    if (confirmedDateOrigin === 'default') {
+      setFormData({
+        ...formData,
+        _confirmedDateChange: { oldDate: previousDate, newDate: confirmedDateValue },
+        departureDates,
+        nextBatch: formData.nextBatch === previousDate || !formData.nextBatch ? confirmedDateValue : formData.nextBatch
+      } as Partial<Trip>)
+    } else {
+      const changedOrigin = getConfirmedDateOrigin()
+      setFormData({
+        ...formData,
+        _confirmedDateChange: {
+          oldDate: previousDate,
+          newDate: confirmedDateValue,
+          joinOrigin: changedOrigin?.location || confirmedDateOrigin
+        },
+        joinUsFrom: (formData.joinUsFrom || []).map((origin) => (
+          getJoinOriginKey(origin) === confirmedDateOrigin
+            ? { ...origin, departureDates }
+            : origin
+        ))
+      } as Partial<Trip>)
+    }
     setMediaError('')
     showToast('Confirmed trip date updated. Save package to notify booked users.')
   }
 
-  const getJoinOriginKey = (origin: NonNullable<Trip['joinUsFrom']>[number]) => origin.id || origin.location
   const isJoinOriginSelected = selectedDepartureForItinerary.startsWith('join:')
   const selectedJoinOriginId = isJoinOriginSelected ? selectedDepartureForItinerary.slice(5) : ''
   const selectedJoinOrigin = (formData.joinUsFrom || []).find((origin) => getJoinOriginKey(origin) === selectedJoinOriginId)
@@ -1326,42 +1344,48 @@ const EditTrip = () => {
 
           <section className={sectionClass}>
             <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
-              <Clock size={20} className="mr-3 text-secondary" /> Logistics & Batches
+              <Clock size={20} className="mr-3 text-secondary" /> Change Confirmed Trip Date
             </h3>
-
-            <div className="grid grid-cols-1 gap-6">
-              <div className="space-y-2">
-                <label className={labelClass}>Next Batch Date</label>
-                <input
-                  type="date"
-                  value={toDateInputValue(formData.nextBatch)}
-                  onChange={e => handleNextBatchChange(e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-            </div>
 
             <div className="rounded-[2rem] border border-secondary/25 bg-secondary/10 p-5 md:p-6 space-y-5">
               <div>
                 <label className={labelClass}>Change Confirmed Trip Date</label>
                 <p className="text-xs text-white/50 mt-2 ml-2">
-                  Use this when users have already booked a confirmed departure. After you save the package, all confirmed bookings for this changed date are updated and emailed automatically.
+                  Select a Join Us From location, change its confirmed departure date, then save the package to update matching confirmed bookings and email users automatically.
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3 md:items-end">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-3 md:items-end">
+                <div className="space-y-2">
+                  <label className="text-[9px] uppercase font-black text-white/40 tracking-[0.18em] ml-2">Join Us From location</label>
+                  <select
+                    value={confirmedDateOrigin}
+                    onChange={(event) => handleConfirmedDateOriginChange(event.target.value)}
+                    className={`${inputClass} p-3 text-sm`}
+                  >
+                    <option value="default" className="bg-slate-900">Default trip dates</option>
+                    {(formData.joinUsFrom || []).filter((origin) => origin.location.trim()).map((origin) => {
+                      const originKey = getJoinOriginKey(origin)
+                      return (
+                        <option key={originKey} value={originKey} className="bg-slate-900">
+                          {origin.location}
+                        </option>
+                      )
+                    })}
+                  </select>
+                </div>
                 <div className="space-y-2">
                   <label className="text-[9px] uppercase font-black text-white/40 tracking-[0.18em] ml-2">Current confirmed date</label>
                   <select
                     value={confirmedDateIndex}
                     onChange={(event) => {
                       setConfirmedDateIndex(event.target.value)
-                      const selectedDate = formData.departureDates?.[Number(event.target.value)] || ''
+                      const selectedDate = getConfirmedDepartureDates()[Number(event.target.value)] || ''
                       setConfirmedDateValue(selectedDate)
                     }}
                     className={`${inputClass} p-3 text-sm`}
                   >
                     <option value="" className="bg-slate-900">Select date</option>
-                    {(formData.departureDates || []).map((date, index) => date ? (
+                    {getConfirmedDepartureDates().map((date, index) => date ? (
                       <option key={`${date}-${index}`} value={index} className="bg-slate-900">{date}</option>
                     ) : null)}
                   </select>
@@ -1382,44 +1406,6 @@ const EditTrip = () => {
                 >
                   Apply Date
                 </button>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <label className={labelClass}>Available Departure Dates</label>
-                  <p className="text-xs text-white/45 mt-2 ml-2">Travellers can select only these dates on trip cards.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, departureDates: [...(formData.departureDates || []), ''] })}
-                  className="h-10 px-4 rounded-xl bg-secondary/15 text-secondary border border-secondary/20 uppercase font-black text-[9px] tracking-[0.16em] hover:bg-secondary hover:text-white transition-colors"
-                >
-                  <Plus size={13} className="inline mr-1" /> Add date
-                </button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {formData.departureDates?.map((date, index) => <div key={`${date}-${index}`} className="flex gap-2">
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={event => {
-                      const departureDates = [...(formData.departureDates || [])]
-                      departureDates[index] = event.target.value
-                      setFormData({ ...formData, departureDates })
-                    }}
-                    className={`${inputClass} p-3 text-sm min-w-0`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, departureDates: (formData.departureDates || []).filter((_, dateIndex) => dateIndex !== index) })}
-                    className="w-11 shrink-0 rounded-xl border border-red-200 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
-                    aria-label="Remove departure date"
-                  >
-                    <Trash2 size={15} className="mx-auto" />
-                  </button>
-                </div>)}
               </div>
             </div>
           </section>

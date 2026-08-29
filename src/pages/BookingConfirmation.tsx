@@ -46,7 +46,7 @@ const BookingConfirmation = () => {
 
   if (!bookingData) return null
 
-  const { trip, departure, travellers, numTravellers } = bookingData
+  const { trip, departure, travellers, numTravellers, joinOrigin } = bookingData
   const pricePerPerson = Number(String(trip.price || '').replace(/[^\d.]/g, ''))
   const subtotal = pricePerPerson * numTravellers
   const gst = Math.round(subtotal * 0.05) // 5% GST
@@ -70,6 +70,7 @@ const BookingConfirmation = () => {
       highlights: trip.highlights || [],
       itinerary: trip.itinerary || [],
       departureDates: trip.departureDates || [],
+      joinOrigin: joinOrigin || trip.joinOrigin,
       ageLimit: trip.ageLimit,
       bookingId: uniqueBookingId,
       status: 'Payment Pending',

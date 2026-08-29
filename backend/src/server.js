@@ -606,11 +606,13 @@ const updateBookingsForTripDate = async ({ tripId, tripTitle, oldPayload, newPay
   if (!dateChange.appliesToAllActiveBookings && dateChange.changedDates.size === 0) {
     return { updated: 0, emailsSent: 0, emailFailures: 0, oldDate: dateChange.oldDate, newDate: dateChange.newDate }
   }
+  const targetJoinOrigin = normalizeText(explicitDateChange?.joinOrigin)
 
   const bookings = await prisma.booking.findMany({ include: { user: true }, orderBy: { createdAt: 'asc' } })
   const activeBookings = bookings.filter((booking) => (
     String(booking.payload?.id) === String(tripId) &&
-    booking.payload?.status !== 'Cancelled'
+    booking.payload?.status !== 'Cancelled' &&
+    (!targetJoinOrigin || normalizeText(booking.payload?.joinOrigin) === targetJoinOrigin)
   ))
 
   if (!activeBookings.length) return { updated: 0, emailsSent: 0, emailFailures: 0 }
