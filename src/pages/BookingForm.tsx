@@ -25,6 +25,7 @@ const BookingForm = () => {
   const [searchParams] = useSearchParams()
   const tripId = searchParams.get('tripId')
   const departure = searchParams.get('departure')
+  const joinOrigin = searchParams.get('joinOrigin')
 
   const [trip, setTrip] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -37,6 +38,16 @@ const BookingForm = () => {
   const [submitting, setSubmitting] = useState(false)
 
   const isTravellerEligible = (age: number) => isAgeWithinLimit(age, trip?.ageLimit)
+  const joinUsFromOptions = (trip?.joinUsFrom || []).filter((origin: any) => origin.location)
+  const selectedJoinOption = joinUsFromOptions.find((origin: any) => (origin.id || origin.location) === joinOrigin)
+  const bookingTrip = selectedJoinOption
+    ? {
+        ...trip,
+        price: selectedJoinOption.price || trip?.price,
+        duration: selectedJoinOption.duration || trip?.duration,
+        joinOrigin: selectedJoinOption.location,
+      }
+    : trip
 
   // Calculate age from date of birth
   const calculateAge = (birthDate: string): number => {
@@ -173,10 +184,11 @@ const BookingForm = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tripTitle: trip?.title,
-          tripLocation: trip?.location,
-          tripDuration: trip?.duration,
-          tripPrice: trip?.price,
+          tripTitle: bookingTrip?.title,
+          tripLocation: bookingTrip?.location,
+          tripDuration: bookingTrip?.duration,
+          tripPrice: bookingTrip?.price,
+          joinOrigin: bookingTrip?.joinOrigin,
           departureDate: departure,
           travellers,
           numTravellers
@@ -186,8 +198,9 @@ const BookingForm = () => {
       // Navigate directly to booking confirmation page
       navigate('/booking-confirmation', {
         state: {
-          trip,
+          trip: bookingTrip,
           departure,
+          joinOrigin: bookingTrip?.joinOrigin,
           travellers,
           numTravellers
         }

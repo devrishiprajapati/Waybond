@@ -152,6 +152,15 @@ const TripDetails = () => {
   const joinUsFromOptions = (trip?.joinUsFrom || []).filter((origin: any) => origin.location)
   const selectedJoinOption = joinUsFromOptions.find((origin: any) => (origin.id || origin.location) === selectedJoinOrigin)
   const selectedJoinItinerary = selectedJoinOrigin ? trip?.joinUsFromItineraries?.[selectedJoinOrigin] : undefined
+  const activePrice = selectedJoinOption?.price || trip?.price
+  const activeDuration = selectedJoinOption?.duration || trip?.duration
+  const formatPrice = (price: unknown) => {
+    if (price === null || price === undefined || price === '') return ''
+    const numericPrice = Number(String(price).replace(/[^\d.]/g, ''))
+    return Number.isFinite(numericPrice) && numericPrice > 0
+      ? numericPrice.toLocaleString('en-IN')
+      : String(price)
+  }
   const activeDepartureDates = selectedJoinOrigin
     ? selectedJoinOption?.departureDates || []
     : trip?.departureDates || []
@@ -219,12 +228,18 @@ const TripDetails = () => {
 
     // Check if user is logged in
     if (!isLoggedIn()) {
-      navigate(`/login?redirect=${encodeURIComponent(`/trip/${slug}`)}`)
+      const redirectParams = new URLSearchParams()
+      if (selectedDeparture) redirectParams.set('departure', selectedDeparture)
+      const redirectPath = `/trip/${slug}${redirectParams.toString() ? `?${redirectParams.toString()}` : ''}`
+      navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`)
       return
     }
 
     // Navigate to booking form with trip details
-    navigate(`/booking-form?tripId=${trip.id}&departure=${encodeURIComponent(selectedDeparture)}`)
+    const bookingParams = new URLSearchParams({ tripId: String(trip.id) })
+    if (selectedDeparture) bookingParams.set('departure', selectedDeparture)
+    if (selectedJoinOrigin) bookingParams.set('joinOrigin', selectedJoinOrigin)
+    navigate(`/booking-form?${bookingParams.toString()}`)
   }
 
   if (loading) {
@@ -666,17 +681,17 @@ const TripDetails = () => {
                 <div className="flex justify-between items-center gap-4 pb-5 border-b border-white/10 md:pb-6">
                   <div className="min-w-0 flex-1 overflow-hidden">
                     <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
-                    <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{trip.price?.toLocaleString('en-IN')}</div>
+                    <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
                   </div>
                   <div className="shrink-0 flex items-center gap-5">
                     <div className="text-center min-w-[46px] md:min-w-[52px]">
-                      <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Day/i)?.[1] ?? trip.duration.split(' ')[0]}</div>
+                      <div className="text-white font-black text-base md:text-lg">{String(activeDuration || '').match(/(\d+)\s*Day/i)?.[1] ?? String(activeDuration || '').split(' ')[0]}</div>
                       <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Days</div>
                     </div>
-                    {String(trip.duration || '').match(/(\d+)\s*Night/i) && (
+                    {String(activeDuration || '').match(/(\d+)\s*Night/i) && (
                       <>
                         <div className="text-center min-w-[46px] md:min-w-[52px]">
-                          <div className="text-white font-black text-base md:text-lg">{String(trip.duration || '').match(/(\d+)\s*Night/i)![1]}</div>
+                          <div className="text-white font-black text-base md:text-lg">{String(activeDuration || '').match(/(\d+)\s*Night/i)![1]}</div>
                           <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Nights</div>
                         </div>
                       </>
@@ -1293,7 +1308,7 @@ const TripDetails = () => {
               {/* Price Section */}
               <div className="text-right">
                 <p className="text-[9px] sm:text-xs text-gray-400 font-bold uppercase tracking-wide">per person</p>
-                <p className="text-sm sm:text-lg md:text-2xl font-black text-secondary leading-none mt-0.5">₹{trip?.price?.toLocaleString('en-IN')}</p>
+                <p className="text-sm sm:text-lg md:text-2xl font-black text-secondary leading-none mt-0.5">₹{formatPrice(activePrice)}</p>
               </div>
 
               {/* Book Now Button */}
