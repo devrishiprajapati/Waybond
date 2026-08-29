@@ -37,6 +37,7 @@ const TripDetails = () => {
   const [thingsToCarryOpen, setThingsToCarryOpen] = useState(false)
   const [termsOpen, setTermsOpen] = useState(false)
   const [cancellationPolicyOpen, setCancellationPolicyOpen] = useState(false)
+  const [overviewExpanded, setOverviewExpanded] = useState(false)
   const travelDateInputRef = React.useRef<HTMLInputElement>(null)
 
   const openTravelDatePicker = () => {
@@ -258,6 +259,15 @@ const TripDetails = () => {
   const expeditionLeads = Array.isArray(trip.captains) && trip.captains.length > 0
     ? trip.captains
     : trip.captain ? [trip.captain] : []
+  const overviewClampStyle = overviewExpanded
+    ? undefined
+    : {
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical' as const,
+        WebkitLineClamp: 4,
+        overflow: 'hidden'
+      }
+  const shouldShowOverviewToggle = String(trip.description || '').length > 180
   const joinUsFromSection = joinUsFromOptions.length > 0 ? (
     <div className="rounded-[1.25rem] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
       <h2 className="mb-5 text-xl font-extrabold tracking-tight text-slate-950 md:text-2xl">Join Us From</h2>
@@ -358,7 +368,7 @@ const TripDetails = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 1.05 }}
                 transition={{ duration: 1.2, ease: "easeInOut" }}
-                className="w-full h-full object-contain bg-[#003d6a]/20"
+                className="w-full h-full object-cover bg-[#003d6a]/20"
               />
             </AnimatePresence>
 
@@ -456,9 +466,21 @@ const TripDetails = () => {
               <div>
                 <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
                   <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
-                  <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg">
+                  <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg" style={overviewClampStyle}>
                     {trip.description}
                   </p>
+                  {shouldShowOverviewToggle && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        haptics.light()
+                        setOverviewExpanded((expanded) => !expanded)
+                      }}
+                      className="mt-4 text-sm font-black uppercase tracking-[0.14em] text-secondary transition-colors hover:text-secondary-dark"
+                    >
+                      {overviewExpanded ? 'Show Less' : 'Read More'}
+                    </button>
+                  )}
                 </div>
 
                 {trip.highlights && trip.highlights.length > 0 && (
@@ -837,9 +859,21 @@ const TripDetails = () => {
           <div>
             <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
               <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
-              <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg">
+              <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg" style={overviewClampStyle}>
                 {trip.description}
               </p>
+              {shouldShowOverviewToggle && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    haptics.light()
+                    setOverviewExpanded((expanded) => !expanded)
+                  }}
+                  className="mt-4 text-sm font-black uppercase tracking-[0.14em] text-secondary transition-colors hover:text-secondary-dark"
+                >
+                  {overviewExpanded ? 'Show Less' : 'Read More'}
+                </button>
+              )}
             </div>
 
             {trip.highlights && trip.highlights.length > 0 && (

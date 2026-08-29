@@ -676,7 +676,7 @@ const EditTrip = () => {
               <div className="space-y-5">
                 <div className="space-y-2">
                   <label className={labelClass}>Main Cover Image</label>
-                  <label className="h-14 rounded-2xl border border-secondary/35 bg-secondary/10 text-secondary font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:bg-secondary hover:text-white transition-all"><Upload size={16} /> Upload Cover Image<input type="file" accept="image/*" className="sr-only" onChange={(event) => handleCoverUpload(event.target.files?.[0])} /></label>
+                  <label className="h-14 rounded-2xl border border-secondary/35 bg-secondary/10 text-secondary font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:bg-secondary hover:text-white transition-all"><Upload size={16} /> Upload Cover Image<input type="file" accept="image/*" className="sr-only" onChange={(event) => { handleCoverUpload(event.target.files?.[0]); event.target.value = '' }} /></label>
                 </div>
                 <div className="space-y-2">
                   <label className={labelClass}>Gallery Images</label>
