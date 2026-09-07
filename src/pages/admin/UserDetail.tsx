@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, ClipboardList, CreditCard, Mail, MapPin, MessageSquareText, Percent, Phone, ShieldCheck, Star, UserRound, type LucideIcon } from 'lucide-react'
+import { ArrowLeft, ArrowRightLeft, CalendarDays, ClipboardList, CreditCard, Mail, MapPin, MessageSquareText, Percent, Phone, ShieldCheck, Star, UserRound, type LucideIcon } from 'lucide-react'
+import TransferPackageModal from './TransferPackageModal'
 
 type UserDetailData = {
   user: {
@@ -41,6 +42,7 @@ export default function AdminUserDetail() {
   const [error, setError] = useState('')
   const [paymentError, setPaymentError] = useState('')
   const [updatingPaymentId, setUpdatingPaymentId] = useState('')
+  const [transferModalBooking, setTransferModalBooking] = useState<Record<string, unknown> | null>(null)
 
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
@@ -137,8 +139,16 @@ export default function AdminUserDetail() {
           return (
             <article key={currentBookingDbId || String(index)} className="liquid-glass-dark border border-white/10 rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
               <div>
-                <p className="text-lg font-sans font-black uppercase italic text-white">{bookingText(booking, 'title', bookingText(booking, 'tripTitle', 'WayBond Trip'))}</p>
-                <p className="text-sm text-white/50 mt-2">{bookingText(booking, 'location', bookingText(booking, 'destination', 'Location pending'))}</p>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-lg font-sans font-black uppercase italic text-white">{bookingText(booking, 'title', bookingText(booking, 'tripTitle', 'WayBond Trip'))}</p>
+                    <p className="text-sm text-white/50 mt-2">{bookingText(booking, 'location', bookingText(booking, 'destination', 'Location pending'))}</p>
+                  </div>
+                  <button onClick={() => setTransferModalBooking(booking)} className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/15 border border-secondary/25 text-secondary text-[9px] font-black uppercase tracking-[0.16em] hover:bg-secondary/25 transition-colors">
+                    <ArrowRightLeft size={14} />
+                    Transfer Package
+                  </button>
+                </div>
                 <div className="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-[0.14em] mt-4">
                   <span className="px-3 py-2 rounded-full bg-secondary/15 text-secondary">{bookingText(booking, 'status', 'Booked')}</span>
                   <span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{bookingText(booking, 'bookingId', `Booking ${index + 1}`)}</span>
@@ -214,7 +224,10 @@ export default function AdminUserDetail() {
               </div>
             </article>
           )
-        }) : <div className="liquid-glass-dark border border-white/10 rounded-2xl p-8 text-white/45">No booked trips yet.</div>}</div></section>
+        }) : <div className="liquid-glass-dark border border-white/10 rounded-2xl p-8 text-white/45">No booked trips yet.</div>}</div>
+
+          {transferModalBooking && <TransferPackageModal booking={transferModalBooking} bookingDbId={bookingDbId(transferModalBooking)} onClose={() => setTransferModalBooking(null)} onUpdate={(updatedBooking) => { setData((current) => current ? { ...current, bookings: current.bookings.map((b) => bookingDbId(b) === bookingDbId(transferModalBooking) ? updatedBooking : b) } : current); setTransferModalBooking(updatedBooking) }} />}
+        </section>
 
         <section><h2 className="text-2xl font-sans font-black uppercase italic text-white mb-4">User <span className="text-secondary">Testimonials</span></h2><div className="grid grid-cols-1 lg:grid-cols-2 gap-4">{testimonials.length ? testimonials.map((testimonial) => <article key={testimonial.id} className="liquid-glass-dark border border-white/10 rounded-2xl p-5"><p className="text-secondary text-[10px] font-black uppercase tracking-[0.16em] mb-3">{testimonial.trip}</p><p className="text-white/75 italic leading-relaxed">&ldquo;{testimonial.review}&rdquo;</p><div className="flex items-center justify-between border-t border-white/10 mt-5 pt-4"><span className="flex gap-1">{Array.from({ length: 5 }).map((_, index) => <Star key={index} size={14} className={index < testimonial.rating ? 'text-secondary fill-secondary' : 'text-white/15'} />)}</span><span className="text-[9px] text-white/35 font-black uppercase tracking-[0.14em]">{formatDate(testimonial.createdAt)}</span></div></article>) : <div className="liquid-glass-dark border border-white/10 rounded-2xl p-8 text-white/45">No testimonials yet.</div>}</div></section>
       </div>

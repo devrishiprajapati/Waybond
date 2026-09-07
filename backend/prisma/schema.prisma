@@ -135,3 +135,31 @@ model TeamMember {
 
   @@index([position])
 }
+
+model BookingReschedule {
+  id              String   @id @default(cuid())
+  bookingId       String
+  userId          String
+  fromTripId      Int
+  fromTripTitle   String
+  toTripId        Int
+  toTripTitle     String
+  fromPrice       Float
+  toPrice         Float
+  fromDeparture   String?
+  toDeparture     String?
+  priceDifference Float
+  reason          String?
+  status          String   @default("PENDING") // PENDING, APPROVED, COMPLETED, REJECTED
+  requestedAt     DateTime @default(now())
+  processedAt     DateTime?
+  processedBy     String?
+  emailSent       Boolean  @default(false)
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+}
