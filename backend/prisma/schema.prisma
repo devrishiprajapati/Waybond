@@ -136,6 +136,7 @@ model TeamMember {
   @@index([position])
 }
 
+<<<<<<< HEAD
 model PromoCode {
   id                String   @id @default(cuid())
   code              String   @unique
@@ -157,4 +158,32 @@ model PromoCode {
   @@index([code])
   @@index([isActive])
   @@index([validUntil])
+=======
+model BookingReschedule {
+  id              String   @id @default(cuid())
+  bookingId       String
+  userId          String
+  fromTripId      Int
+  fromTripTitle   String
+  toTripId        Int
+  toTripTitle     String
+  fromPrice       Float
+  toPrice         Float
+  fromDeparture   String?
+  toDeparture     String?
+  priceDifference Float
+  reason          String?
+  status          String   @default("PENDING") // PENDING, APPROVED, COMPLETED, REJECTED
+  requestedAt     DateTime @default(now())
+  processedAt     DateTime?
+  processedBy     String?
+  emailSent       Boolean  @default(false)
+  notes           String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+>>>>>>> e2aecd939889e0cd18da37678851dbd6a4e10ee6
 }

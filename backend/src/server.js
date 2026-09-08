@@ -932,25 +932,25 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase()
     const password = String(req.body.password || '')
-    
+
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required.' })
     }
 
     // Try to find admin in database
     const admin = await prisma.admin.findUnique({ where: { email } })
-    
+
     if (admin && passwordMatches(password, admin.passwordHash)) {
       if (!admin.isActive) {
         return res.status(403).json({ message: 'Your admin account has been deactivated.' })
       }
-      
+
       // Update last login
       const updatedAdmin = await prisma.admin.update({
         where: { id: admin.id },
         data: { lastLoginAt: new Date() }
       })
-      
+
       // Return admin data with permissions
       return res.json({
         admin: {
@@ -962,7 +962,7 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
         }
       })
     }
-    
+
     const masterEmail = process.env.MASTER_ADMIN_EMAIL || 'master@waybond.com'
     const masterPassword = process.env.MASTER_ADMIN_PASSWORD || 'master123'
 
@@ -981,7 +981,7 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
     // Fallback to environment variable for backward compatibility
     const envEmail = process.env.ADMIN_EMAIL || 'admin@waybond.local'
     const envPassword = process.env.ADMIN_PASSWORD || 'admin123'
-    
+
     if (email === envEmail && password === envPassword) {
       return res.json({
         admin: {
@@ -993,7 +993,7 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
         }
       })
     }
-    
+
     return res.status(401).json({ message: 'Invalid admin credentials.' })
   } catch (error) {
     next(error)
@@ -1167,7 +1167,7 @@ app.get('/api/analytics', async (req, res, next) => {
     const range = req.query.range || '30d'
     const now = new Date()
     let startDate = new Date()
-    
+
     // Calculate date range
     switch (range) {
       case '7d':
@@ -1195,8 +1195,8 @@ app.get('/api/analytics', async (req, res, next) => {
 
     // Filter bookings by date range
     const bookings = allBookings.filter(b => new Date(b.createdAt) >= startDate)
-    const confirmedBookings = bookings.filter(b => 
-      b.payload?.status === 'Confirmed' || 
+    const confirmedBookings = bookings.filter(b =>
+      b.payload?.status === 'Confirmed' ||
       b.payload?.status === 'Refunded' ||
       b.payload?.paymentStatus === 'Paid' ||
       b.payload?.paymentStatus === 'Online' ||
@@ -1208,8 +1208,8 @@ app.get('/api/analytics', async (req, res, next) => {
     const totalRevenue = confirmedBookings.reduce((sum, booking) => sum + getNetBookingRevenue(booking), 0)
 
     // Calculate average booking value
-    const averageBookingValue = confirmedBookings.length > 0 
-      ? Math.round(totalRevenue / confirmedBookings.length) 
+    const averageBookingValue = confirmedBookings.length > 0
+      ? Math.round(totalRevenue / confirmedBookings.length)
       : 0
 
     // Booking trends (weekly or monthly based on range)
@@ -1249,8 +1249,8 @@ app.get('/api/analytics', async (req, res, next) => {
       totalRevenue: Math.round(totalRevenue),
       totalRefunds: Math.round(totalRefunds),
       averageBookingValue,
-      conversionRate: totalRevenue > 0 ? 
-        Number(((confirmedBookings.length / Math.max(bookings.length, 1)) * 100).toFixed(1)) : 
+      conversionRate: totalRevenue > 0 ?
+        Number(((confirmedBookings.length / Math.max(bookings.length, 1)) * 100).toFixed(1)) :
         0,
       totalTrips: allTrips.length,
       totalUsers: allUsers.length
@@ -1299,7 +1299,7 @@ app.get('/api/admin/bookings', async (_req, res, next) => {
 
       // Map old status-based payment values to actual payment methods
       let paymentMethod = payload.paymentStatus || 'Pending Payment'
-      
+
       // If paymentStatus is a status (not a method), try to get the actual method
       // or default to a reasonable payment method
       if (['Paid', 'Pending Payment', 'Failed', 'Refunded', 'Partially Paid'].includes(paymentMethod)) {
@@ -1347,7 +1347,7 @@ function generateBookingTrends(bookings, range) {
       date.setDate(date.getDate() - i)
       const dayStr = date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
       labels.push(dayStr)
-      
+
       const count = bookings.filter(b => {
         const bookingDate = new Date(b.createdAt)
         return bookingDate.toDateString() === date.toDateString()
@@ -1360,14 +1360,14 @@ function generateBookingTrends(bookings, range) {
     const weeks = range === '30d' ? 4 : range === '90d' ? 12 : 52
     const labels = []
     const data = []
-    
+
     for (let i = weeks - 1; i >= 0; i--) {
       labels.push(`Week ${weeks - i}`)
       const weekStart = new Date()
       weekStart.setDate(weekStart.getDate() - (i + 1) * 7)
       const weekEnd = new Date()
       weekEnd.setDate(weekEnd.getDate() - i * 7)
-      
+
       const count = bookings.filter(b => {
         const bookingDate = new Date(b.createdAt)
         return bookingDate >= weekStart && bookingDate < weekEnd
@@ -1382,26 +1382,26 @@ function generateMonthlyRevenue(bookings) {
   const labels = []
   const data = []
   const now = new Date()
-  
+
   for (let i = 11; i >= 0; i--) {
     const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const monthStr = month.toLocaleDateString('en-IN', { month: 'short' })
     labels.push(monthStr)
-    
+
     const monthRevenue = bookings.filter(b => {
       const bookingDate = new Date(b.createdAt)
-      return bookingDate.getMonth() === month.getMonth() && 
-             bookingDate.getFullYear() === month.getFullYear() &&
-             (b.payload?.status === 'Confirmed' || 
-              b.payload?.status === 'Refunded' ||
-              b.payload?.paymentStatus === 'Paid' ||
-              b.payload?.paymentStatus === 'Online' ||
-              b.payload?.paymentStatus === 'Refunded')
+      return bookingDate.getMonth() === month.getMonth() &&
+        bookingDate.getFullYear() === month.getFullYear() &&
+        (b.payload?.status === 'Confirmed' ||
+          b.payload?.status === 'Refunded' ||
+          b.payload?.paymentStatus === 'Paid' ||
+          b.payload?.paymentStatus === 'Online' ||
+          b.payload?.paymentStatus === 'Refunded')
     }).reduce((sum, booking) => sum + getNetBookingRevenue(booking), 0)
-    
+
     data.push(Math.round(monthRevenue))
   }
-  
+
   return { labels, data }
 }
 
@@ -1409,22 +1409,22 @@ function generateMonthlyRefunds(bookings) {
   const labels = []
   const data = []
   const now = new Date()
-  
+
   for (let i = 11; i >= 0; i--) {
     const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const monthStr = month.toLocaleDateString('en-IN', { month: 'short' })
     labels.push(monthStr)
-    
+
     const monthRefunds = bookings.filter(b => {
       const refundDate = new Date(b.payload?.refundedAt || b.payload?.paymentStatusUpdatedAt || b.createdAt)
       return b.payload?.paymentStatus === 'Refunded' &&
-             refundDate.getMonth() === month.getMonth() && 
-             refundDate.getFullYear() === month.getFullYear()
+        refundDate.getMonth() === month.getMonth() &&
+        refundDate.getFullYear() === month.getFullYear()
     }).reduce((sum, booking) => sum + getRefundAmount(booking), 0)
-    
+
     data.push(Math.round(monthRefunds))
   }
-  
+
   return { labels, data }
 }
 
@@ -1432,21 +1432,21 @@ function generateUserGrowth(users) {
   const labels = []
   const data = []
   const now = new Date()
-  
+
   for (let i = 5; i >= 0; i--) {
     const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const monthStr = month.toLocaleDateString('en-IN', { month: 'short' })
     labels.push(monthStr)
-    
+
     const monthUsers = users.filter(u => {
       const userDate = new Date(u.joinedAt)
-      return userDate.getMonth() === month.getMonth() && 
-             userDate.getFullYear() === month.getFullYear()
+      return userDate.getMonth() === month.getMonth() &&
+        userDate.getFullYear() === month.getFullYear()
     }).length
-    
+
     data.push(monthUsers)
   }
-  
+
   return { labels, data }
 }
 
@@ -1618,15 +1618,15 @@ app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
       paymentStatusUpdatedAt: new Date().toISOString(),
       ...(isRefunded
         ? {
-            refundPercentage,
-            refundAmount,
-            refundedAt: booking.payload?.refundedAt || new Date().toISOString()
-          }
+          refundPercentage,
+          refundAmount,
+          refundedAt: booking.payload?.refundedAt || new Date().toISOString()
+        }
         : {
-            refundPercentage: null,
-            refundAmount: null,
-            refundedAt: null
-          })
+          refundPercentage: null,
+          refundAmount: null,
+          refundedAt: null
+        })
     }
 
     const latestPayment = await prisma.payment.findFirst({
@@ -1704,9 +1704,9 @@ app.put('/api/bookings/:bookingId/payment-status', async (req, res, next) => {
 // General booking update endpoint for admin
 app.put('/api/admin/bookings/:bookingId', async (req, res, next) => {
   try {
-    const booking = await prisma.booking.findUnique({ 
-      where: { id: req.params.bookingId }, 
-      include: { user: true } 
+    const booking = await prisma.booking.findUnique({
+      where: { id: req.params.bookingId },
+      include: { user: true }
     })
     if (!booking) return res.status(404).json({ message: 'Booking not found' })
 
@@ -1723,6 +1723,288 @@ app.put('/api/admin/bookings/:bookingId', async (req, res, next) => {
     })
 
     res.json(toBooking(updated))
+  } catch (error) { next(error) }
+})
+
+app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
+  try {
+    const { targetTripId, reason, processedBy } = req.body
+    if (!targetTripId) return res.status(400).json({ message: 'Target trip is required.' })
+
+    const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId }, include: { user: true } })
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' })
+
+    const targetTrip = await prisma.trip.findUnique({ where: { id: Number(targetTripId) } })
+    if (!targetTrip) return res.status(404).json({ message: 'Target trip not found.' })
+    if (!isTripVisible(targetTrip)) return res.status(400).json({ message: 'Target trip is not available.' })
+
+    const oldPayload = booking.payload || {}
+    const targetPayload = targetTrip.payload || {}
+    const travelers = Number(oldPayload.travelers || 1)
+    const oldPrice = toMoneyNumber(oldPayload.price || 0)
+    const newPrice = toMoneyNumber(targetPayload.price || 0)
+    const priceDifference = newPrice - oldPrice
+    const fromDeparture = getTripDate(oldPayload)
+    const toDeparture = getTripDate(targetPayload)
+
+    const transferRecord = {
+      id: `transfer-${Date.now()}`,
+      fromTripTitle: oldPayload.title || oldPayload.tripTitle || 'Unknown Trip',
+      fromTripId: oldPayload.id || oldPayload.tripId || null,
+      toTripTitle: targetPayload.title || 'Unknown Trip',
+      toTripId: targetTrip.id,
+      fromPrice: oldPrice,
+      toPrice: newPrice,
+      transferredAt: new Date().toISOString(),
+      transferredBy: processedBy || 'admin'
+    }
+
+    const transferHistory = Array.isArray(oldPayload.transferHistory) ? [...oldPayload.transferHistory, transferRecord] : [transferRecord]
+
+    const updatedPayload = {
+      ...oldPayload,
+      id: targetTrip.id,
+      tripId: targetTrip.id,
+      title: targetPayload.title || oldPayload.title,
+      tripTitle: targetPayload.title || oldPayload.tripTitle,
+      location: targetPayload.location || oldPayload.location,
+      destination: targetPayload.location || oldPayload.destination,
+      price: newPrice,
+      totalAmount: newPrice * travelers,
+      pendingAmount: Math.max(0, (newPrice * travelers) - toMoneyNumber(oldPayload.amountPaid || 0)),
+      nextBatch: targetPayload.nextBatch || oldPayload.nextBatch,
+      departure: targetPayload.nextBatch || oldPayload.departure,
+      departureDate: targetPayload.nextBatch || oldPayload.departureDate,
+      duration: targetPayload.duration || oldPayload.duration,
+      image: targetPayload.image || oldPayload.image,
+      transferHistory,
+      lastTransferredAt: new Date().toISOString()
+    }
+
+    // Save reschedule record to database
+    let emailSent = false
+    const rescheduleRecord = await prisma.bookingReschedule.create({
+      data: {
+        bookingId: booking.id,
+        userId: booking.userId,
+        fromTripId: Number(oldPayload.id || oldPayload.tripId || 0),
+        fromTripTitle: transferRecord.fromTripTitle,
+        toTripId: targetTrip.id,
+        toTripTitle: transferRecord.toTripTitle,
+        fromPrice: oldPrice,
+        toPrice: newPrice,
+        fromDeparture: fromDeparture || null,
+        toDeparture: toDeparture || null,
+        priceDifference,
+        reason: reason || null,
+        status: 'COMPLETED',
+        processedAt: new Date(),
+        processedBy: processedBy || 'admin',
+        emailSent: false
+      }
+    })
+
+    const updated = await prisma.booking.update({
+      where: { id: booking.id },
+      data: { payload: updatedPayload }
+    })
+
+    // Send reschedule notification email to the user
+    const user = booking.user
+    if (mailTransport && user?.email) {
+      try {
+        const safeName = escapeHtml(user.name || 'Traveller')
+        const safeOldTrip = escapeHtml(transferRecord.fromTripTitle)
+        const safeNewTrip = escapeHtml(transferRecord.toTripTitle)
+        const safeBookingId = escapeHtml(oldPayload.bookingId || booking.id)
+        const safeNewLocation = escapeHtml(targetPayload.location || oldPayload.location || '')
+        const safeNewDeparture = escapeHtml(formatTripDate(updatedPayload.nextBatch))
+        const safeOldDeparture = escapeHtml(formatTripDate(fromDeparture))
+        const formattedOldPrice = `₹${oldPrice.toLocaleString('en-IN')}`
+        const formattedNewPrice = `₹${newPrice.toLocaleString('en-IN')}`
+        const invoicePdf = createInvoicePdf({ booking: updated, user })
+
+        await mailTransport.sendMail({
+          from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+          to: user.email,
+          subject: `WayBond Booking Rescheduled – ${safeNewTrip}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; background: #f8fafc; color: #1e293b;">
+              <div style="background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%); padding: 34px 24px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 30px; font-weight: 900;">WAYBOND</h1>
+                <p style="color: rgba(255,255,255,0.82); margin: 8px 0 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px;">Booking Rescheduled</p>
+              </div>
+              <div style="padding: 30px 22px;">
+                <div style="background: #ffffff; border-radius: 14px; padding: 28px; border: 1px solid #e2e8f0; box-shadow: 0 8px 24px rgba(15,23,42,0.08);">
+                  <p style="margin: 0 0 18px; font-size: 16px;">Dear ${safeName},</p>
+                  <p style="margin: 0 0 24px; line-height: 1.6; color: #475569;">
+                    Your booking has been successfully rescheduled. Please find your updated trip details below.
+                  </p>
+                  <div style="background: #fff7ed; border-left: 4px solid #f97316; border-radius: 10px; padding: 18px 20px; margin-bottom: 20px;">
+                    <p style="margin: 0 0 10px; color: #9a3412; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800;">Previous Package</p>
+                    <p style="margin: 0 0 8px; color: #1e293b; font-size: 15px;"><strong>${safeOldTrip}</strong></p>
+                    <p style="margin: 0 0 4px; color: #78716c;"><strong>Price:</strong> ${formattedOldPrice}/person</p>
+                    ${safeOldDeparture ? `<p style="margin: 0; color: #78716c;"><strong>Departure:</strong> ${safeOldDeparture}</p>` : ''}
+                  </div>
+                  <div style="background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 10px; padding: 18px 20px; margin-bottom: 24px;">
+                    <p style="margin: 0 0 10px; color: #1d4ed8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800;">New Package</p>
+                    <p style="margin: 0 0 8px; color: #1e293b; font-size: 16px; font-weight: 700;"><strong>${safeNewTrip}</strong></p>
+                    <p style="margin: 0 0 4px; color: #1e293b;"><strong>Price:</strong> ${formattedNewPrice}/person</p>
+                    ${safeNewLocation ? `<p style="margin: 0 0 4px; color: #1e293b;"><strong>Location:</strong> ${safeNewLocation}</p>` : ''}
+                    ${safeNewDeparture ? `<p style="margin: 0 0 4px; color: #1e293b;"><strong>Departure:</strong> ${safeNewDeparture}</p>` : ''}
+                    <p style="margin: 0; color: #1e293b;"><strong>Booking ID:</strong> ${safeBookingId}</p>
+                  </div>
+                  ${priceDifference !== 0 ? `
+                  <div style="background: ${priceDifference > 0 ? '#fef3c7' : '#d1fae5'}; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: ${priceDifference > 0 ? '#92400e' : '#065f46'}; font-size: 13px; font-weight: 600;">
+                      ${priceDifference > 0 
+                        ? `💰 Additional payment of ₹${Math.abs(priceDifference * travelers).toLocaleString('en-IN')} required` 
+                        : `✨ You saved ₹${Math.abs(priceDifference * travelers).toLocaleString('en-IN')} with this change`}
+                    </p>
+                  </div>` : ''}
+                  <p style="margin: 0; line-height: 1.6; color: #475569;">
+                    Your booking remains confirmed and all traveler details have been transferred. An updated invoice reflecting your new trip is attached to this email.
+                  </p>
+                </div>
+                <p style="text-align: center; color: #64748b; font-size: 12px; margin: 22px 0 0;">
+                  Questions? Contact us at <a href="mailto:support@waybond.com" style="color: #3b82f6; text-decoration: none;">support@waybond.com</a>
+                </p>
+              </div>
+            </div>
+          `,
+          attachments: [{
+            filename: `WayBond-Invoice-${normalizeText(oldPayload.bookingId || booking.id)}.pdf`,
+            content: invoicePdf,
+            contentType: 'application/pdf'
+          }]
+        })
+
+        emailSent = true
+        await prisma.bookingReschedule.update({
+          where: { id: rescheduleRecord.id },
+          data: { emailSent: true }
+        })
+      } catch (emailErr) {
+        console.error('Reschedule notification email failed:', emailErr.message)
+      }
+    }
+
+    res.json({
+      booking: toBooking(updated),
+      reschedule: {
+        id: rescheduleRecord.id,
+        fromTrip: transferRecord.fromTripTitle,
+        toTrip: transferRecord.toTripTitle,
+        priceDifference,
+        emailSent,
+        processedAt: rescheduleRecord.processedAt
+      }
+    })
+  } catch (error) { next(error) }
+})
+
+// Update payment amounts for a booking
+app.post('/api/bookings/:bookingId/payment-update', async (req, res, next) => {
+  try {
+    const { amountPaid, note } = req.body
+    const paidAmount = toMoneyNumber(amountPaid)
+    if (paidAmount <= 0) return res.status(400).json({ message: 'A valid payment amount is required.' })
+
+    const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId } })
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' })
+
+    const oldPayload = booking.payload || {}
+    const travelers = Number(oldPayload.travelers || 1)
+    const price = toMoneyNumber(oldPayload.price || 0)
+    const totalAmount = price * travelers
+    const previousAmountPaid = toMoneyNumber(oldPayload.amountPaid || 0)
+    const newAmountPaid = previousAmountPaid + paidAmount
+    const pendingAmount = Math.max(0, totalAmount - newAmountPaid)
+
+    const paymentRecord = {
+      id: `payment-${Date.now()}`,
+      amount: paidAmount,
+      previousAmountPaid,
+      newAmountPaid,
+      pendingAmount,
+      note: note || '',
+      updatedAt: new Date().toISOString(),
+      updatedBy: 'admin'
+    }
+
+    const paymentUpdateHistory = Array.isArray(oldPayload.paymentUpdateHistory)
+      ? [...oldPayload.paymentUpdateHistory, paymentRecord]
+      : [paymentRecord]
+
+    let newPaymentStatus = oldPayload.paymentStatus || 'Pending Payment'
+    if (newAmountPaid >= totalAmount) {
+      newPaymentStatus = 'Paid'
+    } else if (newAmountPaid > 0) {
+      newPaymentStatus = 'Partially Paid'
+    }
+
+    const updatedPayload = {
+      ...oldPayload,
+      amountPaid: newAmountPaid,
+      pendingAmount,
+      totalAmount,
+      paymentStatus: newPaymentStatus,
+      paymentUpdateHistory,
+      paymentStatusUpdatedAt: new Date().toISOString()
+    }
+
+    if (newPaymentStatus === 'Paid' && oldPayload.status !== 'Cancelled') {
+      updatedPayload.status = 'Confirmed'
+    }
+
+    const updated = await prisma.booking.update({
+      where: { id: booking.id },
+      data: { payload: updatedPayload }
+    })
+
+    res.json(toBooking(updated))
+  } catch (error) { next(error) }
+})
+
+// Get reschedule history for a booking
+app.get('/api/bookings/:bookingId/reschedules', async (req, res, next) => {
+  try {
+    const reschedules = await prisma.bookingReschedule.findMany({
+      where: { bookingId: req.params.bookingId },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    res.json(reschedules)
+  } catch (error) { next(error) }
+})
+
+// Get all reschedules for admin (with pagination)
+app.get('/api/admin/reschedules', async (req, res, next) => {
+  try {
+    const { status, page = '1', limit = '50' } = req.query
+    const skip = (Number(page) - 1) * Number(limit)
+    
+    const where = status ? { status: String(status) } : {}
+    
+    const [reschedules, total] = await Promise.all([
+      prisma.bookingReschedule.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: Number(limit)
+      }),
+      prisma.bookingReschedule.count({ where })
+    ])
+
+    res.json({
+      reschedules,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        pages: Math.ceil(total / Number(limit))
+      }
+    })
   } catch (error) { next(error) }
 })
 
@@ -1980,23 +2262,23 @@ app.post('/api/admins', async (req, res, next) => {
     const { name, email, password, role, permissions, createdBy } = req.body
     const normalizedEmail = String(email || '').trim().toLowerCase()
     const emailError = validateAccountEmail(normalizedEmail)
-    
+
     if (!name?.trim() || !password || password.length < 6) {
       return res.status(400).json({ message: 'Name, email, and a password with at least 6 characters are required.' })
     }
 
     if (emailError) return res.status(400).json({ message: emailError })
-    
+
     if (role !== 'ADMIN' && role !== 'MASTER_ADMIN') {
       return res.status(400).json({ message: 'Role must be either ADMIN or MASTER_ADMIN' })
     }
-    
+
     // Check if email already exists
     const existing = await prisma.admin.findUnique({ where: { email: normalizedEmail } })
     if (existing) {
       return res.status(409).json({ message: 'An admin with this email already exists.' })
     }
-    
+
     const admin = await prisma.admin.create({
       data: {
         name: name.trim(),
@@ -2020,7 +2302,7 @@ app.post('/api/admins', async (req, res, next) => {
         createdBy: true
       }
     })
-    
+
     res.status(201).json(admin)
   } catch (error) {
     next(error)
@@ -2033,12 +2315,12 @@ app.put('/api/admins/:id', async (req, res, next) => {
     const { name, email, password, role, permissions, isActive } = req.body
     const id = req.params.id
     const normalizedEmail = email ? String(email).trim().toLowerCase() : ''
-    
+
     const existing = await prisma.admin.findUnique({ where: { id } })
     if (!existing) {
       return res.status(404).json({ message: 'Admin not found' })
     }
-    
+
     // Check if email is being changed and if it's already taken
     if (normalizedEmail && normalizedEmail !== existing.email) {
       const emailError = validateAccountEmail(normalizedEmail)
@@ -2049,7 +2331,7 @@ app.put('/api/admins/:id', async (req, res, next) => {
         return res.status(409).json({ message: 'This email is already in use by another admin.' })
       }
     }
-    
+
     const updateData = {}
     if (name) updateData.name = name.trim()
     if (normalizedEmail) updateData.email = normalizedEmail
@@ -2057,7 +2339,7 @@ app.put('/api/admins/:id', async (req, res, next) => {
     if (role) updateData.role = role
     if (permissions !== undefined) updateData.permissions = Array.isArray(permissions) ? permissions : []
     if (isActive !== undefined) updateData.isActive = Boolean(isActive)
-    
+
     const admin = await prisma.admin.update({
       where: { id },
       data: updateData,
@@ -2074,7 +2356,7 @@ app.put('/api/admins/:id', async (req, res, next) => {
         createdBy: true
       }
     })
-    
+
     res.json(admin)
   } catch (error) {
     next(error)
@@ -2088,12 +2370,12 @@ app.delete('/api/admins/:id', async (req, res, next) => {
     if (!admin) {
       return res.status(404).json({ message: 'Admin not found' })
     }
-    
+
     // Prevent deleting Master Admin
     if (admin.role === 'MASTER_ADMIN') {
       return res.status(403).json({ message: 'Cannot delete Master Admin account' })
     }
-    
+
     await prisma.admin.delete({ where: { id: req.params.id } })
     res.json({ success: true })
   } catch (error) {
@@ -2432,21 +2714,21 @@ app.post('/api/admin/promo-codes/:id/increment-usage', async (req, res, next) =>
 app.get('/api/analytics', async (req, res, next) => {
   try {
     const range = req.query.range || '30d'
-    
+
     // Get all trips
     const trips = await prisma.trip.findMany({})
     const tripData = trips.map(toTrip)
-    
+
     // Get all users
     const users = await prisma.user.findMany({
       orderBy: { createdAt: 'asc' }
     })
-    
+
     // Get all bookings
     const bookings = await prisma.booking.findMany({
       orderBy: { createdAt: 'asc' }
     })
-    
+
     // Calculate stats
     const revenueBookings = bookings.filter((booking) =>
       booking.payload?.status === 'Confirmed' ||
@@ -2458,28 +2740,28 @@ app.get('/api/analytics', async (req, res, next) => {
     const totalBookings = bookings.length
     const totalRefunds = revenueBookings.reduce((sum, booking) => sum + getRefundAmount(booking), 0)
     const totalRevenue = revenueBookings.reduce((sum, booking) => sum + getNetBookingRevenue(booking), 0)
-    
+
     const averageBookingValue = totalBookings > 0 ? Math.round(totalRevenue / totalBookings) : 0
-    
+
     // Category distribution
     const categoryCount = {}
     tripData.forEach(trip => {
       categoryCount[trip.category] = (categoryCount[trip.category] || 0) + 1
     })
-    
+
     // Experience distribution
     const experienceCount = {}
     tripData.forEach(trip => {
       experienceCount[trip.experience] = (experienceCount[trip.experience] || 0) + 1
     })
-    
+
     // Location popularity (based on bookings or trip count)
     const locationCount = {}
     bookings.forEach(booking => {
       const location = booking.payload?.location || 'Unknown'
       locationCount[location] = (locationCount[location] || 0) + 1
     })
-    
+
     // Generate monthly data for the past 6 months
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     const currentMonth = new Date().getMonth()
@@ -2487,7 +2769,7 @@ app.get('/api/analytics', async (req, res, next) => {
       const monthIndex = (currentMonth - 5 + i + 12) % 12
       return months[monthIndex]
     })
-    
+
     // User growth (count users created in each month)
     const userGrowthData = last6Months.map((month, index) => {
       const monthIndex = (currentMonth - 5 + index + 12) % 12
@@ -2497,10 +2779,10 @@ app.get('/api/analytics', async (req, res, next) => {
       }).length
       return usersInMonth
     })
-    
+
     // Booking trends (last 4 weeks)
     const bookingTrendsData = [45, 67, 82, 95] // Placeholder
-    
+
     const monthlyRevenueData = last6Months.map((month, index) => {
       const monthIndex = (currentMonth - 5 + index + 12) % 12
       return Math.round(revenueBookings.filter((booking) => {
@@ -2515,7 +2797,7 @@ app.get('/api/analytics', async (req, res, next) => {
         return booking.payload?.paymentStatus === 'Refunded' && refundDate.getMonth() === monthIndex
       }).reduce((sum, booking) => sum + getRefundAmount(booking), 0))
     })
-    
+
     const analyticsData = {
       bookingTrends: {
         labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
@@ -2555,7 +2837,7 @@ app.get('/api/analytics', async (req, res, next) => {
         totalUsers: users.length
       }
     }
-    
+
     res.json(analyticsData)
   } catch (error) {
     next(error)
