@@ -29,7 +29,7 @@ model Admin {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  createdBy    String?  // ID of the admin who created this user
+  createdBy    String? // ID of the admin who created this user
   lastLoginAt  DateTime @default(now())
 
   @@index([email])
@@ -136,31 +136,53 @@ model TeamMember {
   @@index([position])
 }
 
-<<<<<<< HEAD
 model PromoCode {
-  id                String   @id @default(cuid())
-  code              String   @unique
-  discountType      String   // PERCENTAGE or FIXED
-  discountValue     Int      // Percentage (0-100) or fixed amount in INR
-  eligiblePackages  Json     // Array of trip IDs that this promo code applies to (empty array = all packages)
-  minBookingAmount  Int?     // Minimum booking amount to use this promo
-  maxDiscount       Int?     // Maximum discount cap for percentage discounts
-  validFrom         DateTime @default(now())
-  validUntil        DateTime
-  usageLimit        Int?     // Maximum number of times this code can be used (null = unlimited)
-  usageCount        Int      @default(0)
-  isActive          Boolean  @default(true)
-  createdBy         String   // Admin ID who created this promo code
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  description       String?  // Optional description for admin reference
+  id               String           @id @default(cuid())
+  code             String           @unique
+  discountType     String // PERCENTAGE or FIXED
+  discountValue    Int // Percentage (0-100) or fixed amount in INR
+  eligiblePackages Json // Array of trip IDs that this promo code applies to (empty array = all packages)
+  minBookingAmount Int? // Minimum booking amount to use this promo
+  maxDiscount      Int? // Maximum discount cap for percentage discounts
+  validFrom        DateTime         @default(now())
+  validUntil       DateTime
+  usageLimit       Int? // Maximum number of times this code can be used (null = unlimited)
+  usageCount       Int              @default(0)
+  isActive         Boolean          @default(true)
+  createdBy        String // Admin ID who created this promo code
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  description      String? // Optional description for admin reference
+  usages           PromoCodeUsage[] // Relation to track all usages
 
   @@index([code])
   @@index([isActive])
   @@index([validUntil])
-=======
+}
+
+model PromoCodeUsage {
+  id             String    @id @default(cuid())
+  promoCodeId    String
+  promoCode      PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  userId         String
+  userName       String // Store user name for easy access
+  userEmail      String // Store user email for easy access
+  bookingId      String? // Reference to booking if available
+  tripId         Int? // Which package was booked
+  tripTitle      String? // Package title
+  discountAmount Int // Actual discount amount applied
+  bookingAmount  Int // Total booking amount
+  finalAmount    Int // Amount after discount
+  usedAt         DateTime  @default(now())
+
+  @@index([promoCodeId])
+  @@index([userId])
+  @@index([usedAt])
+  @@index([tripId])
+}
+
 model BookingReschedule {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   bookingId       String
   userId          String
   fromTripId      Int
@@ -173,17 +195,16 @@ model BookingReschedule {
   toDeparture     String?
   priceDifference Float
   reason          String?
-  status          String   @default("PENDING") // PENDING, APPROVED, COMPLETED, REJECTED
-  requestedAt     DateTime @default(now())
+  status          String    @default("PENDING") // PENDING, APPROVED, COMPLETED, REJECTED
+  requestedAt     DateTime  @default(now())
   processedAt     DateTime?
   processedBy     String?
-  emailSent       Boolean  @default(false)
-  notes           String?  @db.Text
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  emailSent       Boolean   @default(false)
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([bookingId])
   @@index([userId])
   @@index([status])
->>>>>>> e2aecd939889e0cd18da37678851dbd6a4e10ee6
 }

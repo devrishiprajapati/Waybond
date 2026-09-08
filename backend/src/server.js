@@ -2510,6 +2510,7 @@ app.post('/api/promo-codes/validate', async (req, res, next) => {
     
     res.json({
       valid: true,
+      id: promoCode.id,
       discountAmount,
       finalAmount,
       discountType: promoCode.discountType,
@@ -2705,6 +2706,181 @@ app.post('/api/admin/promo-codes/:id/increment-usage', async (req, res, next) =>
       }
     })
     res.json(promoCode)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Record promo code usage with details
+app.post('/api/promo-codes/record-usage', async (req, res, next) => {
+  try {
+    const {
+      promoCodeId,
+      userId,
+      userName,
+      userEmail,
+      bookingId,
+      tripId,
+      tripTitle,
+      discountAmount,
+      bookingAmount,
+      finalAmount
+    } = req.body
+
+    console.log('Recording promo code usage:', { promoCodeId, userId, userName, userEmail, tripId })
+
+    // Validate required fields
+    if (!promoCodeId || !userId || !userName || !userEmail || !discountAmount || !bookingAmount || !finalAmount) {
+      console.error('Missing required fields:', { promoCodeId, userId, userName, userEmail, discountAmount, bookingAmount, finalAmount })
+      return res.status(400).json({ message: 'Missing required fields' })
+    }
+
+    // Create usage record
+    const usage = await prisma.promoCodeUsage.create({
+      data: {
+        promoCodeId,
+        userId,
+        userName,
+        userEmail,
+        bookingId: bookingId || null,
+        tripId: tripId ? Number(tripId) : null,
+        tripTitle: tripTitle || null,
+        discountAmount: Number(discountAmount),
+        bookingAmount: Number(bookingAmount),
+        finalAmount: Number(finalAmount)
+      }
+    })
+
+    console.log('Promo code usage created:', usage.id)
+
+    // Increment usage count
+    await prisma.promoCode.update({
+      where: { id: promoCodeId },
+      data: {
+        usageCount: {
+          increment: 1
+        }
+      }
+    })
+
+    console.log('Usage count incremented for promo code:', promoCodeId)
+
+    res.status(201).json(usage)
+  } catch (error) {
+    console.error('Error recording promo code usage:', error)
+    next(error)
+  }
+})
+
+// Get usage history for a specific promo code
+app.get('/api/admin/promo-codes/:id/usage-history', async (req, res, next) => {
+  try {
+    const usages = await prisma.promoCodeUsage.findMany({
+      where: { promoCodeId: req.params.id },
+      orderBy: { usedAt: 'desc' }
+    })
+    res.json(usages)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Get all promo code usages with filters (Admin only)
+app.get('/api/admin/promo-code-usages', async (req, res, next) => {
+  try {
+    const { promoCodeId, userId, tripId, startDate, endDate } = req.query
+
+    const where = {}
+    
+    if (promoCodeId) where.promoCodeId = promoCodeId
+    if (userId) where.userId = userId
+    if (tripId) where.tripId = Number(tripId)
+    
+    if (startDate || endDate) {
+      where.usedAt = {}
+      if (startDate) where.usedAt.gte = new Date(startDate)
+      if (endDate) where.usedAt.lte = new Date(endDate)
+    }
+
+    const usages = await prisma.promoCodeUsage.findMany({
+      where,
+      include: {
+        promoCode: {
+          select: {
+            code: true,
+            discountType: true,
+            discountValue: true
+          }
+        }
+      },
+      orderBy: { usedAt: 'desc' }
+    })
+
+    res.json(usages)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Get usage statistics for a promo code
+app.get('/api/admin/promo-codes/:id/statistics', async (req, res, next) => {
+  try {
+    const promoCode = await prisma.promoCode.findUnique({
+      where: { id: req.params.id },
+      include: {
+        usages: {
+          orderBy: { usedAt: 'desc' }
+        }
+      }
+    })
+
+    if (!promoCode) {
+      return res.status(404).json({ message: 'Promo code not found' })
+    }
+
+    // Calculate statistics
+    const totalUsages = promoCode.usages.length
+    const totalDiscountGiven = promoCode.usages.reduce((sum, usage) => sum + usage.discountAmount, 0)
+    const totalRevenue = promoCode.usages.reduce((sum, usage) => sum + usage.finalAmount, 0)
+    const averageDiscount = totalUsages > 0 ? Math.round(totalDiscountGiven / totalUsages) : 0
+
+    // Group by trip
+    const usagesByTrip = {}
+    promoCode.usages.forEach(usage => {
+      if (usage.tripId && usage.tripTitle) {
+        if (!usagesByTrip[usage.tripId]) {
+          usagesByTrip[usage.tripId] = {
+            tripId: usage.tripId,
+            tripTitle: usage.tripTitle,
+            count: 0,
+            totalDiscount: 0
+          }
+        }
+        usagesByTrip[usage.tripId].count++
+        usagesByTrip[usage.tripId].totalDiscount += usage.discountAmount
+      }
+    })
+
+    // Group by date
+    const usagesByDate = {}
+    promoCode.usages.forEach(usage => {
+      const date = usage.usedAt.toISOString().split('T')[0]
+      if (!usagesByDate[date]) {
+        usagesByDate[date] = 0
+      }
+      usagesByDate[date]++
+    })
+
+    res.json({
+      code: promoCode.code,
+      totalUsages,
+      totalDiscountGiven,
+      totalRevenue,
+      averageDiscount,
+      usagesByTrip: Object.values(usagesByTrip),
+      usagesByDate,
+      recentUsages: promoCode.usages.slice(0, 10)
+    })
   } catch (error) {
     next(error)
   }

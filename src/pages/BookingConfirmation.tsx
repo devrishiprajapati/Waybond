@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Users, Clock, IndianRupee, CheckCircle, X, ArrowLeft } from 'lucide-react'
+import { Calendar, Users, Clock, IndianRupee, CheckCircle, X, ArrowLeft, Tag, Sparkles } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
 import { haptics } from '../lib/haptics'
 import { getUser } from '../lib/auth'
@@ -37,6 +37,13 @@ const BookingConfirmation = () => {
   const [cashSubmitting, setCashSubmitting] = useState(false)
   const [paymentConfirmedOpen, setPaymentConfirmedOpen] = useState(false)
   const [dashboardPath, setDashboardPath] = useState('')
+  
+  // Promo code states
+  const [promoCode, setPromoCode] = useState('')
+  const [promoCodeApplied, setPromoCodeApplied] = useState<any>(null)
+  const [promoCodeError, setPromoCodeError] = useState('')
+  const [promoCodeLoading, setPromoCodeLoading] = useState(false)
+  const [discountAmount, setDiscountAmount] = useState(0)
 
   useEffect(() => {
     if (!bookingData) {
@@ -49,8 +56,68 @@ const BookingConfirmation = () => {
   const { trip, departure, travellers, numTravellers, joinOrigin } = bookingData
   const pricePerPerson = Number(String(trip.price || '').replace(/[^\d.]/g, ''))
   const subtotal = pricePerPerson * numTravellers
-  const gst = Math.round(subtotal * 0.05) // 5% GST
-  const totalAmount = subtotal + gst
+  const gst = Math.round((subtotal - discountAmount) * 0.05) // 5% GST on amount after discount
+  const totalAmount = subtotal - discountAmount + gst
+
+  // Apply promo code
+  const handleApplyPromoCode = async () => {
+    if (!promoCode.trim()) {
+      setPromoCodeError('Please enter a promo code')
+      return
+    }
+
+    setPromoCodeLoading(true)
+    setPromoCodeError('')
+
+    try {
+      const requestBody = {
+        code: promoCode.toUpperCase().trim(),
+        tripId: trip.id,
+        bookingAmount: subtotal
+      }
+      
+      console.log('Validating promo code with:', requestBody)
+      
+      const response = await fetch('/api/promo-codes/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      })
+
+      const data = await response.json()
+      console.log('Validation response:', { status: response.status, data })
+
+      if (!response.ok) {
+        setPromoCodeError(data.message || 'Invalid promo code')
+        setPromoCodeApplied(null)
+        setDiscountAmount(0)
+        return
+      }
+
+      // Success - apply discount
+      console.log('Promo code applied successfully:', data)
+      setPromoCodeApplied(data)
+      setDiscountAmount(data.discountAmount)
+      setPromoCodeError('')
+      haptics.success()
+    } catch (error) {
+      console.error('Promo code validation error:', error)
+      setPromoCodeError('Failed to validate promo code. Please try again.')
+      setPromoCodeApplied(null)
+      setDiscountAmount(0)
+    } finally {
+      setPromoCodeLoading(false)
+    }
+  }
+
+  // Remove promo code
+  const handleRemovePromoCode = () => {
+    setPromoCode('')
+    setPromoCodeApplied(null)
+    setPromoCodeError('')
+    setDiscountAmount(0)
+    haptics.light()
+  }
 
   const createBookingPayload = (overrides: Record<string, unknown> = {}) => {
     const timestamp = Date.now().toString(36).toUpperCase()
@@ -98,6 +165,13 @@ const BookingConfirmation = () => {
 
       const bookingPayload = createBookingPayload({ paymentMethod: 'Online' })
 
+      // Add promo code details if applied
+      if (promoCodeApplied) {
+        bookingPayload.promoCode = promoCode.toUpperCase()
+        bookingPayload.discountAmount = discountAmount
+        bookingPayload.originalAmount = subtotal
+      }
+
       // Save to database
       const response = await fetch(`/api/users/${user.id}/bookings`, {
         method: 'POST',
@@ -143,6 +217,59 @@ const BookingConfirmation = () => {
             })
             const verified = await verifyResponse.json()
             if (!verifyResponse.ok || !verified.success) throw new Error(verified.message || 'Payment verification failed')
+            
+            // Record promo code usage if applied
+            if (promoCodeApplied && promoCodeApplied.id && user.id) {
+              try {
+                console.log('Recording promo code usage:', {
+                  promoCodeId: promoCodeApplied.id,
+                  userId: user.id,
+                  code: promoCode
+                })
+                
+                const recordBody = {
+                  promoCodeId: promoCodeApplied.id,
+                  userId: user.id,
+                  userName: travellers[0]?.name || user.name,
+                  userEmail: travellers[0]?.email || user.email,
+                  bookingId: booking.bookingId || booking.id,
+                  tripId: trip.id,
+                  tripTitle: trip.title,
+                  discountAmount: discountAmount,
+                  bookingAmount: subtotal,
+                  finalAmount: totalAmount
+                }
+                
+                console.log('Recording promo code usage with body:', recordBody)
+                
+                const recordResponse = await fetch('/api/promo-codes/record-usage', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(recordBody)
+                })
+                
+                if (!recordResponse.ok) {
+                  const errorText = await recordResponse.text()
+                  console.error('Record usage failed:', {
+                    status: recordResponse.status,
+                    error: errorText
+                  })
+                } else {
+                  const recordResult = await recordResponse.json()
+                  console.log('Promo code usage recorded successfully:', recordResult)
+                }
+              } catch (promoError) {
+                console.error('Failed to record promo code usage:', promoError)
+                // Don't fail the payment if promo recording fails
+              }
+            } else {
+              console.log('Promo code usage NOT recorded. Conditions:', {
+                hasPromoCodeApplied: !!promoCodeApplied,
+                hasPromoCodeId: !!(promoCodeApplied && promoCodeApplied.id),
+                hasUserId: !!user.id
+              })
+            }
+            
             haptics.success()
             setDashboardPath(`/dashboard/${user.id}`)
             setPaymentConfirmedOpen(true)
@@ -176,10 +303,19 @@ const BookingConfirmation = () => {
       if (!user.id) throw new Error('User ID not found')
       setCashSubmitting(true)
 
+      const cashPayload = createBookingPayload({ paymentMethod: 'Cash' })
+      
+      // Add promo code details if applied
+      if (promoCodeApplied) {
+        cashPayload.promoCode = promoCode.toUpperCase()
+        cashPayload.discountAmount = discountAmount
+        cashPayload.originalAmount = subtotal
+      }
+
       const response = await fetch(`/api/users/${user.id}/bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(createBookingPayload({ paymentMethod: 'Cash' }))
+        body: JSON.stringify(cashPayload)
       })
 
       const booking = await response.json()
@@ -321,6 +457,81 @@ const BookingConfirmation = () => {
             </p>
           </motion.div>
 
+          {/* Promo Code Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Tag size={20} className="text-purple-600" />
+              <h3 className="font-black text-gray-900">Have a Promo Code?</h3>
+            </div>
+
+            {!promoCodeApplied ? (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => {
+                      setPromoCode(e.target.value.toUpperCase())
+                      setPromoCodeError('')
+                    }}
+                    placeholder="Enter promo code"
+                    className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono font-bold text-sm uppercase"
+                    disabled={promoCodeLoading}
+                  />
+                  <button
+                    onClick={handleApplyPromoCode}
+                    disabled={promoCodeLoading || !promoCode.trim()}
+                    className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {promoCodeLoading ? 'Applying...' : 'Apply'}
+                  </button>
+                </div>
+                {promoCodeError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg"
+                  >
+                    <X size={16} className="text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-700 font-semibold">{promoCodeError}</p>
+                  </motion.div>
+                )}
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-600 rounded-lg">
+                    <Sparkles size={20} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="font-black text-gray-900">{promoCodeApplied.code}</p>
+                    <p className="text-sm text-purple-700 font-bold">
+                      {promoCodeApplied.discountType === 'PERCENTAGE' 
+                        ? `${promoCodeApplied.discountValue}% OFF` 
+                        : `₹${promoCodeApplied.discountValue} OFF`}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleRemovePromoCode}
+                  className="p-2 hover:bg-purple-200 rounded-lg transition-colors"
+                  title="Remove promo code"
+                >
+                  <X size={20} className="text-purple-600" />
+                </button>
+              </motion.div>
+            )}
+          </motion.div>
+
           {/* Amount Details */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -346,6 +557,15 @@ const BookingConfirmation = () => {
                 <span className="text-gray-600">Sub Total</span>
                 <span className="font-bold text-gray-900">₹{subtotal.toLocaleString('en-IN')}</span>
               </div>
+              {discountAmount > 0 && (
+                <div className="flex justify-between py-2 bg-green-50 -mx-2 px-2 rounded-lg">
+                  <span className="text-green-700 font-bold flex items-center gap-2">
+                    <Sparkles size={16} />
+                    Promo Discount ({promoCodeApplied?.code})
+                  </span>
+                  <span className="font-black text-green-700">-₹{discountAmount.toLocaleString('en-IN')}</span>
+                </div>
+              )}
               <div className="flex justify-between py-2">
                 <span className="text-gray-600">GST (5%)</span>
                 <span className="font-bold text-gray-900">₹{gst.toLocaleString('en-IN')}</span>
