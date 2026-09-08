@@ -37,6 +37,7 @@ import AdminManagement from './pages/admin/AdminManagement'
 import DataFilters from './pages/admin/DataFilters'
 import Analytics from './pages/admin/Analytics'
 import PromoCodesManagement from './pages/admin/PromoCodesManagement'
+import PromoCodeUsageHistory from './pages/admin/PromoCodeUsageHistory'
 import TicketManagement from './pages/admin/TicketManagement'
 import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
@@ -103,6 +104,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
         <Route path="/data-filters" element={<DataFilters />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/promo-codes" element={<PromoCodesManagement />} />
+        <Route path="/promo-codes/:id/usage" element={<PromoCodeUsageHistory />} />
         <Route path="/tickets" element={<TicketManagement />} />
         <Route path="/hero" element={<EditHero />} />
         <Route path="/edit/:id" element={<EditTrip />} />
@@ -122,6 +124,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
         <Route path="/admin/data-filters" element={<DataFilters />} />
         <Route path="/admin/analytics" element={<Analytics />} />
         <Route path="/admin/promo-codes" element={<PromoCodesManagement />} />
+        <Route path="/admin/promo-codes/:id/usage" element={<PromoCodeUsageHistory />} />
         <Route path="/admin/tickets" element={<TicketManagement />} />
         <Route path="/admin/hero" element={<EditHero />} />
         <Route path="/admin/edit/:id" element={<EditTrip />} />

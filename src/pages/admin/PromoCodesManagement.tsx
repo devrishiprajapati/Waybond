@@ -22,7 +22,8 @@ import {
   Calendar,
   Package,
   DollarSign,
-  ArrowLeft
+  ArrowLeft,
+  BarChart3
 } from 'lucide-react'
 import PermissionGuard from '../../components/PermissionGuard'
 
@@ -522,6 +523,16 @@ const PromoCodesManagement = () => {
                       </div>
 
                       <div className="flex items-center gap-2 ml-4">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            navigate(`/admin/promo-codes/${promo.id}/usage`)
+                          }}
+                          className="p-2 hover:bg-purple-50 text-purple-600 rounded-lg transition-colors"
+                          title="View Usage History"
+                        >
+                          <BarChart3 size={18} />
+                        </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
