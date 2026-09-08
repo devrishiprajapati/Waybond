@@ -17,6 +17,7 @@ model User {
   lastLoginAt  DateTime      @updatedAt
   bookings     Booking[]
   testimonials Testimonial[]
+  tickets      Ticket[]
 }
 
 model Admin {
@@ -39,8 +40,10 @@ model Admin {
 model Trip {
   id        Int      @id @default(autoincrement())
   payload   Json
+  discount  Int?     @default(0) // Discount percentage (0-100)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tickets   Ticket[]
 }
 
 model HeroSlide {
@@ -105,8 +108,32 @@ model Booking {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tickets   Ticket[]
 
   @@index([userId])
+}
+
+model Ticket {
+  id            String   @id @default(cuid())
+  bookingId     String
+  tripId        Int
+  userId        String
+  passengerName String
+  ticketType    String
+  fileUrl       String   @db.Text
+  fileName      String
+  mimeType      String
+  uploadedBy    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId, passengerName])
+  @@index([tripId])
+  @@index([userId])
+  @@map("tickets")
 }
 
 model CommunityGallery {
@@ -136,7 +163,6 @@ model TeamMember {
   @@index([position])
 }
 
-<<<<<<< HEAD
 model PromoCode {
   id                String   @id @default(cuid())
   code              String   @unique
@@ -158,7 +184,8 @@ model PromoCode {
   @@index([code])
   @@index([isActive])
   @@index([validUntil])
-=======
+}
+
 model BookingReschedule {
   id              String   @id @default(cuid())
   bookingId       String
@@ -185,5 +212,4 @@ model BookingReschedule {
   @@index([bookingId])
   @@index([userId])
   @@index([status])
->>>>>>> e2aecd939889e0cd18da37678851dbd6a4e10ee6
 }

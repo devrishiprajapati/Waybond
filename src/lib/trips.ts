@@ -5,6 +5,7 @@ export interface Trip {
   title: string;
   location: string;
   price: string;
+  discount?: number;
   rating: number;
   reviews: number;
   duration: string;

@@ -247,8 +247,8 @@ const BookingForm = () => {
                 <Users size={20} className="mr-2 text-secondary" />
                 Number of Travellers
               </h2>
-              <div className="flex gap-3">
-                {[1, 2, 3, 4, 5, 6].map(num => (
+              <div className="flex flex-wrap gap-3">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                   <button
                     key={num}
                     type="button"

@@ -296,7 +296,17 @@ const Discover = () => {
                         <div className="grid grid-cols-2 gap-3 items-end">
                           <div>
                             <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Starting from</p>
-                            <p className="text-xl md:text-2xl font-bungee font-black text-secondary leading-none">₹{trip.price}</p>
+                            {trip.discount && trip.discount > 0 ? (
+                              <div className="space-y-0.5">
+                                <p className="text-sm font-bold text-white/40 leading-none line-through">₹{trip.price}</p>
+                                <p className="text-xl md:text-2xl font-bungee font-black text-secondary leading-none">
+                                  ₹{Math.round(Number(String(trip.price).replace(/,/g, '')) * (1 - trip.discount / 100)).toLocaleString('en-IN')}
+                                </p>
+                                <p className="text-[8px] font-black uppercase tracking-widest text-emerald-400">{trip.discount}% OFF</p>
+                              </div>
+                            ) : (
+                              <p className="text-xl md:text-2xl font-bungee font-black text-secondary leading-none">₹{trip.price}</p>
+                            )}
                           </div>
                           <div className="text-right">
                             <p className="text-[8px] font-black uppercase tracking-widest text-white/45 mb-1">Difficulty</p>

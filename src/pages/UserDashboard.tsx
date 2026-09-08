@@ -13,6 +13,7 @@ import {
   MessageCircle,
   Package,
   Star,
+  Download,
   User
 } from 'lucide-react'
 import { registerUser } from '../lib/adminStorage'
@@ -21,6 +22,7 @@ import { useWishlist } from '../lib/wishlist'
 import { createSlug } from '../lib/dataService'
 import { formatDateOnly } from '../lib/date'
 import { downloadInvoice } from '../lib/invoice'
+import { downloadTicket } from '../lib/tickets'
 
 const UserDashboard = () => {
   const [user, setUser] = useState<any>(null)
@@ -135,6 +137,18 @@ const UserDashboard = () => {
     } catch (error) {
       console.error('Failed to download invoice:', error)
       alert(error instanceof Error ? error.message : 'Unable to download invoice. Please try again.')
+    }
+  }
+
+  const handleDownloadTicket = async (event: React.MouseEvent, trip: any, ticket: any) => {
+    event.preventDefault()
+    event.stopPropagation()
+    try {
+      if (!user?.id) throw new Error('Sign in to download your ticket.')
+      await downloadTicket(trip.bookingDbId, ticket.id, user.id, ticket.fileName)
+    } catch (error) {
+      console.error('Failed to download ticket:', error)
+      alert(error instanceof Error ? error.message : 'Unable to download ticket. Please try again.')
     }
   }
 
@@ -520,6 +534,13 @@ const UserDashboard = () => {
                           ))}
                         </div>
 
+                        {trip.status === 'Confirmed' && trip.ticketNotification?.message && Array.isArray(trip.travelTickets) && trip.travelTickets.length > 0 && (
+                          <div className="flex items-center gap-3 border border-secondary/25 bg-secondary/10 px-4 py-3 text-sm font-semibold text-secondary">
+                            <CheckCircle2 size={17} className="shrink-0" />
+                            <span>{trip.ticketNotification.message}</span>
+                          </div>
+                        )}
+
                         <div className="flex flex-wrap gap-3">
                           {trip.status === 'Confirmed' && (
                             <button
@@ -530,6 +551,16 @@ const UserDashboard = () => {
                               Download Invoice
                             </button>
                           )}
+                          {trip.status === 'Confirmed' && Array.isArray(trip.travelTickets) && trip.travelTickets.map((ticket: any) => (
+                            <button
+                              key={ticket.id}
+                              type="button"
+                              onClick={(event) => handleDownloadTicket(event, trip, ticket)}
+                              className="bg-secondary/15 text-secondary h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] border border-secondary/25 hover:bg-secondary hover:text-white transition-all"
+                            >
+                              <Download size={15} /> Download Ticket{ticket.passengerName ? ` - ${ticket.passengerName}` : ''}
+                            </button>
+                          ))}
                           <button
                             onClick={() => {
                               if (trip.status === 'Confirmed' && !hasTestimonialForTrip(trip.title)) {

@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Clock, MapPin, Package, Download } from 'lucide-re
 import { getUser } from '../../lib/auth'
 import { formatDateOnly } from '../../lib/date'
 import { downloadInvoice } from '../../lib/invoice'
+import { downloadTicket } from '../../lib/tickets'
 
 interface Trip {
   id: string | number
@@ -20,6 +21,8 @@ interface Trip {
   status: string
   highlights?: string[]
   nextBatch: string
+  bookingDbId: string
+  travelTickets?: { id: string; passengerName?: string; fileName: string }[]
 }
 
 const AllTripsPage = () => {
@@ -73,6 +76,16 @@ const AllTripsPage = () => {
     } catch (error) {
       console.error('Failed to download invoice:', error)
       alert(error instanceof Error ? error.message : 'Unable to download invoice. Please try again.')
+    }
+  }
+
+  const handleDownloadTicket = async (trip: Trip, ticket: { id: string; fileName: string }) => {
+    try {
+      const user = getUser()
+      if (!user?.id) throw new Error('Sign in to download your ticket.')
+      await downloadTicket(trip.bookingDbId, ticket.id, user.id, ticket.fileName)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unable to download ticket. Please try again.')
     }
   }
 
@@ -258,6 +271,16 @@ const AllTripsPage = () => {
                             Download Invoice
                           </button>
                         )}
+                        {!isCancelled && trip.status === 'Confirmed' && trip.travelTickets?.map((ticket) => (
+                          <button
+                            key={ticket.id}
+                            onClick={() => void handleDownloadTicket(trip, ticket)}
+                            className="bg-secondary/15 text-secondary h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-secondary/25 hover:bg-secondary hover:text-white transition-all gap-2"
+                          >
+                            <Download size={14} />
+                            Download Ticket{ticket.passengerName ? ` - ${ticket.passengerName}` : ''}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>

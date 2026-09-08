@@ -162,6 +162,10 @@ const TripDetails = () => {
       ? numericPrice.toLocaleString('en-IN')
       : String(price)
   }
+  const hasDiscount = trip?.discount && trip.discount > 0
+  const discountedPrice = hasDiscount && activePrice
+    ? Math.round(Number(String(activePrice).replace(/,/g, '')) * (1 - trip.discount / 100))
+    : null
   const activeDepartureDates = selectedJoinOrigin
     ? selectedJoinOption?.departureDates || []
     : trip?.departureDates || []
@@ -703,7 +707,15 @@ const TripDetails = () => {
                 <div className="flex justify-between items-center gap-4 pb-5 border-b border-white/10 md:pb-6">
                   <div className="min-w-0 flex-1 overflow-hidden">
                     <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
-                    <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
+                    {hasDiscount && discountedPrice ? (
+                      <div className="mt-2 space-y-1">
+                        <div className="text-lg md:text-xl font-bold text-white/40 line-through break-all">₹{formatPrice(activePrice)}</div>
+                        <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter liquid-text italic break-all">₹{formatPrice(discountedPrice)}</div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{trip.discount}% OFF</div>
+                      </div>
+                    ) : (
+                      <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
+                    )}
                   </div>
                   <div className="shrink-0 flex items-center gap-5">
                     <div className="text-center min-w-[46px] md:min-w-[52px]">
@@ -967,6 +979,17 @@ const TripDetails = () => {
                       >
                         <div className="px-4 md:px-8 pb-6 md:pb-8 md:pl-[7.5rem]">
                           <div className="w-full h-px bg-white/10 mb-6"></div>
+
+                          {item.image && (
+                            <div className="mb-6 rounded-2xl overflow-hidden border border-white/10 shadow-lg">
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="w-full h-48 md:h-64 object-cover"
+                              />
+                            </div>
+                          )}
+
                           <p className="text-white/60 font-medium leading-relaxed italic">
                             {item.description}
                           </p>
@@ -1342,7 +1365,14 @@ const TripDetails = () => {
               {/* Price Section */}
               <div className="text-right">
                 <p className="text-[9px] sm:text-xs text-gray-400 font-bold uppercase tracking-wide">per person</p>
-                <p className="text-sm sm:text-lg md:text-2xl font-black text-secondary leading-none mt-0.5">₹{formatPrice(activePrice)}</p>
+                {hasDiscount && discountedPrice ? (
+                  <div className="space-y-0.5">
+                    <p className="text-xs sm:text-sm text-gray-400 line-through leading-none">₹{formatPrice(activePrice)}</p>
+                    <p className="text-sm sm:text-lg md:text-2xl font-black text-secondary leading-none">₹{formatPrice(discountedPrice)}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm sm:text-lg md:text-2xl font-black text-secondary leading-none mt-0.5">₹{formatPrice(activePrice)}</p>
+                )}
               </div>
 
               {/* Book Now Button */}

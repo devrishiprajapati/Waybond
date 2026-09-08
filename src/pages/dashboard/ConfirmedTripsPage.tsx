@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { CheckCircle2, MapPin, Clock, ArrowLeft, Package } from 'lucide-react'
+import { CheckCircle2, MapPin, Clock, ArrowLeft, Package, Download } from 'lucide-react'
 import { getUser } from '../../lib/auth'
 import { formatDateOnly } from '../../lib/date'
+import { downloadTicket } from '../../lib/tickets'
 
 const ConfirmedTripsPage = () => {
   const [confirmedTrips, setConfirmedTrips] = useState<any[]>([])
@@ -43,6 +44,18 @@ const ConfirmedTripsPage = () => {
 
     loadConfirmedTrips()
   }, [navigate, userId])
+
+  const handleDownloadTicket = async (event: React.MouseEvent, trip: any, ticket: any) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const user = getUser()
+    try {
+      if (!user?.id) throw new Error('Sign in to download your ticket.')
+      await downloadTicket(trip.bookingDbId, ticket.id, user.id, ticket.fileName)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unable to download ticket. Please try again.')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white text-white pt-32 pb-20 px-6 md:px-12 lg:px-20">
@@ -150,6 +163,15 @@ const ConfirmedTripsPage = () => {
                             </span>
                           ))}
                         </div>
+                        {Array.isArray(trip.travelTickets) && trip.travelTickets.length > 0 && (
+                          <div className="flex flex-wrap gap-3">
+                            {trip.travelTickets.map((ticket: any) => (
+                              <button key={ticket.id} type="button" onClick={(event) => handleDownloadTicket(event, trip, ticket)} className="h-11 bg-secondary px-5 text-[10px] font-black uppercase tracking-[0.14em] text-white transition-colors hover:bg-secondary/80">
+                                <span className="inline-flex items-center gap-2"><Download size={15} /> Download Ticket{ticket.passengerName ? ` - ${ticket.passengerName}` : ''}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </motion.article>

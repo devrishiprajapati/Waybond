@@ -19,7 +19,12 @@ const isTripVisible = (trip) => trip?.payload?.isVisible !== false
 const toHeroSlide = (record) => ({ id: record.id, ...record.payload })
 
 const toTrendingCard = (record) => ({ id: record.id, ...record.payload })
-const toBooking = (record) => ({ id: record.id, bookingDbId: record.id, ...record.payload })
+const toBooking = (record) => ({
+  id: record.id,
+  bookingDbId: record.id,
+  ...record.payload,
+  ...(Array.isArray(record.tickets) ? { travelTickets: record.tickets.map(toTicketMetadata) } : {})
+})
 const DEFAULT_AGE_LIMIT = { min: '', max: 40 }
 const PAYMENT_METHOD_OPTIONS = [
   'Online',
@@ -122,6 +127,56 @@ const mailTransport = process.env.EMAIL_HOST && process.env.EMAIL_USER && proces
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
   })
   : null
+
+const TICKET_MAX_BYTES = 12 * 1024 * 1024
+const TICKET_MIME_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp'])
+const getPassengerNames = (booking) => {
+  const names = [booking.user?.name]
+  const travellerDetails = Array.isArray(booking.payload?.travellerDetails) ? booking.payload.travellerDetails : []
+  travellerDetails.forEach((traveller) => names.push(traveller?.name || traveller?.fullName))
+
+  const seen = new Set()
+  return names
+    .map((name) => normalizeText(name))
+    .filter((name) => {
+      const key = name.toLowerCase()
+      if (!name || seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+}
+const getBookingTripId = (booking) => {
+  const tripId = Number(booking.payload?.id || booking.payload?.tripId)
+  return Number.isInteger(tripId) && tripId > 0 ? tripId : null
+}
+const toTicketMetadata = (ticket) => ({
+  id: ticket.id,
+  passengerName: ticket.passengerName,
+  ticketType: ticket.ticketType,
+  fileName: ticket.fileName,
+  mimeType: ticket.mimeType,
+  uploadedAt: ticket.createdAt
+})
+const sendTicketAvailableEmail = async ({ booking, ticket }) => {
+  if (!mailTransport || !booking.user?.email) return
+
+  await mailTransport.sendMail({
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    to: booking.user.email,
+    subject: `Your travel ticket is ready - ${normalizeText(booking.payload?.title || 'WayBond Trip')}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #334155;">
+        <div style="background: #0f766e; padding: 28px; text-align: center;"><strong style="color: white; font-size: 26px;">WAYBOND</strong></div>
+        <div style="padding: 32px; background: #f8fafc;">
+          <h2 style="margin: 0 0 16px; color: #0f172a;">Your ticket is available</h2>
+          <p>Hello ${escapeHtml(booking.user.name || 'Traveller')},</p>
+          <p>Your ${escapeHtml(ticket.fileName)} for <strong>${escapeHtml(normalizeText(booking.payload?.title || 'your confirmed trip'))}</strong> is ready.</p>
+          <p>Open your WayBond trip details to download it.</p>
+        </div>
+      </div>
+    `
+  })
+}
 
 const ADMIN_PERMISSIONS = [
   'manage_trips',
@@ -1489,6 +1544,118 @@ app.get('/api/admin/payment-updates', async (_req, res, next) => {
   } catch (error) { next(error) }
 })
 
+app.get('/api/admin/tickets', async (_req, res, next) => {
+  try {
+    const bookings = await prisma.booking.findMany({
+      include: { user: true, tickets: true },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    res.json(bookings
+      .filter((booking) => booking.payload?.status === 'Confirmed')
+      .map((booking) => ({
+        id: booking.id,
+        bookingId: normalizeText(booking.payload?.bookingId || booking.id),
+        tripId: String(booking.payload?.id || booking.payload?.tripId || ''),
+        title: normalizeText(booking.payload?.title || booking.payload?.tripTitle || 'WayBond Trip'),
+        location: normalizeText(booking.payload?.location || booking.payload?.destination || 'Location pending'),
+        departure: normalizeText(booking.payload?.nextBatch || booking.payload?.departure || booking.payload?.departureDate || ''),
+        user: { id: booking.user.id, name: booking.user.name, email: booking.user.email },
+        passengers: getPassengerNames(booking),
+        tickets: booking.tickets.map(toTicketMetadata)
+      })))
+  } catch (error) { next(error) }
+})
+
+app.post('/api/admin/tickets/:bookingId', async (req, res, next) => {
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id: req.params.bookingId },
+      include: { user: true }
+    })
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' })
+    if (booking.payload?.status !== 'Confirmed') return res.status(400).json({ message: 'Tickets can only be added to confirmed trips.' })
+
+    const passengerName = normalizeText(req.body?.passengerName)
+    const fileName = normalizeText(req.body?.fileName).replace(/[^a-zA-Z0-9._ -]/g, '_').slice(0, 160)
+    const mimeType = normalizeText(req.body?.mimeType).toLowerCase()
+    const ticketType = normalizeText(req.body?.ticketType || 'Travel Ticket').slice(0, 80)
+    const dataUrl = String(req.body?.dataUrl || '')
+    const passengerNames = getPassengerNames(booking)
+    const selectedPassenger = passengerNames.find((name) => name.toLowerCase() === passengerName.toLowerCase())
+    const dataUrlMatch = /^data:([a-z0-9/+.-]+);base64,([a-z0-9+/=]+)$/i.exec(dataUrl)
+    const tripId = getBookingTripId(booking)
+
+    if (!selectedPassenger) return res.status(400).json({ message: 'Select a passenger assigned to this booking.' })
+    if (!tripId) return res.status(400).json({ message: 'This booking is not linked to a valid trip.' })
+    if (!fileName || !TICKET_MIME_TYPES.has(mimeType) || dataUrlMatch?.[1].toLowerCase() !== mimeType) {
+      return res.status(400).json({ message: 'Upload a PDF, JPG, PNG, or WEBP ticket.' })
+    }
+
+    const byteLength = Buffer.byteLength(dataUrlMatch[2], 'base64')
+    if (!byteLength || byteLength > TICKET_MAX_BYTES) return res.status(400).json({ message: 'Tickets must be 12 MB or smaller.' })
+
+    const ticket = await prisma.ticket.upsert({
+      where: { bookingId_passengerName: { bookingId: booking.id, passengerName: selectedPassenger } },
+      create: {
+        bookingId: booking.id,
+        tripId,
+        userId: booking.userId,
+        passengerName: selectedPassenger,
+        ticketType,
+        fileUrl: dataUrl,
+        fileName,
+        mimeType,
+        uploadedBy: normalizeText(req.body?.uploadedBy) || null
+      },
+      update: {
+        ticketType,
+        fileUrl: dataUrl,
+        fileName,
+        mimeType,
+        uploadedBy: normalizeText(req.body?.uploadedBy) || null
+      }
+    })
+    const updatedPayload = {
+      ...booking.payload,
+      ticketNotification: {
+        message: `Your travel ticket for ${booking.payload?.title || 'your confirmed trip'} is available.`,
+        createdAt: ticket.createdAt.toISOString(),
+        unread: true
+      }
+    }
+
+    const updated = await prisma.booking.update({ where: { id: booking.id }, data: { payload: updatedPayload } })
+    try {
+      await sendTicketAvailableEmail({ booking, ticket })
+    } catch (emailError) {
+      console.error('Ticket upload succeeded but email notification failed:', emailError)
+    }
+
+    res.status(201).json({ booking: toBooking(updated), ticket: toTicketMetadata(ticket) })
+  } catch (error) { next(error) }
+})
+
+app.get('/api/bookings/:bookingId/tickets/:ticketId', async (req, res, next) => {
+  try {
+    const userId = normalizeText(req.query.userId)
+    if (!userId) return res.status(401).json({ message: 'Sign in to download this ticket.' })
+
+    const ticket = await prisma.ticket.findFirst({
+      where: { id: req.params.ticketId, bookingId: req.params.bookingId, userId }
+    })
+    const dataUrlMatch = /^data:([a-z0-9/+.-]+);base64,([a-z0-9+/=]+)$/i.exec(String(ticket?.fileUrl || ''))
+    if (!ticket || !dataUrlMatch || !TICKET_MIME_TYPES.has(dataUrlMatch[1].toLowerCase())) {
+      return res.status(404).json({ message: 'Ticket file not found.' })
+    }
+
+    const safeFileName = normalizeText(ticket.fileName).replace(/[\\/\r\n"]/g, '_') || 'WayBond-Ticket'
+    res.setHeader('Content-Type', dataUrlMatch[1].toLowerCase())
+    res.setHeader('Content-Disposition', `attachment; filename="${safeFileName}"`)
+    res.send(Buffer.from(dataUrlMatch[2], 'base64'))
+  } catch (error) { next(error) }
+})
+
 app.post('/api/users', async (req, res, next) => {
   try {
     const email = String(req.body.email || '').trim().toLowerCase()
@@ -1501,7 +1668,7 @@ app.post('/api/users', async (req, res, next) => {
 
 app.get('/api/users/:id/dashboard', async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.params.id }, include: { bookings: { orderBy: { createdAt: 'desc' } }, testimonials: { orderBy: { createdAt: 'desc' } } } })
+    const user = await prisma.user.findUnique({ where: { id: req.params.id }, include: { bookings: { orderBy: { createdAt: 'desc' }, include: { tickets: true } }, testimonials: { orderBy: { createdAt: 'desc' } } } })
     if (!user) return res.status(404).json({ message: 'User not found' })
     res.json({ user: publicUser(user), bookings: user.bookings.map(toBooking), testimonials: user.testimonials })
   } catch (error) { next(error) }

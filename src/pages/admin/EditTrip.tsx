@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Globe, Upload, FileText, CheckCircle } from 'lucide-react'
+import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Globe, Upload, FileText, CheckCircle, Percent } from 'lucide-react'
 import { getAdminTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { DEFAULT_AGE_LIMIT, DEFAULT_CANCELLATION_POLICY, ExpeditionLead, Trip } from '../../lib/trips'
 import { formatDateOnly, parseDateOnly } from '../../lib/date'
@@ -58,6 +58,7 @@ const EditTrip = () => {
     title: '',
     location: '',
     price: '',
+    discount: 0,
     duration: '',
     category: 'Adventure',
     experience: 'weekend',
@@ -512,6 +513,23 @@ const EditTrip = () => {
                   className={inputClass}
                   required
                 />
+              </div>
+              <div className="space-y-2">
+                <label className={labelClass}><Percent size={13} className="mr-1 text-secondary" /> Discount %</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={formData.discount ?? 0}
+                  onChange={e => setFormData({ ...formData, discount: Math.min(100, Math.max(0, Number(e.target.value))) })}
+                  placeholder="0"
+                  className={inputClass}
+                />
+                {formData.discount && formData.discount > 0 && formData.price && (
+                  <p className="text-[10px] text-secondary/70 ml-2 mt-1">
+                    Discounted: ₹{Math.round(Number(String(formData.price).replace(/,/g, '')) * (1 - formData.discount / 100)).toLocaleString('en-IN')}
+                  </p>
+                )}
               </div>
               <div className="space-y-2 xl:col-span-1">
                 <label className={labelClass}>Duration</label>
