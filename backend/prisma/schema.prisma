@@ -135,3 +135,26 @@ model TeamMember {
 
   @@index([position])
 }
+
+model PromoCode {
+  id                String   @id @default(cuid())
+  code              String   @unique
+  discountType      String   // PERCENTAGE or FIXED
+  discountValue     Int      // Percentage (0-100) or fixed amount in INR
+  eligiblePackages  Json     // Array of trip IDs that this promo code applies to (empty array = all packages)
+  minBookingAmount  Int?     // Minimum booking amount to use this promo
+  maxDiscount       Int?     // Maximum discount cap for percentage discounts
+  validFrom         DateTime @default(now())
+  validUntil        DateTime
+  usageLimit        Int?     // Maximum number of times this code can be used (null = unlimited)
+  usageCount        Int      @default(0)
+  isActive          Boolean  @default(true)
+  createdBy         String   // Admin ID who created this promo code
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  description       String?  // Optional description for admin reference
+
+  @@index([code])
+  @@index([isActive])
+  @@index([validUntil])
+}

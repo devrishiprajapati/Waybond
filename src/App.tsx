@@ -36,6 +36,7 @@ import AdminTeamMembers from './pages/admin/TeamMembers'
 import AdminManagement from './pages/admin/AdminManagement'
 import DataFilters from './pages/admin/DataFilters'
 import Analytics from './pages/admin/Analytics'
+import PromoCodesManagement from './pages/admin/PromoCodesManagement'
 import FAQs from './pages/FAQs'
 import CancellationRefunds from './pages/CancellationRefunds'
 import SafetyGuidelines from './pages/SafetyGuidelines'
@@ -100,6 +101,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
         <Route path="/admins" element={<AdminManagement />} />
         <Route path="/data-filters" element={<DataFilters />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/promo-codes" element={<PromoCodesManagement />} />
         <Route path="/hero" element={<EditHero />} />
         <Route path="/edit/:id" element={<EditTrip />} />
         <Route path="/new" element={<EditTrip />} />
@@ -117,6 +119,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
         <Route path="/admin/admins" element={<AdminManagement />} />
         <Route path="/admin/data-filters" element={<DataFilters />} />
         <Route path="/admin/analytics" element={<Analytics />} />
+        <Route path="/admin/promo-codes" element={<PromoCodesManagement />} />
         <Route path="/admin/hero" element={<EditHero />} />
         <Route path="/admin/edit/:id" element={<EditTrip />} />
         <Route path="/admin/new" element={<EditTrip />} />

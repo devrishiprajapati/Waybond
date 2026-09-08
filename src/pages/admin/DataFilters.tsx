@@ -6,6 +6,7 @@ import { Filter, Database, Users, Package, FileDown, ArrowLeft, Calendar, Edit2 
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import PermissionGuard from '../../components/PermissionGuard'
+import BookingsView from './BookingsView'
 
 type Trip = {
   id: number
@@ -34,6 +35,8 @@ type Booking = {
   customerEmail: string
   tripName: string
   location: string
+  joinOrigin?: string
+  departureDate?: string
   travelers: number
   price: number
   total: number
@@ -2002,7 +2005,11 @@ const DataFilters = () => {
             <ThemeProvider theme={lightTheme}>
               {activeTab === 'trips' && <TripsTable />}
               {activeTab === 'users' && <UsersTable />}
-              {activeTab === 'bookings' && <BookingsTable />}
+              {activeTab === 'bookings' && (
+                <div className="max-h-[800px] overflow-y-auto">
+                  <BookingsView bookings={bookings} />
+                </div>
+              )}
             </ThemeProvider>
           </div>
 

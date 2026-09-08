@@ -1318,6 +1318,8 @@ app.get('/api/admin/bookings', async (_req, res, next) => {
         customerEmail: booking.user?.email || payload.email || payload.customerEmail || 'N/A',
         tripName: payload.tripName || payload.title || 'N/A',
         location: payload.location || 'N/A',
+        joinOrigin: payload.joinOrigin || null, // Join us from location (pickup point)
+        departureDate: payload.departureDate || payload.nextBatch || 'N/A', // Trip departure date
         travelers,
         price,
         total,
@@ -2113,9 +2115,314 @@ app.get('/api/admins/permissions/list', async (_req, res, next) => {
       { key: 'view_bookings', label: 'View Bookings', description: 'View all booking details and statistics' },
       { key: 'view_data_filters', label: 'View Data Filters', description: 'Access advanced data filtering and analytics' },
       { key: 'view_analytics', label: 'View Analytics Dashboard', description: 'Access business intelligence and charts' },
-      { key: 'manage_admins', label: 'Manage Admins', description: 'Create and manage admin users (Master Admin only)' }
+      { key: 'manage_admins', label: 'Manage Admins', description: 'Create and manage admin users (Master Admin only)' },
+      { key: 'manage_promo_codes', label: 'Manage Promo Codes', description: 'Create, edit, and manage promotional discount codes' }
     ]
     res.json(permissions)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// ==================== PROMO CODE MANAGEMENT ====================
+
+// Helper function to generate random promo code
+const generatePromoCode = (length = 8) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let code = ''
+  for (let i = 0; i < length; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return code
+}
+
+// Get all promo codes (Admin only)
+app.get('/api/admin/promo-codes', async (_req, res, next) => {
+  try {
+    const promoCodes = await prisma.promoCode.findMany({
+      orderBy: { createdAt: 'desc' }
+    })
+    res.json(promoCodes)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Get single promo code by ID (Admin only)
+app.get('/api/admin/promo-codes/:id', async (req, res, next) => {
+  try {
+    const promoCode = await prisma.promoCode.findUnique({
+      where: { id: req.params.id }
+    })
+    if (!promoCode) {
+      return res.status(404).json({ message: 'Promo code not found' })
+    }
+    res.json(promoCode)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Validate and apply promo code (Public endpoint for customers)
+app.post('/api/promo-codes/validate', async (req, res, next) => {
+  try {
+    const { code, tripId, bookingAmount } = req.body
+    
+    if (!code || !tripId) {
+      return res.status(400).json({ message: 'Promo code and trip ID are required' })
+    }
+    
+    const promoCode = await prisma.promoCode.findUnique({
+      where: { code: code.toUpperCase() }
+    })
+    
+    if (!promoCode) {
+      return res.status(404).json({ message: 'Invalid promo code' })
+    }
+    
+    // Check if promo code is active
+    if (!promoCode.isActive) {
+      return res.status(400).json({ message: 'This promo code is no longer active' })
+    }
+    
+    // Check validity dates
+    const now = new Date()
+    if (now < new Date(promoCode.validFrom)) {
+      return res.status(400).json({ message: 'This promo code is not yet valid' })
+    }
+    if (now > new Date(promoCode.validUntil)) {
+      return res.status(400).json({ message: 'This promo code has expired' })
+    }
+    
+    // Check usage limit
+    if (promoCode.usageLimit && promoCode.usageCount >= promoCode.usageLimit) {
+      return res.status(400).json({ message: 'This promo code has reached its usage limit' })
+    }
+    
+    // Check eligible packages
+    const eligiblePackages = promoCode.eligiblePackages || []
+    if (eligiblePackages.length > 0 && !eligiblePackages.includes(Number(tripId))) {
+      return res.status(400).json({ message: 'This promo code is not valid for the selected package' })
+    }
+    
+    // Check minimum booking amount
+    if (promoCode.minBookingAmount && bookingAmount < promoCode.minBookingAmount) {
+      return res.status(400).json({ 
+        message: `Minimum booking amount of ₹${promoCode.minBookingAmount.toLocaleString('en-IN')} required for this promo code` 
+      })
+    }
+    
+    // Calculate discount
+    let discountAmount = 0
+    if (promoCode.discountType === 'PERCENTAGE') {
+      discountAmount = Math.round((bookingAmount * promoCode.discountValue) / 100)
+      // Apply max discount cap if exists
+      if (promoCode.maxDiscount && discountAmount > promoCode.maxDiscount) {
+        discountAmount = promoCode.maxDiscount
+      }
+    } else if (promoCode.discountType === 'FIXED') {
+      discountAmount = Math.min(promoCode.discountValue, bookingAmount)
+    }
+    
+    const finalAmount = Math.max(0, bookingAmount - discountAmount)
+    
+    res.json({
+      valid: true,
+      discountAmount,
+      finalAmount,
+      discountType: promoCode.discountType,
+      discountValue: promoCode.discountValue,
+      code: promoCode.code
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Create promo code (Admin only)
+app.post('/api/admin/promo-codes', async (req, res, next) => {
+  try {
+    const {
+      code,
+      discountType,
+      discountValue,
+      eligiblePackages,
+      minBookingAmount,
+      maxDiscount,
+      validFrom,
+      validUntil,
+      usageLimit,
+      createdBy,
+      description,
+      autoGenerate
+    } = req.body
+    
+    // Validation
+    if (!discountType || !['PERCENTAGE', 'FIXED'].includes(discountType)) {
+      return res.status(400).json({ message: 'Invalid discount type. Must be PERCENTAGE or FIXED' })
+    }
+    
+    if (!discountValue || discountValue <= 0) {
+      return res.status(400).json({ message: 'Discount value must be greater than 0' })
+    }
+    
+    if (discountType === 'PERCENTAGE' && discountValue > 100) {
+      return res.status(400).json({ message: 'Percentage discount cannot exceed 100%' })
+    }
+    
+    if (!validUntil) {
+      return res.status(400).json({ message: 'Valid until date is required' })
+    }
+    
+    if (new Date(validUntil) <= new Date()) {
+      return res.status(400).json({ message: 'Valid until date must be in the future' })
+    }
+    
+    // Generate or validate code
+    let promoCodeValue = autoGenerate ? generatePromoCode() : (code || '').toUpperCase().trim()
+    
+    if (!promoCodeValue) {
+      return res.status(400).json({ message: 'Promo code is required' })
+    }
+    
+    // If auto-generating, ensure uniqueness
+    if (autoGenerate) {
+      let attempts = 0
+      while (attempts < 10) {
+        const existing = await prisma.promoCode.findUnique({ where: { code: promoCodeValue } })
+        if (!existing) break
+        promoCodeValue = generatePromoCode()
+        attempts++
+      }
+    } else {
+      // Check if custom code already exists
+      const existing = await prisma.promoCode.findUnique({ where: { code: promoCodeValue } })
+      if (existing) {
+        return res.status(409).json({ message: 'This promo code already exists' })
+      }
+    }
+    
+    // Validate promo code format (alphanumeric, 4-20 characters)
+    if (!/^[A-Z0-9]{4,20}$/.test(promoCodeValue)) {
+      return res.status(400).json({ 
+        message: 'Promo code must be 4-20 characters long and contain only letters and numbers' 
+      })
+    }
+    
+    const promoCode = await prisma.promoCode.create({
+      data: {
+        code: promoCodeValue,
+        discountType,
+        discountValue: Number(discountValue),
+        eligiblePackages: Array.isArray(eligiblePackages) ? eligiblePackages : [],
+        minBookingAmount: minBookingAmount ? Number(minBookingAmount) : null,
+        maxDiscount: maxDiscount ? Number(maxDiscount) : null,
+        validFrom: validFrom ? new Date(validFrom) : new Date(),
+        validUntil: new Date(validUntil),
+        usageLimit: usageLimit ? Number(usageLimit) : null,
+        createdBy: createdBy || 'system',
+        description: description || null
+      }
+    })
+    
+    res.status(201).json(promoCode)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Update promo code (Admin only)
+app.put('/api/admin/promo-codes/:id', async (req, res, next) => {
+  try {
+    const {
+      code,
+      discountType,
+      discountValue,
+      eligiblePackages,
+      minBookingAmount,
+      maxDiscount,
+      validFrom,
+      validUntil,
+      usageLimit,
+      isActive,
+      description
+    } = req.body
+    
+    const existing = await prisma.promoCode.findUnique({ where: { id: req.params.id } })
+    if (!existing) {
+      return res.status(404).json({ message: 'Promo code not found' })
+    }
+    
+    // If code is being changed, check if new code already exists
+    if (code && code.toUpperCase() !== existing.code) {
+      const codeExists = await prisma.promoCode.findUnique({ 
+        where: { code: code.toUpperCase() } 
+      })
+      if (codeExists) {
+        return res.status(409).json({ message: 'This promo code already exists' })
+      }
+    }
+    
+    // Validation
+    if (discountType && !['PERCENTAGE', 'FIXED'].includes(discountType)) {
+      return res.status(400).json({ message: 'Invalid discount type' })
+    }
+    
+    if (discountType === 'PERCENTAGE' && discountValue > 100) {
+      return res.status(400).json({ message: 'Percentage discount cannot exceed 100%' })
+    }
+    
+    const updateData = {}
+    if (code) updateData.code = code.toUpperCase().trim()
+    if (discountType) updateData.discountType = discountType
+    if (discountValue !== undefined) updateData.discountValue = Number(discountValue)
+    if (eligiblePackages !== undefined) updateData.eligiblePackages = eligiblePackages
+    if (minBookingAmount !== undefined) updateData.minBookingAmount = minBookingAmount ? Number(minBookingAmount) : null
+    if (maxDiscount !== undefined) updateData.maxDiscount = maxDiscount ? Number(maxDiscount) : null
+    if (validFrom) updateData.validFrom = new Date(validFrom)
+    if (validUntil) updateData.validUntil = new Date(validUntil)
+    if (usageLimit !== undefined) updateData.usageLimit = usageLimit ? Number(usageLimit) : null
+    if (isActive !== undefined) updateData.isActive = Boolean(isActive)
+    if (description !== undefined) updateData.description = description
+    
+    const promoCode = await prisma.promoCode.update({
+      where: { id: req.params.id },
+      data: updateData
+    })
+    
+    res.json(promoCode)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Delete promo code (Admin only)
+app.delete('/api/admin/promo-codes/:id', async (req, res, next) => {
+  try {
+    const promoCode = await prisma.promoCode.findUnique({ where: { id: req.params.id } })
+    if (!promoCode) {
+      return res.status(404).json({ message: 'Promo code not found' })
+    }
+    
+    await prisma.promoCode.delete({ where: { id: req.params.id } })
+    res.json({ success: true })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Increment usage count (Internal endpoint, called after successful booking)
+app.post('/api/admin/promo-codes/:id/increment-usage', async (req, res, next) => {
+  try {
+    const promoCode = await prisma.promoCode.update({
+      where: { id: req.params.id },
+      data: {
+        usageCount: {
+          increment: 1
+        }
+      }
+    })
+    res.json(promoCode)
   } catch (error) {
     next(error)
   }

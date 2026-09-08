@@ -11,7 +11,8 @@ import {
   Shield,
   TrendingUp,
   Users2,
-  UsersRound
+  UsersRound,
+  Ticket
 } from 'lucide-react'
 
 type AdminData = {
@@ -30,6 +31,7 @@ const navItems = [
   { label: 'Team', path: '/admin/team-members', icon: Users2, permission: 'manage_team_members' },
   { label: 'Users', path: '/admin/users', icon: UsersRound, permission: 'manage_users' },
   { label: 'Payments', path: '/admin/payment-update', icon: CreditCard, permission: 'view_bookings' },
+  { label: 'Promos', path: '/admin/promo-codes', icon: Ticket, permission: 'manage_promo_codes' },
   { label: 'Gallery', path: '/admin/gallery', icon: Images, permission: 'manage_gallery' },
   { label: 'Admins', path: '/admin/admins', icon: Shield, permission: 'manage_admins' }
 ]
