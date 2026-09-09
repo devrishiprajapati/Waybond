@@ -501,6 +501,11 @@ const UserDashboard = () => {
                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                           <div className="space-y-2">
                             <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.25em]">Booking ID {trip.bookingId}</p>
+                            {trip.isPassenger && trip.bookedBy && (
+                              <p className="text-[9px] text-secondary font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                                <User size={12} /> Booked by: {trip.bookedBy}
+                              </p>
+                            )}
                             <h3 className="text-2xl md:text-3xl font-bungee font-black uppercase italic tracking-tighter leading-none">{trip.title}</h3>
                             <div className="flex flex-wrap items-center gap-4 text-white/50 text-[10px] font-black uppercase tracking-[0.16em]">
                               <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" />{trip.location}</span>

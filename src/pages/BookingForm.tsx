@@ -191,7 +191,8 @@ const BookingForm = () => {
           joinOrigin: bookingTrip?.joinOrigin,
           departureDate: departure,
           travellers,
-          numTravellers
+          numTravellers,
+          tripId: trip?.id
         })
       })
 

@@ -151,16 +151,15 @@ const Login = () => {
                         )}
 
                         <div className="space-y-1">
-                            <label className="text-[8px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Email Address</label>
+                            <label className="text-[8px] uppercase font-black text-slate-500 tracking-[0.2em] ml-4">Email or Phone</label>
                             <div className="relative">
                                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={16} />
                                 <input
-                                    type="email"
+                                    type="text"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="hello@example.com"
+                                    placeholder="email@example.com or 10-digit phone"
                                     autoComplete="email"
-                                    inputMode="email"
                                     className="w-full bg-slate-50 border border-slate-200 p-4 pl-12 rounded-2xl text-slate-800 focus:border-secondary outline-none transition-colors placeholder:text-slate-400 text-base"
                                     required
                                 />

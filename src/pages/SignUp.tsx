@@ -195,7 +195,7 @@ const SignUp = () => {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: fullName, email, password, profile: { dateOfBirth, gender, mobileNumber, address, emergencyContact, medicalInfo, bloodGroup, governmentId: { name: governmentID.name, type: governmentID.type, data: governmentIdData } } })
+        body: JSON.stringify({ name: fullName, email, password, phone: mobileNumber, profile: { dateOfBirth, gender, mobileNumber, address, emergencyContact, medicalInfo, bloodGroup, governmentId: { name: governmentID.name, type: governmentID.type, data: governmentIdData } } })
       })
       const responseText = await response.text()
       let data: { user?: { id?: string; name: string; email: string;[key: string]: unknown }; message?: string } = {}

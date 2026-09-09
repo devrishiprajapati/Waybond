@@ -789,8 +789,105 @@ app.post('/api/enquiry', async (req, res, next) => {
 // Send booking details email to host
 app.post('/api/booking-details', async (req, res, next) => {
   try {
-    const { tripTitle, tripLocation, tripDuration, tripPrice, departureDate, travellers, numTravellers } = req.body
+    const { tripTitle, tripLocation, tripDuration, tripPrice, departureDate, travellers, numTravellers, joinOrigin, tripId } = req.body
 
+    // Step 1: Match passengers with existing user accounts by phone number
+    const passengerUsers = []
+    const unmatchedPassengers = []
+    
+    for (const traveller of travellers) {
+      const phone = traveller.phone.trim()
+      const name = traveller.name.trim()
+      
+      // Try to find existing user by phone number
+      const user = await prisma.user.findUnique({
+        where: { phone }
+      })
+      
+      if (user) {
+        // User account exists - link this passenger to their account
+        passengerUsers.push({ user, traveller, matched: true })
+      } else {
+        // No user account found - store passenger info but don't create account
+        unmatchedPassengers.push({
+          name,
+          phone,
+          traveller
+        })
+      }
+    }
+
+    // Determine primary booker (first passenger, or first matched passenger if first is unmatched)
+    if (passengerUsers.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No passengers have registered accounts. At least one passenger must have a WayBond account (signed up with the same phone number) to complete the booking.',
+        unmatchedPassengers: unmatchedPassengers.map(up => ({
+          name: up.name,
+          phone: up.phone
+        }))
+      })
+    }
+
+    let primaryBooker = null
+    // If first passenger has an account, they're the primary booker
+    const firstTravellerPhone = travellers[0].phone.trim()
+    const firstPassengerMatch = passengerUsers.find(p => p.traveller.phone.trim() === firstTravellerPhone)
+    primaryBooker = firstPassengerMatch ? firstPassengerMatch.user : passengerUsers[0].user
+
+    // Step 2: Create booking record
+    const bookingPayload = {
+      title: tripTitle,
+      tripTitle,
+      location: tripLocation,
+      duration: tripDuration,
+      price: tripPrice,
+      departure: departureDate,
+      joinOrigin,
+      tripId: tripId || null,
+      travelers: numTravellers,
+      travellers: travellers.map(t => ({
+        name: t.name,
+        age: t.age,
+        gender: t.gender,
+        phone: t.phone,
+        email: t.email,
+        dateOfBirth: t.dateOfBirth,
+        city: t.city,
+        state: t.state,
+        emergencyContact: t.emergencyContact
+      })),
+      bookingDate: new Date().toISOString(),
+      status: 'CONFIRMED',
+      unmatchedPassengers: unmatchedPassengers.map(up => ({
+        name: up.name,
+        phone: up.phone
+      })) // Store unmatched passengers for future linking
+    }
+
+    const booking = await prisma.booking.create({
+      data: {
+        userId: primaryBooker.id,
+        payload: bookingPayload
+      }
+    })
+
+    // Step 3: Create PassengerBooking records only for matched passengers
+    await Promise.all(
+      passengerUsers.map((item) => {
+        const isFirst = item.traveller.phone.trim() === firstTravellerPhone
+        return prisma.passengerBooking.create({
+          data: {
+            bookingId: booking.id,
+            userId: item.user.id,
+            passengerName: item.traveller.name,
+            isPrimaryBooker: isFirst && item.user.id === primaryBooker.id
+          }
+        })
+      })
+    )
+
+    // Step 4: Send email notification (existing email logic)
     const travellersList = travellers.map((t, idx) => `
       <tr style="background-color: ${idx % 2 === 0 ? '#f8fafc' : '#ffffff'};">
         <td colspan="4" style="padding: 16px; border-bottom: 2px solid #e5e7eb;">
@@ -907,7 +1004,12 @@ app.post('/api/booking-details', async (req, res, next) => {
       console.log('[Booking] Email not configured — logging booking details')
     }
 
-    res.json({ success: true, message: 'Booking details sent successfully' })
+    res.json({ 
+      success: true, 
+      message: 'Booking details sent successfully',
+      matchedPassengers: passengerUsers.length,
+      unmatchedPassengers: unmatchedPassengers.length
+    })
   } catch (error) {
     console.error('Booking details email error:', error)
     next(error)
@@ -919,23 +1021,89 @@ app.post('/api/auth/signup', async (req, res, next) => {
     const email = String(req.body.email || '').trim().toLowerCase()
     const name = String(req.body.name || '').trim()
     const password = String(req.body.password || '')
+    const phone = req.body.phone ? String(req.body.phone).trim() : null
     const profile = req.body.profile || undefined
     const emailError = validateAccountEmail(email)
     if (!name || password.length < 6) return res.status(400).json({ message: 'Name, email, and a 6-character password are required.' })
     if (emailError) return res.status(400).json({ message: emailError })
     if (await prisma.user.findUnique({ where: { email } })) return res.status(409).json({ message: 'An account already exists for this email.' })
-    const user = await prisma.user.create({ data: { name, email, passwordHash: hashPassword(password), profile } })
+    if (phone && await prisma.user.findUnique({ where: { phone } })) return res.status(409).json({ message: 'An account already exists for this phone number.' })
+    const user = await prisma.user.create({ data: { name, email, phone, passwordHash: hashPassword(password), profile } })
+    
+    // Retroactively link user to any existing bookings where they appear as a passenger with matching phone
+    if (phone) {
+      try {
+        // Find all bookings where travellers array might contain this phone number
+        const allBookings = await prisma.booking.findMany({
+          select: {
+            id: true,
+            userId: true,
+            payload: true
+          }
+        })
+
+        // Filter bookings that have a traveller with matching phone number
+        const matchingBookings = allBookings.filter(booking => {
+          const travellers = booking.payload?.travellers || []
+          return travellers.some(t => t.phone === phone)
+        })
+
+        // Create PassengerBooking records for each matching booking
+        for (const booking of matchingBookings) {
+          const travellers = booking.payload?.travellers || []
+          const matchingTraveller = travellers.find(t => t.phone === phone)
+          
+          if (matchingTraveller) {
+            // Check if PassengerBooking already exists (avoid duplicates)
+            const existingPassengerBooking = await prisma.passengerBooking.findFirst({
+              where: {
+                bookingId: booking.id,
+                userId: user.id
+              }
+            })
+
+            if (!existingPassengerBooking) {
+              // Determine if this user is the primary booker (first traveller)
+              const firstTravellerPhone = travellers[0]?.phone
+              const isPrimaryBooker = firstTravellerPhone === phone && booking.userId === user.id
+
+              await prisma.passengerBooking.create({
+                data: {
+                  bookingId: booking.id,
+                  userId: user.id,
+                  passengerName: matchingTraveller.name || name,
+                  isPrimaryBooker
+                }
+              })
+              
+              console.log(`[Signup] Linked user ${user.id} to booking ${booking.id} as passenger`)
+            }
+          }
+        }
+      } catch (linkError) {
+        // Log the error but don't fail signup
+        console.error('[Signup] Error linking user to existing bookings:', linkError)
+      }
+    }
+    
     res.status(201).json({ user: publicUser(user) })
   } catch (error) { next(error) }
 })
 
 app.post('/api/auth/login', async (req, res, next) => {
   try {
-    const email = String(req.body.email || '').trim().toLowerCase()
+    const emailOrPhone = String(req.body.email || '').trim().toLowerCase()
     const password = String(req.body.password || '')
-    if (isDisposable(email)) return res.status(403).json({ message: disposableEmailMessage })
-    const user = await prisma.user.findUnique({ where: { email } })
-    if (!user || !passwordMatches(password, user.passwordHash)) return res.status(401).json({ message: 'Invalid email or password.' })
+    if (isDisposable(emailOrPhone)) return res.status(403).json({ message: disposableEmailMessage })
+    
+    // Try to find user by email first, then by phone
+    let user = await prisma.user.findUnique({ where: { email: emailOrPhone } })
+    if (!user && /^\d{10}$/.test(emailOrPhone)) {
+      // If input looks like a phone number (10 digits), try phone lookup
+      user = await prisma.user.findUnique({ where: { phone: emailOrPhone } })
+    }
+    
+    if (!user || !passwordMatches(password, user.passwordHash)) return res.status(401).json({ message: 'Invalid email/phone or password.' })
     const updatedUser = await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
     res.json({ user: publicUser(updatedUser) })
   } catch (error) { next(error) }
@@ -1683,9 +1851,62 @@ app.post('/api/users', async (req, res, next) => {
 
 app.get('/api/users/:id/dashboard', async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id: req.params.id }, include: { bookings: { orderBy: { createdAt: 'desc' }, include: { tickets: true } }, testimonials: { orderBy: { createdAt: 'desc' } } } })
+    // Get user with primary bookings
+    const user = await prisma.user.findUnique({ 
+      where: { id: req.params.id }, 
+      include: { 
+        bookings: { 
+          orderBy: { createdAt: 'desc' }, 
+          include: { 
+            tickets: true,
+            passengerBookings: {
+              include: {
+                user: true
+              }
+            }
+          } 
+        }, 
+        testimonials: { orderBy: { createdAt: 'desc' } },
+        passengerBookings: {
+          include: {
+            booking: {
+              include: {
+                tickets: true,
+                user: true, // Primary booker
+                passengerBookings: {
+                  include: {
+                    user: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      } 
+    })
+    
     if (!user) return res.status(404).json({ message: 'User not found' })
-    res.json({ user: publicUser(user), bookings: user.bookings.map(toBooking), testimonials: user.testimonials })
+    
+    // Combine primary bookings and passenger bookings
+    const primaryBookings = user.bookings.map(b => toBooking(b))
+    const passengerBookingsList = user.passengerBookings
+      .filter(pb => !pb.isPrimaryBooker) // Exclude if they're already the primary booker
+      .map(pb => {
+        const booking = toBooking(pb.booking)
+        // Add info about who made the booking
+        return {
+          ...booking,
+          bookedBy: pb.booking.user.name,
+          bookedByEmail: pb.booking.user.email,
+          isPassenger: true
+        }
+      })
+    
+    // Merge and sort by creation date
+    const allBookings = [...primaryBookings, ...passengerBookingsList]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    
+    res.json({ user: publicUser(user), bookings: allBookings, testimonials: user.testimonials })
   } catch (error) { next(error) }
 })
 

@@ -7,17 +7,21 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  name         String
-  email        String        @unique
-  passwordHash String
-  role         String        @default("USER")
-  profile      Json?
-  joinedAt     DateTime      @default(now())
-  lastLoginAt  DateTime      @updatedAt
-  bookings     Booking[]
-  testimonials Testimonial[]
-  tickets      Ticket[]
+  id                String              @id @default(cuid())
+  name              String
+  email             String              @unique
+  phone             String?             @unique // Phone number for matching bookings
+  passwordHash      String
+  role              String              @default("USER")
+  profile           Json?
+  joinedAt          DateTime            @default(now())
+  lastLoginAt       DateTime            @updatedAt
+  bookings          Booking[]           // Bookings where user is primary booker
+  passengerBookings PassengerBooking[]  // Bookings where user is a passenger
+  testimonials      Testimonial[]
+  tickets           Ticket[]
+
+  @@index([phone])
 }
 
 model Admin {
@@ -102,15 +106,31 @@ model Testimonial {
 }
 
 model Booking {
-  id        String   @id @default(cuid())
-  userId    String
-  payload   Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tickets   Ticket[]
+  id               String              @id @default(cuid())
+  userId           String // Primary booker
+  payload          Json
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tickets          Ticket[]
+  passengerBookings PassengerBooking[] // All passengers on this booking
 
   @@index([userId])
+}
+
+model PassengerBooking {
+  id            String   @id @default(cuid())
+  bookingId     String
+  userId        String // Passenger user account
+  passengerName String
+  isPrimaryBooker Boolean @default(false) // True for the person who made the booking
+  createdAt     DateTime @default(now())
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId, userId])
+  @@index([userId])
+  @@index([bookingId])
 }
 
 model Ticket {
