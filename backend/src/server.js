@@ -729,6 +729,21 @@ app.post('/api/enquiry', async (req, res, next) => {
     const { name, phone, email, travelDate, travellers, message, tripTitle, tripLocation, tripDuration } = req.body
     if (!name?.trim() || !phone?.trim()) return res.status(400).json({ message: 'Name and phone are required.' })
 
+    // Save enquiry to database
+    const enquiry = await prisma.enquiry.create({
+      data: {
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email?.trim() || null,
+        travelDate: travelDate || '',
+        travellers: String(travellers || ''),
+        message: message?.trim() || null,
+        tripTitle: tripTitle || null,
+        tripLocation: tripLocation || null,
+        status: 'NEW'
+      }
+    })
+
     const adminEmail = 'prajapatirishi748@gmail.com'
     const formattedDate = travelDate ? formatTripDate(travelDate) : 'Not specified'
 
@@ -767,7 +782,7 @@ app.post('/api/enquiry', async (req, res, next) => {
       console.log('[Enquiry] Email not configured — logging enquiry:', { name, phone, email, travelDate, travellers, tripTitle })
     }
 
-    res.json({ success: true })
+    res.json({ success: true, enquiry })
   } catch (error) { next(error) }
 })
 
@@ -3198,6 +3213,7 @@ app.get('/api/analytics', async (req, res, next) => {
   }
 })
 
+<<<<<<< HEAD
 // ==================== BOOKING CANCELLATION MANAGEMENT ====================
 
 // Submit cancellation request (User)
@@ -3406,6 +3422,67 @@ app.get('/api/admin/cancellations-stats', async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+=======
+// ==================== Enquiry Management API ====================
+
+// Get all enquiries
+app.get('/api/admin/enquiries', async (req, res, next) => {
+  try {
+    const status = req.query.status
+    const where = status && status !== 'ALL' ? { status } : {}
+    
+    const enquiries = await prisma.enquiry.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
+    })
+    
+    res.json(enquiries)
+  } catch (error) { next(error) }
+})
+
+// Get single enquiry
+app.get('/api/admin/enquiries/:id', async (req, res, next) => {
+  try {
+    const enquiry = await prisma.enquiry.findUnique({
+      where: { id: req.params.id }
+    })
+    
+    if (!enquiry) {
+      return res.status(404).json({ message: 'Enquiry not found' })
+    }
+    
+    res.json(enquiry)
+  } catch (error) { next(error) }
+})
+
+// Update enquiry status and notes
+app.patch('/api/admin/enquiries/:id', async (req, res, next) => {
+  try {
+    const { status, notes, updatedBy } = req.body
+    
+    const enquiry = await prisma.enquiry.update({
+      where: { id: req.params.id },
+      data: {
+        ...(status && { status }),
+        ...(notes !== undefined && { notes }),
+        ...(updatedBy && { updatedBy })
+      }
+    })
+    
+    res.json(enquiry)
+  } catch (error) { next(error) }
+})
+
+// Delete enquiry
+app.delete('/api/admin/enquiries/:id', async (req, res, next) => {
+  try {
+    await prisma.enquiry.delete({
+      where: { id: req.params.id }
+    })
+    
+    res.json({ success: true })
+  } catch (error) { next(error) }
+>>>>>>> 82f586fe2c9e3d0fad274240e6260ab1dec179be
 })
 
 app.use((error, _req, res, _next) => {

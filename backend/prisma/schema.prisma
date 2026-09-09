@@ -236,6 +236,7 @@ model BookingReschedule {
   @@index([status])
 }
 
+<<<<<<< HEAD
 model BookingCancellation {
   id                String    @id @default(cuid())
   bookingId         String
@@ -264,4 +265,25 @@ model BookingCancellation {
   @@index([userId])
   @@index([status])
   @@index([refundStatus])
+=======
+model Enquiry {
+  id           String   @id @default(cuid())
+  name         String
+  phone        String
+  email        String?
+  travelDate   String
+  travellers   String
+  message      String?  @db.Text
+  tripTitle    String?
+  tripLocation String?
+  status       String   @default("NEW") // NEW, CONTACTED, IN_PROGRESS, CONVERTED, CLOSED
+  notes        String?  @db.Text
+  updatedBy    String? // Admin ID who last updated
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([phone])
+>>>>>>> 82f586fe2c9e3d0fad274240e6260ab1dec179be
 }
