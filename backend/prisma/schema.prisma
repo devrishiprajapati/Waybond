@@ -256,6 +256,36 @@ model BookingReschedule {
   @@index([status])
 }
 
+<<<<<<< HEAD
+model BookingCancellation {
+  id                String    @id @default(cuid())
+  bookingId         String
+  userId            String
+  userName          String
+  userEmail         String
+  tripId            Int
+  tripTitle         String
+  bookingAmount     Float
+  departure         String?
+  cancellationReason String   // Why they want to cancel
+  experience        String?   // Their experience so far (optional)
+  feedback          String?   // Any additional feedback
+  status            String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  refundAmount      Float?    // Amount to be refunded (set by admin)
+  refundStatus      String?   // PENDING, PROCESSED, COMPLETED
+  requestedAt       DateTime  @default(now())
+  processedAt       DateTime?
+  processedBy       String?   // Admin ID who processed
+  adminNotes        String?   @db.Text
+  emailSent         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+  @@index([refundStatus])
+=======
 model Enquiry {
   id           String   @id @default(cuid())
   name         String
@@ -275,4 +305,5 @@ model Enquiry {
   @@index([status])
   @@index([createdAt])
   @@index([phone])
+>>>>>>> 82f586fe2c9e3d0fad274240e6260ab1dec179be
 }

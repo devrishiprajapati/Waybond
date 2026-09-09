@@ -1730,24 +1730,35 @@ app.get('/api/admin/payment-updates', async (_req, res, next) => {
 app.get('/api/admin/tickets', async (_req, res, next) => {
   try {
     const bookings = await prisma.booking.findMany({
-      include: { user: true, tickets: true },
+      include: { user: true },
       orderBy: { createdAt: 'desc' }
     })
 
     res.json(bookings
       .filter((booking) => booking.payload?.status === 'Confirmed')
-      .map((booking) => ({
-        id: booking.id,
-        bookingId: normalizeText(booking.payload?.bookingId || booking.id),
-        tripId: String(booking.payload?.id || booking.payload?.tripId || ''),
-        title: normalizeText(booking.payload?.title || booking.payload?.tripTitle || 'WayBond Trip'),
-        location: normalizeText(booking.payload?.location || booking.payload?.destination || 'Location pending'),
-        departure: normalizeText(booking.payload?.nextBatch || booking.payload?.departure || booking.payload?.departureDate || ''),
-        user: { id: booking.user.id, name: booking.user.name, email: booking.user.email },
-        passengers: getPassengerNames(booking),
-        tickets: booking.tickets.map(toTicketMetadata)
-      })))
-  } catch (error) { next(error) }
+      .map((booking) => {
+        try {
+          return {
+            id: booking.id,
+            bookingId: normalizeText(booking.payload?.bookingId || booking.id),
+            tripId: String(booking.payload?.id || booking.payload?.tripId || ''),
+            title: normalizeText(booking.payload?.title || booking.payload?.tripTitle || 'WayBond Trip'),
+            location: normalizeText(booking.payload?.location || booking.payload?.destination || 'Location pending'),
+            departure: normalizeText(booking.payload?.nextBatch || booking.payload?.departure || booking.payload?.departureDate || ''),
+            user: { id: booking.user.id, name: booking.user.name, email: booking.user.email },
+            passengers: getPassengerNames(booking),
+            tickets: [] // Tickets relation doesn't exist in schema
+          }
+        } catch (err) {
+          console.error('Error processing booking:', booking.id, err)
+          return null
+        }
+      })
+      .filter(Boolean))
+  } catch (error) { 
+    console.error('Error in /api/admin/tickets:', error)
+    next(error) 
+  }
 })
 
 app.post('/api/admin/tickets/:bookingId', async (req, res, next) => {
@@ -3423,6 +3434,216 @@ app.get('/api/analytics', async (req, res, next) => {
   }
 })
 
+<<<<<<< HEAD
+// ==================== BOOKING CANCELLATION MANAGEMENT ====================
+
+// Submit cancellation request (User)
+app.post('/api/users/:userId/bookings/:bookingId/cancel', async (req, res, next) => {
+  try {
+    const { userId, bookingId } = req.params
+    const { cancellationReason, experience, feedback } = req.body
+
+    // Validate required fields
+    if (!cancellationReason || !cancellationReason.trim()) {
+      return res.status(400).json({ message: 'Cancellation reason is required' })
+    }
+
+    // Get booking details
+    const booking = await prisma.booking.findFirst({
+      where: { id: bookingId, userId },
+      include: { user: true }
+    })
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' })
+    }
+
+    // Check if booking is confirmed
+    if (booking.payload?.status !== 'Confirmed') {
+      return res.status(400).json({ message: 'Only confirmed bookings can be cancelled' })
+    }
+
+    // Check if already cancelled
+    const existingCancellation = await prisma.bookingCancellation.findFirst({
+      where: { bookingId }
+    })
+
+    if (existingCancellation) {
+      return res.status(400).json({ message: 'Cancellation request already exists for this booking' })
+    }
+
+    // Create cancellation request
+    const cancellation = await prisma.bookingCancellation.create({
+      data: {
+        bookingId,
+        userId,
+        userName: booking.user.name,
+        userEmail: booking.user.email,
+        tripId: Number(booking.payload?.id || booking.payload?.tripId || 0),
+        tripTitle: booking.payload?.title || booking.payload?.tripTitle || 'Trip',
+        bookingAmount: parseFloat(String(booking.payload?.price || 0).replace(/[^\d.]/g, '')) || 0,
+        departure: booking.payload?.nextBatch || booking.payload?.departure || null,
+        cancellationReason: cancellationReason.trim(),
+        experience: experience?.trim() || null,
+        feedback: feedback?.trim() || null,
+        status: 'PENDING'
+      }
+    })
+
+    res.status(201).json(cancellation)
+  } catch (error) {
+    console.error('Error creating cancellation request:', error)
+    next(error)
+  }
+})
+
+// Get all cancellation requests (Admin)
+app.get('/api/admin/cancellations', async (req, res, next) => {
+  try {
+    const { status, search } = req.query
+    
+    const where = {}
+    if (status && status !== 'all') {
+      where.status = status.toUpperCase()
+    }
+    
+    if (search) {
+      where.OR = [
+        { userName: { contains: search, mode: 'insensitive' } },
+        { userEmail: { contains: search, mode: 'insensitive' } },
+        { tripTitle: { contains: search, mode: 'insensitive' } },
+        { bookingId: { contains: search, mode: 'insensitive' } }
+      ]
+    }
+
+    const cancellations = await prisma.bookingCancellation.findMany({
+      where,
+      orderBy: { requestedAt: 'desc' }
+    })
+
+    res.json(cancellations)
+  } catch (error) {
+    console.error('Error fetching cancellations:', error)
+    next(error)
+  }
+})
+
+// Get single cancellation request (Admin)
+app.get('/api/admin/cancellations/:id', async (req, res, next) => {
+  try {
+    const cancellation = await prisma.bookingCancellation.findUnique({
+      where: { id: req.params.id }
+    })
+
+    if (!cancellation) {
+      return res.status(404).json({ message: 'Cancellation request not found' })
+    }
+
+    res.json(cancellation)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Update cancellation request (Admin - Approve/Reject)
+app.put('/api/admin/cancellations/:id', async (req, res, next) => {
+  try {
+    const { status, refundAmount, refundStatus, adminNotes, processedBy } = req.body
+
+    const cancellation = await prisma.bookingCancellation.findUnique({
+      where: { id: req.params.id }
+    })
+
+    if (!cancellation) {
+      return res.status(404).json({ message: 'Cancellation request not found' })
+    }
+
+    const updateData = {
+      updatedAt: new Date()
+    }
+
+    if (status) updateData.status = status
+    if (refundAmount !== undefined) updateData.refundAmount = parseFloat(refundAmount)
+    if (refundStatus) updateData.refundStatus = refundStatus
+    if (adminNotes !== undefined) updateData.adminNotes = adminNotes
+    if (processedBy) updateData.processedBy = processedBy
+    
+    if (status && status !== 'PENDING') {
+      updateData.processedAt = new Date()
+    }
+
+    // If approved, update the booking status to Cancelled
+    if (status === 'APPROVED') {
+      await prisma.booking.update({
+        where: { id: cancellation.bookingId },
+        data: {
+          payload: {
+            ...cancellation,
+            status: 'Cancelled'
+          }
+        }
+      })
+    }
+
+    const updated = await prisma.bookingCancellation.update({
+      where: { id: req.params.id },
+      data: updateData
+    })
+
+    res.json(updated)
+  } catch (error) {
+    console.error('Error updating cancellation:', error)
+    next(error)
+  }
+})
+
+// Delete cancellation request (Admin)
+app.delete('/api/admin/cancellations/:id', async (req, res, next) => {
+  try {
+    const cancellation = await prisma.bookingCancellation.findUnique({
+      where: { id: req.params.id }
+    })
+
+    if (!cancellation) {
+      return res.status(404).json({ message: 'Cancellation request not found' })
+    }
+
+    await prisma.bookingCancellation.delete({
+      where: { id: req.params.id }
+    })
+
+    res.json({ success: true })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Get cancellation statistics (Admin)
+app.get('/api/admin/cancellations-stats', async (req, res, next) => {
+  try {
+    const [pending, approved, rejected, total] = await Promise.all([
+      prisma.bookingCancellation.count({ where: { status: 'PENDING' } }),
+      prisma.bookingCancellation.count({ where: { status: 'APPROVED' } }),
+      prisma.bookingCancellation.count({ where: { status: 'REJECTED' } }),
+      prisma.bookingCancellation.count()
+    ])
+
+    const totalRefundAmount = await prisma.bookingCancellation.aggregate({
+      where: { status: 'APPROVED', refundAmount: { not: null } },
+      _sum: { refundAmount: true }
+    })
+
+    res.json({
+      pending,
+      approved,
+      rejected,
+      total,
+      totalRefundAmount: totalRefundAmount._sum.refundAmount || 0
+    })
+  } catch (error) {
+    next(error)
+  }
+=======
 // ==================== Enquiry Management API ====================
 
 // Get all enquiries
@@ -3482,6 +3703,7 @@ app.delete('/api/admin/enquiries/:id', async (req, res, next) => {
     
     res.json({ success: true })
   } catch (error) { next(error) }
+>>>>>>> 82f586fe2c9e3d0fad274240e6260ab1dec179be
 })
 
 app.use((error, _req, res, _next) => {

@@ -26,7 +26,8 @@ import {
   Eye,
   EyeOff,
   TrendingUp,
-  Ticket
+  Ticket,
+  XCircle
 } from 'lucide-react'
 import { deleteTrip, updateTrip } from '../../lib/dataService'
 import { Trip } from '../../lib/trips'
@@ -149,7 +150,11 @@ const AdminDashboard = () => {
     { label: 'Users', path: '/admin/users', icon: UsersRound, permission: 'manage_users' },
     { label: 'Payment Update', path: '/admin/payment-update', icon: CreditCard, permission: 'view_bookings' },
     { label: 'Tickets', path: '/admin/tickets', icon: Ticket, permission: 'view_bookings' },
+<<<<<<< HEAD
+    { label: 'Cancellations', path: '/admin/cancellations', icon: XCircle, permission: 'view_bookings' },
+=======
     { label: 'Enquiries', path: '/admin/enquiries', icon: MessageCircle, permission: 'view_bookings' },
+>>>>>>> 82f586fe2c9e3d0fad274240e6260ab1dec179be
     { label: 'Promo Codes', path: '/admin/promo-codes', icon: Ticket, permission: 'manage_promo_codes' },
     { label: 'Gallery', path: '/admin/gallery', icon: Images, permission: 'manage_gallery' },
     { label: 'Admin Management', path: '/admin/admins', icon: Shield, permission: 'manage_admins' }
