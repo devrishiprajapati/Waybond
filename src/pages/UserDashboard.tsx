@@ -14,7 +14,8 @@ import {
   Package,
   Star,
   Download,
-  User
+  User,
+  XCircle
 } from 'lucide-react'
 import { registerUser } from '../lib/adminStorage'
 import { getUser, logout } from '../lib/auth'
@@ -23,11 +24,14 @@ import { createSlug } from '../lib/dataService'
 import { formatDateOnly } from '../lib/date'
 import { downloadInvoice } from '../lib/invoice'
 import { downloadTicket } from '../lib/tickets'
+import CancellationModal from '../components/CancellationModal'
 
 const UserDashboard = () => {
   const [user, setUser] = useState<any>(null)
   const [bookedTrips, setBookedTrips] = useState<any[]>([])
   const [cancelledTrips, setCancelledTrips] = useState<any[]>([])
+  const [cancellationModalOpen, setCancellationModalOpen] = useState(false)
+  const [selectedBookingForCancellation, setSelectedBookingForCancellation] = useState<any>(null)
   const [testimonials, setTestimonials] = useState<any[]>([])
   const [testimonialText, setTestimonialText] = useState('')
   const [testimonialTripId, setTestimonialTripId] = useState('')
@@ -165,6 +169,39 @@ const UserDashboard = () => {
         setTestimonialImage(reader.result as string)
       }
       reader.readAsDataURL(file)
+    }
+  }
+
+  const handleOpenCancellationModal = (booking: any) => {
+    setSelectedBookingForCancellation(booking)
+    setCancellationModalOpen(true)
+  }
+
+  const handleCancellationSuccess = async () => {
+    // Reload bookings to reflect the updated status
+    if (user?.id) {
+      try {
+        const response = await fetch(`/api/users/${user.id}/dashboard`)
+        if (!response.ok) throw new Error('Dashboard unavailable')
+        const data = await response.json()
+
+        // Load testimonials
+        setTestimonials(data.testimonials.map((item: any) => ({
+          ...item,
+          tripTitle: item.trip,
+          text: item.review,
+          createdAt: new Date(item.createdAt).toLocaleDateString('en-IN')
+        })))
+
+        // Separate active and cancelled bookings
+        const activeBookings = data.bookings.filter((booking: any) => booking.status !== 'Cancelled')
+        const cancelledBookings = data.bookings.filter((booking: any) => booking.status === 'Cancelled')
+
+        setBookedTrips(activeBookings)
+        setCancelledTrips(cancelledBookings)
+      } catch (error) {
+        console.error('Failed to reload dashboard:', error)
+      }
     }
   }
 
@@ -543,13 +580,22 @@ const UserDashboard = () => {
 
                         <div className="flex flex-wrap gap-3">
                           {trip.status === 'Confirmed' && (
-                            <button
-                              type="button"
-                              onClick={(event) => handleDownloadInvoice(event, trip.bookingId)}
-                              className="bg-green-500/10 text-green-300 h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-green-500/20 hover:bg-green-500 hover:text-white transition-all"
-                            >
-                              Download Invoice
-                            </button>
+                            <>
+                              <button
+                                type="button"
+                                onClick={(event) => handleDownloadInvoice(event, trip.bookingId)}
+                                className="bg-green-500/10 text-green-300 h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-green-500/20 hover:bg-green-500 hover:text-white transition-all"
+                              >
+                                Download Invoice
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleOpenCancellationModal(trip)}
+                                className="bg-red-500/10 text-red-300 h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"
+                              >
+                                <XCircle size={15} /> Cancel Booking
+                              </button>
+                            </>
                           )}
                           {trip.status === 'Confirmed' && Array.isArray(trip.travelTickets) && trip.travelTickets.map((ticket: any) => (
                             <button
@@ -647,7 +693,7 @@ const UserDashboard = () => {
 
                         <div className="flex flex-wrap gap-3">
                           <Link
-                            to={`/trip/${createSlug(trip.title)}`}
+                            to={`/trip/${createSlug(trip.title || 'trip')}`}
                             className="bg-white/5 text-white h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-white/10 hover:bg-white/20 hover:border-white/30 transition-all"
                           >
                             View Trip Details
@@ -770,6 +816,17 @@ const UserDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Cancellation Modal */}
+      {selectedBookingForCancellation && (
+        <CancellationModal
+          isOpen={cancellationModalOpen}
+          onClose={() => setCancellationModalOpen(false)}
+          booking={selectedBookingForCancellation}
+          userId={user?.id || ''}
+          onSuccess={handleCancellationSuccess}
+        />
+      )}
     </div>
   )
 }
