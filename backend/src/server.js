@@ -794,16 +794,16 @@ app.post('/api/booking-details', async (req, res, next) => {
     // Step 1: Match passengers with existing user accounts by phone number
     const passengerUsers = []
     const unmatchedPassengers = []
-    
+
     for (const traveller of travellers) {
       const phone = traveller.phone.trim()
       const name = traveller.name.trim()
-      
+
       // Try to find existing user by phone number
       const user = await prisma.user.findUnique({
         where: { phone }
       })
-      
+
       if (user) {
         // User account exists - link this passenger to their account
         passengerUsers.push({ user, traveller, matched: true })
@@ -819,8 +819,8 @@ app.post('/api/booking-details', async (req, res, next) => {
 
     // Determine primary booker (first passenger, or first matched passenger if first is unmatched)
     if (passengerUsers.length === 0) {
-      return res.status(400).json({ 
-        success: false, 
+      return res.status(400).json({
+        success: false,
         message: 'No passengers have registered accounts. At least one passenger must have a WayBond account (signed up with the same phone number) to complete the booking.',
         unmatchedPassengers: unmatchedPassengers.map(up => ({
           name: up.name,
@@ -1004,8 +1004,8 @@ app.post('/api/booking-details', async (req, res, next) => {
       console.log('[Booking] Email not configured — logging booking details')
     }
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: 'Booking details sent successfully',
       matchedPassengers: passengerUsers.length,
       unmatchedPassengers: unmatchedPassengers.length
@@ -1029,7 +1029,7 @@ app.post('/api/auth/signup', async (req, res, next) => {
     if (await prisma.user.findUnique({ where: { email } })) return res.status(409).json({ message: 'An account already exists for this email.' })
     if (phone && await prisma.user.findUnique({ where: { phone } })) return res.status(409).json({ message: 'An account already exists for this phone number.' })
     const user = await prisma.user.create({ data: { name, email, phone, passwordHash: hashPassword(password), profile } })
-    
+
     // Retroactively link user to any existing bookings where they appear as a passenger with matching phone
     if (phone) {
       try {
@@ -1052,7 +1052,7 @@ app.post('/api/auth/signup', async (req, res, next) => {
         for (const booking of matchingBookings) {
           const travellers = booking.payload?.travellers || []
           const matchingTraveller = travellers.find(t => t.phone === phone)
-          
+
           if (matchingTraveller) {
             // Check if PassengerBooking already exists (avoid duplicates)
             const existingPassengerBooking = await prisma.passengerBooking.findFirst({
@@ -1075,7 +1075,7 @@ app.post('/api/auth/signup', async (req, res, next) => {
                   isPrimaryBooker
                 }
               })
-              
+
               console.log(`[Signup] Linked user ${user.id} to booking ${booking.id} as passenger`)
             }
           }
@@ -1085,7 +1085,7 @@ app.post('/api/auth/signup', async (req, res, next) => {
         console.error('[Signup] Error linking user to existing bookings:', linkError)
       }
     }
-    
+
     res.status(201).json({ user: publicUser(user) })
   } catch (error) { next(error) }
 })
@@ -1095,14 +1095,14 @@ app.post('/api/auth/login', async (req, res, next) => {
     const emailOrPhone = String(req.body.email || '').trim().toLowerCase()
     const password = String(req.body.password || '')
     if (isDisposable(emailOrPhone)) return res.status(403).json({ message: disposableEmailMessage })
-    
+
     // Try to find user by email first, then by phone
     let user = await prisma.user.findUnique({ where: { email: emailOrPhone } })
     if (!user && /^\d{10}$/.test(emailOrPhone)) {
       // If input looks like a phone number (10 digits), try phone lookup
       user = await prisma.user.findUnique({ where: { phone: emailOrPhone } })
     }
-    
+
     if (!user || !passwordMatches(password, user.passwordHash)) return res.status(401).json({ message: 'Invalid email/phone or password.' })
     const updatedUser = await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } })
     res.json({ user: publicUser(updatedUser) })
@@ -1755,9 +1755,9 @@ app.get('/api/admin/tickets', async (_req, res, next) => {
         }
       })
       .filter(Boolean))
-  } catch (error) { 
+  } catch (error) {
     console.error('Error in /api/admin/tickets:', error)
-    next(error) 
+    next(error)
   }
 })
 
@@ -1863,20 +1863,20 @@ app.post('/api/users', async (req, res, next) => {
 app.get('/api/users/:id/dashboard', async (req, res, next) => {
   try {
     // Get user with primary bookings
-    const user = await prisma.user.findUnique({ 
-      where: { id: req.params.id }, 
-      include: { 
-        bookings: { 
-          orderBy: { createdAt: 'desc' }, 
-          include: { 
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      include: {
+        bookings: {
+          orderBy: { createdAt: 'desc' },
+          include: {
             tickets: true,
             passengerBookings: {
               include: {
                 user: true
               }
             }
-          } 
-        }, 
+          }
+        },
         testimonials: { orderBy: { createdAt: 'desc' } },
         passengerBookings: {
           include: {
@@ -1893,13 +1893,21 @@ app.get('/api/users/:id/dashboard', async (req, res, next) => {
             }
           }
         }
-      } 
+      }
     })
-    
+
     if (!user) return res.status(404).json({ message: 'User not found' })
-    
+
     // Combine primary bookings and passenger bookings
-    const primaryBookings = user.bookings.map(b => toBooking(b))
+    const primaryBookings = user.bookings.map(b => {
+      const booking = toBooking(b)
+      // For primary bookings, add the booker name (which is the current user)
+      return {
+        ...booking,
+        bookedBy: user.name,
+        isPrimaryBooker: true
+      }
+    })
     const passengerBookingsList = user.passengerBookings
       .filter(pb => !pb.isPrimaryBooker) // Exclude if they're already the primary booker
       .map(pb => {
@@ -1912,11 +1920,11 @@ app.get('/api/users/:id/dashboard', async (req, res, next) => {
           isPassenger: true
         }
       })
-    
+
     // Merge and sort by creation date
     const allBookings = [...primaryBookings, ...passengerBookingsList]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    
+
     res.json({ user: publicUser(user), bookings: allBookings, testimonials: user.testimonials })
   } catch (error) { next(error) }
 })
@@ -2271,9 +2279,9 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
                   ${priceDifference !== 0 ? `
                   <div style="background: ${priceDifference > 0 ? '#fef3c7' : '#d1fae5'}; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;">
                     <p style="margin: 0; color: ${priceDifference > 0 ? '#92400e' : '#065f46'}; font-size: 13px; font-weight: 600;">
-                      ${priceDifference > 0 
-                        ? `💰 Additional payment of ₹${Math.abs(priceDifference * travelers).toLocaleString('en-IN')} required` 
-                        : `✨ You saved ₹${Math.abs(priceDifference * travelers).toLocaleString('en-IN')} with this change`}
+                      ${priceDifference > 0
+                ? `💰 Additional payment of ₹${Math.abs(priceDifference * travelers).toLocaleString('en-IN')} required`
+                : `✨ You saved ₹${Math.abs(priceDifference * travelers).toLocaleString('en-IN')} with this change`}
                     </p>
                   </div>` : ''}
                   <p style="margin: 0; line-height: 1.6; color: #475569;">
@@ -2397,9 +2405,9 @@ app.get('/api/admin/reschedules', async (req, res, next) => {
   try {
     const { status, page = '1', limit = '50' } = req.query
     const skip = (Number(page) - 1) * Number(limit)
-    
+
     const where = status ? { status: String(status) } : {}
-    
+
     const [reschedules, total] = await Promise.all([
       prisma.bookingReschedule.findMany({
         where,
@@ -2863,24 +2871,24 @@ app.get('/api/admin/promo-codes/:id', async (req, res, next) => {
 app.post('/api/promo-codes/validate', async (req, res, next) => {
   try {
     const { code, tripId, bookingAmount } = req.body
-    
+
     if (!code || !tripId) {
       return res.status(400).json({ message: 'Promo code and trip ID are required' })
     }
-    
+
     const promoCode = await prisma.promoCode.findUnique({
       where: { code: code.toUpperCase() }
     })
-    
+
     if (!promoCode) {
       return res.status(404).json({ message: 'Invalid promo code' })
     }
-    
+
     // Check if promo code is active
     if (!promoCode.isActive) {
       return res.status(400).json({ message: 'This promo code is no longer active' })
     }
-    
+
     // Check validity dates
     const now = new Date()
     if (now < new Date(promoCode.validFrom)) {
@@ -2889,25 +2897,25 @@ app.post('/api/promo-codes/validate', async (req, res, next) => {
     if (now > new Date(promoCode.validUntil)) {
       return res.status(400).json({ message: 'This promo code has expired' })
     }
-    
+
     // Check usage limit
     if (promoCode.usageLimit && promoCode.usageCount >= promoCode.usageLimit) {
       return res.status(400).json({ message: 'This promo code has reached its usage limit' })
     }
-    
+
     // Check eligible packages
     const eligiblePackages = promoCode.eligiblePackages || []
     if (eligiblePackages.length > 0 && !eligiblePackages.includes(Number(tripId))) {
       return res.status(400).json({ message: 'This promo code is not valid for the selected package' })
     }
-    
+
     // Check minimum booking amount
     if (promoCode.minBookingAmount && bookingAmount < promoCode.minBookingAmount) {
-      return res.status(400).json({ 
-        message: `Minimum booking amount of ₹${promoCode.minBookingAmount.toLocaleString('en-IN')} required for this promo code` 
+      return res.status(400).json({
+        message: `Minimum booking amount of ₹${promoCode.minBookingAmount.toLocaleString('en-IN')} required for this promo code`
       })
     }
-    
+
     // Calculate discount
     let discountAmount = 0
     if (promoCode.discountType === 'PERCENTAGE') {
@@ -2919,9 +2927,9 @@ app.post('/api/promo-codes/validate', async (req, res, next) => {
     } else if (promoCode.discountType === 'FIXED') {
       discountAmount = Math.min(promoCode.discountValue, bookingAmount)
     }
-    
+
     const finalAmount = Math.max(0, bookingAmount - discountAmount)
-    
+
     res.json({
       valid: true,
       id: promoCode.id,
@@ -2953,35 +2961,35 @@ app.post('/api/admin/promo-codes', async (req, res, next) => {
       description,
       autoGenerate
     } = req.body
-    
+
     // Validation
     if (!discountType || !['PERCENTAGE', 'FIXED'].includes(discountType)) {
       return res.status(400).json({ message: 'Invalid discount type. Must be PERCENTAGE or FIXED' })
     }
-    
+
     if (!discountValue || discountValue <= 0) {
       return res.status(400).json({ message: 'Discount value must be greater than 0' })
     }
-    
+
     if (discountType === 'PERCENTAGE' && discountValue > 100) {
       return res.status(400).json({ message: 'Percentage discount cannot exceed 100%' })
     }
-    
+
     if (!validUntil) {
       return res.status(400).json({ message: 'Valid until date is required' })
     }
-    
+
     if (new Date(validUntil) <= new Date()) {
       return res.status(400).json({ message: 'Valid until date must be in the future' })
     }
-    
+
     // Generate or validate code
     let promoCodeValue = autoGenerate ? generatePromoCode() : (code || '').toUpperCase().trim()
-    
+
     if (!promoCodeValue) {
       return res.status(400).json({ message: 'Promo code is required' })
     }
-    
+
     // If auto-generating, ensure uniqueness
     if (autoGenerate) {
       let attempts = 0
@@ -2998,14 +3006,14 @@ app.post('/api/admin/promo-codes', async (req, res, next) => {
         return res.status(409).json({ message: 'This promo code already exists' })
       }
     }
-    
+
     // Validate promo code format (alphanumeric, 4-20 characters)
     if (!/^[A-Z0-9]{4,20}$/.test(promoCodeValue)) {
-      return res.status(400).json({ 
-        message: 'Promo code must be 4-20 characters long and contain only letters and numbers' 
+      return res.status(400).json({
+        message: 'Promo code must be 4-20 characters long and contain only letters and numbers'
       })
     }
-    
+
     const promoCode = await prisma.promoCode.create({
       data: {
         code: promoCodeValue,
@@ -3021,7 +3029,7 @@ app.post('/api/admin/promo-codes', async (req, res, next) => {
         description: description || null
       }
     })
-    
+
     res.status(201).json(promoCode)
   } catch (error) {
     next(error)
@@ -3044,31 +3052,31 @@ app.put('/api/admin/promo-codes/:id', async (req, res, next) => {
       isActive,
       description
     } = req.body
-    
+
     const existing = await prisma.promoCode.findUnique({ where: { id: req.params.id } })
     if (!existing) {
       return res.status(404).json({ message: 'Promo code not found' })
     }
-    
+
     // If code is being changed, check if new code already exists
     if (code && code.toUpperCase() !== existing.code) {
-      const codeExists = await prisma.promoCode.findUnique({ 
-        where: { code: code.toUpperCase() } 
+      const codeExists = await prisma.promoCode.findUnique({
+        where: { code: code.toUpperCase() }
       })
       if (codeExists) {
         return res.status(409).json({ message: 'This promo code already exists' })
       }
     }
-    
+
     // Validation
     if (discountType && !['PERCENTAGE', 'FIXED'].includes(discountType)) {
       return res.status(400).json({ message: 'Invalid discount type' })
     }
-    
+
     if (discountType === 'PERCENTAGE' && discountValue > 100) {
       return res.status(400).json({ message: 'Percentage discount cannot exceed 100%' })
     }
-    
+
     const updateData = {}
     if (code) updateData.code = code.toUpperCase().trim()
     if (discountType) updateData.discountType = discountType
@@ -3081,12 +3089,12 @@ app.put('/api/admin/promo-codes/:id', async (req, res, next) => {
     if (usageLimit !== undefined) updateData.usageLimit = usageLimit ? Number(usageLimit) : null
     if (isActive !== undefined) updateData.isActive = Boolean(isActive)
     if (description !== undefined) updateData.description = description
-    
+
     const promoCode = await prisma.promoCode.update({
       where: { id: req.params.id },
       data: updateData
     })
-    
+
     res.json(promoCode)
   } catch (error) {
     next(error)
@@ -3100,7 +3108,7 @@ app.delete('/api/admin/promo-codes/:id', async (req, res, next) => {
     if (!promoCode) {
       return res.status(404).json({ message: 'Promo code not found' })
     }
-    
+
     await prisma.promoCode.delete({ where: { id: req.params.id } })
     res.json({ success: true })
   } catch (error) {
@@ -3205,11 +3213,11 @@ app.get('/api/admin/promo-code-usages', async (req, res, next) => {
     const { promoCodeId, userId, tripId, startDate, endDate } = req.query
 
     const where = {}
-    
+
     if (promoCodeId) where.promoCodeId = promoCodeId
     if (userId) where.userId = userId
     if (tripId) where.tripId = Number(tripId)
-    
+
     if (startDate || endDate) {
       where.usedAt = {}
       if (startDate) where.usedAt.gte = new Date(startDate)
@@ -3434,7 +3442,6 @@ app.get('/api/analytics', async (req, res, next) => {
   }
 })
 
-<<<<<<< HEAD
 // ==================== BOOKING CANCELLATION MANAGEMENT ====================
 
 // Submit cancellation request (User)
@@ -3501,12 +3508,12 @@ app.post('/api/users/:userId/bookings/:bookingId/cancel', async (req, res, next)
 app.get('/api/admin/cancellations', async (req, res, next) => {
   try {
     const { status, search } = req.query
-    
+
     const where = {}
     if (status && status !== 'all') {
       where.status = status.toUpperCase()
     }
-    
+
     if (search) {
       where.OR = [
         { userName: { contains: search, mode: 'insensitive' } },
@@ -3567,7 +3574,7 @@ app.put('/api/admin/cancellations/:id', async (req, res, next) => {
     if (refundStatus) updateData.refundStatus = refundStatus
     if (adminNotes !== undefined) updateData.adminNotes = adminNotes
     if (processedBy) updateData.processedBy = processedBy
-    
+
     if (status && status !== 'PENDING') {
       updateData.processedAt = new Date()
     }
@@ -3643,7 +3650,8 @@ app.get('/api/admin/cancellations-stats', async (req, res, next) => {
   } catch (error) {
     next(error)
   }
-=======
+})
+
 // ==================== Enquiry Management API ====================
 
 // Get all enquiries
@@ -3651,12 +3659,12 @@ app.get('/api/admin/enquiries', async (req, res, next) => {
   try {
     const status = req.query.status
     const where = status && status !== 'ALL' ? { status } : {}
-    
+
     const enquiries = await prisma.enquiry.findMany({
       where,
       orderBy: { createdAt: 'desc' }
     })
-    
+
     res.json(enquiries)
   } catch (error) { next(error) }
 })
@@ -3667,11 +3675,11 @@ app.get('/api/admin/enquiries/:id', async (req, res, next) => {
     const enquiry = await prisma.enquiry.findUnique({
       where: { id: req.params.id }
     })
-    
+
     if (!enquiry) {
       return res.status(404).json({ message: 'Enquiry not found' })
     }
-    
+
     res.json(enquiry)
   } catch (error) { next(error) }
 })
@@ -3680,7 +3688,7 @@ app.get('/api/admin/enquiries/:id', async (req, res, next) => {
 app.patch('/api/admin/enquiries/:id', async (req, res, next) => {
   try {
     const { status, notes, updatedBy } = req.body
-    
+
     const enquiry = await prisma.enquiry.update({
       where: { id: req.params.id },
       data: {
@@ -3689,7 +3697,7 @@ app.patch('/api/admin/enquiries/:id', async (req, res, next) => {
         ...(updatedBy && { updatedBy })
       }
     })
-    
+
     res.json(enquiry)
   } catch (error) { next(error) }
 })
@@ -3700,10 +3708,9 @@ app.delete('/api/admin/enquiries/:id', async (req, res, next) => {
     await prisma.enquiry.delete({
       where: { id: req.params.id }
     })
-    
+
     res.json({ success: true })
   } catch (error) { next(error) }
->>>>>>> 82f586fe2c9e3d0fad274240e6260ab1dec179be
 })
 
 app.use((error, _req, res, _next) => {

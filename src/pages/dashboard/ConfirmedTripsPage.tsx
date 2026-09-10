@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { CheckCircle2, MapPin, Clock, ArrowLeft, Package, Download } from 'lucide-react'
+import { CheckCircle2, MapPin, Clock, ArrowLeft, Package, Download, Users } from 'lucide-react'
 import { getUser } from '../../lib/auth'
 import { formatDateOnly } from '../../lib/date'
 import { downloadTicket } from '../../lib/tickets'
@@ -119,6 +119,12 @@ const ConfirmedTripsPage = () => {
                       <div className="relative h-56 md:h-full min-h-[280px]">
                         <img src={trip.image} alt={trip.title} className="absolute inset-0 w-full h-full object-cover" />
 
+                        {(Number(trip.travelers) > 1 || (Array.isArray(trip.travellers) && trip.travellers.length > 1)) && (
+                          <div className="absolute left-5 top-5 bg-white/95 backdrop-blur-sm rounded-full p-2.5 shadow-lg border border-secondary/20">
+                            <Users size={18} className="text-secondary" />
+                          </div>
+                        )}
+
                         <span className="absolute left-5 bottom-5 bg-green-500 text-white rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.18em] flex items-center gap-2">
                           <CheckCircle2 size={12} />
                           {trip.status}
@@ -130,6 +136,11 @@ const ConfirmedTripsPage = () => {
                           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-6">
                             <div className="space-y-2">
                               <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.25em]">Booking ID {trip.bookingId}</p>
+                              {trip.bookedBy && (Number(trip.travelers) > 1 || (Array.isArray(trip.travellers) && trip.travellers.length > 1)) && (
+                                <p className="text-[9px] text-secondary font-black uppercase tracking-[0.2em] flex items-center gap-2">
+                                  <Users size={12} /> Booked by: {trip.bookedBy}
+                                </p>
+                              )}
                               <h3 className="text-2xl md:text-3xl font-bungee font-black uppercase italic tracking-tighter leading-none">{trip.title}</h3>
                               <div className="flex flex-wrap items-center gap-4 text-white/50 text-[10px] font-black uppercase tracking-[0.16em] mt-3">
                                 <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" />{trip.location}</span>
@@ -166,8 +177,13 @@ const ConfirmedTripsPage = () => {
                         {Array.isArray(trip.travelTickets) && trip.travelTickets.length > 0 && (
                           <div className="flex flex-wrap gap-3">
                             {trip.travelTickets.map((ticket: any) => (
-                              <button key={ticket.id} type="button" onClick={(event) => handleDownloadTicket(event, trip, ticket)} className="h-11 bg-secondary px-5 text-[10px] font-black uppercase tracking-[0.14em] text-white transition-colors hover:bg-secondary/80">
-                                <span className="inline-flex items-center gap-2"><Download size={15} /> Download Ticket{ticket.passengerName ? ` - ${ticket.passengerName}` : ''}</span>
+                              <button key={ticket.id} type="button" onClick={(event) => handleDownloadTicket(event, trip, ticket)} className="group h-11 bg-secondary px-5 text-[10px] font-black uppercase tracking-[0.14em] text-white transition-colors hover:bg-secondary/80">
+                                <span className="inline-flex items-center gap-2">
+                                  {(Number(trip.travelers) > 1 || (Array.isArray(trip.travellers) && trip.travellers.length > 1)) && (
+                                    <Users size={15} className="text-white" />
+                                  )}
+                                  <Download size={15} /> Download Ticket{ticket.passengerName ? ` - ${ticket.passengerName}` : ''}
+                                </span>
                               </button>
                             ))}
                           </div>
