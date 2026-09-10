@@ -15,6 +15,7 @@ import {
   Star,
   Download,
   User,
+  Users,
   XCircle
 } from 'lucide-react'
 import { registerUser } from '../lib/adminStorage'
@@ -24,6 +25,7 @@ import { createSlug } from '../lib/dataService'
 import { formatDateOnly } from '../lib/date'
 import { downloadInvoice } from '../lib/invoice'
 import { downloadTicket } from '../lib/tickets'
+import { getWhatsAppLink } from '../lib/data'
 import CancellationModal from '../components/CancellationModal'
 
 const UserDashboard = () => {
@@ -583,6 +585,15 @@ const UserDashboard = () => {
                           </div>
                         )}
 
+                        {trip.status === 'Confirmed' && trip.whatsappGroupLink && (
+                          <div className="flex items-center gap-3 border border-[#25D366]/25 bg-[#25D366]/10 px-4 py-3 rounded-xl">
+                            <MessageCircle size={17} className="shrink-0 text-[#25D366]" />
+                            <span className="text-sm font-semibold text-[#25D366]">
+                              WhatsApp Group available! Join to connect with fellow travelers.
+                            </span>
+                          </div>
+                        )}
+
                         <div className="flex flex-wrap gap-3">
                           {trip.status === 'Confirmed' && (
                             <>
@@ -593,6 +604,17 @@ const UserDashboard = () => {
                               >
                                 Download Invoice
                               </button>
+                              {trip.whatsappGroupLink && (
+                                <a
+                                  href={trip.whatsappGroupLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] shadow-lg shadow-[#25D366]/30 hover:shadow-xl hover:shadow-[#25D366]/40 transition-all hover:scale-105"
+                                >
+                                  <MessageCircle size={15} strokeWidth={2.5} /> Join WhatsApp Group
+                                </a>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => handleOpenCancellationModal(trip)}

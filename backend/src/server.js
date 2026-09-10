@@ -1564,7 +1564,8 @@ app.get('/api/admin/bookings', async (_req, res, next) => {
         status: payload.status || 'Pending',
         paymentStatus: paymentMethod,
         bookingDate: payload.bookingDate || new Date(booking.createdAt).toLocaleDateString('en-IN'),
-        travellerDetails: payload.travellerDetails || []
+        travellerDetails: payload.travellerDetails || [],
+        whatsappGroupLink: payload.whatsappGroupLink || null
       }
     })
 
@@ -3434,8 +3435,7 @@ app.get('/api/analytics', async (req, res, next) => {
   }
 })
 
-<<<<<<< HEAD
-// ==================== BOOKING CANCELLATION MANAGEMENT ====================
+// ==================== BOOKING CANCELLATION MANAGEMENT====================
 
 // Submit cancellation request (User)
 app.post('/api/users/:userId/bookings/:bookingId/cancel', async (req, res, next) => {
@@ -3643,7 +3643,85 @@ app.get('/api/admin/cancellations-stats', async (req, res, next) => {
   } catch (error) {
     next(error)
   }
-=======
+})
+
+// ==================== Enquiry Management API ====================
+
+// Save WhatsApp group link for a trip date
+app.post('/api/admin/whatsapp-links', async (req, res, next) => {
+  try {
+    const { tripName, departureDate, whatsappLink } = req.body
+    
+    if (!tripName || !departureDate || !whatsappLink) {
+      return res.status(400).json({ message: 'Trip name, departure date, and WhatsApp link are required' })
+    }
+
+    // Store the WhatsApp link in a JSON field or separate table
+    // For now, we'll update all bookings with this trip and date
+    const bookings = await prisma.booking.findMany({
+      where: {
+        payload: {
+          path: ['title'],
+          equals: tripName
+        }
+      }
+    })
+
+    // Filter bookings by departure date and update them
+    const updates = bookings
+      .filter(booking => {
+        const bookingDate = booking.payload?.nextBatch || booking.payload?.departureDate
+        return bookingDate === departureDate
+      })
+      .map(booking => 
+        prisma.booking.update({
+          where: { id: booking.id },
+          data: {
+            payload: {
+              ...booking.payload,
+              whatsappGroupLink: whatsappLink
+            }
+          }
+        })
+      )
+
+    await Promise.all(updates)
+
+    res.json({ success: true, message: 'WhatsApp link saved successfully', updatedCount: updates.length })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Get WhatsApp group link for a trip date
+app.get('/api/whatsapp-link/:tripName/:departureDate', async (req, res, next) => {
+  try {
+    const { tripName, departureDate } = req.params
+    
+    const booking = await prisma.booking.findFirst({
+      where: {
+        payload: {
+          path: ['title'],
+          equals: decodeURIComponent(tripName)
+        }
+      }
+    })
+
+    if (!booking) {
+      return res.json({ whatsappGroupLink: null })
+    }
+
+    const bookingDate = booking.payload?.nextBatch || booking.payload?.departureDate
+    if (bookingDate === decodeURIComponent(departureDate)) {
+      res.json({ whatsappGroupLink: booking.payload?.whatsappGroupLink || null })
+    } else {
+      res.json({ whatsappGroupLink: null })
+    }
+  } catch (error) {
+    next(error)
+  }
+})
+
 // ==================== Enquiry Management API ====================
 
 // Get all enquiries
@@ -3703,7 +3781,6 @@ app.delete('/api/admin/enquiries/:id', async (req, res, next) => {
     
     res.json({ success: true })
   } catch (error) { next(error) }
->>>>>>> 82f586fe2c9e3d0fad274240e6260ab1dec179be
 })
 
 app.use((error, _req, res, _next) => {

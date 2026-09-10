@@ -256,7 +256,6 @@ model BookingReschedule {
   @@index([status])
 }
 
-<<<<<<< HEAD
 model BookingCancellation {
   id                String    @id @default(cuid())
   bookingId         String
@@ -285,7 +284,8 @@ model BookingCancellation {
   @@index([userId])
   @@index([status])
   @@index([refundStatus])
-=======
+}
+
 model Enquiry {
   id           String   @id @default(cuid())
   name         String
@@ -305,5 +305,4 @@ model Enquiry {
   @@index([status])
   @@index([createdAt])
   @@index([phone])
->>>>>>> 82f586fe2c9e3d0fad274240e6260ab1dec179be
 }
