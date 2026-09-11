@@ -591,14 +591,14 @@ const UserDashboard = () => {
                           </div>
                         )}
 
-                        {trip.status === 'Confirmed' && trip.whatsappGroupLink && (
+                        {/* {trip.status === 'Confirmed' && trip.whatsappGroupLink && (
                           <div className="flex items-center gap-3 border border-[#25D366]/25 bg-[#25D366]/10 px-4 py-3 rounded-xl">
                             <MessageCircle size={17} className="shrink-0 text-[#25D366]" />
                             <span className="text-sm font-semibold text-[#25D366]">
                               WhatsApp Group available! Join to connect with fellow travelers.
                             </span>
                           </div>
-                        )}
+                        )} */}
 
                         <div className="flex flex-wrap gap-3">
                           {trip.status === 'Confirmed' && (
@@ -606,7 +606,7 @@ const UserDashboard = () => {
                               <button
                                 type="button"
                                 onClick={(event) => handleDownloadInvoice(event, trip.bookingId)}
-                                className="bg-green-500/10 text-green-300 h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-green-500/20 hover:bg-green-500 hover:text-white transition-all"
+                                className="bg-green-500/10 text-green-500 h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-green-500/20 hover:bg-green-500 hover:text-white transition-all hover:scale-105"
                               >
                                 Download Invoice
                               </button>
@@ -616,7 +616,7 @@ const UserDashboard = () => {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={(e) => e.stopPropagation()}
-                                  className="bg-gradient-to-r from-[#25D366] to-[#128C7E] text-white h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] shadow-lg shadow-[#25D366]/30 hover:shadow-xl hover:shadow-[#25D366]/40 transition-all hover:scale-105"
+                                  className="bg-[#25D366] text-white h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] shadow-lg shadow-[#25D366]/30 hover:shadow-xl hover:shadow-[#25D366]/40 transition-all hover:scale-105"
                                 >
                                   <MessageCircle size={15} strokeWidth={2.5} /> Join WhatsApp Group
                                 </a>
@@ -624,7 +624,7 @@ const UserDashboard = () => {
                               <button
                                 type="button"
                                 onClick={() => handleOpenCancellationModal(trip)}
-                                className="bg-red-500/10 text-red-300 h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"
+                                className="bg-red-500/10 text-red-300 h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] border border-red-500/20 hover:bg-red-500 hover:text-white transition-all hover:scale-105"
                               >
                                 <XCircle size={15} /> Cancel Booking
                               </button>
@@ -635,7 +635,7 @@ const UserDashboard = () => {
                               key={ticket.id}
                               type="button"
                               onClick={(event) => handleDownloadTicket(event, trip, ticket)}
-                              className="group bg-secondary/15 text-secondary h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] border border-secondary/25 hover:bg-secondary hover:text-white transition-all"
+                              className="group bg-secondary/15 text-secondary h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] border border-secondary/25 hover:bg-secondary hover:text-white transition-all hover:scale-105"
                             >
                               {(Number(trip.travelers) > 1 || (Array.isArray(trip.travellers) && trip.travellers.length > 1)) && (
                                 <Users size={15} className="text-secondary group-hover:text-white transition-colors" />
@@ -652,7 +652,7 @@ const UserDashboard = () => {
                             }}
                             disabled={trip.status !== 'Confirmed' || hasTestimonialForTrip(trip.title)}
                             className={`h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border transition-all ${trip.status === 'Confirmed' && !hasTestimonialForTrip(trip.title)
-                              ? 'bg-white/5 text-white border-white/10 hover:bg-white/20 hover:border-white/30 cursor-pointer'
+                              ? 'bg-white/5 text-white border-white/10 hover:bg-white/20 hover:border-white/30 hover:scale-105 cursor-pointer'
                               : 'bg-white/5 text-white/30 border-white/10 cursor-not-allowed opacity-50'
                               }`}
                             title={hasTestimonialForTrip(trip.title) ? 'Testimonial already submitted' : ''}
@@ -662,7 +662,7 @@ const UserDashboard = () => {
                           {trip.status !== 'Confirmed' && (
                             <button
                               onClick={() => handleCancelTrip(trip.bookingDbId)}
-                              className="bg-red-500/10 text-red-300 h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-red-500/20 hover:bg-red-500 hover:text-white transition-all"
+                              className="bg-red-500/10 text-red-300 h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border border-red-500/20 hover:bg-red-500 hover:text-white transition-all hover:scale-105"
                             >
                               Cancel Trip
                             </button>

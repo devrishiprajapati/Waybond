@@ -3443,11 +3443,8 @@ app.get('/api/analytics', async (req, res, next) => {
   }
 })
 
-<<<<<<< HEAD
 // ==================== BOOKING CANCELLATION MANAGEMENT====================
-=======
 // ==================== BOOKING CANCELLATION MANAGEMENT ====================
->>>>>>> b14370c03f048e345c69f5e74320571ecfede32a
 
 // Submit cancellation request (User)
 app.post('/api/users/:userId/bookings/:bookingId/cancel', async (req, res, next) => {
@@ -3657,7 +3654,6 @@ app.get('/api/admin/cancellations-stats', async (req, res, next) => {
   }
 })
 
-<<<<<<< HEAD
 // ==================== Enquiry Management API ====================
 
 // Save WhatsApp group link for a trip date
@@ -3735,8 +3731,6 @@ app.get('/api/whatsapp-link/:tripName/:departureDate', async (req, res, next) =>
   }
 })
 
-=======
->>>>>>> b14370c03f048e345c69f5e74320571ecfede32a
 // ==================== Enquiry Management API ====================
 
 // Get all enquiries

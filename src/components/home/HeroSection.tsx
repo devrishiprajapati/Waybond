@@ -90,7 +90,7 @@ export default function HeroSection() {
 
 
       {/* Text Content — Dynamic but synchronized */}
-      <div className="absolute inset-0 flex items-center z-20 pt-20 pb-20 sm:pb-0">
+      <div className="absolute inset-0 flex items-end sm:items-center z-20 pt-20 pb-8 sm:pb-0">
         <div className="max-w-[1920px] mx-auto w-full px-6 md:px-12 lg:px-20">
           <div className="max-w-3xl">
             <AnimatePresence mode="wait">
