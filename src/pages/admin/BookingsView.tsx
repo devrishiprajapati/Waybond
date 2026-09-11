@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ChevronDown, ChevronRight, Download, Users, Search, MapPin, Edit2, Save, X, CreditCard, User } from 'lucide-react'
+import { ChevronDown, ChevronRight, Download, Users, Search, MapPin, Edit2, Save, X, CreditCard, User, MessageCircle } from 'lucide-react'
 
 type TravellerDetail = {
   name?: string
@@ -31,6 +31,7 @@ type Booking = {
   joinOrigin?: string
   departureDate?: string
   travellerDetails?: TravellerDetail[]
+  whatsappGroupLink?: string
 }
 
 type BookingsViewProps = {
@@ -57,6 +58,8 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
   const [editedData, setEditedData] = useState<TravellerDetail | null>(null)
   const [editingPayment, setEditingPayment] = useState<string | null>(null)
   const [editedPaymentData, setEditedPaymentData] = useState<{ status: string; paymentStatus: string } | null>(null)
+  const [editingWhatsAppLink, setEditingWhatsAppLink] = useState<string | null>(null)
+  const [whatsappLinkInput, setWhatsappLinkInput] = useState<string>('')
   const [saving, setSaving] = useState(false)
 
   const getInitials = (name: string): string => {
@@ -175,6 +178,53 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleSaveWhatsAppLink = async (bookingsArray: Booking[], dateKey: string) => {
+    if (!whatsappLinkInput.trim()) {
+      alert('Please enter a valid WhatsApp group link')
+      return
+    }
+    
+    setSaving(true)
+    try {
+      console.log('Updating WhatsApp link for bookings:', bookingsArray.map(b => b.bookingId))
+      console.log('WhatsApp link:', whatsappLinkInput.trim())
+      
+      // Update all bookings in this date group
+      const updatePromises = bookingsArray.map(async (booking) => {
+        const response = await fetch(`/api/admin/bookings/${booking.bookingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ whatsappGroupLink: whatsappLinkInput.trim() })
+        })
+        
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error(`Failed to update booking ${booking.bookingId}:`, errorText)
+          throw new Error(`Failed to update booking ${booking.bookingId}`)
+        }
+        
+        return response.json()
+      })
+      
+      await Promise.all(updatePromises)
+      
+      alert(`WhatsApp group link updated for ${bookingsArray.length} booking(s)`)
+      setEditingWhatsAppLink(null)
+      setWhatsappLinkInput('')
+      onBookingUpdate ? onBookingUpdate() : window.location.reload()
+    } catch (error) {
+      console.error('Error updating WhatsApp link:', error)
+      alert(`Failed to update WhatsApp group link: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleEditWhatsAppLink = (dateKey: string, currentLink: string) => {
+    setEditingWhatsAppLink(dateKey)
+    setWhatsappLinkInput(currentLink || '')
   }
 
   const updateEditedField = (field: keyof TravellerDetail, value: string) => {
@@ -329,22 +379,90 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                             {Object.entries(dateGroups).map(([date, bookingsArray]) => {
                               const dateKey = `${locationKey}-${date}`
                               const isDateExpanded = expandedDates.has(dateKey)
+                              const isEditingWhatsAppForThis = editingWhatsAppLink === dateKey
+                              const currentWhatsAppLink = bookingsArray[0]?.whatsappGroupLink || ''
 
                               return (
                                 <div key={dateKey} className="border-b border-gray-100 last:border-b-0">
                                   {/* Date Header */}
-                                  <div
-                                    onClick={() => toggleDate(dateKey)}
-                                    className="flex items-center gap-3 px-10 py-3 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
-                                  >
-                                    <button className="text-gray-600">
-                                      {isDateExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                                    </button>
-                                    <div className="flex items-center gap-4">
-                                      <p className="text-sm font-bold text-gray-700">{date}</p>
-                                      <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full font-semibold">
-                                        {bookingsArray.length} {bookingsArray.length === 1 ? 'booking' : 'bookings'}
-                                      </span>
+                                  <div className="px-10 py-3 bg-gray-50">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <button 
+                                        onClick={() => toggleDate(dateKey)}
+                                        className="text-gray-600 hover:text-gray-900"
+                                      >
+                                        {isDateExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                                      </button>
+                                      <div className="flex items-center gap-4 flex-1">
+                                        <p className="text-sm font-bold text-gray-700">{date}</p>
+                                        <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full font-semibold">
+                                          {bookingsArray.length} {bookingsArray.length === 1 ? 'booking' : 'bookings'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* WhatsApp Group Link Section */}
+                                    <div className="ml-9 mt-2">
+                                      {isEditingWhatsAppForThis ? (
+                                        <div className="flex items-center gap-2 bg-green-50 border-2 border-green-300 rounded-lg p-2">
+                                          <MessageCircle size={16} className="text-green-600" />
+                                          <input
+                                            type="text"
+                                            value={whatsappLinkInput}
+                                            onChange={(e) => setWhatsappLinkInput(e.target.value)}
+                                            placeholder="Enter WhatsApp group invite link"
+                                            className="flex-1 text-xs px-3 py-1.5 border border-gray-300 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-green-500"
+                                            onClick={(e) => e.stopPropagation()}
+                                          />
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              handleSaveWhatsAppLink(bookingsArray, dateKey)
+                                            }}
+                                            disabled={saving}
+                                            className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 disabled:opacity-50 flex items-center gap-1"
+                                          >
+                                            <Save size={12} /> Save
+                                          </button>
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              setEditingWhatsAppLink(null)
+                                              setWhatsappLinkInput('')
+                                            }}
+                                            disabled={saving}
+                                            className="px-2 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-300 disabled:opacity-50"
+                                          >
+                                            <X size={12} />
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center gap-2">
+                                          <MessageCircle size={14} className="text-green-600" />
+                                          {currentWhatsAppLink ? (
+                                            <a
+                                              href={currentWhatsAppLink}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-xs text-green-600 font-semibold hover:underline flex-1 truncate"
+                                              onClick={(e) => e.stopPropagation()}
+                                            >
+                                              {currentWhatsAppLink}
+                                            </a>
+                                          ) : (
+                                            <span className="text-xs text-gray-400 italic flex-1">No WhatsApp group link set</span>
+                                          )}
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              handleEditWhatsAppLink(dateKey, currentWhatsAppLink)
+                                            }}
+                                            className="px-2 py-1 text-xs text-gray-600 hover:bg-gray-200 rounded-lg font-semibold flex items-center gap-1"
+                                          >
+                                            <Edit2 size={12} /> {currentWhatsAppLink ? 'Edit' : 'Add'} Link
+                                          </button>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
 

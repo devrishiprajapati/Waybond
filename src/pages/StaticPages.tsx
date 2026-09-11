@@ -179,7 +179,7 @@ const TeamMembersSection = () => {
             </div>
 
             {/* Content Section */}
-            <div className="p-8 md:p-12 lg:p-16 space-y-8 flex flex-col justify-center">
+            <div className="p-8 md:p-12 lg:p-16 space-y-8 flex flex-col ">
               {/* Name & Designation */}
               <div className="space-y-4">
                 <h3 className="text-4xl md:text-5xl lg:text-6xl font-bungee font-black text-white italic tracking-tighter liquid-text leading-none">
@@ -188,63 +188,63 @@ const TeamMembersSection = () => {
                 <p className="text-secondary font-black uppercase tracking-[0.3em] text-xs md:text-sm">
                   {pinnedMember.designation}
                 </p>
+                
+                {/* Contact & Social Links - Below Name */}
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {pinnedMember.email && (
+                    <a
+                      href={`mailto:${pinnedMember.email}`}
+                      className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:border-secondary/60 hover:bg-secondary/10 rounded-xl transition-all"
+                      title={pinnedMember.email}
+                    >
+                      <Mail size={16} className="text-white/60 hover:text-secondary transition-colors" />
+                    </a>
+                  )}
+                  {pinnedMember.phone && (
+                    <a
+                      href={`tel:${pinnedMember.phone}`}
+                      className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:border-secondary/60 hover:bg-secondary/10 rounded-xl transition-all"
+                      title={pinnedMember.phone}
+                    >
+                      <Phone size={16} className="text-white/60 hover:text-secondary transition-colors" />
+                    </a>
+                  )}
+                  {pinnedMember.linkedin && (
+                    <a
+                      href={pinnedMember.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:border-secondary/60 hover:bg-secondary/10 rounded-xl transition-all"
+                      title="LinkedIn"
+                    >
+                      <Linkedin size={16} className="text-white/60 hover:text-secondary transition-colors" />
+                    </a>
+                  )}
+                  {pinnedMember.twitter && (
+                    <a
+                      href={pinnedMember.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 hover:border-secondary/60 hover:bg-secondary/10 rounded-xl transition-all"
+                      title="Twitter / X"
+                    >
+                      <Twitter size={16} className="text-white/60 hover:text-secondary transition-colors" />
+                    </a>
+                  )}
+                </div>
               </div>
 
               {/* Bio */}
               <div className="space-y-4">
                 {pinnedMember.fullBio && (
-                  <p className="text-white/80 leading-relaxed text-base md:text-lg font-medium italic">
+                  <p className="text-white/80 leading-relaxed text-sm font-medium italic">
                     {pinnedMember.fullBio}
                   </p>
                 )}
                 {!pinnedMember.fullBio && pinnedMember.shortBio && (
-                  <p className="text-white/80 leading-relaxed text-base md:text-lg font-medium italic">
+                  <p className="text-white/80 leading-relaxed text-sm font-medium italic">
                     {pinnedMember.shortBio}
                   </p>
-                )}
-              </div>
-
-              {/* Contact & Social Links */}
-              <div className="flex flex-wrap gap-3 pt-4">
-                {pinnedMember.email && (
-                  <a
-                    href={`mailto:${pinnedMember.email}`}
-                    className="inline-flex items-center gap-2 bg-white/5 border-2 border-white/20 hover:border-secondary/60 hover:bg-secondary/10 text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
-                  >
-                    <Mail size={16} className="text-secondary" />
-                    {pinnedMember.email}
-                  </a>
-                )}
-                {pinnedMember.phone && (
-                  <a
-                    href={`tel:${pinnedMember.phone}`}
-                    className="inline-flex items-center gap-2 bg-white/5 border-2 border-white/20 hover:border-secondary/60 hover:bg-secondary/10 text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
-                  >
-                    <Phone size={16} className="text-secondary" />
-                    {pinnedMember.phone}
-                  </a>
-                )}
-                {pinnedMember.linkedin && (
-                  <a
-                    href={pinnedMember.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-white/5 border-2 border-white/20 hover:border-secondary/60 hover:bg-secondary/10 text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
-                  >
-                    <Linkedin size={16} className="text-secondary" />
-                    LinkedIn
-                  </a>
-                )}
-                {pinnedMember.twitter && (
-                  <a
-                    href={pinnedMember.twitter}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-white/5 border-2 border-white/20 hover:border-secondary/60 hover:bg-secondary/10 text-white px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
-                  >
-                    <Twitter size={16} className="text-secondary" />
-                    Twitter / X
-                  </a>
                 )}
               </div>
             </div>
