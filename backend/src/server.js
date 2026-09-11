@@ -2178,7 +2178,7 @@ app.put('/api/admin/bookings/:bookingId', async (req, res, next) => {
 
 app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
   try {
-    const { targetTripId, reason, processedBy } = req.body
+    const { targetTripId, reason, processedBy, participantIndex } = req.body
     if (!targetTripId) return res.status(400).json({ message: 'Target trip is required.' })
 
     const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId }, include: { user: true } })
@@ -2190,7 +2190,22 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
 
     const oldPayload = booking.payload || {}
     const targetPayload = targetTrip.payload || {}
-    const travelers = Number(oldPayload.travelers || 1)
+    
+    // Check if this is a group member transfer (participantIndex provided)
+    let isGroupMemberTransfer = participantIndex !== undefined && participantIndex !== null
+    let removedParticipant = null
+    let updatedTravellerDetails = oldPayload.travellerDetails || []
+    
+    if (isGroupMemberTransfer) {
+      const travellerDetails = Array.isArray(oldPayload.travellerDetails) ? oldPayload.travellerDetails : []
+      if (participantIndex >= 0 && participantIndex < travellerDetails.length) {
+        removedParticipant = travellerDetails[participantIndex]
+        // Remove this participant from the original booking
+        updatedTravellerDetails = travellerDetails.filter((_, index) => index !== participantIndex)
+      }
+    }
+    
+    const travelers = isGroupMemberTransfer ? Math.max(1, updatedTravellerDetails.length) : Number(oldPayload.travelers || 1)
     const oldPrice = toMoneyNumber(oldPayload.price || 0)
     const newPrice = toMoneyNumber(targetPayload.price || 0)
     const priceDifference = newPrice - oldPrice
@@ -2220,6 +2235,8 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
       location: targetPayload.location || oldPayload.location,
       destination: targetPayload.location || oldPayload.destination,
       price: newPrice,
+      travelers: travelers,  // Updated traveler count if group member removed
+      travellerDetails: isGroupMemberTransfer ? updatedTravellerDetails : oldPayload.travellerDetails,  // Updated list if group member removed
       totalAmount: newPrice * travelers,
       pendingAmount: Math.max(0, (newPrice * travelers) - toMoneyNumber(oldPayload.amountPaid || 0)),
       nextBatch: targetPayload.nextBatch || oldPayload.nextBatch,
@@ -2228,7 +2245,19 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
       duration: targetPayload.duration || oldPayload.duration,
       image: targetPayload.image || oldPayload.image,
       transferHistory,
-      lastTransferredAt: new Date().toISOString()
+      lastTransferredAt: new Date().toISOString(),
+      ...(isGroupMemberTransfer && removedParticipant ? {
+        participantRemovals: [
+          ...(Array.isArray(oldPayload.participantRemovals) ? oldPayload.participantRemovals : []),
+          {
+            id: `removal-${Date.now()}`,
+            participantName: removedParticipant.name,
+            participantEmail: removedParticipant.email,
+            removedAt: new Date().toISOString(),
+            reason: 'Package Transfer'
+          }
+        ]
+      } : {})
     }
 
     // Save reschedule record to database

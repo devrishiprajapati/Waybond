@@ -143,13 +143,6 @@ const Navbar = () => {
               className="absolute top-1/2 left-1/2 w-[90%] max-w-[340px] liquid-glass shadow-2xl p-8 rounded-[3rem] flex flex-col max-h-[90vh] overflow-y-auto isolate"
             >
               <div className="flex justify-between items-center mb-8 relative z-20 sticky top-0 bg-white rounded-2xl px-3 py-2">
-                <Link to="/" onClick={() => haptics.light()} className="flex items-center" aria-label="Waybond home">
-                  <img
-                    src="/assets/waybond-logo.svg"
-                    alt="Waybond Logo"
-                    className="h-8 w-auto"
-                  />
-                </Link>
                 <button
                   onClick={() => {
                     haptics.light();

@@ -25,6 +25,7 @@ export default function TransferPackageModal({ booking, bookingDbId, onClose, on
     const [activeTab, setActiveTab] = useState<typeof TABS[number]['id']>('transfer')
     const [trips, setTrips] = useState<Trip[]>([])
     const [selectedTripId, setSelectedTripId] = useState<number | null>(null)
+    const [selectedParticipantIndex, setSelectedParticipantIndex] = useState<number | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
@@ -34,6 +35,8 @@ export default function TransferPackageModal({ booking, bookingDbId, onClose, on
     const currentTitle = String(booking.title || booking.tripTitle || 'WayBond Trip')
     const currentPrice = Number(booking.price || 0)
     const travelers = Number(booking.travelers || 1)
+    const travellerDetails = Array.isArray(booking.travellerDetails) ? booking.travellerDetails : []
+    const isGroupBooking = travelers > 1 && travellerDetails.length > 1
     const totalAmount = Number(booking.totalAmount || currentPrice * travelers)
     const amountPaid = Number(booking.amountPaid || 0)
     const pendingAmount = Number(booking.pendingAmount || Math.max(0, totalAmount - amountPaid))
@@ -56,17 +59,21 @@ export default function TransferPackageModal({ booking, bookingDbId, onClose, on
         setError('')
         setSuccess('')
         try {
-            // First, perform the package transfer
             const response = await fetch(`/api/bookings/${bookingDbId}/transfer`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ targetTripId: selectedTripId })
+                body: JSON.stringify({ 
+                    targetTripId: selectedTripId,
+                    participantIndex: selectedParticipantIndex  // Include participant index if selected
+                })
             })
             const data = await response.json()
             if (!response.ok) throw new Error(data.message || 'Transfer failed.')
             
-            setSuccess('Package transferred successfully!')
+            const transferType = selectedParticipantIndex !== null ? 'member' : 'entire booking'
+            setSuccess(`Package transferred successfully! ${selectedParticipantIndex !== null ? 'Member removed from original booking.' : ''}`)
             setSelectedTripId(null)
+            setSelectedParticipantIndex(null)
             onUpdate(data)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Transfer failed.')
@@ -147,6 +154,53 @@ export default function TransferPackageModal({ booking, bookingDbId, onClose, on
                                 </svg>
                                 <h3 className="text-xl font-bold text-blue-600">Booking Information</h3>
                             </div>
+
+                            {/* Group Member Selection (if group booking) */}
+                            {isGroupBooking && (
+                                <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                    <p className="text-sm font-semibold text-blue-900 mb-3">
+                                        This is a group booking with {travelers} travelers. Select transfer type:
+                                    </p>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-transparent hover:border-blue-300 cursor-pointer transition-all">
+                                            <input
+                                                type="radio"
+                                                name="transferType"
+                                                checked={selectedParticipantIndex === null}
+                                                onChange={() => setSelectedParticipantIndex(null)}
+                                                className="w-4 h-4 text-blue-600"
+                                            />
+                                            <div>
+                                                <p className="font-bold text-sm text-gray-900">Transfer Entire Booking</p>
+                                                <p className="text-xs text-gray-600">Move all {travelers} travelers to new package</p>
+                                            </div>
+                                        </label>
+                                        
+                                        {travellerDetails.map((traveller, index) => (
+                                            <label
+                                                key={index}
+                                                className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-transparent hover:border-blue-300 cursor-pointer transition-all"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="transferType"
+                                                    checked={selectedParticipantIndex === index}
+                                                    onChange={() => setSelectedParticipantIndex(index)}
+                                                    className="w-4 h-4 text-blue-600"
+                                                />
+                                                <div>
+                                                    <p className="font-bold text-sm text-gray-900">
+                                                        Transfer Only: {traveller.name || `Traveler ${index + 1}`}
+                                                    </p>
+                                                    <p className="text-xs text-gray-600">
+                                                        {traveller.email || 'No email'} • This member will be removed from group
+                                                    </p>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Package Field */}
                             <div>
