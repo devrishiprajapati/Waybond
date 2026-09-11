@@ -37,7 +37,7 @@ const BookingConfirmation = () => {
   const [cashSubmitting, setCashSubmitting] = useState(false)
   const [paymentConfirmedOpen, setPaymentConfirmedOpen] = useState(false)
   const [dashboardPath, setDashboardPath] = useState('')
-  
+
   // Promo code states
   const [promoCode, setPromoCode] = useState('')
   const [promoCodeApplied, setPromoCodeApplied] = useState<any>(null)
@@ -75,9 +75,9 @@ const BookingConfirmation = () => {
         tripId: trip.id,
         bookingAmount: subtotal
       }
-      
+
       console.log('Validating promo code with:', requestBody)
-      
+
       const response = await fetch('/api/promo-codes/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,7 +119,7 @@ const BookingConfirmation = () => {
     haptics.light()
   }
 
-  const createBookingPayload = (overrides: Record<string, unknown> = {}) => {
+  const createBookingPayload = (overrides: Record<string, unknown> = {}): Record<string, unknown> => {
     const timestamp = Date.now().toString(36).toUpperCase()
     const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase()
     const uniqueBookingId = `WB-${timestamp}-${randomSuffix}`
@@ -146,6 +146,9 @@ const BookingConfirmation = () => {
       travellerDetails: travellers,
       bookedOn: new Date().toLocaleDateString('en-IN'),
       nextBatch: departure || trip.departureDates?.[0] || 'TBD',
+      promoCode: undefined as string | undefined,
+      discountAmount: undefined as number | undefined,
+      originalAmount: undefined as number | undefined,
       ...overrides
     }
   }
@@ -217,7 +220,7 @@ const BookingConfirmation = () => {
             })
             const verified = await verifyResponse.json()
             if (!verifyResponse.ok || !verified.success) throw new Error(verified.message || 'Payment verification failed')
-            
+
             // Record promo code usage if applied
             if (promoCodeApplied && promoCodeApplied.id && user.id) {
               try {
@@ -226,7 +229,7 @@ const BookingConfirmation = () => {
                   userId: user.id,
                   code: promoCode
                 })
-                
+
                 const recordBody = {
                   promoCodeId: promoCodeApplied.id,
                   userId: user.id,
@@ -239,15 +242,15 @@ const BookingConfirmation = () => {
                   bookingAmount: subtotal,
                   finalAmount: totalAmount
                 }
-                
+
                 console.log('Recording promo code usage with body:', recordBody)
-                
+
                 const recordResponse = await fetch('/api/promo-codes/record-usage', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(recordBody)
                 })
-                
+
                 if (!recordResponse.ok) {
                   const errorText = await recordResponse.text()
                   console.error('Record usage failed:', {
@@ -269,7 +272,7 @@ const BookingConfirmation = () => {
                 hasUserId: !!user.id
               })
             }
-            
+
             haptics.success()
             setDashboardPath(`/dashboard/${user.id}`)
             setPaymentConfirmedOpen(true)
@@ -304,7 +307,7 @@ const BookingConfirmation = () => {
       setCashSubmitting(true)
 
       const cashPayload = createBookingPayload({ paymentMethod: 'Cash' })
-      
+
       // Add promo code details if applied
       if (promoCodeApplied) {
         cashPayload.promoCode = promoCode.toUpperCase()
@@ -515,8 +518,8 @@ const BookingConfirmation = () => {
                   <div>
                     <p className="font-black text-gray-900">{promoCodeApplied.code}</p>
                     <p className="text-sm text-purple-700 font-bold">
-                      {promoCodeApplied.discountType === 'PERCENTAGE' 
-                        ? `${promoCodeApplied.discountValue}% OFF` 
+                      {promoCodeApplied.discountType === 'PERCENTAGE'
+                        ? `${promoCodeApplied.discountValue}% OFF`
                         : `₹${promoCodeApplied.discountValue} OFF`}
                     </p>
                   </div>
