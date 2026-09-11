@@ -56,6 +56,7 @@ export default function TransferPackageModal({ booking, bookingDbId, onClose, on
         setError('')
         setSuccess('')
         try {
+            // First, perform the package transfer
             const response = await fetch(`/api/bookings/${bookingDbId}/transfer`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -63,6 +64,7 @@ export default function TransferPackageModal({ booking, bookingDbId, onClose, on
             })
             const data = await response.json()
             if (!response.ok) throw new Error(data.message || 'Transfer failed.')
+            
             setSuccess('Package transferred successfully!')
             setSelectedTripId(null)
             onUpdate(data)

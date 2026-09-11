@@ -30,7 +30,7 @@ export default function WhyChooseUs() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-center mb-16 space-y-3"
+          className="text-center mb-10 space-y-3"
         >
           <h2 className="text-2xl md:text-5xl font-bungee font-black text-slate-800 tracking-tighter uppercase italic leading-none">
             What Makes Us <span className="text-primary font-bungee">Different</span>

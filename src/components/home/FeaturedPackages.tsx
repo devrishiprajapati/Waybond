@@ -57,8 +57,8 @@ export default function FeaturedPackages() {
   }, [])
 
   return (
-    <section className="py-10 bg-white relative overflow-hidden">
-      <div className="absolute left-1/2 top-0 h-80 w-2/3 -translate-x-1/2 rounded-full bg-secondary/5 blur-[110px] pointer-events-none" />
+    <section className="py-5 bg-white relative overflow-hidden">
+      <div className="absolute left-1/2 top-0 h-80 w-2/3 -translate-x-1/2 rounded-full blur-[110px] pointer-events-none" />
       <div className="max-w-[1920px] mx-auto px-6 md:px-12 lg:px-20 relative z-10">
         <div className="text-center mb-10 md:mb-12">
           <h2 className="text-2xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none font-bungee">Choose Your <span className="text-secondary font-bungee">Experience</span></h2>
@@ -94,7 +94,7 @@ export default function FeaturedPackages() {
               className="relative"
             >
               {/* Horizontal Scroll Container */}
-              <div className="flex gap-4 md:gap-7 lg:gap-9 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-1">
+              <div className="flex gap-4 md:gap-7 lg:gap-9 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-1">
                 {selectedTrips.map(trip => {
                   const selectedDeparture = selectedDepartures[trip.id] || trip.departureDates?.[0]
                   const isWishlisted = isInList(trip.id)
@@ -104,7 +104,7 @@ export default function FeaturedPackages() {
                       key={trip.id}
                       to={`/trip/${createSlug(trip.title)}${selectedDeparture ? `?departure=${selectedDeparture}` : ''}`}
                       onClick={() => haptics.medium()}
-                      className="group overflow-hidden rounded-2xl md:rounded-[2rem] liquid-glass text-white border border-white/10 shadow-xl md:shadow-2xl transition-transform duration-500 hover:-translate-y-2 flex flex-col relative min-w-[280px] max-w-[280px] sm:min-w-[340px] sm:max-w-[340px] md:min-w-[380px] md:max-w-[380px] snap-start cursor-pointer"
+                      className="group overflow-hidden rounded-2xl md:rounded-[2rem] text-white border border-white/10 transition-transform duration-500 hover:-translate-y-2 flex flex-col relative min-w-[280px] max-w-[280px] sm:min-w-[340px] sm:max-w-[340px] md:min-w-[380px] md:max-w-[380px] snap-start cursor-pointer"
                     >
                       {/* Wishlist Button - Top Right */}
                       <button
@@ -129,7 +129,7 @@ export default function FeaturedPackages() {
                       </span>
 
                       {/* Image Section */}
-                      <div className="relative h-44 sm:h-52 md:h-60 overflow-hidden bg-white flex-shrink-0">
+                      <div className="relative h-44 sm:h-52 md:h-60 overflow-hidden flex-shrink-0">
                         <img src={optimizeImageUrl(trip.image, 800, 80)} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
 
                       </div>

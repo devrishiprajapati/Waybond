@@ -2326,6 +2326,75 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
+// Remove participant from booking (when transferring to another package)
+app.post('/api/bookings/:bookingId/remove-participant', async (req, res, next) => {
+  try {
+    const { participantIndex, participantName } = req.body
+    
+    if (participantIndex === undefined) {
+      return res.status(400).json({ message: 'Participant index is required.' })
+    }
+
+    const booking = await prisma.booking.findUnique({ 
+      where: { id: req.params.bookingId }
+    })
+    if (!booking) return res.status(404).json({ message: 'Booking not found.' })
+
+    const payload = booking.payload || {}
+    const travellerDetails = Array.isArray(payload.travellerDetails) ? payload.travellerDetails : []
+    
+    if (participantIndex < 0 || participantIndex >= travellerDetails.length) {
+      return res.status(404).json({ message: 'Participant not found.' })
+    }
+
+    const participant = travellerDetails[participantIndex]
+    
+    // Remove participant
+    const updatedTravellerDetails = travellerDetails.filter((_, index) => index !== participantIndex)
+    const updatedTravelers = Math.max(1, updatedTravellerDetails.length)
+    const price = toMoneyNumber(payload.price || 0)
+    const newTotalAmount = price * updatedTravelers
+    const amountPaid = toMoneyNumber(payload.amountPaid || 0)
+    const refundAmount = price
+
+    const updatedPayload = {
+      ...payload,
+      travelers: updatedTravelers,
+      travellerDetails: updatedTravellerDetails,
+      totalAmount: newTotalAmount,
+      pendingAmount: Math.max(0, newTotalAmount - Math.max(0, amountPaid - refundAmount)),
+      amountPaid: Math.max(0, amountPaid - refundAmount),
+      participantRemovals: [
+        ...(Array.isArray(payload.participantRemovals) ? payload.participantRemovals : []),
+        {
+          id: `removal-${Date.now()}`,
+          participantName: participant.name || participantName,
+          participantEmail: participant.email,
+          removedAt: new Date().toISOString(),
+          reason: 'Package Transfer'
+        }
+      ]
+    }
+
+    const updated = await prisma.booking.update({
+      where: { id: booking.id },
+      data: { payload: updatedPayload }
+    })
+
+    res.json({
+      success: true,
+      message: 'Participant removed successfully',
+      booking: updated.payload,
+      refundAmount,
+      removedParticipant: participant
+    })
+
+  } catch (error) { 
+    console.error('Remove participant error:', error)
+    next(error) 
+  }
+})
+
 // Update payment amounts for a booking
 app.post('/api/bookings/:bookingId/payment-update', async (req, res, next) => {
   try {

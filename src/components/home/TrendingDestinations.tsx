@@ -12,10 +12,10 @@ export default function TrendingDestinations() {
   }, [])
 
   return (
-    <section className="py-16 md:py-28 bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
+    <section className="py-8 md:py-15 bg-white relative overflow-hidden">
       {/* Decorative Elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -ml-48 -mb-48 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full blur-3xl -ml-48 -mb-48 pointer-events-none" />
 
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 md:px-12 lg:px-20 relative z-10">
         {/* Section Header */}
@@ -60,16 +60,13 @@ export default function TrendingDestinations() {
                   className="block relative h-[291px] sm:h-[333px] md:h-[364px] lg:h-[394px] xl:h-[424px] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {/* Image Container */}
-                  <div className="relative z-0 w-full h-full overflow-hidden bg-gray-200">
+                  <div className="relative z-0 w-full h-full overflow-hidden bg-white">
                     <img
                       src={optimizeImageUrl(card.image, 900, 85)}
                       alt={card.title}
                       loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 will-change-transform"
                     />
-
-                    {/* Gradient Overlay - Darker at top and bottom */}
-
                   </div>
 
                   {/* Top Section - Title and Subtitle */}
