@@ -1,5 +1,12 @@
 import { getWhatsAppLink } from './data';
 
+export interface Attraction {
+  name: string;
+  description: string;
+  image: string;
+  location?: string;
+}
+
 export interface Trip {
   id: number;
   title: string;
@@ -67,15 +74,16 @@ export interface Trip {
     max?: number | string;
   };
   isVisible?: boolean;
+  attractions?: Attraction[];
 }
 
 export interface ExpeditionLead {
-    name: string;
-    role: string;
-    bio: string;
-    avatar: string;
-    rating: number;
-    trips: number;
+  name: string;
+  role: string;
+  bio: string;
+  avatar: string;
+  rating: number;
+  trips: number;
 }
 
 export const DEFAULT_AGE_LIMIT = { min: '', max: 40 };

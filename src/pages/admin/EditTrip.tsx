@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Globe, Upload, FileText, CheckCircle, Percent } from 'lucide-react'
 import { getAdminTripById, updateTrip, addTrip } from '../../lib/dataService'
-import { DEFAULT_AGE_LIMIT, DEFAULT_CANCELLATION_POLICY, ExpeditionLead, Trip } from '../../lib/trips'
+import { Attraction, DEFAULT_AGE_LIMIT, DEFAULT_CANCELLATION_POLICY, ExpeditionLead, Trip } from '../../lib/trips'
 import { formatDateOnly, parseDateOnly } from '../../lib/date'
 
 const CATEGORIES = ['Adventure', 'Beach', 'Luxury', 'Nature', 'Honeymoon', 'Backpacking']
@@ -91,7 +91,8 @@ const EditTrip = () => {
     termsAndConditions: '',
     cancellationPolicy: DEFAULT_CANCELLATION_POLICY,
     ageLimit: DEFAULT_AGE_LIMIT,
-    isVisible: true
+    isVisible: true,
+    attractions: []
   })
   const [mediaError, setMediaError] = useState('')
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false })
@@ -265,7 +266,7 @@ const EditTrip = () => {
     } catch (error) {
       setMediaError(error instanceof Error ? error.message : 'Unable to save the package.')
     }
-  } 
+  }
 
   const getJoinOriginKey = (origin: NonNullable<Trip['joinUsFrom']>[number]) => origin.id || origin.location
   const getConfirmedDateOrigin = () => {
@@ -1006,9 +1007,9 @@ const EditTrip = () => {
                 type="button"
                 onClick={() => {
                   const currentItinerary = getSelectedItinerary()
-                  const newDay = { 
-                    day: (currentItinerary?.length || 0) + 1, 
-                    title: '', 
+                  const newDay = {
+                    day: (currentItinerary?.length || 0) + 1,
+                    title: '',
                     description: '',
                     image: undefined,
                     date: addDaysToDateInput(activeItineraryDepartureDate, currentItinerary?.length || 0) || undefined
@@ -1036,11 +1037,10 @@ const EditTrip = () => {
                       key={originKey}
                       type="button"
                       onClick={() => selectItineraryTarget(selectionKey)}
-                      className={`px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${
-                        selectedDepartureForItinerary === selectionKey
+                      className={`px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${selectedDepartureForItinerary === selectionKey
                           ? 'bg-secondary text-white border-2 border-secondary shadow-lg'
                           : 'bg-white/5 text-white/60 border border-white/10 hover:border-white/30'
-                      }`}
+                        }`}
                     >
                       {origin.location}
                     </button>
@@ -1537,6 +1537,143 @@ const EditTrip = () => {
                 </div>
               ))}
             </div>
+          </section>
+
+          {/* ── Attractions ── */}
+          <section className={sectionClass}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-sans font-black uppercase italic tracking-widest text-white flex items-center">
+                <MapPin size={20} className="mr-3 text-secondary" /> Attractions
+              </h3>
+              <span className="text-[10px] font-black uppercase tracking-[0.18em] text-white/35">
+                {(formData.attractions || []).length} / 8
+              </span>
+            </div>
+            <p className="text-xs text-white/40 ml-2 -mt-4">Add up to 8 attraction cards — travellers can tap each one for full details on the trip page.</p>
+
+            <div className="space-y-6">
+              {(formData.attractions || []).map((attraction, index) => (
+                <div key={index} className="relative bg-white/[0.03] border border-white/10 rounded-3xl p-5 md:p-6 space-y-5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-secondary/70">Attraction {index + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = [...(formData.attractions || [])]
+                        next.splice(index, 1)
+                        setFormData({ ...formData, attractions: next })
+                      }}
+                      className="w-8 h-8 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center"
+                      aria-label="Remove attraction"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-2">
+                      <label className={labelClass}>Attraction Name</label>
+                      <input
+                        type="text"
+                        value={attraction.name}
+                        onChange={e => {
+                          const next = [...(formData.attractions || [])]
+                          next[index] = { ...next[index], name: e.target.value }
+                          setFormData({ ...formData, attractions: next })
+                        }}
+                        placeholder="e.g. Pangong Tso Lake"
+                        className={inputClass}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className={labelClass}>Location (optional)</label>
+                      <input
+                        type="text"
+                        value={attraction.location || ''}
+                        onChange={e => {
+                          const next = [...(formData.attractions || [])]
+                          next[index] = { ...next[index], location: e.target.value }
+                          setFormData({ ...formData, attractions: next })
+                        }}
+                        placeholder="e.g. Ladakh"
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className={labelClass}>Description</label>
+                    <textarea
+                      value={attraction.description}
+                      onChange={e => {
+                        const next = [...(formData.attractions || [])]
+                        next[index] = { ...next[index], description: e.target.value }
+                        setFormData({ ...formData, attractions: next })
+                      }}
+                      placeholder="Describe what makes this attraction special..."
+                      className={textareaClass}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className={labelClass}>Attraction Image</label>
+                    {attraction.image ? (
+                      <div className="relative w-full h-40 rounded-2xl overflow-hidden border border-white/10">
+                        <img src={attraction.image} alt={attraction.name} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = [...(formData.attractions || [])]
+                            next[index] = { ...next[index], image: '' }
+                            setFormData({ ...formData, attractions: next })
+                          }}
+                          className="absolute top-2 right-2 w-8 h-8 rounded-xl bg-black/70 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
+                          aria-label="Remove image"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="h-14 rounded-2xl border border-dashed border-white/20 bg-white/[0.03] text-white/55 font-black text-[10px] uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer hover:border-secondary hover:text-secondary transition-all">
+                        <Upload size={16} /> Upload Image
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={async (event) => {
+                            const file = event.target.files?.[0]
+                            if (!file) return
+                            try {
+                              validateImage(file)
+                              const image = await readImage(file)
+                              const next = [...(formData.attractions || [])]
+                              next[index] = { ...next[index], image }
+                              setFormData({ ...formData, attractions: next })
+                              setMediaError('')
+                            } catch (error) {
+                              setMediaError(error instanceof Error ? error.message : 'Unable to upload image.')
+                            }
+                            event.target.value = ''
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              disabled={(formData.attractions || []).length >= 8}
+              onClick={() => {
+                const newAttraction: Attraction = { name: '', description: '', image: '', location: '' }
+                setFormData({ ...formData, attractions: [...(formData.attractions || []), newAttraction] })
+              }}
+              className="w-full h-14 rounded-2xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-white/20 disabled:hover:text-white/50"
+            >
+              <Plus size={18} /> Add Attraction {(formData.attractions || []).length >= 8 ? '(Max 8)' : ''}
+            </button>
           </section>
 
           <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-5 bg-white/85 backdrop-blur-3xl border border-white/10 p-4 md:p-5 rounded-[2rem] fixed bottom-24 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 lg:bottom-6 z-50 shadow-2xl shadow-black/40">
