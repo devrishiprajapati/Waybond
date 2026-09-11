@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet-async'
 import { getTripById } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 import { formatAgeLimit, isAgeWithinLimit } from '../lib/trips'
+import { getUser } from '../lib/auth'
 
 interface TravellerInfo {
   name: string
@@ -36,6 +37,7 @@ const BookingForm = () => {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
+  const [userDataLoaded, setUserDataLoaded] = useState(false)
 
   const isTravellerEligible = (age: number) => isAgeWithinLimit(age, trip?.ageLimit)
   const joinUsFromOptions = (trip?.joinUsFrom || []).filter((origin: any) => origin.location)
@@ -72,6 +74,49 @@ const BookingForm = () => {
       })
     }
   }, [tripId])
+
+  // Pre-fill first traveller with logged-in user's details
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const currentUser = getUser()
+      if (!currentUser || !currentUser.id || userDataLoaded) return
+
+      try {
+        const response = await fetch(`/api/users/${currentUser.id}`)
+        if (response.ok) {
+          const userData = await response.json()
+          
+          // Pre-fill first traveller with user data
+          const updatedTravellers = [...travellers]
+          updatedTravellers[0] = {
+            name: userData.name || currentUser.name || '',
+            email: userData.email || currentUser.email || '',
+            phone: userData.phone || '',
+            age: '',
+            gender: userData.gender || 'Male',
+            dateOfBirth: userData.dateOfBirth || '',
+            state: userData.state || '',
+            city: userData.city || '',
+            emergencyContact: userData.emergencyContact || ''
+          }
+          
+          // Calculate age if dateOfBirth is available
+          if (userData.dateOfBirth) {
+            const age = calculateAge(userData.dateOfBirth)
+            updatedTravellers[0].age = age > 0 ? age.toString() : ''
+            updatedTravellers[0].isEligible = isTravellerEligible(age)
+          }
+          
+          setTravellers(updatedTravellers)
+          setUserDataLoaded(true)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error)
+      }
+    }
+
+    fetchUserData()
+  }, [userDataLoaded])
 
   const handleTravellerCountChange = (count: number) => {
     setNumTravellers(count)
@@ -188,6 +233,7 @@ const BookingForm = () => {
           tripLocation: bookingTrip?.location,
           tripDuration: bookingTrip?.duration,
           tripPrice: bookingTrip?.price,
+          tripImage: bookingTrip?.image,
           joinOrigin: bookingTrip?.joinOrigin,
           departureDate: departure,
           travellers,

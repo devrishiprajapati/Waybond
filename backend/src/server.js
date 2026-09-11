@@ -836,16 +836,26 @@ app.post('/api/booking-details', async (req, res, next) => {
     primaryBooker = firstPassengerMatch ? firstPassengerMatch.user : passengerUsers[0].user
 
     // Step 2: Create booking record
+    // Generate unique booking ID
+    const timestamp = Date.now().toString(36).toUpperCase()
+    const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase()
+    const uniqueBookingId = `WB-${timestamp}-${randomSuffix}`
+
     const bookingPayload = {
+      id: tripId,
+      bookingId: uniqueBookingId,
       title: tripTitle,
       tripTitle,
       location: tripLocation,
       duration: tripDuration,
       price: tripPrice,
+      image: req.body.tripImage || '/placeholder-trip.jpg', // Add image field
       departure: departureDate,
+      nextBatch: departureDate,
       joinOrigin,
       tripId: tripId || null,
       travelers: numTravellers,
+      travellerDetails: travellers,
       travellers: travellers.map(t => ({
         name: t.name,
         age: t.age,
@@ -858,7 +868,10 @@ app.post('/api/booking-details', async (req, res, next) => {
         emergencyContact: t.emergencyContact
       })),
       bookingDate: new Date().toISOString(),
+      bookedOn: new Date().toLocaleDateString('en-IN'), // Add bookedOn field
       status: 'CONFIRMED',
+      paymentStatus: 'Pending Payment',
+      paymentMethod: 'Online',
       unmatchedPassengers: unmatchedPassengers.map(up => ({
         name: up.name,
         phone: up.phone
@@ -1376,6 +1389,20 @@ app.delete('/api/testimonials/:id', async (req, res, next) => {
 
 app.get('/api/users', async (_req, res, next) => {
   try { res.json((await prisma.user.findMany({ orderBy: { lastLoginAt: 'desc' } })).map(publicUser)) } catch (error) { next(error) }
+})
+
+app.get('/api/users/:id', async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.params.id } })
+    if (!user) return res.status(404).json({ message: 'User not found' })
+    
+    // Flatten profile data if it exists
+    const userData = {
+      ...publicUser(user),
+      ...(user.profile || {})
+    }
+    res.json(userData)
+  } catch (error) { next(error) }
 })
 
 app.get('/api/admin/dashboard', async (_req, res, next) => {
