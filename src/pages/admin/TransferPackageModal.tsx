@@ -70,11 +70,22 @@ export default function TransferPackageModal({ booking, bookingDbId, onClose, on
             const data = await response.json()
             if (!response.ok) throw new Error(data.message || 'Transfer failed.')
             
-            const transferType = selectedParticipantIndex !== null ? 'member' : 'entire booking'
-            setSuccess(`Package transferred successfully! ${selectedParticipantIndex !== null ? 'Member removed from original booking.' : ''}`)
+            if (selectedParticipantIndex !== null && data.newMemberBooking) {
+                setSuccess(`Package transferred successfully! New booking created: ${data.newMemberBooking.bookingId}. Member removed from original booking.`)
+            } else {
+                setSuccess('Package transferred successfully!')
+            }
+            
             setSelectedTripId(null)
             setSelectedParticipantIndex(null)
-            onUpdate(data)
+            
+            // Pass the updated booking data to parent
+            onUpdate(data.booking)
+            
+            // Force page reload after a short delay to ensure fresh data
+            setTimeout(() => {
+                window.location.reload()
+            }, 1500)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Transfer failed.')
         } finally {

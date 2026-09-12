@@ -37,6 +37,7 @@ const BookingConfirmation = () => {
   const [cashSubmitting, setCashSubmitting] = useState(false)
   const [paymentConfirmedOpen, setPaymentConfirmedOpen] = useState(false)
   const [dashboardPath, setDashboardPath] = useState('')
+  const [bookingCreated, setBookingCreated] = useState(false) // Prevent duplicate bookings
 
   // Promo code states
   const [promoCode, setPromoCode] = useState('')
@@ -156,6 +157,12 @@ const BookingConfirmation = () => {
   const handlePayNow = async () => {
     haptics.medium()
 
+    // Prevent duplicate bookings
+    if (bookingCreated || paying) {
+      console.log('Booking already in progress or created')
+      return
+    }
+
     // Check if user is logged in
     const user = getUser()
     if (!user) {
@@ -175,6 +182,8 @@ const BookingConfirmation = () => {
         bookingPayload.originalAmount = subtotal
       }
 
+      setPaying(true)
+      
       // Save to database
       const response = await fetch(`/api/users/${user.id}/bookings`, {
         method: 'POST',
@@ -184,11 +193,13 @@ const BookingConfirmation = () => {
 
       if (!response.ok) throw new Error('Failed to create booking')
       const booking = await response.json()
+      
+      // Mark booking as created to prevent duplicates
+      setBookingCreated(true)
 
       const amount = Math.round(totalAmount * 100)
       if (!Number.isInteger(amount) || amount < 100) throw new Error('Invalid amount')
 
-      setPaying(true)
       const orderResponse = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -283,18 +294,31 @@ const BookingConfirmation = () => {
             setPaying(false)
           }
         },
-        modal: { ondismiss: () => setPaying(false) }
+        modal: { ondismiss: () => {
+          setPaying(false)
+          // Don't reset bookingCreated here - booking was already created
+        } }
       })
       razorpay.open()
     } catch (error) {
       console.error('Payment failed:', error)
       setPaying(false)
+      // Reset bookingCreated only if booking creation itself failed
+      if (!error || error.message.includes('Failed to create booking')) {
+        setBookingCreated(false)
+      }
       alert(error instanceof Error ? error.message : 'Unable to start payment. Please try again.')
     }
   }
 
   const handleCashPayment = async () => {
     haptics.medium()
+
+    // Prevent duplicate bookings
+    if (bookingCreated || cashSubmitting) {
+      console.log('Booking already in progress or created')
+      return
+    }
 
     const user = getUser()
     if (!user) {
@@ -324,13 +348,16 @@ const BookingConfirmation = () => {
       const booking = await response.json()
       if (!response.ok) throw new Error(booking.message || 'Failed to create cash booking')
 
+      // Mark booking as created to prevent duplicates
+      setBookingCreated(true)
+
       alert('Cash payment request submitted. Your booking will stay pending until admin confirmation.')
       navigate(`/dashboard/${user.id}`)
     } catch (error) {
       console.error('Cash booking failed:', error)
       alert(error instanceof Error ? error.message : 'Unable to submit cash payment request. Please try again.')
-    } finally {
       setCashSubmitting(false)
+      setBookingCreated(false) // Reset on error
     }
   }
 
@@ -589,17 +616,17 @@ const BookingConfirmation = () => {
           >
             <button
               onClick={handlePayNow}
-              disabled={paying || cashSubmitting}
+              disabled={paying || cashSubmitting || bookingCreated}
               className="w-full bg-secondary hover:bg-secondary/90 text-white py-4 rounded-full font-black text-lg uppercase tracking-wide shadow-xl shadow-secondary/30 transition-all hover:shadow-2xl hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {paying ? 'Processing...' : 'Pay Now'}
+              {paying ? 'Processing...' : bookingCreated ? 'Booking Created' : 'Pay Now'}
             </button>
             <button
               onClick={handleCashPayment}
-              disabled={paying || cashSubmitting}
+              disabled={paying || cashSubmitting || bookingCreated}
               className="w-full border-2 border-secondary bg-white text-secondary hover:bg-secondary hover:text-white py-4 rounded-full font-black text-lg uppercase tracking-wide shadow-lg shadow-secondary/10 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {cashSubmitting ? 'Submitting...' : 'Cash'}
+              {cashSubmitting ? 'Submitting...' : bookingCreated ? 'Booking Created' : 'Cash'}
             </button>
           </motion.div>
 

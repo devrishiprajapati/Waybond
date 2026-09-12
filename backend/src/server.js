@@ -1991,6 +1991,36 @@ app.post('/api/users/:id/bookings', async (req, res, next) => {
       })
     }
 
+    // Check for duplicate bookings in the last 30 seconds
+    const recentBookings = await prisma.booking.findMany({
+      where: {
+        userId: req.params.id,
+        createdAt: {
+          gte: new Date(Date.now() - 30000) // Last 30 seconds
+        }
+      }
+    })
+
+    // Check if there's a recent booking for the same trip with same travelers
+    const isDuplicate = recentBookings.some(booking => {
+      const payload = booking.payload || {}
+      const sameTrip = Number(payload.id) === tripId
+      const sameTravelerCount = Number(payload.travelers) === travellers.length
+      const sameTravelerNames = JSON.stringify(travellers.map(t => t.name).sort()) === 
+                                JSON.stringify((payload.travellerDetails || []).map(t => t.name).sort())
+      return sameTrip && sameTravelerCount && sameTravelerNames
+    })
+
+    if (isDuplicate) {
+      console.log('Duplicate booking prevented for user:', req.params.id, 'trip:', tripId)
+      // Return the existing booking instead of creating a duplicate
+      const existingBooking = recentBookings.find(booking => {
+        const payload = booking.payload || {}
+        return Number(payload.id) === tripId
+      })
+      return res.status(200).json(toBooking(existingBooking))
+    }
+
     const booking = await prisma.booking.create({ data: { userId: req.params.id, payload: req.body } })
     res.status(201).json(toBooking(booking))
   } catch (error) { next(error) }
@@ -2178,8 +2208,15 @@ app.put('/api/admin/bookings/:bookingId', async (req, res, next) => {
 
 app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
   try {
+    console.log('=== TRANSFER REQUEST RECEIVED ===')
+    console.log('Request body:', JSON.stringify(req.body, null, 2))
+    console.log('Booking ID:', req.params.bookingId)
+    
     const { targetTripId, reason, processedBy, participantIndex } = req.body
     if (!targetTripId) return res.status(400).json({ message: 'Target trip is required.' })
+
+    console.log('Participant index:', participantIndex)
+    console.log('Is group member transfer:', participantIndex !== undefined && participantIndex !== null)
 
     const booking = await prisma.booking.findUnique({ where: { id: req.params.bookingId }, include: { user: true } })
     if (!booking) return res.status(404).json({ message: 'Booking not found.' })
@@ -2202,6 +2239,12 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
         removedParticipant = travellerDetails[participantIndex]
         // Remove this participant from the original booking
         updatedTravellerDetails = travellerDetails.filter((_, index) => index !== participantIndex)
+        console.log('Group member transfer:', {
+          originalTravelerCount: travellerDetails.length,
+          removedMember: removedParticipant.name,
+          remainingTravelerCount: updatedTravellerDetails.length,
+          remainingMembers: updatedTravellerDetails.map(t => t.name)
+        })
       }
     }
     
@@ -2226,7 +2269,27 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
 
     const transferHistory = Array.isArray(oldPayload.transferHistory) ? [...oldPayload.transferHistory, transferRecord] : [transferRecord]
 
-    const updatedPayload = {
+    // For group member transfer, keep the original booking with reduced travelers
+    // For full booking transfer, move entire booking to new trip
+    const updatedPayload = isGroupMemberTransfer ? {
+      ...oldPayload,
+      travelers: travelers,  // Reduced traveler count
+      travellerDetails: updatedTravellerDetails,  // Removed list without transferred member
+      totalAmount: oldPrice * travelers,  // Keep original trip's price
+      pendingAmount: Math.max(0, (oldPrice * travelers) - toMoneyNumber(oldPayload.amountPaid || 0)),
+      transferHistory,
+      lastTransferredAt: new Date().toISOString(),
+      participantRemovals: [
+        ...(Array.isArray(oldPayload.participantRemovals) ? oldPayload.participantRemovals : []),
+        {
+          id: `removal-${Date.now()}`,
+          participantName: removedParticipant.name,
+          participantEmail: removedParticipant.email,
+          removedAt: new Date().toISOString(),
+          reason: 'Package Transfer'
+        }
+      ]
+    } : {
       ...oldPayload,
       id: targetTrip.id,
       tripId: targetTrip.id,
@@ -2235,8 +2298,8 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
       location: targetPayload.location || oldPayload.location,
       destination: targetPayload.location || oldPayload.destination,
       price: newPrice,
-      travelers: travelers,  // Updated traveler count if group member removed
-      travellerDetails: isGroupMemberTransfer ? updatedTravellerDetails : oldPayload.travellerDetails,  // Updated list if group member removed
+      travelers: travelers,
+      travellerDetails: oldPayload.travellerDetails,
       totalAmount: newPrice * travelers,
       pendingAmount: Math.max(0, (newPrice * travelers) - toMoneyNumber(oldPayload.amountPaid || 0)),
       nextBatch: targetPayload.nextBatch || oldPayload.nextBatch,
@@ -2245,52 +2308,193 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
       duration: targetPayload.duration || oldPayload.duration,
       image: targetPayload.image || oldPayload.image,
       transferHistory,
-      lastTransferredAt: new Date().toISOString(),
-      ...(isGroupMemberTransfer && removedParticipant ? {
-        participantRemovals: [
-          ...(Array.isArray(oldPayload.participantRemovals) ? oldPayload.participantRemovals : []),
-          {
-            id: `removal-${Date.now()}`,
-            participantName: removedParticipant.name,
-            participantEmail: removedParticipant.email,
-            removedAt: new Date().toISOString(),
-            reason: 'Package Transfer'
-          }
-        ]
-      } : {})
+      lastTransferredAt: new Date().toISOString()
     }
 
-    // Save reschedule record to database
+    // Save reschedule record to database (only for full booking transfers)
     let emailSent = false
-    const rescheduleRecord = await prisma.bookingReschedule.create({
-      data: {
-        bookingId: booking.id,
-        userId: booking.userId,
-        fromTripId: Number(oldPayload.id || oldPayload.tripId || 0),
-        fromTripTitle: transferRecord.fromTripTitle,
-        toTripId: targetTrip.id,
-        toTripTitle: transferRecord.toTripTitle,
-        fromPrice: oldPrice,
-        toPrice: newPrice,
-        fromDeparture: fromDeparture || null,
-        toDeparture: toDeparture || null,
-        priceDifference,
-        reason: reason || null,
-        status: 'COMPLETED',
-        processedAt: new Date(),
-        processedBy: processedBy || 'admin',
-        emailSent: false
-      }
-    })
+    let rescheduleRecord = null
+    if (!isGroupMemberTransfer) {
+      rescheduleRecord = await prisma.bookingReschedule.create({
+        data: {
+          bookingId: booking.id,
+          userId: booking.userId,
+          fromTripId: Number(oldPayload.id || oldPayload.tripId || 0),
+          fromTripTitle: transferRecord.fromTripTitle,
+          toTripId: targetTrip.id,
+          toTripTitle: transferRecord.toTripTitle,
+          fromPrice: oldPrice,
+          toPrice: newPrice,
+          fromDeparture: fromDeparture || null,
+          toDeparture: toDeparture || null,
+          priceDifference,
+          reason: reason || null,
+          status: 'COMPLETED',
+          processedAt: new Date(),
+          processedBy: processedBy || 'admin',
+          emailSent: false
+        }
+      })
+    }
 
+    // Update the original booking with new traveler count and details
+    // All group members (via PassengerBooking) will see the updated count automatically
     const updated = await prisma.booking.update({
       where: { id: booking.id },
       data: { payload: updatedPayload }
     })
+    
+    if (isGroupMemberTransfer) {
+      console.log('Original booking updated:', {
+        bookingId: updated.id,
+        newTravelerCount: updatedPayload.travelers,
+        remainingMembers: updatedPayload.travellerDetails?.length || 0,
+        message: 'All group members will see this updated count'
+      })
+    }
 
-    // Send reschedule notification email to the user
+    // If this was a group member transfer, create a new booking for the transferred member
+    let newMemberBooking = null
+    let memberUser = null
+    if (isGroupMemberTransfer && removedParticipant) {
+      const newBookingId = `WB-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+      
+      console.log('Creating new booking for transferred member:', {
+        name: removedParticipant.name,
+        email: removedParticipant.email,
+        originalUserId: booking.userId
+      })
+      
+      // Find user by email - try multiple email fields
+      if (removedParticipant.email) {
+        memberUser = await prisma.user.findFirst({ 
+          where: { 
+            OR: [
+              { email: removedParticipant.email },
+              { email: removedParticipant.email.toLowerCase() },
+              { email: removedParticipant.email.trim() }
+            ]
+          } 
+        })
+        
+        // If user doesn't exist, create one automatically
+        if (!memberUser) {
+          console.log('User not found, creating new user account for transferred member')
+          
+          try {
+            memberUser = await prisma.user.create({
+              data: {
+                uid: `usr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                email: removedParticipant.email.toLowerCase().trim(),
+                name: removedParticipant.name,
+                phone: removedParticipant.phone || null,
+                createdAt: new Date(),
+                // Generate a random password that they'll need to reset
+                passwordHash: await hashPassword(`temp-${Date.now()}`)
+              }
+            })
+            
+            console.log('New user created:', {
+              uid: memberUser.uid,
+              email: memberUser.email,
+              name: memberUser.name
+            })
+          } catch (createError) {
+            console.error('Failed to create user:', createError)
+            // If user creation fails, fall back to original booking user
+            memberUser = null
+          }
+        }
+      }
+      
+      const targetUserId = memberUser?.uid || booking.userId
+      
+      console.log('Found/Created user for new booking:', {
+        memberUser: memberUser ? memberUser.uid : 'not found',
+        willUseUserId: targetUserId,
+        isNewUser: memberUser && !memberUser.createdAt ? false : true
+      })
+      
+      // Remove their passengerBooking entry from original booking
+      if (memberUser) {
+        try {
+          await prisma.passengerBooking.deleteMany({
+            where: {
+              bookingId: booking.id,
+              userId: memberUser.uid
+            }
+          })
+          console.log('Removed passengerBooking entry from original booking for transferred member')
+        } catch (pbDeleteError) {
+          console.error('Failed to delete passengerBooking:', pbDeleteError)
+        }
+      }
+      
+      newMemberBooking = await prisma.booking.create({
+        data: {
+          id: newBookingId,
+          userId: targetUserId,
+          payload: {
+            bookingId: newBookingId,
+            tripId: targetTrip.id,
+            id: targetTrip.id,
+            title: targetPayload.title,
+            tripTitle: targetPayload.title,
+            location: targetPayload.location,
+            destination: targetPayload.location,
+            price: newPrice,
+            travelers: 1,
+            totalAmount: newPrice,
+            amountPaid: 0,
+            pendingAmount: newPrice,
+            paymentStatus: 'Pending Payment',
+            status: 'Confirmed',
+            customerName: removedParticipant.name,
+            customerEmail: removedParticipant.email,
+            customerPhone: removedParticipant.phone,
+            nextBatch: targetPayload.nextBatch,
+            departure: targetPayload.nextBatch,
+            departureDate: targetPayload.nextBatch,
+            duration: targetPayload.duration,
+            image: targetPayload.image,
+            bookingDate: new Date().toISOString(),
+            travellerDetails: [{
+              ...removedParticipant,
+              isBooker: true,
+              transferredFrom: oldPayload.title || oldPayload.tripTitle
+            }],
+            transferredFromBooking: booking.id,
+            transferredFromTrip: oldPayload.title || oldPayload.tripTitle
+          }
+        }
+      })
+      
+      // Create passenger booking entry if the member has their own user account
+      if (memberUser && memberUser.uid !== targetUserId) {
+        try {
+          await prisma.passengerBooking.create({
+            data: {
+              bookingId: newMemberBooking.id,
+              userId: memberUser.uid,
+              isPrimaryBooker: true
+            }
+          })
+          console.log('Created passengerBooking entry for transferred member')
+        } catch (pbError) {
+          console.error('Failed to create passengerBooking:', pbError)
+        }
+      }
+      
+      console.log('New member booking created successfully:', {
+        bookingId: newMemberBooking.id,
+        userId: newMemberBooking.userId,
+        tripTitle: targetPayload.title
+      })
+    }
+
+    // Send reschedule notification email to the user (only for full booking transfers)
     const user = booking.user
-    if (mailTransport && user?.email) {
+    if (!isGroupMemberTransfer && mailTransport && user?.email) {
       try {
         const safeName = escapeHtml(user.name || 'Traveller')
         const safeOldTrip = escapeHtml(transferRecord.fromTripTitle)
@@ -2370,14 +2574,20 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
 
     res.json({
       booking: toBooking(updated),
-      reschedule: {
+      newMemberBooking: newMemberBooking ? toBooking(newMemberBooking) : null,
+      isGroupMemberTransfer,
+      removedParticipant: removedParticipant ? {
+        name: removedParticipant.name,
+        email: removedParticipant.email
+      } : null,
+      reschedule: rescheduleRecord ? {
         id: rescheduleRecord.id,
         fromTrip: transferRecord.fromTripTitle,
         toTrip: transferRecord.toTripTitle,
         priceDifference,
         emailSent,
         processedAt: rescheduleRecord.processedAt
-      }
+      } : null
     })
   } catch (error) { next(error) }
 })

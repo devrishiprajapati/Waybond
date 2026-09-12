@@ -142,7 +142,7 @@ const Navbar = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="absolute top-1/2 left-1/2 w-[90%] max-w-[340px] liquid-glass shadow-2xl p-8 rounded-[3rem] flex flex-col max-h-[90vh] overflow-y-auto isolate"
             >
-              <div className="flex justify-between items-center mb-8 relative z-20 sticky top-0 bg-white rounded-2xl px-3 py-2">
+              <div className="flex justify-end items-center mb-8 relative z-20 sticky top-0 bg-white rounded-2xl px-3 py-2">
                 <button
                   onClick={() => {
                     haptics.light();
