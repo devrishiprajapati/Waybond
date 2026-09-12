@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -172,6 +172,18 @@ const TripDetails = () => {
   const activeDepartureDates = selectedJoinOrigin
     ? selectedJoinOption?.departureDates || []
     : trip?.departureDates || []
+  
+  // Filter out past dates - only show today and future dates
+  const futureDepartureDates = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // Reset to start of day
+    
+    return activeDepartureDates.filter(date => {
+      const dateObj = new Date(date)
+      return dateObj >= today
+    })
+  }, [activeDepartureDates])
+  
   const activeItinerary = selectedJoinOrigin
     ? selectedJoinItinerary || trip?.itinerary || []
     : trip?.departureItineraries?.[selectedDeparture] || trip?.itinerary || []
@@ -787,8 +799,8 @@ const TripDetails = () => {
                       <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
 
                       {(() => {
-                        const dates = activeDepartureDates
-                        if (!dates.length) return <p className="text-[7px] text-white/30">No dates available</p>
+                        const dates = futureDepartureDates
+                        if (!dates.length) return <p className="text-[7px] text-white/30">No upcoming dates available</p>
 
                         // Create month groups
                         const monthGroups: Record<string, string[]> = {}

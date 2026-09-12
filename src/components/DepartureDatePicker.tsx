@@ -12,7 +12,18 @@ const toDate = (date: string) => parseDateOnly(date)
 const monthKey = (date: string) => formatDateOnly(date, { month: 'short', year: 'numeric' })
 
 export default function DepartureDatePicker({ dates = [], value, onChange }: DepartureDatePickerProps) {
-  const validDates = useMemo(() => dates.filter(date => toDate(date)), [dates])
+  // Filter out past dates - only show today and future dates
+  const today = new Date()
+  today.setHours(0, 0, 0, 0) // Reset to start of day for accurate comparison
+  
+  const futureDates = useMemo(() => {
+    return dates.filter(date => {
+      const dateObj = toDate(date)
+      return dateObj && dateObj >= today
+    })
+  }, [dates])
+  
+  const validDates = useMemo(() => futureDates.filter(date => toDate(date)), [futureDates])
   const months = useMemo(() => Array.from(new Set(validDates.map(monthKey))), [validDates])
   const initialMonth = value && validDates.includes(value) ? monthKey(value) : months[0]
   const [activeMonth, setActiveMonth] = useState(initialMonth)

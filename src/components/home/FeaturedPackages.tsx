@@ -7,6 +7,7 @@ import { getTrips, optimizeImageUrl, createSlug } from '../../lib/dataService'
 import { haptics } from '../../lib/haptics'
 import { useWishlist } from '../../lib/wishlist'
 import { formatDateOnly } from '../../lib/date'
+import { filterFutureDates } from '../../lib/dateFilters'
 
 type Experience = 'monsoon' | 'weekend' | 'road' | 'snow'
 
@@ -96,7 +97,9 @@ export default function FeaturedPackages() {
               {/* Horizontal Scroll Container */}
               <div className="flex gap-4 md:gap-7 lg:gap-9 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-1">
                 {selectedTrips.map(trip => {
-                  const selectedDeparture = selectedDepartures[trip.id] || trip.departureDates?.[0]
+                  // Filter to only show future dates
+                  const futureDates = filterFutureDates(trip.departureDates || [])
+                  const selectedDeparture = selectedDepartures[trip.id] || futureDates[0]
                   const isWishlisted = isInList(trip.id)
 
                   return (
