@@ -57,7 +57,7 @@ export default function TrendingDestinations() {
               >
                 <Link
                   to="/discover"
-                  className="block relative h-[291px] sm:h-[333px] md:h-[364px] lg:h-[394px] xl:h-[424px] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]"
+                  className="block relative h-[291px] sm:h-[333px] md:h-[364px] lg:h-[394px] xl:h-[424px] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {/* Image Container */}
                   <div className="relative z-0 w-full h-full overflow-hidden bg-white">
