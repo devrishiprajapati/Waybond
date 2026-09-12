@@ -14,6 +14,8 @@ import { DEFAULT_CANCELLATION_POLICY, formatAgeLimit } from '../lib/trips'
 import { haptics } from '../lib/haptics'
 import { isLoggedIn } from '../lib/auth'
 import { addDaysToDateInput, formatDateOnly } from '../lib/date'
+import AttractionModal from '../components/AttractionModal'
+import { Attraction } from '../lib/trips'
 
 const TripDetails = () => {
   const { slug } = useParams()
@@ -38,6 +40,7 @@ const TripDetails = () => {
   const [termsOpen, setTermsOpen] = useState(false)
   const [cancellationPolicyOpen, setCancellationPolicyOpen] = useState(false)
   const [overviewExpanded, setOverviewExpanded] = useState(false)
+  const [selectedAttraction, setSelectedAttraction] = useState<Attraction | null>(null)
   const travelDateInputRef = React.useRef<HTMLInputElement>(null)
 
   const openTravelDatePicker = () => {
@@ -266,11 +269,11 @@ const TripDetails = () => {
   const overviewClampStyle = overviewExpanded
     ? undefined
     : {
-        display: '-webkit-box',
-        WebkitBoxOrient: 'vertical' as const,
-        WebkitLineClamp: 4,
-        overflow: 'hidden'
-      }
+      display: '-webkit-box',
+      WebkitBoxOrient: 'vertical' as const,
+      WebkitLineClamp: 4,
+      overflow: 'hidden'
+    }
   const shouldShowOverviewToggle = String(trip.description || '').length > 180
   const joinUsFromSection = joinUsFromOptions.length > 0 ? (
     <div className="rounded-[1.25rem] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
@@ -313,6 +316,7 @@ const TripDetails = () => {
 
   return (
     <>
+      <AttractionModal attraction={selectedAttraction} onClose={() => setSelectedAttraction(null)} />
       <div className="bg-white min-h-screen pt-28 pb-28 relative">
         <Helmet>
           <title>{trip.title} | WAYBOND</title>
@@ -647,6 +651,44 @@ const TripDetails = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                </div>
+              )}
+
+              {/* Attractions */}
+              {trip.attractions && trip.attractions.length > 0 && (
+                <div className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-7">
+                  <h2 className="text-xl md:text-3xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text mb-5 md:mb-6">Attractions</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
+                    {trip.attractions.map((attraction: Attraction, idx: number) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => { haptics.light(); setSelectedAttraction(attraction) }}
+                        className="group relative aspect-[3/4] overflow-hidden rounded-xl md:rounded-2xl border border-white/10 hover:border-secondary/60 hover:scale-[1.02] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                      >
+                        {attraction.image ? (
+                          <img
+                            src={attraction.image}
+                            alt={attraction.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                            <MapPin size={32} className="text-white/30" />
+                          </div>
+                        )}
+                        {/* Text at top */}
+                        <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent pb-8">
+                          <p className="text-white text-sm md:text-base font-black leading-snug">{attraction.name}</p>
+                          {attraction.location && (
+                            <p className="text-white text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] mt-0.5 flex items-center gap-1 opacity-80">
+                              <MapPin size={9} /> {attraction.location}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -1048,7 +1090,46 @@ const TripDetails = () => {
             </div>
           )}
 
+          {/* Attractions - Mobile Only */}
+          {trip.attractions && trip.attractions.length > 0 && (
+            <div className="liquid-glass-dark border border-white/10 rounded-2xl p-4">
+              <h2 className="text-xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text mb-4">Attractions</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {trip.attractions.map((attraction: Attraction, idx: number) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => { haptics.light(); setSelectedAttraction(attraction) }}
+                    className="group relative aspect-[3/4] overflow-hidden rounded-xl border border-white/10 hover:border-secondary/60 hover:scale-[1.02] transition-all duration-300 focus:outline-none"
+                  >
+                    {attraction.image ? (
+                      <img
+                        src={attraction.image}
+                        alt={attraction.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                        <MapPin size={28} className="text-white/30" />
+                      </div>
+                    )}
+                    {/* Text at top */}
+                    <div className="absolute top-0 left-0 right-0 p-2.5 bg-gradient-to-b from-black/60 to-transparent pb-7">
+                      <p className="text-white text-xs font-black leading-snug">{attraction.name}</p>
+                      {attraction.location && (
+                        <p className="text-white text-[8px] font-bold uppercase tracking-[0.12em] mt-0.5 flex items-center gap-1 opacity-80">
+                          <MapPin size={8} /> {attraction.location}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Captain Profiles - Mobile Only */}
+
           <div className="space-y-5">
             {expeditionLeads.map((lead: any, index: number) => (
               <div key={`${lead.name}-${index}`} className="p-5 md:p-12 liquid-glass-dark border border-white/10 rounded-3xl md:rounded-[3rem] text-white overflow-hidden relative group shadow-[0_12px_36px_rgba(0,0,0,0.18)] md:shadow-[0_15px_60px_rgba(0,0,0,0.4)]">
