@@ -8,6 +8,7 @@ import { getTrips, createSlug } from '../lib/dataService'
 import { haptics } from '../lib/haptics'
 import { useWishlist } from '../lib/wishlist'
 import { formatDateOnly, parseDateOnly } from '../lib/date'
+import { getDepartureOptions } from '../lib/dateFilters'
 
 const experienceFilters = [
   { key: 'monsoon', label: 'Monsoon ', icon: '⛰️' },
@@ -15,15 +16,6 @@ const experienceFilters = [
   { key: 'road', label: 'Road ', icon: '🚙' },
   { key: 'snow', label: 'Snow ', icon: '❄️' },
 ] as const
-
-const getDepartureOptions = (trip: any) => {
-  const dates = [
-    trip.nextBatch,
-    ...(Array.isArray(trip.departureDates) ? trip.departureDates : [])
-  ]
-
-  return Array.from(new Set(dates.map((date) => String(date || '').trim()).filter(Boolean)))
-}
 
 const getMonthKey = (date: string) => {
   const parsed = parseDateOnly(date)
