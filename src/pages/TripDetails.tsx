@@ -424,13 +424,8 @@ const TripDetails = () => {
               </>
             )}
 
-            {/* Image Counter & Dots */}
+            {/* Dots Indicator */}
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 z-20">
-              {/* Image Counter */}
-              <div className="liquid-glass px-5 py-2.5 rounded-full border border-white/20 text-white text-sm font-black tracking-wider shadow-xl">
-                {activeImage + 1} / {trip.images.length}
-              </div>
-
               {/* Dots Indicator */}
               {trip.images.length <= 10 && (
                 <div className="flex gap-2.5">
@@ -659,33 +654,26 @@ const TripDetails = () => {
               {trip.attractions && trip.attractions.length > 0 && (
                 <div className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-7">
                   <h2 className="text-xl md:text-3xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text mb-5 md:mb-6">Attractions</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                     {trip.attractions.map((attraction: Attraction, idx: number) => (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => { haptics.light(); setSelectedAttraction(attraction) }}
-                        className="group relative aspect-[3/4] overflow-hidden rounded-xl md:rounded-2xl border border-white/10 hover:border-secondary/60 hover:scale-[1.02] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                        className="group relative w-full aspect-[3/4] overflow-hidden rounded-xl md:rounded-2xl hover:scale-[1.02] transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
                       >
                         {attraction.image ? (
                           <img
                             src={attraction.image}
                             alt={attraction.name}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
                         ) : (
-                          <div className="w-full h-full bg-white/5 flex items-center justify-center">
-                            <MapPin size={32} className="text-white/30" />
-                          </div>
+                          <div className="w-full h-full" style={{ background: 'linear-gradient(135deg,#1a2a3a,#0d1b2a)' }} />
                         )}
-                        {/* Text at top */}
-                        <div className="absolute top-0 left-0 right-0 p-3 bg-gradient-to-b from-black/60 to-transparent pb-8">
-                          <p className="text-white text-sm md:text-base font-black leading-snug">{attraction.name}</p>
-                          {attraction.location && (
-                            <p className="text-white text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] mt-0.5 flex items-center gap-1 opacity-80">
-                              <MapPin size={9} /> {attraction.location}
-                            </p>
-                          )}
+                        {/* Name only at bottom */}
+                        <div className="absolute bottom-3 left-3 right-3 text-center">
+                          <p className="text-sm md:text-base font-black leading-snug" style={{ color: '#ffffff' }}>{attraction.name}</p>
                         </div>
                       </button>
                     ))}
@@ -1100,27 +1088,20 @@ const TripDetails = () => {
                     key={idx}
                     type="button"
                     onClick={() => { haptics.light(); setSelectedAttraction(attraction) }}
-                    className="group relative aspect-[3/4] overflow-hidden rounded-xl border border-white/10 hover:border-secondary/60 hover:scale-[1.02] transition-all duration-300 focus:outline-none"
+                    className="group relative w-full aspect-[3/4] overflow-hidden rounded-xl hover:scale-[1.02] transition-all duration-300 focus:outline-none"
                   >
                     {attraction.image ? (
                       <img
                         src={attraction.image}
                         alt={attraction.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full h-full bg-white/5 flex items-center justify-center">
-                        <MapPin size={28} className="text-white/30" />
-                      </div>
+                      <div className="w-full h-full" style={{ background: 'linear-gradient(135deg,#1a2a3a,#0d1b2a)' }} />
                     )}
-                    {/* Text at top */}
-                    <div className="absolute top-0 left-0 right-0 p-2.5 bg-gradient-to-b from-black/60 to-transparent pb-7">
-                      <p className="text-white text-xs font-black leading-snug">{attraction.name}</p>
-                      {attraction.location && (
-                        <p className="text-white text-[8px] font-bold uppercase tracking-[0.12em] mt-0.5 flex items-center gap-1 opacity-80">
-                          <MapPin size={8} /> {attraction.location}
-                        </p>
-                      )}
+                    {/* Name only at bottom */}
+                    <div className="absolute bottom-2 left-2 right-2 text-center">
+                      <p className="text-xs font-black leading-snug" style={{ color: '#ffffff' }}>{attraction.name}</p>
                     </div>
                   </button>
                 ))}
