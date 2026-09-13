@@ -62,7 +62,7 @@ const DataFilters = () => {
   const [trips, setTrips] = useState<Trip[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
-  const [activeTab, setActiveTab] = useState<'trips' | 'users' | 'bookings'>('trips')
+  const [activeTab, setActiveTab] = useState<'trips' | 'users' | 'bookings'>('bookings')
   const [loading, setLoading] = useState(true)
   const [currentAdminPermissions, setCurrentAdminPermissions] = useState<string[]>([])
   const navigate = useNavigate()
@@ -1963,30 +1963,8 @@ const DataFilters = () => {
             ))}
           </div>
 
-          {/* Tab Navigation */}
+          {/* Tab Navigation - Only Bookings */}
           <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
-            <button
-              onClick={() => setActiveTab('trips')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] transition-all whitespace-nowrap ${
-                activeTab === 'trips'
-                  ? 'bg-secondary text-white'
-                  : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
-              }`}
-            >
-              <Package size={16} />
-              Trips Data
-            </button>
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] transition-all whitespace-nowrap ${
-                activeTab === 'users'
-                  ? 'bg-secondary text-white'
-                  : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
-              }`}
-            >
-              <Users size={16} />
-              Users Data
-            </button>
             <button
               onClick={() => setActiveTab('bookings')}
               className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.16em] transition-all whitespace-nowrap ${
@@ -2003,13 +1981,9 @@ const DataFilters = () => {
           {/* Data Tables */}
           <div className="liquid-glass-dark border border-white/10 rounded-[2rem] p-6 overflow-hidden w-full">
             <ThemeProvider theme={lightTheme}>
-              {activeTab === 'trips' && <TripsTable />}
-              {activeTab === 'users' && <UsersTable />}
-              {activeTab === 'bookings' && (
-                <div className="max-h-[800px] overflow-y-auto">
-                  <BookingsView bookings={bookings} />
-                </div>
-              )}
+              <div className="max-h-[800px] overflow-y-auto">
+                <BookingsView bookings={bookings} onBookingUpdate={loadData} />
+              </div>
             </ThemeProvider>
           </div>
 

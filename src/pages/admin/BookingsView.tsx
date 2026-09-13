@@ -53,7 +53,6 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set())
   const [expandedParticipants, setExpandedParticipants] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
-  const [showCustomerState, setShowCustomerState] = useState(false)
   const [editingParticipant, setEditingParticipant] = useState<{ bookingId: string; index: number } | null>(null)
   const [editedData, setEditedData] = useState<TravellerDetail | null>(null)
   const [editingPayment, setEditingPayment] = useState<string | null>(null)
@@ -86,9 +85,7 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
 
   const groupedBookings: GroupedBookings = filteredBookings.reduce((acc, booking) => {
     const tripName = booking.tripName
-    const groupKey = showCustomerState 
-      ? (booking.travellerDetails?.[0]?.state || 'State not provided')
-      : (booking.joinOrigin || 'No pickup point specified')
+    const groupKey = booking.joinOrigin || 'No pickup point specified'
     const date = booking.departureDate || booking.bookingDate
     
     if (!acc[tripName]) acc[tripName] = {}
@@ -263,7 +260,7 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
 
   return (
     <div className="space-y-4">
-      {/* Search Bar and Toggle */}
+      {/* Search Bar */}
       <div className="space-y-3">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
@@ -274,34 +271,6 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
           />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="text-sm text-gray-600 font-semibold">Group by:</span>
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setShowCustomerState(false)}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
-                !showCustomerState ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <MapPin size={16} />
-                <span className="hidden sm:inline">Pickup Points</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setShowCustomerState(true)}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
-                showCustomerState ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Users size={16} />
-                <span className="hidden sm:inline">Customer State</span>
-              </div>
-            </button>
-          </div>
         </div>
       </div>
 
@@ -365,7 +334,7 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                             {isLocationExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
                           </button>
                           <div className="flex items-center gap-3 flex-1">
-                            <MapPin size={18} className={showCustomerState ? 'text-blue-600' : 'text-green-600'} />
+                            <MapPin size={18} className="text-green-600" />
                             <div>
                               <p className="text-sm font-bold text-gray-800">{joinLocation}</p>
                               <p className="text-xs text-gray-500 font-medium">{locationBookingCount} bookings</p>
@@ -493,20 +462,11 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                                                   <p className="text-sm text-gray-600 mb-2">{booking.customerEmail}</p>
                                                 )}
 
-                                                {showCustomerState ? (
-                                                  booking.joinOrigin && (
-                                                    <span className="inline-flex items-center gap-1.5 text-xs text-green-700 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 font-semibold">
-                                                      <MapPin size={12} />
-                                                      Pickup: {booking.joinOrigin}
-                                                    </span>
-                                                  )
-                                                ) : (
-                                                  booking.travellerDetails?.[0]?.state && (
-                                                    <span className="inline-flex items-center gap-1.5 text-xs text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 font-semibold">
-                                                      <MapPin size={12} />
-                                                      From: {booking.travellerDetails[0].state}
-                                                    </span>
-                                                  )
+                                                {booking.joinOrigin && (
+                                                  <span className="inline-flex items-center gap-1.5 text-xs text-green-700 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 font-semibold">
+                                                    <MapPin size={12} />
+                                                    Pickup: {booking.joinOrigin}
+                                                  </span>
                                                 )}
                                               </div>
 

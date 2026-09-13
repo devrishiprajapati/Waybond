@@ -2022,6 +2022,45 @@ app.post('/api/users/:id/bookings', async (req, res, next) => {
     }
 
     const booking = await prisma.booking.create({ data: { userId: req.params.id, payload: req.body } })
+
+    // Create PassengerBooking records for all travelers
+    try {
+      const travelerPhones = travellers
+        .map(t => t.phone?.trim())
+        .filter(phone => phone && phone.length > 0)
+
+      if (travelerPhones.length > 0) {
+        // Find users with matching phone numbers
+        const matchedUsers = await prisma.user.findMany({
+          where: {
+            phone: { in: travelerPhones }
+          }
+        })
+
+        // Create PassengerBooking records for matched users
+        const firstTravellerPhone = travellers[0]?.phone?.trim()
+        await Promise.all(
+          matchedUsers.map((user) => {
+            const traveller = travellers.find(t => t.phone?.trim() === user.phone)
+            if (!traveller) return Promise.resolve()
+            
+            const isPrimaryBooker = user.phone === firstTravellerPhone && user.id === req.params.id
+            return prisma.passengerBooking.create({
+              data: {
+                bookingId: booking.id,
+                userId: user.id,
+                passengerName: traveller.name,
+                isPrimaryBooker
+              }
+            })
+          })
+        )
+      }
+    } catch (pbError) {
+      console.error('Failed to create PassengerBooking records:', pbError)
+      // Don't fail the booking creation if PassengerBooking creation fails
+    }
+
     res.status(201).json(toBooking(booking))
   } catch (error) { next(error) }
 })
@@ -2365,16 +2404,29 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
         originalUserId: booking.userId
       })
       
-      // Find user by email - try multiple email fields
-      if (removedParticipant.email) {
+      // Find user by email or phone - try multiple fields
+      if (removedParticipant.email || removedParticipant.phone) {
+        const searchConditions = []
+        
+        // Try to find by email
+        if (removedParticipant.email) {
+          searchConditions.push(
+            { email: removedParticipant.email },
+            { email: removedParticipant.email.toLowerCase() },
+            { email: removedParticipant.email.trim() }
+          )
+        }
+        
+        // Try to find by phone
+        if (removedParticipant.phone) {
+          searchConditions.push(
+            { phone: removedParticipant.phone },
+            { phone: removedParticipant.phone.trim() }
+          )
+        }
+        
         memberUser = await prisma.user.findFirst({ 
-          where: { 
-            OR: [
-              { email: removedParticipant.email },
-              { email: removedParticipant.email.toLowerCase() },
-              { email: removedParticipant.email.trim() }
-            ]
-          } 
+          where: { OR: searchConditions } 
         })
         
         // If user doesn't exist, create one automatically

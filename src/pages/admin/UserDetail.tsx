@@ -144,10 +144,13 @@ export default function AdminUserDetail() {
                     <p className="text-lg font-sans font-black uppercase italic text-white">{bookingText(booking, 'title', bookingText(booking, 'tripTitle', 'WayBond Trip'))}</p>
                     <p className="text-sm text-white/50 mt-2">{bookingText(booking, 'location', bookingText(booking, 'destination', 'Location pending'))}</p>
                   </div>
-                  <button onClick={() => setTransferModalBooking(booking)} className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/15 border border-secondary/25 text-secondary text-[9px] font-black uppercase tracking-[0.16em] hover:bg-secondary/25 transition-colors">
-                    <ArrowRightLeft size={14} />
-                    Transfer Package
-                  </button>
+                  {/* Only show transfer button for primary bookers */}
+                  {booking.isPrimaryBooker && (
+                    <button onClick={() => setTransferModalBooking(booking)} className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary/15 border border-secondary/25 text-secondary text-[9px] font-black uppercase tracking-[0.16em] hover:bg-secondary/25 transition-colors">
+                      <ArrowRightLeft size={14} />
+                      Transfer Package
+                    </button>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-[0.14em] mt-4">
                   <span className="px-3 py-2 rounded-full bg-secondary/15 text-secondary">{bookingText(booking, 'status', 'Booked')}</span>
