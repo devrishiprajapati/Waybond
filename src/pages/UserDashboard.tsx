@@ -22,10 +22,9 @@ import { registerUser } from '../lib/adminStorage'
 import { getUser, logout } from '../lib/auth'
 import { useWishlist } from '../lib/wishlist'
 import { createSlug } from '../lib/dataService'
-import { formatDateOnly } from '../lib/date'
+import { formatDateShort } from '../lib/date'
 import { downloadInvoice } from '../lib/invoice'
 import { downloadTicket } from '../lib/tickets'
-import { getWhatsAppLink } from '../lib/data'
 import CancellationModal from '../components/CancellationModal'
 
 const UserDashboard = () => {
@@ -542,8 +541,8 @@ const UserDashboard = () => {
                         </span>
                       </div>
 
-                      <div className="p-7 md:p-8 space-y-6">
-                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                      <div className="p-6 md:p-7 space-y-5">
+                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
                           <div className="space-y-2">
                             <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.25em]">Booking ID {trip.bookingId}</p>
                             {trip.bookedBy && (Number(trip.travelers) > 1 || (Array.isArray(trip.travellers) && trip.travellers.length > 1)) && (
@@ -552,7 +551,7 @@ const UserDashboard = () => {
                               </p>
                             )}
                             <h3 className="text-2xl md:text-3xl font-bungee font-black uppercase italic tracking-tighter leading-none">{trip.title}</h3>
-                            <div className="flex flex-wrap items-center gap-4 text-white/50 text-[10px] font-black uppercase tracking-[0.16em]">
+                            <div className="flex flex-wrap items-center gap-3 text-white/50 text-[10px] font-black uppercase tracking-[0.16em]">
                               <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" />{trip.location}</span>
                               <span className="flex items-center gap-2"><Clock size={13} className="text-secondary" />{trip.duration}</span>
                             </div>
@@ -565,7 +564,7 @@ const UserDashboard = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {[
-                            { label: 'Trip Start', value: formatDateOnly(trip.nextBatch || 'TBD') },
+                            { label: 'Trip Start', value: formatDateShort(trip.nextBatch || 'TBD') },
                             { label: 'Travelers', value: `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}` },
                             { label: 'Booked On', value: trip.bookedOn }
                           ].map((item) => (
@@ -583,22 +582,6 @@ const UserDashboard = () => {
                             </span>
                           ))}
                         </div>
-
-                        {trip.status === 'Confirmed' && trip.ticketNotification?.message && Array.isArray(trip.travelTickets) && trip.travelTickets.length > 0 && (
-                          <div className="flex items-center gap-3 border border-secondary/25 bg-secondary/10 px-4 py-3 text-sm font-semibold text-secondary">
-                            <CheckCircle2 size={17} className="shrink-0" />
-                            <span>{trip.ticketNotification.message}</span>
-                          </div>
-                        )}
-
-                        {/* {trip.status === 'Confirmed' && trip.whatsappGroupLink && (
-                          <div className="flex items-center gap-3 border border-[#25D366]/25 bg-[#25D366]/10 px-4 py-3 rounded-xl">
-                            <MessageCircle size={17} className="shrink-0 text-[#25D366]" />
-                            <span className="text-sm font-semibold text-[#25D366]">
-                              WhatsApp Group available! Join to connect with fellow travelers.
-                            </span>
-                          </div>
-                        )} */}
 
                         <div className="flex flex-wrap gap-3">
                           {trip.status === 'Confirmed' && (
@@ -637,10 +620,7 @@ const UserDashboard = () => {
                               onClick={(event) => handleDownloadTicket(event, trip, ticket)}
                               className="group bg-secondary/15 text-secondary h-12 px-6 rounded-2xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.16em] border border-secondary/25 hover:bg-secondary hover:text-white transition-all hover:scale-105"
                             >
-                              {(Number(trip.travelers) > 1 || (Array.isArray(trip.travellers) && trip.travellers.length > 1)) && (
-                                <Users size={15} className="text-secondary group-hover:text-white transition-colors" />
-                              )}
-                              <Download size={15} /> Download Ticket{ticket.passengerName ? ` - ${ticket.passengerName}` : ''}
+                              <Download size={15} /> Download Ticket
                             </button>
                           ))}
                           <button
@@ -719,7 +699,7 @@ const UserDashboard = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {[
-                            { label: 'Trip Start', value: formatDateOnly(trip.nextBatch || 'TBD') },
+                            { label: 'Trip Start', value: formatDateShort(trip.nextBatch || 'TBD') },
                             { label: 'Travelers', value: `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}` },
                             { label: 'Cancelled On', value: trip.cancelledOn }
                           ].map((item) => (

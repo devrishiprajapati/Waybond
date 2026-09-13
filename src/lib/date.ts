@@ -17,6 +17,15 @@ export const formatDateOnly = (
   return parsed ? parsed.toLocaleDateString('en-IN', options) : value
 }
 
+export const formatDateShort = (value: string) => {
+  const parsed = parseDateOnly(value)
+  if (!parsed) return value
+  const day = parsed.getDate()
+  const month = parsed.getMonth() + 1
+  const year = String(parsed.getFullYear()).slice(-2)
+  return `${day}/${month}/${year}`
+}
+
 export const addDaysToDateInput = (value: string, dayOffset: number) => {
   const parsed = parseDateOnly(value)
   if (!parsed) return ''
