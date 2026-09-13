@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Mail, Search, UserRound, UsersRound } from 'lucide-react'
 import { getAllRegisteredUsers, registerUser, RegisteredUser } from '../../lib/adminStorage'
 import { getUser } from '../../lib/auth'
+import PermissionGuard from '../../components/PermissionGuard'
 
 const formatDate = (value: string) => new Date(value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
 
@@ -27,6 +28,7 @@ export default function AdminUsers() {
   }, [search, users])
 
   return (
+    <PermissionGuard requiredPermission="manage_users">
     <div className="min-h-screen bg-white text-white px-4 sm:px-6 md:px-10 lg:px-16 pt-24 md:pt-32 pb-28 lg:pb-20">
       <div className="max-w-[1500px] mx-auto">
         <div className="mb-10"><Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.22em] mb-5"><ArrowLeft size={15} /> Admin dashboard</Link><p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-3">Explorer directory</p><h1 className="text-4xl md:text-6xl font-sans font-black uppercase italic tracking-tighter liquid-text font-bungee">Registered <span className="text-primary font-bungee">Users</span></h1></div>
@@ -35,5 +37,6 @@ export default function AdminUsers() {
         {filteredUsers.length === 0 && <div className="py-12 text-center text-white/45"><UserRound className="mx-auto mb-4 text-white/20" size={40} /><p>No registered users yet.</p></div>}
       </div>
     </div>
+    </PermissionGuard>
   )
 }

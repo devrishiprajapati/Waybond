@@ -6,49 +6,64 @@ export type Permission = {
 
 export const ALL_PERMISSIONS: Permission[] = [
   {
-    key: 'data_filters_view',
-    label: 'Data Filters - View',
-    description: 'View all data in the Data Filters section (Trips, Users, Bookings tables)'
-  },
-  {
-    key: 'data_filters_edit',
-    label: 'Data Filters - Edit',
-    description: 'Edit and modify data in the Data Filters section tables'
-  },
-  {
-    key: 'trips_manage',
+    key: 'manage_trips',
     label: 'Trips Management',
-    description: 'Create, edit, and delete trip packages'
+    description: 'Access trip inventory dashboard, create, edit, and delete trip packages'
   },
   {
-    key: 'users_manage',
-    label: 'Users Management',
-    description: 'View and manage registered users'
+    key: 'view_analytics',
+    label: 'Analytics',
+    description: 'Access analytics dashboard with booking trends, revenue reports, and user growth metrics'
   },
   {
-    key: 'bookings_manage',
-    label: 'Bookings Management',
-    description: 'View and manage all bookings'
+    key: 'view_data_filters',
+    label: 'Data Filters',
+    description: 'View and manage booking data, edit bookings, update payments, and transfer packages'
   },
   {
-    key: 'analytics_view',
-    label: 'Analytics - View',
-    description: 'Access analytics and reports dashboard'
+    key: 'manage_hero',
+    label: 'Trending Adventures',
+    description: 'Manage homepage hero section and trending adventure carousel'
   },
   {
-    key: 'content_manage',
-    label: 'Content Management',
-    description: 'Manage homepage, gallery, testimonials, and stories'
+    key: 'manage_travel_stories',
+    label: 'Travel Stories',
+    description: 'Create, edit, and manage travel stories and blog posts'
   },
   {
-    key: 'team_manage',
-    label: 'Team Management',
-    description: 'Manage team members and their information'
+    key: 'manage_testimonials',
+    label: 'Testimonials',
+    description: 'Manage customer testimonials and reviews'
   },
   {
-    key: 'payment_manage',
-    label: 'Payment Management',
-    description: 'View and update payment statuses'
+    key: 'manage_team_members',
+    label: 'Team Members',
+    description: 'Add, edit, and remove team members displayed on the website'
+  },
+  {
+    key: 'manage_users',
+    label: 'Users',
+    description: 'View user profiles, manage user details, and view booking history'
+  },
+  {
+    key: 'view_bookings',
+    label: 'Bookings & Payments',
+    description: 'Manage payments, upload tickets, and process cancellations'
+  },
+  {
+    key: 'manage_enquiries',
+    label: 'Enquiries',
+    description: 'View and manage customer enquiries and trip interest requests'
+  },
+  {
+    key: 'manage_promo_codes',
+    label: 'Promo Codes',
+    description: 'Create and manage promotional discount codes'
+  },
+  {
+    key: 'manage_gallery',
+    label: 'Gallery',
+    description: 'Upload and manage travel photos in the website gallery'
   }
 ]
 

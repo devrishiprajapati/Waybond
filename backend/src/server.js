@@ -180,15 +180,17 @@ const sendTicketAvailableEmail = async ({ booking, ticket }) => {
 
 const ADMIN_PERMISSIONS = [
   'manage_trips',
+  'view_analytics',
+  'view_data_filters',
   'manage_hero',
+  'manage_travel_stories',
   'manage_testimonials',
   'manage_team_members',
   'manage_users',
-  'manage_gallery',
-  'manage_travel_stories',
   'view_bookings',
-  'view_data_filters',
-  'view_analytics'
+  'manage_enquiries',
+  'manage_promo_codes',
+  'manage_gallery'
 ]
 
 const MASTER_ADMIN_PERMISSIONS = [

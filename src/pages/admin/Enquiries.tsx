@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Calendar, LoaderCircle, Mail, MessageSquare, Phone, Search, Trash2, User, Users } from 'lucide-react'
+import PermissionGuard from '../../components/PermissionGuard'
 
 type Enquiry = {
   id: string
@@ -149,6 +150,7 @@ export default function Enquiries() {
   }
 
   return (
+    <PermissionGuard requiredPermission="manage_enquiries">
     <div className="min-h-screen bg-white px-4 pb-28 pt-24 text-slate-900 sm:px-6 lg:px-12 lg:pb-12">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
@@ -424,5 +426,6 @@ export default function Enquiries() {
         </div>
       )}
     </div>
+    </PermissionGuard>
   )
 }
