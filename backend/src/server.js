@@ -2523,8 +2523,9 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
         }
       })
       
-      // Create passenger booking entry if the member has their own user account
-      if (memberUser && memberUser.uid !== targetUserId) {
+      // Create passenger booking entry for the transferred member
+      // This ensures they can see their booking when they log in
+      if (memberUser) {
         try {
           await prisma.passengerBooking.create({
             data: {
@@ -2533,7 +2534,10 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
               isPrimaryBooker: true
             }
           })
-          console.log('Created passengerBooking entry for transferred member')
+          console.log('Created passengerBooking entry for transferred member:', {
+            bookingId: newMemberBooking.id,
+            userId: memberUser.uid
+          })
         } catch (pbError) {
           console.error('Failed to create passengerBooking:', pbError)
         }
