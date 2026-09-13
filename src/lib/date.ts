@@ -22,7 +22,7 @@ export const formatDateShort = (value: string) => {
   if (!parsed) return value
   const day = parsed.getDate()
   const month = parsed.getMonth() + 1
-  const year = String(parsed.getFullYear()).slice(-2)
+  const year = parsed.getFullYear()
   return `${day}/${month}/${year}`
 }
 

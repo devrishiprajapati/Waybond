@@ -31,6 +31,7 @@ const UserDashboard = () => {
   const [user, setUser] = useState<any>(null)
   const [bookedTrips, setBookedTrips] = useState<any[]>([])
   const [cancelledTrips, setCancelledTrips] = useState<any[]>([])
+  const [showAllTrips, setShowAllTrips] = useState(false)
   const [cancellationModalOpen, setCancellationModalOpen] = useState(false)
   const [selectedBookingForCancellation, setSelectedBookingForCancellation] = useState<any>(null)
   const [testimonials, setTestimonials] = useState<any[]>([])
@@ -509,16 +510,18 @@ const UserDashboard = () => {
                 <h2 className="text-xl font-bungee font-black uppercase italic tracking-tight flex items-center">
                   <Calendar className="mr-3 text-secondary" /> All Your Trips
                 </h2>
-                <Link
-                  to={`/dashboard/${userId}/all-trips`}
-                  className="text-secondary font-black uppercase tracking-[0.25em] text-[10px] border-b border-secondary/40 pb-1"
-                >
-                  View All
-                </Link>
+                {bookedTrips.length > 3 && (
+                  <button
+                    onClick={() => setShowAllTrips(!showAllTrips)}
+                    className="text-secondary font-black uppercase tracking-[0.25em] text-[10px] border-b border-secondary/40 pb-1 hover:border-secondary transition-colors"
+                  >
+                    {showAllTrips ? 'Show Less' : 'View All'}
+                  </button>
+                )}
               </div>
 
               <div className="space-y-5">
-                {bookedTrips.map((trip, index) => (
+                {(showAllTrips ? bookedTrips : bookedTrips.slice(0, 3)).map((trip, index) => (
                   <motion.article
                     key={trip.bookingId || trip.id}
                     initial={{ opacity: 0, y: 18 }}
