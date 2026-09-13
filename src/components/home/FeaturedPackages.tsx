@@ -71,7 +71,7 @@ export default function FeaturedPackages() {
               key={filter.key}
               type="button"
               onClick={() => handleExperienceChange(filter.key)}
-              className={`min-w-0 w-full px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-full text-[10px] sm:text-xs md:text-sm font-black transition-all duration-300 overflow-hidden ${experience === filter.key ? 'bg-secondary text-white shadow-xl shadow-secondary/20' : 'bg-white/5 text-white hover:bg-white/10'}`}
+              className={`min-w-0 w-full px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-full text-[10px] sm:text-xs md:text-sm font-black transition-all duration-300 overflow-hidden ${experience === filter.key ? 'bg-secondary text-white' : 'bg-white/5 text-white hover:bg-white/10'}`}
               style={experience === filter.key
                 ? { border: '2px solid var(--secondary)' }
                 : { border: '2px solid rgba(0, 0, 0, 0.8)' }
@@ -127,7 +127,7 @@ export default function FeaturedPackages() {
                       </button>
 
                       {/* Experience Badge - Top Left */}
-                      <span className="absolute top-3 left-3 md:top-4 md:left-4 z-10 bg-secondary text-white rounded-full px-3 py-1.5 md:px-4 md:py-2 text-[8px] md:text-[9px] font-black uppercase tracking-[0.18em] shadow-lg">
+                      <span className="absolute top-3 left-3 md:top-4 md:left-4 z-10 bg-secondary text-white rounded-full px-3 py-1.5 md:px-4 md:py-2 text-[8px] md:text-[9px] font-black uppercase tracking-[0.18em]">
                         {trip.experience}
                       </span>
 
@@ -267,7 +267,7 @@ export default function FeaturedPackages() {
                                             }))
                                           }}
                                           className={`w-6 h-6 md:w-7 md:h-7 rounded-full font-black text-[10px] md:text-xs flex items-center justify-center transition-all ${isSelected
-                                            ? 'bg-secondary text-white shadow-lg shadow-secondary/40'
+                                            ? 'bg-secondary text-white'
                                             : 'bg-white/10 text-white border border-white/30 hover:border-secondary'
                                             }`}
                                           title={date}

@@ -1544,169 +1544,212 @@ const DataFilters = () => {
                 return (
                   <div 
                     key={index} 
-                    className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm hover:shadow-md transition-shadow"
+                    className={`relative bg-gradient-to-br from-white to-gray-50 rounded-2xl p-5 border-2 transition-all duration-300 ${
+                      isEditing 
+                        ? 'border-secondary shadow-lg shadow-secondary/20 ring-2 ring-secondary/20' 
+                        : 'border-gray-200 hover:border-secondary/50 hover:shadow-md'
+                    }`}
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-secondary/20 text-secondary flex items-center justify-center font-black text-sm">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary to-secondary/70 text-white flex items-center justify-center font-black text-base shadow-md">
                           {index + 1}
                         </div>
-                        <h4 className="font-black text-gray-800 text-sm uppercase">
-                          Traveller {index + 1}
-                        </h4>
+                        <div>
+                          <h4 className="font-black text-gray-900 text-base">
+                            {isEditing ? 'Editing Participant' : traveller.name || `Participant ${index + 1}`}
+                          </h4>
+                          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">
+                            {isEditing ? 'Update Details' : 'Traveller Information'}
+                          </p>
+                        </div>
                       </div>
                       {canEdit && !isEditing && (
                         <button
                           onClick={() => handleEditTraveller(booking.bookingId, index, traveller)}
-                          className="p-1.5 rounded-lg bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-all"
-                          title="Edit traveller"
+                          className="p-2 rounded-xl bg-secondary/10 text-secondary hover:bg-secondary hover:text-white transition-all shadow-sm hover:shadow-md hover:scale-105"
+                          title="Edit participant"
                         >
-                          <Edit2 size={14} />
+                          <Edit2 size={16} />
                         </button>
                       )}
                     </div>
                     
                     {isEditing ? (
-                      <div className="space-y-3 text-sm">
+                      <div className="space-y-4">
+                        {/* Name Field */}
                         <div>
-                          <label className="text-gray-500 font-semibold text-xs block mb-1">Name</label>
+                          <label className="text-gray-700 font-bold text-xs uppercase tracking-wide block mb-1.5">
+                            Full Name <span className="text-red-500">*</span>
+                          </label>
                           <input
                             type="text"
                             value={editedTravellerData.name || ''}
                             onChange={(e) => setEditedTravellerData({ ...editedTravellerData, name: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            placeholder="Enter full name"
+                            className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all outline-none"
                           />
                         </div>
-                        <div>
-                          <label className="text-gray-500 font-semibold text-xs block mb-1">Gender</label>
-                          <select
-                            value={editedTravellerData.gender || ''}
-                            onChange={(e) => setEditedTravellerData({ ...editedTravellerData, gender: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                          >
-                            <option value="">Select</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                          </select>
+
+                        {/* Gender & Age Row */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-gray-700 font-bold text-xs uppercase tracking-wide block mb-1.5">
+                              Gender
+                            </label>
+                            <select
+                              value={editedTravellerData.gender || ''}
+                              onChange={(e) => setEditedTravellerData({ ...editedTravellerData, gender: e.target.value })}
+                              className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all outline-none bg-white"
+                            >
+                              <option value="">Select</option>
+                              <option value="Male">Male</option>
+                              <option value="Female">Female</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-gray-700 font-bold text-xs uppercase tracking-wide block mb-1.5">
+                              Date of Birth
+                            </label>
+                            <input
+                              type="date"
+                              value={editedTravellerData.dateOfBirth || editedTravellerData.dob || ''}
+                              onChange={(e) => setEditedTravellerData({ ...editedTravellerData, dateOfBirth: e.target.value, dob: e.target.value })}
+                              className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all outline-none"
+                            />
+                          </div>
                         </div>
+
+                        {/* Phone Field */}
                         <div>
-                          <label className="text-gray-500 font-semibold text-xs block mb-1">Date of Birth</label>
-                          <input
-                            type="date"
-                            value={editedTravellerData.dateOfBirth || editedTravellerData.dob || ''}
-                            onChange={(e) => setEditedTravellerData({ ...editedTravellerData, dateOfBirth: e.target.value, dob: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-gray-500 font-semibold text-xs block mb-1">Phone</label>
+                          <label className="text-gray-700 font-bold text-xs uppercase tracking-wide block mb-1.5">
+                            Phone Number
+                          </label>
                           <input
                             type="tel"
                             value={editedTravellerData.phone || ''}
                             onChange={(e) => setEditedTravellerData({ ...editedTravellerData, phone: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            placeholder="10-digit mobile number"
+                            className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all outline-none"
                           />
                         </div>
+
+                        {/* Email Field */}
                         <div>
-                          <label className="text-gray-500 font-semibold text-xs block mb-1">Emergency Contact</label>
-                          <input
-                            type="tel"
-                            value={editedTravellerData.emergencyContact || ''}
-                            onChange={(e) => setEditedTravellerData({ ...editedTravellerData, emergencyContact: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-gray-500 font-semibold text-xs block mb-1">Email</label>
+                          <label className="text-gray-700 font-bold text-xs uppercase tracking-wide block mb-1.5">
+                            Email Address
+                          </label>
                           <input
                             type="email"
                             value={editedTravellerData.email || ''}
                             onChange={(e) => setEditedTravellerData({ ...editedTravellerData, email: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            placeholder="email@example.com"
+                            className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all outline-none"
                           />
                         </div>
+
+                        {/* City & State Row */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-gray-700 font-bold text-xs uppercase tracking-wide block mb-1.5">
+                              City
+                            </label>
+                            <input
+                              type="text"
+                              value={editedTravellerData.city || ''}
+                              onChange={(e) => setEditedTravellerData({ ...editedTravellerData, city: e.target.value })}
+                              placeholder="City"
+                              className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all outline-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-gray-700 font-bold text-xs uppercase tracking-wide block mb-1.5">
+                              State
+                            </label>
+                            <input
+                              type="text"
+                              value={editedTravellerData.state || ''}
+                              onChange={(e) => setEditedTravellerData({ ...editedTravellerData, state: e.target.value })}
+                              placeholder="State"
+                              className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Emergency Contact Field */}
                         <div>
-                          <label className="text-gray-500 font-semibold text-xs block mb-1">City</label>
+                          <label className="text-gray-700 font-bold text-xs uppercase tracking-wide block mb-1.5">
+                            Emergency Contact
+                          </label>
                           <input
-                            type="text"
-                            value={editedTravellerData.city || ''}
-                            onChange={(e) => setEditedTravellerData({ ...editedTravellerData, city: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                            type="tel"
+                            value={editedTravellerData.emergencyContact || ''}
+                            onChange={(e) => setEditedTravellerData({ ...editedTravellerData, emergencyContact: e.target.value })}
+                            placeholder="Emergency contact number"
+                            className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl text-sm font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 transition-all outline-none"
                           />
                         </div>
-                        <div>
-                          <label className="text-gray-500 font-semibold text-xs block mb-1">State</label>
-                          <input
-                            type="text"
-                            value={editedTravellerData.state || ''}
-                            onChange={(e) => setEditedTravellerData({ ...editedTravellerData, state: e.target.value })}
-                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-                          />
-                        </div>
-                        <div className="flex gap-2 pt-2">
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 pt-3 border-t border-gray-200">
                           <button
                             onClick={() => handleSaveTraveller(booking, index)}
-                            className="flex-1 px-3 py-2 bg-secondary text-white rounded-lg text-xs font-bold hover:bg-secondary/90 transition-all"
+                            className="flex-1 px-4 py-3 bg-gradient-to-r from-secondary to-secondary/90 text-white rounded-xl text-sm font-black uppercase tracking-wide hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"
                           >
-                            Save
+                            Save Changes
                           </button>
                           <button
                             onClick={handleCancelEdit}
-                            className="flex-1 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-400 transition-all"
+                            className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-xl text-sm font-black uppercase tracking-wide hover:bg-gray-300 hover:scale-[1.02] active:scale-[0.98] transition-all"
                           >
                             Cancel
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-3">
                         {traveller.name && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500 font-semibold">Name:</span>
-                            <span className="text-gray-800 font-bold">{traveller.name}</span>
+                          <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                            <span className="text-gray-600 font-bold text-xs uppercase tracking-wide">Name</span>
+                            <span className="text-gray-900 font-black text-sm">{traveller.name}</span>
                           </div>
                         )}
                         {traveller.gender && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500 font-semibold">Gender:</span>
-                            <span className="text-gray-800 font-bold">{traveller.gender}</span>
+                          <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                            <span className="text-gray-600 font-bold text-xs uppercase tracking-wide">Gender</span>
+                            <span className="text-gray-900 font-black text-sm">{traveller.gender}</span>
                           </div>
                         )}
                         {(traveller.dob || traveller.dateOfBirth) && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500 font-semibold">DOB:</span>
-                            <span className="text-gray-800 font-bold">{traveller.dob || traveller.dateOfBirth}</span>
+                          <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                            <span className="text-gray-600 font-bold text-xs uppercase tracking-wide">DOB</span>
+                            <span className="text-gray-900 font-black text-sm">{traveller.dob || traveller.dateOfBirth}</span>
                           </div>
                         )}
                         {traveller.phone && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500 font-semibold">Phone:</span>
-                            <span className="text-gray-800 font-bold">{traveller.phone}</span>
-                          </div>
-                        )}
-                        {traveller.emergencyContact && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500 font-semibold">Emergency:</span>
-                            <span className="text-gray-800 font-bold">{traveller.emergencyContact}</span>
+                          <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                            <span className="text-gray-600 font-bold text-xs uppercase tracking-wide">Phone</span>
+                            <span className="text-gray-900 font-black text-sm">{traveller.phone}</span>
                           </div>
                         )}
                         {traveller.email && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500 font-semibold">Email:</span>
-                            <span className="text-gray-800 font-bold text-xs">{traveller.email}</span>
+                          <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                            <span className="text-gray-600 font-bold text-xs uppercase tracking-wide">Email</span>
+                            <span className="text-gray-900 font-black text-xs break-all">{traveller.email}</span>
                           </div>
                         )}
-                        {traveller.city && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500 font-semibold">City:</span>
-                            <span className="text-gray-800 font-bold">{traveller.city}</span>
+                        {traveller.city && traveller.state && (
+                          <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
+                            <span className="text-gray-600 font-bold text-xs uppercase tracking-wide">Location</span>
+                            <span className="text-gray-900 font-black text-sm">{traveller.city}, {traveller.state}</span>
                           </div>
                         )}
-                        {traveller.state && (
-                          <div className="flex justify-between">
-                            <span className="text-gray-500 font-semibold">State:</span>
-                            <span className="text-gray-800 font-bold">{traveller.state}</span>
+                        {traveller.emergencyContact && (
+                          <div className="flex items-center justify-between py-2 px-3 bg-red-50 rounded-lg border border-red-200">
+                            <span className="text-red-600 font-bold text-xs uppercase tracking-wide">Emergency</span>
+                            <span className="text-red-900 font-black text-sm">{traveller.emergencyContact}</span>
                           </div>
                         )}
                       </div>

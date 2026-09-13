@@ -353,17 +353,11 @@ const TripDetails = () => {
               </div>
             </div>
             <div className="flex flex-wrap gap-2.5 sm:gap-3">
-              <button
-                onClick={() => haptics.light()}
-                className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 shadow-xl transition-colors hover:bg-white/10 sm:h-auto sm:w-auto sm:rounded-2xl sm:p-4"
-              >
-                <Instagram size={20} className="text-white/80" />
-              </button>
               <a
                 href='/faqs'
                 target="_blank" rel="noopener noreferrer"
                 onClick={() => haptics.medium()}
-                className="liquid-glass-dark flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 shadow-xl transition-colors hover:border-secondary hover:bg-secondary sm:h-auto sm:w-auto sm:rounded-2xl sm:p-4 group"
+                className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/10 border border-secondary/20 shadow-md transition-colors hover:bg-secondary hover:border-secondary sm:h-12 sm:w-12 sm:rounded-2xl group"
               >
                 <MessageCircle size={20} className="text-secondary group-hover:text-white transition-colors" />
               </a>
@@ -464,10 +458,22 @@ const TripDetails = () => {
         {/* Mobile Header - Styled like second image - After Image */}
         <div className="md:hidden max-w-[1920px] mx-auto px-4 mb-8">
           <div className="bg-white rounded-2xl p-5 shadow-lg">
-            <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight leading-tight mb-3">{trip.title}</h1>
-            <div className="flex items-center text-gray-600 text-sm font-semibold">
-              <MapPin size={16} className="mr-2 text-secondary shrink-0" />
-              <span className="uppercase tracking-wide">{trip.location}</span>
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight leading-tight mb-3">{trip.title}</h1>
+                <div className="flex items-center text-gray-600 text-sm font-semibold">
+                  <MapPin size={16} className="mr-2 text-secondary shrink-0" />
+                  <span className="uppercase tracking-wide">{trip.location}</span>
+                </div>
+              </div>
+              <a
+                href='/faqs'
+                target="_blank" rel="noopener noreferrer"
+                onClick={() => haptics.medium()}
+                className="shrink-0 flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/10 border border-secondary/20 shadow-md transition-colors hover:bg-secondary hover:border-secondary group"
+              >
+                <MessageCircle size={20} className="text-secondary group-hover:text-white transition-colors" />
+              </a>
             </div>
           </div>
         </div>

@@ -102,22 +102,22 @@ const Footer = () => {
           </h4>
           <ul className="space-y-4 text-slate-300 text-xs font-bold uppercase tracking-widest">
             <li>
-              <a
-                href="/discover"
+              <Link
+                to="/discover"
                 className="hover:text-secondary transition-colors flex items-center gap-2 group"
               >
                 <span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>
                 Trips & Tours
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="/wishlist"
+              <Link
+                to="/wishlist"
                 className="hover:text-secondary transition-colors flex items-center gap-2 group"
               >
                 <span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>
                 Dream Vault
-              </a>
+              </Link>
             </li>
             <li>
               <Link
@@ -132,6 +132,7 @@ const Footer = () => {
               <a
                 href={getWhatsAppLink(`Hi WayBond! I'd like to get in touch regarding my trip. Can you help me?`)}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="hover:text-secondary transition-colors flex items-center gap-2 group"
               >
                 <span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>
@@ -151,6 +152,7 @@ const Footer = () => {
                   "Hi WayBond! I need some help with my trip. Could you assist me?",
                 )}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="hover:text-secondary transition-colors flex items-center gap-2 group"
               >
                 <span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>
@@ -158,31 +160,31 @@ const Footer = () => {
               </a>
             </li>
             <li>
-              <a
-                href="/safety-guidelines"
+              <Link
+                to="/safety-guidelines"
                 className="hover:text-secondary transition-colors flex items-center gap-2 group"
               >
                 <span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>
                 SAFETY GUIDELINES
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="/cancellation-refunds"
+              <Link
+                to="/cancellation-refunds"
                 className="hover:text-secondary transition-colors flex items-center gap-2 group"
               >
                 <span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>
                 CANCELLATION & REFUNDS
-              </a>
+              </Link>
             </li>
             <li>
-              <a
-                href="/faqs"
+              <Link
+                to="/faqs"
                 className="hover:text-secondary transition-colors flex items-center gap-2 group"
               >
                 <span className="w-0 h-px bg-secondary group-hover:w-4 transition-all duration-300"></span>
                 TRAVELER FAQS
-              </a>
+              </Link>
             </li>
           </ul>
         </div>

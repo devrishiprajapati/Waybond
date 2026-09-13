@@ -565,7 +565,7 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                                                 </button>
                                                 
                                                 {expandedParticipants.has(booking.bookingId) && (
-                                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                                     {booking.travellerDetails.map((traveller, idx) => {
                                                       const isEditing = editingParticipant?.bookingId === booking.bookingId && editingParticipant?.index === idx
                                                       const initials = traveller.bookedBy || bookedByInitials
@@ -573,152 +573,200 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                                                       return (
                                                         <div
                                                           key={idx}
-                                                          className={`relative border-2 rounded-xl p-4 transition-all ${
+                                                          className={`relative bg-gradient-to-br from-white to-gray-50 rounded-2xl p-5 border-2 transition-all duration-300 ${
                                                             isEditing 
-                                                              ? 'bg-amber-50 border-amber-300 shadow-lg' 
-                                                              : 'bg-blue-50 border-blue-200 hover:bg-blue-100 hover:shadow-md'
+                                                              ? 'border-secondary shadow-xl shadow-secondary/30 ring-4 ring-secondary/20 scale-[1.02]' 
+                                                              : 'border-gray-200 hover:border-secondary/50 hover:shadow-lg'
                                                           }`}
                                                         >
                                                           {/* Booked By Badge */}
-                                                          <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-lg border-2 border-white">
+                                                          <div className="absolute -top-3 -right-3 w-11 h-11 rounded-full bg-gradient-to-br from-secondary to-secondary/70 text-white flex items-center justify-center font-black text-sm shadow-lg border-4 border-white">
                                                             {initials}
                                                           </div>
 
-                                                          <div className="flex items-start justify-between mb-3">
-                                                            {isEditing ? (
-                                                              <input
-                                                                type="text"
-                                                                value={editedData?.name || ''}
-                                                                onChange={(e) => updateEditedField('name', e.target.value)}
-                                                                className="text-sm font-bold text-blue-900 flex-1 px-2 py-1.5 border-2 border-gray-300 rounded-lg"
-                                                                placeholder="Name"
-                                                              />
-                                                            ) : (
-                                                              <p className="text-sm font-bold text-blue-900 flex-1 pr-2">
-                                                                {traveller.name || `Traveller ${idx + 1}`}
+                                                          {/* Participant Number Badge */}
+                                                          <div className="absolute -top-3 -left-3 w-9 h-9 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 text-white flex items-center justify-center font-black text-sm shadow-lg border-4 border-white">
+                                                            {idx + 1}
+                                                          </div>
+
+                                                          {/* Header */}
+                                                          <div className="mb-4 pb-3 border-b border-gray-200">
+                                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                              {isEditing ? (
+                                                                <input
+                                                                  type="text"
+                                                                  value={editedData?.name || ''}
+                                                                  onChange={(e) => updateEditedField('name', e.target.value)}
+                                                                  className="flex-1 px-3 py-2 border-2 border-gray-300 rounded-xl text-sm font-bold text-gray-900 focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none"
+                                                                  placeholder="Enter full name"
+                                                                />
+                                                              ) : (
+                                                                <p className="text-base font-black text-gray-900 flex-1 pr-2">
+                                                                  {traveller.name || `Participant ${idx + 1}`}
+                                                                </p>
+                                                              )}
+                                                              
+                                                              {isEditing ? (
+                                                                <div className="flex gap-1.5">
+                                                                  <button
+                                                                    onClick={() => handleSaveParticipant(booking, idx)}
+                                                                    disabled={saving}
+                                                                    className="p-2 text-white bg-green-600 hover:bg-green-700 rounded-xl transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
+                                                                    title="Save changes"
+                                                                  >
+                                                                    <Save size={16} />
+                                                                  </button>
+                                                                  <button
+                                                                    onClick={() => {setEditingParticipant(null); setEditedData(null)}}
+                                                                    disabled={saving}
+                                                                    className="p-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-xl transition-all disabled:opacity-50"
+                                                                    title="Cancel"
+                                                                  >
+                                                                    <X size={16} />
+                                                                  </button>
+                                                                </div>
+                                                              ) : (
+                                                                <button
+                                                                  onClick={() => handleEditParticipant(booking.bookingId, idx, traveller)}
+                                                                  className="p-2 text-secondary bg-secondary/10 hover:bg-secondary hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md"
+                                                                  title="Edit participant"
+                                                                >
+                                                                  <Edit2 size={16} />
+                                                                </button>
+                                                              )}
+                                                            </div>
+                                                            {isEditing && (
+                                                              <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">
+                                                                Editing Participant Details
                                                               </p>
-                                                            )}
-                                                            
-                                                            {isEditing ? (
-                                                              <div className="flex gap-1">
-                                                                <button
-                                                                  onClick={() => handleSaveParticipant(booking, idx)}
-                                                                  disabled={saving}
-                                                                  className="p-1 text-green-600 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50"
-                                                                >
-                                                                  <Save size={16} />
-                                                                </button>
-                                                                <button
-                                                                  onClick={() => {setEditingParticipant(null); setEditedData(null)}}
-                                                                  disabled={saving}
-                                                                  className="p-1 text-red-600 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
-                                                                >
-                                                                  <X size={16} />
-                                                                </button>
-                                                              </div>
-                                                            ) : (
-                                                              <button
-                                                                onClick={() => handleEditParticipant(booking.bookingId, idx, traveller)}
-                                                                className="p-1 text-gray-500 hover:bg-blue-200 rounded-lg transition-colors"
-                                                              >
-                                                                <Edit2 size={14} />
-                                                              </button>
                                                             )}
                                                           </div>
                                                           
-                                                          <div className="space-y-2 text-xs text-gray-700">
+                                                          {/* Content */}
+                                                          <div className="space-y-3">
                                                             {isEditing ? (
                                                               <>
-                                                                <div className="flex gap-2">
-                                                                  <select
-                                                                    value={editedData?.gender || ''}
-                                                                    onChange={(e) => updateEditedField('gender', e.target.value)}
-                                                                    className="flex-1 px-2 py-1.5 border-2 border-gray-300 rounded-lg text-xs"
-                                                                  >
-                                                                    <option value="">Gender</option>
-                                                                    <option value="Male">Male</option>
-                                                                    <option value="Female">Female</option>
-                                                                    <option value="Other">Other</option>
-                                                                  </select>
+                                                                {/* Gender & Age */}
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                  <div>
+                                                                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Gender</label>
+                                                                    <select
+                                                                      value={editedData?.gender || ''}
+                                                                      onChange={(e) => updateEditedField('gender', e.target.value)}
+                                                                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl text-xs font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none bg-white"
+                                                                    >
+                                                                      <option value="">Select</option>
+                                                                      <option value="Male">Male</option>
+                                                                      <option value="Female">Female</option>
+                                                                      <option value="Other">Other</option>
+                                                                    </select>
+                                                                  </div>
+                                                                  <div>
+                                                                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Age</label>
+                                                                    <input
+                                                                      type="text"
+                                                                      value={editedData?.age || ''}
+                                                                      onChange={(e) => updateEditedField('age', e.target.value)}
+                                                                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl text-xs font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none"
+                                                                      placeholder="Age"
+                                                                    />
+                                                                  </div>
+                                                                </div>
+
+                                                                {/* Phone */}
+                                                                <div>
+                                                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Phone</label>
                                                                   <input
-                                                                    type="text"
-                                                                    value={editedData?.age || ''}
-                                                                    onChange={(e) => updateEditedField('age', e.target.value)}
-                                                                    className="w-16 px-2 py-1.5 border-2 border-gray-300 rounded-lg text-xs"
-                                                                    placeholder="Age"
+                                                                    type="tel"
+                                                                    value={editedData?.phone || ''}
+                                                                    onChange={(e) => updateEditedField('phone', e.target.value)}
+                                                                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl text-xs font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none"
+                                                                    placeholder="10-digit number"
                                                                   />
                                                                 </div>
-                                                                <input
-                                                                  type="tel"
-                                                                  value={editedData?.phone || ''}
-                                                                  onChange={(e) => updateEditedField('phone', e.target.value)}
-                                                                  className="w-full px-2 py-1.5 border-2 border-gray-300 rounded-lg text-xs"
-                                                                  placeholder="Phone"
-                                                                />
-                                                                <input
-                                                                  type="email"
-                                                                  value={editedData?.email || ''}
-                                                                  onChange={(e) => updateEditedField('email', e.target.value)}
-                                                                  className="w-full px-2 py-1.5 border-2 border-gray-300 rounded-lg text-xs"
-                                                                  placeholder="Email"
-                                                                />
-                                                                <div className="flex gap-2">
+
+                                                                {/* Email */}
+                                                                <div>
+                                                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Email</label>
                                                                   <input
-                                                                    type="text"
-                                                                    value={editedData?.city || ''}
-                                                                    onChange={(e) => updateEditedField('city', e.target.value)}
-                                                                    className="flex-1 px-2 py-1.5 border-2 border-gray-300 rounded-lg text-xs"
-                                                                    placeholder="City"
-                                                                  />
-                                                                  <input
-                                                                    type="text"
-                                                                    value={editedData?.state || ''}
-                                                                    onChange={(e) => updateEditedField('state', e.target.value)}
-                                                                    className="flex-1 px-2 py-1.5 border-2 border-gray-300 rounded-lg text-xs"
-                                                                    placeholder="State"
+                                                                    type="email"
+                                                                    value={editedData?.email || ''}
+                                                                    onChange={(e) => updateEditedField('email', e.target.value)}
+                                                                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl text-xs font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none"
+                                                                    placeholder="email@example.com"
                                                                   />
                                                                 </div>
-                                                                <input
-                                                                  type="tel"
-                                                                  value={editedData?.emergencyContact || ''}
-                                                                  onChange={(e) => updateEditedField('emergencyContact', e.target.value)}
-                                                                  className="w-full px-2 py-1.5 border-2 border-gray-300 rounded-lg text-xs"
-                                                                  placeholder="Emergency Contact"
-                                                                />
+
+                                                                {/* City & State */}
+                                                                <div className="grid grid-cols-2 gap-2">
+                                                                  <div>
+                                                                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">City</label>
+                                                                    <input
+                                                                      type="text"
+                                                                      value={editedData?.city || ''}
+                                                                      onChange={(e) => updateEditedField('city', e.target.value)}
+                                                                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl text-xs font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none"
+                                                                      placeholder="City"
+                                                                    />
+                                                                  </div>
+                                                                  <div>
+                                                                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">State</label>
+                                                                    <input
+                                                                      type="text"
+                                                                      value={editedData?.state || ''}
+                                                                      onChange={(e) => updateEditedField('state', e.target.value)}
+                                                                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl text-xs font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none"
+                                                                      placeholder="State"
+                                                                    />
+                                                                  </div>
+                                                                </div>
+
+                                                                {/* Emergency Contact */}
+                                                                <div>
+                                                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wide block mb-1">Emergency</label>
+                                                                  <input
+                                                                    type="tel"
+                                                                    value={editedData?.emergencyContact || ''}
+                                                                    onChange={(e) => updateEditedField('emergencyContact', e.target.value)}
+                                                                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-xl text-xs font-semibold focus:border-secondary focus:ring-2 focus:ring-secondary/20 outline-none"
+                                                                    placeholder="Emergency contact"
+                                                                  />
+                                                                </div>
                                                               </>
                                                             ) : (
                                                               <>
                                                                 {traveller.gender && (
-                                                                  <div className="flex items-center gap-1.5">
-                                                                    <span className="text-gray-500 font-bold">•</span>
-                                                                    <span className="font-semibold">{traveller.gender}</span>
-                                                                    {traveller.age && <span>, {traveller.age} yrs</span>}
+                                                                  <div className="flex items-center justify-between py-2 px-3 bg-gray-100 rounded-lg">
+                                                                    <span className="text-xs text-gray-600 font-bold uppercase tracking-wide">Gender</span>
+                                                                    <span className="text-xs font-black text-gray-900">
+                                                                      {traveller.gender}{traveller.age && `, ${traveller.age} yrs`}
+                                                                    </span>
                                                                   </div>
                                                                 )}
                                                                 {traveller.phone && (
-                                                                  <div className="flex items-center gap-1.5">
-                                                                    <span>📞</span>
-                                                                    <span className="font-mono font-semibold">{traveller.phone}</span>
+                                                                  <div className="flex items-center justify-between py-2 px-3 bg-gray-100 rounded-lg">
+                                                                    <span className="text-xs text-gray-600 font-bold uppercase tracking-wide">Phone</span>
+                                                                    <span className="text-xs font-black text-gray-900 font-mono">{traveller.phone}</span>
                                                                   </div>
                                                                 )}
                                                                 {traveller.email && (
-                                                                  <div className="flex items-center gap-1.5">
-                                                                    <span>✉️</span>
-                                                                    <span className="truncate font-semibold" title={traveller.email}>
-                                                                      {traveller.email.length > 18 ? traveller.email.substring(0, 18) + '...' : traveller.email}
+                                                                  <div className="flex items-center justify-between py-2 px-3 bg-gray-100 rounded-lg">
+                                                                    <span className="text-xs text-gray-600 font-bold uppercase tracking-wide">Email</span>
+                                                                    <span className="text-xs font-black text-gray-900 truncate max-w-[60%]" title={traveller.email}>
+                                                                      {traveller.email}
                                                                     </span>
                                                                   </div>
                                                                 )}
                                                                 {traveller.city && traveller.state && (
-                                                                  <div className="flex items-center gap-1.5">
-                                                                    <span>📍</span>
-                                                                    <span className="font-semibold">{traveller.city}, {traveller.state}</span>
+                                                                  <div className="flex items-center justify-between py-2 px-3 bg-gray-100 rounded-lg">
+                                                                    <span className="text-xs text-gray-600 font-bold uppercase tracking-wide">Location</span>
+                                                                    <span className="text-xs font-black text-gray-900">{traveller.city}, {traveller.state}</span>
                                                                   </div>
                                                                 )}
                                                                 {traveller.emergencyContact && (
-                                                                  <div className="flex items-center gap-1.5">
-                                                                    <span>🚨</span>
-                                                                    <span className="font-mono font-semibold">{traveller.emergencyContact}</span>
+                                                                  <div className="flex items-center justify-between py-2 px-3 bg-red-50 rounded-lg border border-red-200">
+                                                                    <span className="text-xs text-red-600 font-bold uppercase tracking-wide">Emergency</span>
+                                                                    <span className="text-xs font-black text-red-900 font-mono">{traveller.emergencyContact}</span>
                                                                   </div>
                                                                 )}
                                                               </>
