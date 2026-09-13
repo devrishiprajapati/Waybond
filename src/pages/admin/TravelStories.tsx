@@ -113,7 +113,13 @@ export default function AdminTravelStories() {
       <div className="max-w-[1500px] mx-auto">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-7 mb-10">
           <div>
-            <Link to="/admin/dashboard" className="inline-flex items-center gap-2 text-secondary font-black text-[10px] uppercase tracking-[0.22em] mb-5"><ArrowLeft size={15} /> Admin dashboard</Link>
+             <Link
+                        to="/admin/dashboard"
+                        className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all mb-6"
+                      >
+                        <ArrowLeft className="mr-2" size={18} />
+                        Back to Dashboard
+                      </Link>
             <p className="text-secondary font-black uppercase tracking-[0.35em] text-[10px] mb-3">Editorial desk</p>
             <h1 className="text-4xl md:text-6xl font-sans font-black uppercase italic tracking-tighter liquid-text font-bungee">Travel <span className="text-primary font-bungee">Stories</span></h1>
           </div>

@@ -63,7 +63,7 @@ const CancellationManagement = () => {
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  
+
   const [formData, setFormData] = useState({
     status: '',
     refundAmount: '',
@@ -158,7 +158,7 @@ const CancellationManagement = () => {
       setError(null)
 
       const adminData = JSON.parse(sessionStorage.getItem('adminData') || '{}')
-      
+
       const response = await fetch(`/api/admin/cancellations/${selectedCancellation.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -175,7 +175,7 @@ const CancellationManagement = () => {
 
       setSuccess('Cancellation request updated successfully')
       await loadData()
-      
+
       setTimeout(() => {
         handleCloseModal()
       }, 1500)
@@ -235,12 +235,12 @@ const CancellationManagement = () => {
         <div className="mb-8">
           <Link
             to="/admin/dashboard"
-            className="inline-flex items-center gap-2 text-[10px] tracking-[0.22em] text-secondary uppercase mb-4 hover:opacity-70 transition-opacity"
+            className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all mb-6"
           >
-            <ArrowLeft size={12} />
-            ADMIN DASHBOARD
+            <ArrowLeft className="mr-2" size={18} />
+            Back to Dashboard
           </Link>
-          
+
           <h1 className="text-4xl md:text-6xl font-black font-bungee text-gray-900 liquid-text mb-2">
             CANCELLATION MANAGEMENT
           </h1>
@@ -321,11 +321,10 @@ const CancellationManagement = () => {
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                  filterStatus === status
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterStatus === status
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {status === 'all' ? 'All' : status.charAt(0) + status.slice(1).toLowerCase()}
               </button>
@@ -346,8 +345,8 @@ const CancellationManagement = () => {
             <XCircle className="mx-auto mb-4 text-gray-400" size={48} />
             <p className="text-lg font-bold text-gray-500">No cancellation requests found</p>
             <p className="text-sm text-gray-400 mt-2">
-              {searchQuery || filterStatus !== 'all' 
-                ? 'Try adjusting your filters' 
+              {searchQuery || filterStatus !== 'all'
+                ? 'Try adjusting your filters'
                 : 'Cancellation requests will appear here'}
             </p>
           </div>
@@ -503,7 +502,7 @@ const CancellationManagement = () => {
                 {/* Status Update Form */}
                 <div className="border-t-2 border-gray-200 pt-6">
                   <h3 className="text-sm font-bold text-gray-500 uppercase mb-4">Update Status</h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>

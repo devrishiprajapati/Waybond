@@ -142,7 +142,13 @@ export default function TicketManagement() {
         <div className="mx-auto max-w-6xl">
           <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <Link to="/admin/dashboard" className="mb-4 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 transition-colors hover:text-secondary"><ArrowLeft size={15} /> Admin dashboard</Link>
+              <Link
+                to="/admin/dashboard"
+                className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all mb-6"
+              >
+                <ArrowLeft className="mr-2" size={18} />
+                Back to Dashboard
+              </Link>
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-secondary">Confirmed departures</p>
               <h1 className="mt-2 text-3xl font-black uppercase text-slate-900 sm:text-4xl">Ticket management</h1>
             </div>
