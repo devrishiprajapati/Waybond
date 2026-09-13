@@ -603,9 +603,6 @@ const TripDetails = () => {
                               <p className="text-white/60 font-medium leading-relaxed italic">
                                 {item.description}
                               </p>
-                              <div className="mt-8 flex items-center text-xs text-secondary font-black uppercase tracking-widest bg-secondary/10 w-fit px-4 py-2 rounded-full border border-secondary/20">
-                                <Clock size={14} className="mr-2" /> Typical Activity: 4-6 Hours
-                              </div>
                             </div>
                           </motion.div>
                         )}
@@ -665,7 +662,7 @@ const TripDetails = () => {
               {/* Attractions */}
               {trip.attractions && trip.attractions.length > 0 && (
                 <div className="liquid-glass-dark border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-7">
-                  <h2 className="text-xl md:text-3xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text mb-5 md:mb-6">Attractions</h2>
+                  <h2 className="text-xl md:text-3xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text mb-5 md:mb-6">Attractions And Places To Visit</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
                     {trip.attractions.map((attraction: Attraction, idx: number) => (
                       <button
@@ -1035,9 +1032,6 @@ const TripDetails = () => {
                           <p className="text-white/60 font-medium leading-relaxed italic">
                             {item.description}
                           </p>
-                          <div className="mt-8 flex items-center text-xs text-secondary font-black uppercase tracking-widest bg-secondary/10 w-fit px-4 py-2 rounded-full border border-secondary/20">
-                            <Clock size={14} className="mr-2" /> Typical Activity: 4-6 Hours
-                          </div>
                         </div>
                       </motion.div>
                     )}
@@ -1171,11 +1165,11 @@ const TripDetails = () => {
           </div>
         </section>
 
-        {/* Quick Links & Policies - Full Width Section */}
+        {/* Quick Links- Full Width Section */}
         <section className="max-w-[1920px] mx-auto px-4 md:px-12 lg:px-20 mb-12 lg:mb-16">
           <div className="bg-white rounded-xl md:rounded-2xl lg:rounded-3xl p-4 sm:p-5 md:p-8 shadow-lg">
             <h3 className="text-base sm:text-lg md:text-xl font-black text-gray-900 mb-4 sm:mb-5 md:mb-6">
-              Quick Links & Policies
+              Quick Links
             </h3>
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap gap-3 sm:gap-4 md:gap-5 lg:gap-6">
               {/* Things to Carry Button */}
@@ -1396,7 +1390,7 @@ const TripDetails = () => {
       {!enquiryOpen && (
         <button
           onClick={() => { haptics.medium(); setEnquiryOpen(true) }}
-          className="fixed left-1/2 -translate-x-1/2 z-[150] flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2.5 whitespace-nowrap bg-secondary text-white px-8 sm:px-7 py-4 sm:py-3.5 rounded-full shadow-[0_8px_30px_rgba(100,149,237,0.6)] hover:shadow-[0_8px_40px_rgba(100,149,237,0.8)] hover:scale-105 active:scale-95 transition-all duration-200 font-black text-sm sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] border-2 border-white/30 backdrop-blur-sm"
+          className="fixed left-1/2 -translate-x-1/2 z-[150] flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2 whitespace-nowrap bg-secondary text-white px-5 py-3 rounded-full shadow-[0_8px_30px_rgba(100,149,237,0.6)] hover:shadow-[0_8px_40px_rgba(100,149,237,0.8)] hover:scale-105 active:scale-95 transition-all duration-200 font-black text-xs uppercase tracking-[0.12em] border-2 border-white/30 backdrop-blur-sm sm:gap-2.5 sm:px-7 sm:py-3.5 sm:tracking-[0.2em]"
           aria-label="Open enquiry form"
           style={{
             WebkitTapHighlightColor: 'transparent',
@@ -1404,7 +1398,7 @@ const TripDetails = () => {
             bottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))'
           }}
         >
-          <MessageCircle size={20} className="sm:w-[18px] sm:h-[18px]" />
+          <MessageCircle size={15} className="sm:w-[18px] sm:h-[18px]" />
           Enquire Now
         </button>
       )}
