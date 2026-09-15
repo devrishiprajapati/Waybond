@@ -2438,18 +2438,16 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
           try {
             memberUser = await prisma.user.create({
               data: {
-                uid: `usr-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 email: removedParticipant.email.toLowerCase().trim(),
                 name: removedParticipant.name,
                 phone: removedParticipant.phone || null,
-                createdAt: new Date(),
                 // Generate a random password that they'll need to reset
                 passwordHash: await hashPassword(`temp-${Date.now()}`)
               }
             })
             
             console.log('New user created:', {
-              uid: memberUser.uid,
+              id: memberUser.id,
               email: memberUser.email,
               name: memberUser.name
             })
@@ -2461,10 +2459,10 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
         }
       }
       
-      const targetUserId = memberUser?.uid || booking.userId
+      const targetUserId = memberUser?.id || booking.userId
       
       console.log('Found/Created user for new booking:', {
-        memberUser: memberUser ? memberUser.uid : 'not found',
+        memberUser: memberUser ? memberUser.id : 'not found',
         willUseUserId: targetUserId,
         isNewUser: memberUser && !memberUser.createdAt ? false : true
       })
@@ -2475,7 +2473,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
           await prisma.passengerBooking.deleteMany({
             where: {
               bookingId: booking.id,
-              userId: memberUser.uid
+              userId: memberUser.id
             }
           })
           console.log('Removed passengerBooking entry from original booking for transferred member')
@@ -2530,13 +2528,15 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
           await prisma.passengerBooking.create({
             data: {
               bookingId: newMemberBooking.id,
-              userId: memberUser.uid,
+              userId: memberUser.id,
+              passengerName: removedParticipant.name,
               isPrimaryBooker: true
             }
           })
           console.log('Created passengerBooking entry for transferred member:', {
             bookingId: newMemberBooking.id,
-            userId: memberUser.uid
+            userId: memberUser.id,
+            passengerName: removedParticipant.name
           })
         } catch (pbError) {
           console.error('Failed to create passengerBooking:', pbError)
@@ -4183,6 +4183,134 @@ app.delete('/api/admin/enquiries/:id', async (req, res, next) => {
 
     res.json({ success: true })
   } catch (error) { next(error) }
+})
+
+// Fix transferred bookings (migration endpoint)
+app.post('/api/admin/fix-transferred-bookings', async (req, res, next) => {
+  try {
+    console.log('🔍 Starting fix for transferred bookings...')
+    
+    // Find all bookings
+    const allBookings = await prisma.booking.findMany({
+      include: {
+        user: true,
+        passengerBookings: true
+      }
+    })
+
+    // Filter transferred bookings
+    const transferredBookings = allBookings.filter(booking => {
+      const payload = booking.payload
+      return payload && (
+        payload.transferredFromBooking || 
+        payload.transferredFromTrip ||
+        (Array.isArray(payload.travellerDetails) && 
+         payload.travellerDetails.some(t => t.transferredFrom))
+      )
+    })
+
+    console.log(`Found ${transferredBookings.length} transferred bookings`)
+
+    let fixedCount = 0
+    let alreadyCorrect = 0
+    const errors = []
+
+    for (const booking of transferredBookings) {
+      const payload = booking.payload
+      const bookingId = booking.id
+      const userId = booking.userId
+
+      // Check if PassengerBooking already exists
+      const existingPassengerBooking = await prisma.passengerBooking.findUnique({
+        where: {
+          bookingId_userId: {
+            bookingId: bookingId,
+            userId: userId
+          }
+        }
+      })
+
+      if (existingPassengerBooking) {
+        alreadyCorrect++
+        continue
+      }
+
+      // Find the user who should own this booking
+      let targetUser = null
+      const customerEmail = payload.customerEmail
+      const customerPhone = payload.customerPhone
+
+      if (customerEmail || customerPhone) {
+        const searchConditions = []
+        
+        if (customerEmail && customerEmail !== 'N/A') {
+          searchConditions.push({ email: customerEmail.toLowerCase().trim() })
+        }
+        
+        if (customerPhone && customerPhone !== 'N/A') {
+          searchConditions.push({ phone: customerPhone.trim() })
+        }
+
+        if (searchConditions.length > 0) {
+          targetUser = await prisma.user.findFirst({
+            where: { OR: searchConditions }
+          })
+        }
+      }
+
+      if (!targetUser) {
+        targetUser = await prisma.user.findUnique({ where: { uid: userId } })
+      }
+
+      if (!targetUser) {
+        errors.push({
+          bookingId,
+          error: 'User not found',
+          email: customerEmail,
+          phone: customerPhone
+        })
+        continue
+      }
+
+      // Create the missing PassengerBooking entry
+      try {
+        await prisma.passengerBooking.create({
+          data: {
+            bookingId: bookingId,
+            userId: targetUser.uid,
+            isPrimaryBooker: true
+          }
+        })
+
+        console.log(`✅ Created PassengerBooking for ${bookingId} -> ${targetUser.name}`)
+        fixedCount++
+      } catch (createError) {
+        if (createError.code === 'P2002') {
+          alreadyCorrect++
+        } else {
+          errors.push({
+            bookingId,
+            error: createError.message,
+            userId: targetUser.uid
+          })
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      summary: {
+        totalTransferred: transferredBookings.length,
+        fixed: fixedCount,
+        alreadyCorrect: alreadyCorrect,
+        errors: errors.length
+      },
+      errors: errors
+    })
+  } catch (error) { 
+    console.error('Error fixing transferred bookings:', error)
+    next(error) 
+  }
 })
 
 app.use((error, _req, res, _next) => {

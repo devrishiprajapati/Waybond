@@ -762,19 +762,10 @@ const TripDetails = () => {
                       <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
                     )}
                   </div>
-                  <div className="shrink-0 flex items-center gap-5">
-                    <div className="text-center min-w-[46px] md:min-w-[52px]">
-                      <div className="text-white font-black text-base md:text-lg">{String(activeDuration || '').match(/(\d+)\s*Day/i)?.[1] ?? String(activeDuration || '').split(' ')[0]}</div>
-                      <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Days</div>
+                  <div className="shrink-0">
+                    <div className="text-sm md:text-base text-white font-semibold">
+                      {activeDuration}
                     </div>
-                    {String(activeDuration || '').match(/(\d+)\s*Night/i) && (
-                      <>
-                        <div className="text-center min-w-[46px] md:min-w-[52px]">
-                          <div className="text-white font-black text-base md:text-lg">{String(activeDuration || '').match(/(\d+)\s*Night/i)![1]}</div>
-                          <div className="text-[7px] md:text-[8px] text-white/60 font-black uppercase tracking-[0.2em] mt-0.5">Nights</div>
-                        </div>
-                      </>
-                    )}
                   </div>
                 </div>
 
