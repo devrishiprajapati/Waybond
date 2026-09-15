@@ -7,6 +7,7 @@ import {
   ChevronUp, Instagram, MessageCircle, FileText, Download, X,
   Share2, Link2, Check, Calendar, ChevronLeft, ChevronRight, User
 } from 'lucide-react'
+import DOMPurify from 'dompurify'
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
 import { getTripBySlug, createSlug } from '../lib/dataService'
@@ -16,6 +17,8 @@ import { isLoggedIn } from '../lib/auth'
 import { addDaysToDateInput, formatDateOnly } from '../lib/date'
 import AttractionModal from '../components/AttractionModal'
 import { Attraction } from '../lib/trips'
+
+const sanitizeHtml = (html: string) => DOMPurify.sanitize(html || '', { USE_PROFILES: { html: true } })
 
 const TripDetails = () => {
   const { slug } = useParams()
@@ -487,9 +490,11 @@ const TripDetails = () => {
               <div>
                 <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
                   <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
-                  <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg" style={overviewClampStyle}>
-                    {trip.description}
-                  </p>
+                  <div
+                    className="rich-content text-base font-medium leading-relaxed text-slate-700 md:text-lg"
+                    style={overviewClampStyle}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(trip.description) }}
+                  />
                   {shouldShowOverviewToggle && (
                     <button
                       type="button"
@@ -606,9 +611,10 @@ const TripDetails = () => {
                                 </div>
                               )}
 
-                              <p className="text-white/60 font-medium leading-relaxed">
-                                {item.description}
-                              </p>
+                              <div
+                                className="rich-content text-white/60 font-medium leading-relaxed"
+                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.description) }}
+                              />
                             </div>
                           </motion.div>
                         )}
@@ -759,16 +765,6 @@ const TripDetails = () => {
                           <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Nights</span>
                         )}
                       </div>
-<<<<<<< HEAD
-                    ) : (
-                      <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
-                    )}
-                  </div>
-                  <div className="shrink-0">
-                    <div className="text-sm md:text-base text-white font-semibold">
-                      {activeDuration}
-                    </div>
-=======
                     </div>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
@@ -793,7 +789,6 @@ const TripDetails = () => {
                         )}
                       </div>
                     </div>
->>>>>>> a497f392a8db0ec08082e324d63cc3acedfd3928
                   </div>
                 </div>
 
@@ -1054,9 +1049,10 @@ const TripDetails = () => {
                             </div>
                           )}
 
-                          <p className="text-white/60 font-medium leading-relaxed">
-                            {item.description}
-                          </p>
+                          <div
+                            className="rich-content text-white/60 font-medium leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.description) }}
+                          />
                         </div>
                       </motion.div>
                     )}
@@ -1566,10 +1562,8 @@ const TripDetails = () => {
               </div>
 
               <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
-                <div className="prose prose-sm sm:prose-base max-w-none">
-                  <div className="text-gray-800 leading-relaxed whitespace-pre-line">
-                    {trip.termsAndConditions}
-                  </div>
+                <div className="rich-content text-gray-800 leading-relaxed">
+                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(trip.termsAndConditions) }} />
                 </div>
               </div>
             </motion.div>
@@ -1612,9 +1606,10 @@ const TripDetails = () => {
               </div>
 
               <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
-                <p className="whitespace-pre-line text-gray-800 text-sm sm:text-base leading-relaxed font-medium">
-                  {cancellationPolicy}
-                </p>
+                <div
+                  className="rich-content text-gray-800 text-sm sm:text-base leading-relaxed font-medium"
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(cancellationPolicy) }}
+                />
               </div>
             </motion.div>
           </motion.div>
