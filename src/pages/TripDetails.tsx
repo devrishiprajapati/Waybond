@@ -172,18 +172,18 @@ const TripDetails = () => {
   const activeDepartureDates = selectedJoinOrigin
     ? selectedJoinOption?.departureDates || []
     : trip?.departureDates || []
-  
+
   // Filter out past dates - only show today and future dates
   const futureDepartureDates = useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0) // Reset to start of day
-    
+
     return activeDepartureDates.filter(date => {
       const dateObj = new Date(date)
       return dateObj >= today
     })
   }, [activeDepartureDates])
-  
+
   const activeItinerary = selectedJoinOrigin
     ? selectedJoinItinerary || trip?.itinerary || []
     : trip?.departureItineraries?.[selectedDeparture] || trip?.itinerary || []
@@ -521,7 +521,7 @@ const TripDetails = () => {
               {/* Itinerary */}
               <div>
                 <div className="flex justify-between items-end gap-4 mb-6 md:mb-10">
-                  <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
+                  <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase liquid-text">The Itinerary</h2>
                   <button
                     onClick={toggleAllDays}
                     className="text-secondary font-black text-[10px] uppercase tracking-[0.2em] border-b border-secondary/30 pb-1 hover:border-secondary transition-all"
@@ -544,7 +544,7 @@ const TripDetails = () => {
                         <div className="flex items-center gap-3 md:gap-6 min-w-0">
                           <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDays.includes(item.day) ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
                             <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
-                            <span className="text-lg md:text-2xl font-black italic">{item.day < 10 ? `0${item.day}` : item.day}</span>
+                            <span className="text-lg md:text-2xl font-black">{item.day < 10 ? `0${item.day}` : item.day}</span>
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3 className="text-base md:text-2xl font-bold text-white tracking-tight">{item.title}</h3>
@@ -606,7 +606,7 @@ const TripDetails = () => {
                                 </div>
                               )}
 
-                              <p className="text-white/60 font-medium leading-relaxed italic">
+                              <p className="text-white/60 font-medium leading-relaxed">
                                 {item.description}
                               </p>
                             </div>
@@ -722,10 +722,10 @@ const TripDetails = () => {
 
                       <div className="space-y-5">
                         <div>
-                          <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{lead.name}</h3>
+                          <h3 className="text-3xl md:text-4xl font-bungee font-black tracking-tighter liquid-text">{lead.name}</h3>
                           <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{lead.role}</p>
                         </div>
-                        <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">
+                        <p className="text-white/50 font-medium leading-relaxed max-w-xl">
                           {lead.bio}
                         </p>
                         <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-white/10">
@@ -749,15 +749,17 @@ const TripDetails = () => {
             {/* Right Side - Desktop Booking Widget */}
             <div className="lg:col-span-4">
               <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-3xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] space-y-5 md:rounded-[3rem] md:p-8 md:space-y-6 md:shadow-[0_15px_60px_rgba(0,0,0,0.5)]">
-                <div className="flex justify-between items-center gap-4 pb-5 border-b border-white/10 md:pb-6">
+                <div className="flex justify-between items-start gap-4 pb-5 border-b border-white/10 md:pb-6">
                   <div className="min-w-0 flex-1 overflow-hidden">
-                    <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
-                    {hasDiscount && discountedPrice ? (
-                      <div className="mt-2 space-y-1">
-                        <div className="text-lg md:text-xl font-bold text-white/40 line-through break-all">₹{formatPrice(activePrice)}</div>
-                        <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter liquid-text italic break-all">₹{formatPrice(discountedPrice)}</div>
-                        <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{trip.discount}% OFF</div>
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Days</span>
+                        {String(activeDuration || '').match(/(\d+)\s*Night/i) && (
+                          <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Nights</span>
+                        )}
                       </div>
+<<<<<<< HEAD
                     ) : (
                       <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
                     )}
@@ -766,6 +768,32 @@ const TripDetails = () => {
                     <div className="text-sm md:text-base text-white font-semibold">
                       {activeDuration}
                     </div>
+=======
+                    </div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1">
+                        {hasDiscount && discountedPrice ? (
+                          <div className="space-y-1">
+                            <div className="text-lg md:text-xl font-bold text-white/40 line-through break-all">₹{formatPrice(activePrice)}</div>
+                            <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter liquid-text italic break-all">₹{formatPrice(discountedPrice)}</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{trip.discount}% OFF</div>
+                          </div>
+                        ) : (
+                          <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-center min-w-[46px]">
+                          <div className="text-white font-black text-base md:text-lg not-italic">{String(activeDuration || '').match(/(\d+)\s*Day/i)?.[1] ?? String(activeDuration || '').split(' ')[0]}</div>
+                        </div>
+                        {String(activeDuration || '').match(/(\d+)\s*Night/i) && (
+                          <div className="text-center min-w-[46px]">
+                            <div className="text-white font-black text-base md:text-lg not-italic">{String(activeDuration || '').match(/(\d+)\s*Night/i)![1]}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+>>>>>>> a497f392a8db0ec08082e324d63cc3acedfd3928
                   </div>
                 </div>
 
@@ -941,7 +969,7 @@ const TripDetails = () => {
           {/* Itinerary - Mobile Only */}
           <div>
             <div className="flex justify-between items-end gap-4 mb-6 md:mb-10">
-              <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase italic liquid-text">The Itinerary</h2>
+              <h2 className="text-2xl md:text-5xl font-bungee font-black text-white tracking-tighter uppercase liquid-text">The Itinerary</h2>
               <button
                 onClick={toggleAllDays}
                 className="text-secondary font-black text-[10px] uppercase tracking-[0.2em] border-b border-secondary/30 pb-1 hover:border-secondary transition-all"
@@ -964,7 +992,7 @@ const TripDetails = () => {
                     <div className="flex items-center gap-3 md:gap-6 min-w-0">
                       <div className={`w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex flex-col items-center justify-center font-bungee transition-colors duration-500 shrink-0 ${expandedDays.includes(item.day) ? 'bg-secondary text-white shadow-lg shadow-secondary/30' : 'bg-white/5 text-white/40'}`}>
                         <span className="text-[10px] font-black uppercase tracking-widest">Day</span>
-                        <span className="text-lg md:text-2xl font-black italic">0{item.day}</span>
+                        <span className="text-lg md:text-2xl font-black">0{item.day}</span>
                       </div>
                       <div className="min-w-0 flex-1">
                         <h3 className="text-base md:text-2xl font-bold text-white tracking-tight min-w-0">{item.title}</h3>
@@ -1026,7 +1054,7 @@ const TripDetails = () => {
                             </div>
                           )}
 
-                          <p className="text-white/60 font-medium leading-relaxed italic">
+                          <p className="text-white/60 font-medium leading-relaxed">
                             {item.description}
                           </p>
                         </div>
@@ -1139,10 +1167,10 @@ const TripDetails = () => {
 
                   <div className="space-y-5">
                     <div>
-                      <h3 className="text-3xl md:text-4xl font-bungee font-black italic tracking-tighter liquid-text">{lead.name}</h3>
+                      <h3 className="text-3xl md:text-4xl font-bungee font-black tracking-tighter liquid-text">{lead.name}</h3>
                       <p className="text-secondary font-black text-[10px] uppercase tracking-[0.3em] mt-2">{lead.role}</p>
                     </div>
-                    <p className="text-white/50 font-medium leading-relaxed max-w-xl italic">
+                    <p className="text-white/50 font-medium leading-relaxed max-w-xl">
                       {lead.bio}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-4 border-t border-white/10">
