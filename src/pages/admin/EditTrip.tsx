@@ -5,6 +5,7 @@ import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, U
 import { getAdminTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { Attraction, DEFAULT_AGE_LIMIT, DEFAULT_CANCELLATION_POLICY, ExpeditionLead, Trip } from '../../lib/trips'
 import { formatDateOnly, parseDateOnly } from '../../lib/date'
+import RichTextEditor from '../../components/RichTextEditor'
 
 const CATEGORIES = ['Adventure', 'Beach', 'Luxury', 'Nature', 'Honeymoon', 'Backpacking']
 const DIFFICULTY_LEVELS: { value: Trip['difficulty'], label: string, color: string }[] = [
@@ -666,12 +667,11 @@ const EditTrip = () => {
 
             <div className="space-y-2">
               <label className={labelClass}>Description</label>
-              <textarea
-                value={formData.description}
-                onChange={e => setFormData({ ...formData, description: e.target.value })}
+              <RichTextEditor
+                value={formData.description || ''}
+                onChange={html => setFormData({ ...formData, description: html })}
                 placeholder="Write an immersive summary for explorers..."
-                className={textareaClass}
-                required
+                minHeight="140px"
               />
             </div>
           </motion.section>
@@ -1038,8 +1038,8 @@ const EditTrip = () => {
                       type="button"
                       onClick={() => selectItineraryTarget(selectionKey)}
                       className={`px-4 py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all ${selectedDepartureForItinerary === selectionKey
-                          ? 'bg-secondary text-white border-2 border-secondary shadow-lg'
-                          : 'bg-white/5 text-white/60 border border-white/10 hover:border-white/30'
+                        ? 'bg-secondary text-white border-2 border-secondary shadow-lg'
+                        : 'bg-white/5 text-white/60 border border-white/10 hover:border-white/30'
                         }`}
                     >
                       {origin.location}
@@ -1225,16 +1225,15 @@ const EditTrip = () => {
                       </div>
                     </div>
 
-                    <textarea
-                      value={item.description}
-                      onChange={e => {
+                    <RichTextEditor
+                      value={item.description || ''}
+                      onChange={html => {
                         const newItinerary = [...getSelectedItinerary()];
-                        newItinerary[index] = { ...newItinerary[index], description: e.target.value };
+                        newItinerary[index] = { ...newItinerary[index], description: html };
                         setSelectedItinerary(newItinerary);
                       }}
                       placeholder="Day description..."
-                      className={textareaClass}
-                      required
+                      minHeight="120px"
                     />
                   </div>
                 ));
@@ -1328,13 +1327,12 @@ const EditTrip = () => {
             <p className="text-xs text-white/45 ml-2 mb-4">Package-specific terms, payment terms, safety guidelines, and important notes</p>
 
             <div className="space-y-2">
-              <textarea
-                value={formData.termsAndConditions}
-                onChange={e => setFormData({ ...formData, termsAndConditions: e.target.value })}
-                placeholder="Enter terms and conditions, payment terms, safety guidelines, etc.&#10;&#10;Example:&#10;• Full payment required 15 days before departure&#10;• Travel insurance recommended&#10;• Valid ID proof mandatory"
-                className={`${textareaClass} min-h-[200px]`}
+              <RichTextEditor
+                value={formData.termsAndConditions || ''}
+                onChange={html => setFormData({ ...formData, termsAndConditions: html })}
+                placeholder="Enter terms and conditions, payment terms, safety guidelines, etc."
+                minHeight="200px"
               />
-              <p className="text-[10px] text-white/30 ml-2">Use bullet points (•) or numbers for better readability</p>
             </div>
           </motion.section>
 
@@ -1350,11 +1348,11 @@ const EditTrip = () => {
             <p className="text-xs text-white/45 ml-2 mb-4">Package-specific cancellation and refund rules shown in Quick Links & Policies</p>
 
             <div className="space-y-2">
-              <textarea
-                value={formData.cancellationPolicy}
-                onChange={e => setFormData({ ...formData, cancellationPolicy: e.target.value })}
-                placeholder={DEFAULT_CANCELLATION_POLICY}
-                className={`${textareaClass} min-h-[180px]`}
+              <RichTextEditor
+                value={formData.cancellationPolicy || ''}
+                onChange={html => setFormData({ ...formData, cancellationPolicy: html })}
+                placeholder="Enter cancellation and refund policy..."
+                minHeight="180px"
               />
               <p className="text-[10px] text-white/30 ml-2">Leave the default text or customize it for this package.</p>
             </div>
