@@ -48,6 +48,7 @@ const AdminDashboard = () => {
   const [adminData, setAdminData] = useState<any>(null)
   const navigate = useNavigate()
   const location = useLocation()
+  const hasRedirected = React.useRef(false)
 
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
@@ -59,7 +60,45 @@ const AdminDashboard = () => {
     const adminDataStr = sessionStorage.getItem('adminData')
     if (adminDataStr) {
       try {
-        setAdminData(JSON.parse(adminDataStr))
+        const parsedAdminData = JSON.parse(adminDataStr)
+        setAdminData(parsedAdminData)
+        
+        // Auto-redirect if user doesn't have manage_trips permission and is on dashboard
+        // Only redirect once to prevent loops
+        if (location.pathname === '/admin/dashboard' && !hasRedirected.current) {
+          const hasDashboardAccess = parsedAdminData.role === 'MASTER_ADMIN' || 
+            (parsedAdminData.permissions && parsedAdminData.permissions.includes('manage_trips'))
+          
+          if (!hasDashboardAccess) {
+            // Find first available page based on permissions
+            const availablePages = [
+              { path: '/admin/data-filters', permission: 'view_data_filters' },
+              { path: '/admin/analytics', permission: 'view_analytics' },
+              { path: '/admin/hero', permission: 'manage_hero' },
+              { path: '/admin/travel-stories', permission: 'manage_travel_stories' },
+              { path: '/admin/testimonials', permission: 'manage_testimonials' },
+              { path: '/admin/team-members', permission: 'manage_team_members' },
+              { path: '/admin/users', permission: 'manage_users' },
+              { path: '/admin/payment-update', permission: 'view_bookings' },
+              { path: '/admin/tickets', permission: 'view_bookings' },
+              { path: '/admin/cancellations', permission: 'view_bookings' },
+              { path: '/admin/enquiries', permission: 'view_bookings' },
+              { path: '/admin/promo-codes', permission: 'manage_promo_codes' },
+              { path: '/admin/gallery', permission: 'manage_gallery' },
+              { path: '/admin/admins', permission: 'manage_admins' }
+            ]
+            
+            // Find first page user has access to
+            for (const page of availablePages) {
+              if (parsedAdminData.permissions && parsedAdminData.permissions.includes(page.permission)) {
+                console.log('Redirecting to:', page.path)
+                hasRedirected.current = true
+                navigate(page.path, { replace: true })
+                return
+              }
+            }
+          }
+        }
       } catch (error) {
         console.error('Failed to parse admin data:', error)
       }

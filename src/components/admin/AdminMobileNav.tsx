@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   BookOpen,
   CreditCard,
@@ -14,7 +14,8 @@ import {
   Users2,
   UsersRound,
   Ticket,
-  XCircle
+  XCircle,
+  LogOut
 } from 'lucide-react'
 
 type AdminData = {
@@ -51,6 +52,7 @@ const getAdminData = (): AdminData | null => {
 
 export default function AdminMobileNav() {
   const location = useLocation()
+  const navigate = useNavigate()
   const isAdmin = sessionStorage.getItem('isAdmin') === 'true'
   const adminData = getAdminData()
 
@@ -59,6 +61,12 @@ export default function AdminMobileNav() {
   const hasPermission = (permission: string) => {
     if (adminData?.role === 'MASTER_ADMIN') return true
     return Boolean(adminData?.permissions?.includes(permission))
+  }
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('isAdmin')
+    sessionStorage.removeItem('adminData')
+    navigate('/admin/login')
   }
 
   const visibleNavItems = navItems.filter((item) => hasPermission(item.permission))
@@ -84,6 +92,15 @@ export default function AdminMobileNav() {
             </Link>
           )
         })}
+        
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="flex min-w-[76px] flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[9px] font-black uppercase tracking-[0.08em] transition-colors bg-red-50 text-red-600 hover:bg-red-500 hover:text-white"
+        >
+          <LogOut size={17} />
+          <span className="max-w-full truncate">Logout</span>
+        </button>
       </nav>
     </div>
   )

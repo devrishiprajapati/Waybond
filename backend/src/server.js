@@ -1594,7 +1594,10 @@ app.get('/api/admin/bookings', async (_req, res, next) => {
         paymentStatus: paymentMethod,
         bookingDate: payload.bookingDate || new Date(booking.createdAt).toLocaleDateString('en-IN'),
         travellerDetails: payload.travellerDetails || [],
-        whatsappGroupLink: payload.whatsappGroupLink || null
+        whatsappGroupLink: payload.whatsappGroupLink || null,
+        lastModifiedBy: payload.lastModifiedBy || null,
+        lastModifiedAt: payload.lastModifiedAt || null,
+        changeLog: Array.isArray(payload.changeLog) ? payload.changeLog : []
       }
     })
 

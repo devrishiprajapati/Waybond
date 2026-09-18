@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { MaterialReactTable, type MRT_ColumnDef, useMaterialReactTable } from 'material-react-table'
 import { Button, ThemeProvider, createTheme, MenuItem } from '@mui/material'
-import { Filter, Database, Users, Package, FileDown, ArrowLeft, Calendar, Edit2 } from 'lucide-react'
+import { Filter, Database, Users, Package, FileDown, ArrowLeft, Calendar, Edit2, LogOut } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import PermissionGuard from '../../components/PermissionGuard'
@@ -77,12 +77,11 @@ const DataFilters = () => {
     const adminData = JSON.parse(sessionStorage.getItem('adminData') || '{}')
     setCurrentAdminPermissions(adminData.permissions || [])
     
-    // Check if admin has view or edit permission or is Master Admin
-    const hasViewPermission = adminData.permissions?.includes('data_filters_view')
-    const hasEditPermission = adminData.permissions?.includes('data_filters_edit')
+    // Check if admin has view_data_filters permission or is Master Admin
+    const hasPermission = adminData.permissions?.includes('view_data_filters')
     const isMasterAdmin = adminData.role === 'MASTER_ADMIN'
     
-    if (!hasViewPermission && !hasEditPermission && !isMasterAdmin) {
+    if (!hasPermission && !isMasterAdmin) {
       navigate('/admin/dashboard')
       return
     }
@@ -93,8 +92,10 @@ const DataFilters = () => {
   const hasEditPermission = () => {
     const adminData = JSON.parse(sessionStorage.getItem('adminData') || '{}')
     const isMasterAdmin = adminData.role === 'MASTER_ADMIN'
-    const hasEditPerm = adminData.permissions?.includes('data_filters_edit')
-    return isMasterAdmin || hasEditPerm
+    const hasPermission = adminData.permissions?.includes('view_data_filters')
+    // For now, all users with view_data_filters can edit
+    // You can add a separate 'edit_data_filters' permission later if needed
+    return isMasterAdmin || hasPermission
   }
 
   const loadData = async () => {
@@ -1968,14 +1969,29 @@ const DataFilters = () => {
     <PermissionGuard requiredPermission="view_data_filters">
       <div className="min-h-screen bg-white text-white p-4 pb-28 pt-24 sm:p-6 sm:pb-28 sm:pt-24 md:p-10 md:pb-28 lg:p-12 lg:pb-12">
         <div className="max-w-[1800px] mx-auto pt-20">
-          {/* Back to Dashboard Button */}
-          <Link
-            to="/admin/dashboard"
-            className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all"
-          >
-            <ArrowLeft className="mr-2" size={18} />
-            Back to Dashboard
-          </Link>
+          {/* Navigation Header */}
+          <div className="flex items-center justify-between mb-6">
+            <Link
+              to="/admin/dashboard"
+              className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all"
+            >
+              <ArrowLeft className="mr-2" size={18} />
+              Back to Dashboard
+            </Link>
+            
+            {/* Logout Button - Desktop Only */}
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('isAdmin')
+                sessionStorage.removeItem('adminData')
+                navigate('/admin/login')
+              }}
+              className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all font-black text-[10px] uppercase tracking-[0.16em]"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
+          </div>
 
           {/* Header */}
           <header className="mb-10">

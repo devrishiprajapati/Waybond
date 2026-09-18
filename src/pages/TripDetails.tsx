@@ -749,52 +749,33 @@ const TripDetails = () => {
             {/* Right Side - Desktop Booking Widget */}
             <div className="lg:col-span-4">
               <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-3xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] space-y-5 md:rounded-[3rem] md:p-8 md:space-y-6 md:shadow-[0_15px_60px_rgba(0,0,0,0.5)]">
-                <div className="flex justify-between items-start gap-4 pb-5 border-b border-white/10 md:pb-6">
-                  <div className="min-w-0 flex-1 overflow-hidden">
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Days</span>
-                        {String(activeDuration || '').match(/(\d+)\s*Night/i) && (
-                          <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Nights</span>
-                        )}
-                      </div>
-<<<<<<< HEAD
-                    ) : (
-                      <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter mt-2 liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
-                    )}
-                  </div>
-                  <div className="shrink-0">
-                    <div className="text-sm md:text-base text-white font-semibold">
-                      {activeDuration}
-                    </div>
-=======
-                    </div>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        {hasDiscount && discountedPrice ? (
-                          <div className="space-y-1">
-                            <div className="text-lg md:text-xl font-bold text-white/40 line-through break-all">₹{formatPrice(activePrice)}</div>
-                            <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter liquid-text italic break-all">₹{formatPrice(discountedPrice)}</div>
-                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{trip.discount}% OFF</div>
-                          </div>
-                        ) : (
-                          <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-center min-w-[46px]">
-                          <div className="text-white font-black text-base md:text-lg not-italic">{String(activeDuration || '').match(/(\d+)\s*Day/i)?.[1] ?? String(activeDuration || '').split(' ')[0]}</div>
+                {/* Price and Duration - Side by Side */}
+                <div className="flex items-start justify-between gap-6 pb-5 border-b border-white/10 md:pb-6">
+                  {/* Price Section - Left Side */}
+                  <div className="flex-1">
+                    <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] block mb-2">Price per person</span>
+                    <div className="mt-2">
+                      {hasDiscount && discountedPrice ? (
+                        <div className="space-y-1">
+                          <div className="text-base md:text-lg font-bold text-white/40 line-through">₹{formatPrice(activePrice)}</div>
+                          <div className="text-2xl md:text-3xl font-bungee font-black text-white tracking-tighter liquid-text italic">₹{formatPrice(discountedPrice)}</div>
+                          <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{trip.discount}% OFF</div>
                         </div>
-                        {String(activeDuration || '').match(/(\d+)\s*Night/i) && (
-                          <div className="text-center min-w-[46px]">
-                            <div className="text-white font-black text-base md:text-lg not-italic">{String(activeDuration || '').match(/(\d+)\s*Night/i)![1]}</div>
-                          </div>
-                        )}
+                      ) : (
+                        <div className="text-2xl md:text-3xl font-bungee font-black text-white tracking-tighter liquid-text italic">₹{formatPrice(activePrice)}</div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Duration Section - Right Side */}
+                  {activeDuration && (
+                    <div className="flex-shrink-0 text-right">
+                      <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] block mb-2">Duration</span>
+                      <div className="mt-2 text-xs md:text-sm font-black text-white tracking-tight">
+                        {activeDuration}
                       </div>
                     </div>
->>>>>>> a497f392a8db0ec08082e324d63cc3acedfd3928
-                  </div>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5 md:pb-6">
