@@ -58,41 +58,8 @@ const AdminLogin = () => {
       
       // Redirect based on permissions
       const adminData = data.admin
-      const hasDashboardAccess = adminData.role === 'MASTER_ADMIN' || 
-        (adminData.permissions && adminData.permissions.includes('manage_trips'))
-      
-      if (hasDashboardAccess) {
-        navigate('/admin/dashboard')
-      } else {
-        // Find first available page based on permissions
-        const availablePages = [
-          { path: '/admin/data-filters', permission: 'view_data_filters' },
-          { path: '/admin/analytics', permission: 'view_analytics' },
-          { path: '/admin/hero', permission: 'manage_hero' },
-          { path: '/admin/travel-stories', permission: 'manage_travel_stories' },
-          { path: '/admin/testimonials', permission: 'manage_testimonials' },
-          { path: '/admin/team-members', permission: 'manage_team_members' },
-          { path: '/admin/users', permission: 'manage_users' },
-          { path: '/admin/payment-update', permission: 'view_bookings' },
-          { path: '/admin/tickets', permission: 'view_bookings' },
-          { path: '/admin/cancellations', permission: 'view_bookings' },
-          { path: '/admin/enquiries', permission: 'view_bookings' },
-          { path: '/admin/promo-codes', permission: 'manage_promo_codes' },
-          { path: '/admin/gallery', permission: 'manage_gallery' },
-          { path: '/admin/admins', permission: 'manage_admins' }
-        ]
-        
-        // Find first page user has access to
-        let redirectPath = '/admin/dashboard' // fallback
-        for (const page of availablePages) {
-          if (adminData.permissions && adminData.permissions.includes(page.permission)) {
-            redirectPath = page.path
-            break
-          }
-        }
-        
-        navigate(redirectPath)
-      }
+      // All admins go to dashboard - sidebar will show only accessible pages
+      navigate('/admin/dashboard')
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Invalid expedition credentials')
     }

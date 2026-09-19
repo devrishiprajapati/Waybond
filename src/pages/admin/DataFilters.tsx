@@ -1970,28 +1970,13 @@ const DataFilters = () => {
       <div className="min-h-screen bg-white text-white p-4 pb-28 pt-24 sm:p-6 sm:pb-28 sm:pt-24 md:p-10 md:pb-28 lg:p-12 lg:pb-12">
         <div className="max-w-[1800px] mx-auto pt-20">
           {/* Navigation Header */}
-          <div className="flex items-center justify-between mb-6">
-            <Link
-              to="/admin/dashboard"
-              className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all"
-            >
-              <ArrowLeft className="mr-2" size={18} />
-              Back to Dashboard
-            </Link>
-            
-            {/* Logout Button - Desktop Only */}
-            <button
-              onClick={() => {
-                sessionStorage.removeItem('isAdmin')
-                sessionStorage.removeItem('adminData')
-                navigate('/admin/login')
-              }}
-              className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all font-black text-[10px] uppercase tracking-[0.16em]"
-            >
-              <LogOut size={16} />
-              Logout
-            </button>
-          </div>
+          <Link
+            to="/admin/dashboard"
+            className="inline-flex items-center text-white/50 font-black text-[10px] uppercase tracking-[0.24em] hover:text-secondary transition-all mb-6"
+          >
+            <ArrowLeft className="mr-2" size={18} />
+            Back to Dashboard
+          </Link>
 
           {/* Header */}
           <header className="mb-10">
