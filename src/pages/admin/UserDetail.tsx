@@ -137,12 +137,50 @@ export default function AdminUserDetail() {
           const isUpdating = updatingPaymentId === currentBookingDbId
 
           return (
-            <article key={currentBookingDbId || String(index)} className="liquid-glass-dark border border-white/10 rounded-2xl p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
-              <div>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-lg font-sans font-black uppercase italic text-white">{bookingText(booking, 'title', bookingText(booking, 'tripTitle', 'WayBond Trip'))}</p>
-                    <p className="text-sm text-white/50 mt-2">{bookingText(booking, 'location', bookingText(booking, 'destination', 'Location pending'))}</p>
+            <article key={currentBookingDbId || String(index)} className="liquid-glass-dark border border-white/10 rounded-2xl p-5 flex flex-col xl:flex-row xl:items-start justify-between gap-5">
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-start gap-3 mb-2">
+                      <p className="text-lg font-sans font-black uppercase italic text-white">{bookingText(booking, 'title', bookingText(booking, 'tripTitle', 'WayBond Trip'))}</p>
+                      
+                      {/* Group Booking Indicator */}
+                      {bookingNumber(booking, 'travelers') > 1 && (
+                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-300 text-[8px] font-black uppercase tracking-wider">
+                          <UserRound size={11} />
+                          Group
+                        </span>
+                      )}
+                      
+                      {/* Transfer Badge */}
+                      {(booking.transferredFrom || booking.transferredFromTrip || booking.transferredFromBooking) && (
+                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/20 border border-purple-400/40 text-purple-300 text-[8px] font-black uppercase tracking-wider">
+                          <ArrowRightLeft size={11} />
+                          Transferred
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-white/50 mb-3">
+                      <span className="flex items-center gap-1.5">
+                        <MapPin size={14} className="text-secondary" />
+                        {bookingText(booking, 'location', bookingText(booking, 'destination', 'Location pending'))}
+                      </span>
+                    </div>
+                    
+                    {/* Package Departure Date */}
+                    {(bookingText(booking, 'departureDate') || bookingText(booking, 'departure') || bookingText(booking, 'nextBatch')) && (
+                      <div className="mb-3 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 inline-flex items-center gap-2">
+                        <CalendarDays size={16} className="text-green-400" />
+                        <div>
+                          <p className="text-[8px] text-white/40 font-black uppercase tracking-wider">Departure Date</p>
+                          <p className="text-sm text-white font-bold">
+                            {bookingText(booking, 'departureDate') ? 
+                              formatDate(bookingText(booking, 'departureDate')) : 
+                              bookingText(booking, 'departure') || bookingText(booking, 'nextBatch', 'TBD')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {/* Only show transfer button for primary bookers */}
                   {booking.isPrimaryBooker && (
@@ -152,7 +190,89 @@ export default function AdminUserDetail() {
                     </button>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-[0.14em] mt-4">
+
+                {/* Transfer Information */}
+                {(booking.transferredFrom || booking.transferredFromTrip || booking.transferredFromBooking || (Array.isArray(booking.transferHistory) && booking.transferHistory.length > 0)) && (
+                  <div className="mb-4 bg-purple-100/95 backdrop-blur-sm border-2 border-purple-300 rounded-xl p-4 shadow-lg">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ArrowRightLeft size={18} className="text-purple-600" />
+                      <h4 className="text-sm font-black text-purple-700 uppercase tracking-wide">Transfer History</h4>
+                      {Array.isArray(booking.transferHistory) && booking.transferHistory.length > 0 && (
+                        <span className="text-xs text-purple-700 font-bold ml-auto">
+                          {booking.transferHistory.length} Transfer{booking.transferHistory.length > 1 ? 's' : ''} Made
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Show simple transfer info if no detailed history */}
+                    {!Array.isArray(booking.transferHistory) || booking.transferHistory.length === 0 ? (
+                      <div className="bg-white/90 rounded-lg p-3 border border-purple-200">
+                        <p className="text-sm text-gray-800 font-semibold mb-1">
+                          <span className="font-black text-gray-900">From:</span> {bookingText(booking, 'transferredFrom', bookingText(booking, 'transferredFromTrip', 'Previous Package'))}
+                        </p>
+                        {(bookingText(booking, 'transferredOn') || bookingText(booking, 'transferDate')) && (
+                          <p className="text-xs text-gray-600">
+                            <span className="font-bold">Date:</span> {formatDate(bookingText(booking, 'transferredOn', bookingText(booking, 'transferDate')))}
+                          </p>
+                        )}
+                        {bookingText(booking, 'transferredFromBooking') && (
+                          <p className="text-xs text-gray-600">
+                            <span className="font-bold">Booking ID:</span> {bookingText(booking, 'transferredFromBooking')}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      /* Show detailed transfer history - HORIZONTAL GRID LAYOUT */
+                      <div className="space-y-2.5">
+                        {booking.transferHistory.slice(-2).reverse().map((transfer: any, idx: number) => (
+                          <div key={transfer.id || idx} className="bg-white/90 rounded-lg p-3 border border-purple-200 shadow-sm">
+                            {/* Admin badge and date - Right aligned */}
+                            <div className="flex items-center justify-end gap-2 mb-2.5">
+                              {transfer.transferredBy && (
+                                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-bold shadow-sm">
+                                  <ShieldCheck size={12} />
+                                  {transfer.transferredBy}
+                                </span>
+                              )}
+                              {transfer.transferredAt && (
+                                <span className="text-xs text-gray-700 font-bold">
+                                  {formatDate(transfer.transferredAt)}
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* Transfer info - Horizontal layout with packages side by side */}
+                            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                              <div>
+                                <p className="text-base font-black text-gray-900 mb-1">{transfer.fromTripTitle}</p>
+                                {transfer.fromPrice !== undefined && (
+                                  <p className="text-sm text-gray-600 font-semibold">Price: ₹{Number(transfer.fromPrice).toLocaleString('en-IN')}</p>
+                                )}
+                              </div>
+                              
+                              <ArrowRightLeft size={20} className="text-purple-500 shrink-0" />
+                              
+                              <div>
+                                <p className="text-base font-black text-gray-900 mb-1">{transfer.toTripTitle}</p>
+                                {transfer.toPrice !== undefined && (
+                                  <p className="text-sm text-gray-600 font-semibold">Price: ₹{Number(transfer.toPrice).toLocaleString('en-IN')}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {booking.transferHistory.length > 2 && (
+                          <p className="text-xs text-purple-600 font-bold italic text-center pt-1">
+                            + {booking.transferHistory.length - 2} more transfer{booking.transferHistory.length - 2 > 1 ? 's' : ''}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-3 text-[9px] font-black uppercase tracking-[0.14em]">
                   <span className="px-3 py-2 rounded-full bg-secondary/15 text-secondary">{bookingText(booking, 'status', 'Booked')}</span>
                   <span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{bookingText(booking, 'bookingId', `Booking ${index + 1}`)}</span>
                   <span className="px-3 py-2 rounded-full bg-white/5 text-white/55">{bookingText(booking, 'travelers', '1')} traveller(s)</span>

@@ -630,13 +630,13 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings: initialBookings, 
                                 <div key={dateKey} className="border-b border-gray-100 last:border-b-0">
                                   {/* Date Header */}
                                   <div className="px-10 py-3 bg-gray-50">
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <button 
-                                        onClick={() => toggleDate(dateKey)}
-                                        className="text-gray-600 hover:text-gray-900"
-                                      >
+                                    <div 
+                                      className="flex items-center gap-3 mb-2 cursor-pointer hover:bg-gray-100 -mx-2 px-2 py-1 rounded-lg transition-colors"
+                                      onClick={() => toggleDate(dateKey)}
+                                    >
+                                      <div className="text-gray-600">
                                         {isDateExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                                      </button>
+                                      </div>
                                       <div className="flex items-center gap-4 flex-1">
                                         <p className="text-sm font-bold text-gray-700">{date}</p>
                                         <span className="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded-full font-semibold">
