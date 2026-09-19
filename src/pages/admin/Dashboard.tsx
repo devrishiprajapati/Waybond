@@ -60,7 +60,8 @@ const AdminDashboard = () => {
     const adminDataStr = sessionStorage.getItem('adminData')
     if (adminDataStr) {
       try {
-        setAdminData(JSON.parse(adminDataStr))
+        const parsedAdminData = JSON.parse(adminDataStr)
+        setAdminData(parsedAdminData)
       } catch (error) {
         console.error('Failed to parse admin data:', error)
       }

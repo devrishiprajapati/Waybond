@@ -11,6 +11,32 @@ const AdminLogin = () => {
   const navigate = useNavigate()
 
   if (sessionStorage.getItem('isAdmin') === 'true') {
+    // Check where to redirect based on permissions
+    const adminDataStr = sessionStorage.getItem('adminData')
+    if (adminDataStr) {
+      try {
+        const adminData = JSON.parse(adminDataStr)
+        const hasDashboardAccess = adminData.role === 'MASTER_ADMIN' || 
+          (adminData.permissions && adminData.permissions.includes('manage_trips'))
+        
+        if (!hasDashboardAccess) {
+          // Find first available page
+          const availablePages = [
+            { path: '/admin/data-filters', permission: 'view_data_filters' },
+            { path: '/admin/analytics', permission: 'view_analytics' },
+            { path: '/admin/payment-update', permission: 'view_bookings' }
+          ]
+          
+          for (const page of availablePages) {
+            if (adminData.permissions && adminData.permissions.includes(page.permission)) {
+              return <Navigate to={page.path} replace />
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing admin data:', error)
+      }
+    }
     return <Navigate to="/admin/dashboard" replace />
   }
 
@@ -30,6 +56,9 @@ const AdminLogin = () => {
       sessionStorage.setItem('isAdmin', 'true')
       sessionStorage.setItem('adminData', JSON.stringify(data.admin))
       
+      // Redirect based on permissions
+      const adminData = data.admin
+      // All admins go to dashboard - sidebar will show only accessible pages
       navigate('/admin/dashboard')
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Invalid expedition credentials')

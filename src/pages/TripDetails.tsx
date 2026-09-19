@@ -7,7 +7,6 @@ import {
   ChevronUp, Instagram, MessageCircle, FileText, Download, X,
   Share2, Link2, Check, Calendar, ChevronLeft, ChevronRight, User
 } from 'lucide-react'
-import DOMPurify from 'dompurify'
 import { Helmet } from 'react-helmet-async'
 import { getWhatsAppLink } from '../lib/data'
 import { getTripBySlug, createSlug } from '../lib/dataService'
@@ -17,8 +16,6 @@ import { isLoggedIn } from '../lib/auth'
 import { addDaysToDateInput, formatDateOnly } from '../lib/date'
 import AttractionModal from '../components/AttractionModal'
 import { Attraction } from '../lib/trips'
-
-const sanitizeHtml = (html: string) => DOMPurify.sanitize(html || '', { USE_PROFILES: { html: true } })
 
 const TripDetails = () => {
   const { slug } = useParams()
@@ -472,11 +469,9 @@ const TripDetails = () => {
               <div>
                 <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
                   <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
-                  <div
-                    className="rich-content text-base font-medium leading-relaxed text-slate-700 md:text-lg"
-                    style={overviewClampStyle}
-                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(trip.description) }}
-                  />
+                  <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg" style={overviewClampStyle}>
+                    {trip.description}
+                  </p>
                   {shouldShowOverviewToggle && (
                     <button
                       type="button"
@@ -593,10 +588,9 @@ const TripDetails = () => {
                                 </div>
                               )}
 
-                              <div
-                                className="rich-content text-white/60 font-medium leading-relaxed"
-                                dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.description) }}
-                              />
+                              <p className="text-white/60 font-medium leading-relaxed">
+                                {item.description}
+                              </p>
                             </div>
                           </motion.div>
                         )}
@@ -737,41 +731,33 @@ const TripDetails = () => {
             {/* Right Side - Desktop Booking Widget */}
             <div className="lg:col-span-4">
               <div className="sticky top-32 liquid-glass-dark border border-white/10 rounded-3xl p-5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] space-y-5 md:rounded-[3rem] md:p-8 md:space-y-6 md:shadow-[0_15px_60px_rgba(0,0,0,0.5)]">
-                <div className="flex justify-between items-start gap-4 pb-5 border-b border-white/10 md:pb-6">
-                  <div className="min-w-0 flex-1 overflow-hidden">
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Price per person</span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Days</span>
-                        {String(activeDuration || '').match(/(\d+)\s*Night/i) && (
-                          <span className="text-[10px] text-white/40 font-black uppercase tracking-[0.3em]">Nights</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        {hasDiscount && discountedPrice ? (
-                          <div className="space-y-1">
-                            <div className="text-lg md:text-xl font-bold text-white/40 line-through break-all">₹{formatPrice(activePrice)}</div>
-                            <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter liquid-text italic break-all">₹{formatPrice(discountedPrice)}</div>
-                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{trip.discount}% OFF</div>
-                          </div>
-                        ) : (
-                          <div className="text-3xl md:text-4xl font-bungee font-black text-white tracking-tighter liquid-text italic break-all">₹{formatPrice(activePrice)}</div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-center min-w-[46px]">
-                          <div className="text-white font-black text-base md:text-lg not-italic">{String(activeDuration || '').match(/(\d+)\s*Day/i)?.[1] ?? String(activeDuration || '').split(' ')[0]}</div>
+                {/* Price and Duration - Side by Side */}
+                <div className="flex items-start justify-between gap-6 pb-5 border-b border-white/10 md:pb-6">
+                  {/* Price Section - Left Side */}
+                  <div className="flex-1">
+                    <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] block mb-2">Price per person</span>
+                    <div className="mt-2">
+                      {hasDiscount && discountedPrice ? (
+                        <div className="space-y-1">
+                          <div className="text-base md:text-lg font-bold text-white/40 line-through">₹{formatPrice(activePrice)}</div>
+                          <div className="text-2xl md:text-3xl font-bungee font-black text-white tracking-tighter liquid-text italic">₹{formatPrice(discountedPrice)}</div>
+                          <div className="text-[10px] font-black uppercase tracking-widest text-emerald-400">{trip.discount}% OFF</div>
                         </div>
-                        {String(activeDuration || '').match(/(\d+)\s*Night/i) && (
-                          <div className="text-center min-w-[46px]">
-                            <div className="text-white font-black text-base md:text-lg not-italic">{String(activeDuration || '').match(/(\d+)\s*Night/i)![1]}</div>
-                          </div>
-                        )}
-                      </div>
+                      ) : (
+                        <div className="text-2xl md:text-3xl font-bungee font-black text-white tracking-tighter liquid-text italic">₹{formatPrice(activePrice)}</div>
+                      )}
                     </div>
                   </div>
+                  
+                  {/* Duration Section - Right Side */}
+                  {activeDuration && (
+                    <div className="flex-shrink-0 text-right">
+                      <span className="text-[10px] text-white/40 font-bold uppercase tracking-[0.2em] block mb-2">Duration</span>
+                      <div className="mt-2 text-xs md:text-sm font-black text-white tracking-tight">
+                        {activeDuration}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5 md:pb-6">
@@ -1031,10 +1017,9 @@ const TripDetails = () => {
                             </div>
                           )}
 
-                          <div
-                            className="rich-content text-white/60 font-medium leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.description) }}
-                          />
+                          <p className="text-white/60 font-medium leading-relaxed">
+                            {item.description}
+                          </p>
                         </div>
                       </motion.div>
                     )}
@@ -1556,8 +1541,10 @@ const TripDetails = () => {
               </div>
 
               <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
-                <div className="rich-content text-gray-800 leading-relaxed">
-                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(trip.termsAndConditions) }} />
+                <div className="prose prose-sm sm:prose-base max-w-none">
+                  <div className="text-gray-800 leading-relaxed whitespace-pre-line">
+                    {trip.termsAndConditions}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -1600,10 +1587,9 @@ const TripDetails = () => {
               </div>
 
               <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
-                <div
-                  className="rich-content text-gray-800 text-sm sm:text-base leading-relaxed font-medium"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(cancellationPolicy) }}
-                />
+                <p className="whitespace-pre-line text-gray-800 text-sm sm:text-base leading-relaxed font-medium">
+                  {cancellationPolicy}
+                </p>
               </div>
             </motion.div>
           </motion.div>

@@ -1,5 +1,15 @@
-import React, { useState } from 'react'
-import { ChevronDown, ChevronRight, Download, Users, Search, MapPin, Edit2, Save, X, CreditCard, User, MessageCircle } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { ChevronDown, ChevronRight, Download, Users, Search, MapPin, Edit2, Save, X, CreditCard, User, MessageCircle, Clock, History } from 'lucide-react'
+
+type ChangeLog = {
+  timestamp: string
+  changedBy: string
+  changedByRole?: string
+  changeType: string
+  field?: string
+  oldValue?: string
+  newValue?: string
+}
 
 type TravellerDetail = {
   name?: string
@@ -14,6 +24,8 @@ type TravellerDetail = {
   state?: string
   isEligible?: boolean
   bookedBy?: string
+  lastModifiedBy?: string
+  lastModifiedAt?: string
 }
 
 type Booking = {
@@ -32,6 +44,9 @@ type Booking = {
   departureDate?: string
   travellerDetails?: TravellerDetail[]
   whatsappGroupLink?: string
+  lastModifiedBy?: string
+  lastModifiedAt?: string
+  changeLog?: ChangeLog[]
 }
 
 type BookingsViewProps = {
@@ -47,25 +62,241 @@ type GroupedBookings = {
   }
 }
 
-const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }) => {
+const BookingsView: React.FC<BookingsViewProps> = ({ bookings: initialBookings, onBookingUpdate }) => {
+  const [bookings, setBookings] = useState<Booking[]>(initialBookings)
   const [expandedTrips, setExpandedTrips] = useState<Set<string>>(new Set())
   const [expandedJoinLocations, setExpandedJoinLocations] = useState<Set<string>>(new Set())
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set())
   const [expandedParticipants, setExpandedParticipants] = useState<Set<string>>(new Set())
+  const [expandedChangeLogs, setExpandedChangeLogs] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
   const [editingParticipant, setEditingParticipant] = useState<{ bookingId: string; index: number } | null>(null)
   const [editedData, setEditedData] = useState<TravellerDetail | null>(null)
-  const [editingPayment, setEditingPayment] = useState<string | null>(null)
-  const [editedPaymentData, setEditedPaymentData] = useState<{ status: string; paymentStatus: string } | null>(null)
   const [editingWhatsAppLink, setEditingWhatsAppLink] = useState<string | null>(null)
   const [whatsappLinkInput, setWhatsappLinkInput] = useState<string>('')
   const [saving, setSaving] = useState(false)
+
+  // Update bookings when prop changes
+  useEffect(() => {
+    setBookings(initialBookings)
+  }, [initialBookings])
+
+  // Get current admin user from localStorage or context
+  const getCurrentUser = () => {
+    try {
+      const adminDataStr = sessionStorage.getItem('adminData')
+      if (adminDataStr) {
+        const adminData = JSON.parse(adminDataStr)
+        const name = adminData.name || adminData.email || 'Admin'
+        const role = adminData.role || 'ADMIN'
+        return { name, role, isMaster: role === 'MASTER_ADMIN' }
+      }
+    } catch (error) {
+      console.error('Error getting current user:', error)
+    }
+    return { name: 'Admin', role: 'ADMIN', isMaster: false }
+  }
+
+  const toggleChangeLog = (bookingId: string) => {
+    const newExpanded = new Set(expandedChangeLogs)
+    newExpanded.has(bookingId) ? newExpanded.delete(bookingId) : newExpanded.add(bookingId)
+    setExpandedChangeLogs(newExpanded)
+  }
+
+  const formatDateTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString)
+      return date.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      })
+    } catch {
+      return dateString
+    }
+  }
 
   const getInitials = (name: string): string => {
     if (!name) return '?'
     const words = name.trim().split(' ')
     if (words.length === 1) return words[0].charAt(0).toUpperCase()
     return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase()
+  }
+
+  // Parse field changes from old and new values
+  const parseFieldChanges = (oldValue?: string, newValue?: string) => {
+    if (!oldValue || !newValue) return []
+    
+    try {
+      const oldData = JSON.parse(oldValue)
+      const newData = JSON.parse(newValue)
+      const changes: { field: string; oldVal: string; newVal: string }[] = []
+      
+      // Field labels mapping
+      const fieldLabels: Record<string, string> = {
+        name: 'Name',
+        gender: 'Gender',
+        age: 'Age',
+        phone: 'Phone',
+        email: 'Email',
+        city: 'City',
+        state: 'State',
+        emergencyContact: 'Emergency Contact',
+        dob: 'Date of Birth',
+        dateOfBirth: 'Date of Birth'
+      }
+      
+      // Compare all fields
+      const allKeys = new Set([...Object.keys(oldData), ...Object.keys(newData)])
+      
+      allKeys.forEach(key => {
+        // Skip internal fields
+        if (['bookedBy', 'lastModifiedBy', 'lastModifiedAt', 'isEligible'].includes(key)) return
+        
+        const oldVal = oldData[key]
+        const newVal = newData[key]
+        
+        // Only show if value actually changed
+        if (oldVal !== newVal) {
+          changes.push({
+            field: fieldLabels[key] || key,
+            oldVal: oldVal || '(empty)',
+            newVal: newVal || '(empty)'
+          })
+        }
+      })
+      
+      return changes
+    } catch (error) {
+      console.error('Error parsing field changes:', error)
+      return []
+    }
+  }
+
+  // Download CSV function
+  const downloadCSV = (data: Booking[], filename: string) => {
+    const headers = [
+      'Booking ID',
+      'Trip Name',
+      'Location',
+      'Pickup Point',
+      'Departure Date',
+      'Customer Name',
+      'Customer Email',
+      'Customer Phone',
+      'Travelers',
+      'Price per Person',
+      'Total Amount',
+      'Status',
+      'Payment Status',
+      'Booking Date',
+      'WhatsApp Group',
+      'Participant Name',
+      'Participant Gender',
+      'Participant Age',
+      'Participant Phone',
+      'Participant Email',
+      'Participant City',
+      'Participant State',
+      'Emergency Contact'
+    ]
+
+    const rows: string[][] = []
+    
+    data.forEach(booking => {
+      if (booking.travellerDetails && booking.travellerDetails.length > 0) {
+        // Create a row for each participant
+        booking.travellerDetails.forEach(traveller => {
+          rows.push([
+            booking.bookingId,
+            booking.tripName,
+            booking.location,
+            booking.joinOrigin || 'Not specified',
+            booking.departureDate || 'Not specified',
+            booking.customerName,
+            booking.customerEmail || 'N/A',
+            traveller.phone || 'N/A',
+            booking.travelers.toString(),
+            booking.price.toString(),
+            booking.total.toString(),
+            booking.status,
+            booking.paymentStatus || 'N/A',
+            booking.bookingDate,
+            booking.whatsappGroupLink || 'Not set',
+            traveller.name || 'N/A',
+            traveller.gender || 'N/A',
+            traveller.age || 'N/A',
+            traveller.phone || 'N/A',
+            traveller.email || 'N/A',
+            traveller.city || 'N/A',
+            traveller.state || 'N/A',
+            traveller.emergencyContact || 'N/A'
+          ])
+        })
+      } else {
+        // Single row if no traveller details
+        rows.push([
+          booking.bookingId,
+          booking.tripName,
+          booking.location,
+          booking.joinOrigin || 'Not specified',
+          booking.departureDate || 'Not specified',
+          booking.customerName,
+          booking.customerEmail || 'N/A',
+          'N/A',
+          booking.travelers.toString(),
+          booking.price.toString(),
+          booking.total.toString(),
+          booking.status,
+          booking.paymentStatus || 'N/A',
+          booking.bookingDate,
+          booking.whatsappGroupLink || 'Not set',
+          'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A'
+        ])
+      }
+    })
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', filename)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const handleDownloadTrip = (tripName: string) => {
+    const tripBookings = filteredBookings.filter(b => b.tripName === tripName)
+    const filename = `${tripName.replace(/\s+/g, '_')}_All_Bookings_${new Date().toISOString().split('T')[0]}.csv`
+    downloadCSV(tripBookings, filename)
+  }
+
+  const handleDownloadByPickup = (tripName: string, pickupPoint: string) => {
+    const pickupBookings = filteredBookings.filter(
+      b => b.tripName === tripName && (b.joinOrigin || 'No pickup point specified') === pickupPoint
+    )
+    const filename = `${tripName.replace(/\s+/g, '_')}_${pickupPoint.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`
+    downloadCSV(pickupBookings, filename)
+  }
+
+  const handleDownloadByDate = (tripName: string, pickupPoint: string, date: string) => {
+    const dateBookings = filteredBookings.filter(
+      b => b.tripName === tripName && 
+           (b.joinOrigin || 'No pickup point specified') === pickupPoint &&
+           (b.departureDate || b.bookingDate) === date
+    )
+    const filename = `${tripName.replace(/\s+/g, '_')}_${pickupPoint.replace(/\s+/g, '_')}_${date}_${new Date().toISOString().split('T')[0]}.csv`
+    downloadCSV(dateBookings, filename)
   }
 
   const filteredBookings = bookings.filter(booking => {
@@ -125,52 +356,79 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
     setEditedData({ ...traveller })
   }
 
-  const handleEditPayment = (bookingId: string, status: string, paymentStatus: string) => {
-    setEditingPayment(bookingId)
-    setEditedPaymentData({ status, paymentStatus })
-  }
-
-  const handleSavePayment = async (booking: Booking) => {
-    if (!editedPaymentData) return
-    setSaving(true)
-    try {
-      const response = await fetch(`/api/admin/bookings/${booking.bookingId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: editedPaymentData.status,
-          paymentStatus: editedPaymentData.paymentStatus
-        })
-      })
-      if (!response.ok) throw new Error('Failed to update payment')
-      setEditingPayment(null)
-      setEditedPaymentData(null)
-      onBookingUpdate ? onBookingUpdate() : window.location.reload()
-    } catch (error) {
-      alert('Failed to update payment information')
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const handleSaveParticipant = async (booking: Booking, index: number) => {
     if (!editedData) return
     setSaving(true)
     try {
       const updatedTravellerDetails = [...(booking.travellerDetails || [])]
+      const currentUser = getCurrentUser()
+      const timestamp = new Date().toISOString()
+      
+      // Add modification tracking to participant
       if (!editedData.bookedBy) editedData.bookedBy = getInitials(booking.customerName)
+      editedData.lastModifiedBy = currentUser.name
+      editedData.lastModifiedAt = timestamp
+      
       updatedTravellerDetails[index] = editedData
+
+      // Create change log entry
+      const oldData = booking.travellerDetails?.[index]
+      const changeLog: ChangeLog = {
+        timestamp,
+        changedBy: currentUser.name,
+        changedByRole: currentUser.role,
+        changeType: 'Participant Updated',
+        field: `Participant ${index + 1} (${editedData.name || 'Unnamed'})`,
+        oldValue: JSON.stringify(oldData),
+        newValue: JSON.stringify(editedData)
+      }
+
+      const existingChangeLogs = Array.isArray(booking.changeLog) ? booking.changeLog : []
+
+      const requestBody = { 
+        travellerDetails: updatedTravellerDetails,
+        lastModifiedBy: currentUser.name,
+        lastModifiedAt: timestamp,
+        changeLog: [...existingChangeLogs, changeLog]
+      }
+      
+      console.log('💾 Saving booking update...')
 
       const response = await fetch(`/api/admin/bookings/${booking.bookingId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ travellerDetails: updatedTravellerDetails })
+        body: JSON.stringify(requestBody)
       })
+      
       if (!response.ok) throw new Error('Failed to update participant')
+      
+      const responseData = await response.json()
+      console.log('✅ Saved! Change logs:', responseData.changeLog?.length || 0)
+      
+      // Update the bookings state with the new data
+      setBookings(prevBookings => {
+        const updated = prevBookings.map(b => 
+          b.bookingId === booking.bookingId 
+            ? { ...b, ...responseData } 
+            : b
+        )
+        
+        // Check if update worked
+        const updatedBooking = updated.find(b => b.bookingId === booking.bookingId)
+        console.log('📊 Updated booking changeLog count:', updatedBooking?.changeLog?.length || 0)
+        
+        return updated
+      })
+      
       setEditingParticipant(null)
       setEditedData(null)
-      onBookingUpdate ? onBookingUpdate() : window.location.reload()
+      
+      // Optionally notify parent component (but don't reload)
+      if (onBookingUpdate) {
+        onBookingUpdate()
+      }
     } catch (error) {
+      console.error('❌ Error saving participant:', error)
       alert('Failed to update participant')
     } finally {
       setSaving(false)
@@ -308,8 +566,15 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                     <p className="text-sm text-gray-500 font-medium">{totalBookings} total bookings</p>
                   </div>
                 </div>
-                <button className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
-                  <Download size={20} className="text-gray-600" />
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDownloadTrip(tripName)
+                  }}
+                  className="p-2 hover:bg-blue-100 rounded-lg transition-colors group"
+                  title="Download all bookings for this trip"
+                >
+                  <Download size={20} className="text-blue-600 group-hover:text-blue-700" />
                 </button>
               </div>
 
@@ -340,6 +605,16 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                               <p className="text-xs text-gray-500 font-medium">{locationBookingCount} bookings</p>
                             </div>
                           </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDownloadByPickup(tripName, joinLocation)
+                            }}
+                            className="p-1.5 hover:bg-green-200 rounded-lg transition-colors group"
+                            title="Download bookings for this pickup point"
+                          >
+                            <Download size={18} className="text-green-600 group-hover:text-green-700" />
+                          </button>
                         </div>
 
                         {/* Date Groups */}
@@ -368,6 +643,16 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                                           {bookingsArray.length} {bookingsArray.length === 1 ? 'booking' : 'bookings'}
                                         </span>
                                       </div>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          handleDownloadByDate(tripName, joinLocation, date)
+                                        }}
+                                        className="p-1.5 hover:bg-purple-100 rounded-lg transition-colors group"
+                                        title="Download bookings for this date"
+                                      >
+                                        <Download size={16} className="text-purple-600 group-hover:text-purple-700" />
+                                      </button>
                                     </div>
                                     
                                     {/* WhatsApp Group Link Section */}
@@ -439,7 +724,6 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                                   {isDateExpanded && (
                                     <div className="bg-white divide-y divide-gray-100">
                                       {bookingsArray.map((booking) => {
-                                        const isEditingPaymentForThis = editingPayment === booking.bookingId
                                         const bookedByInitials = getInitials(booking.customerName)
 
                                         return (
@@ -455,6 +739,20 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                                                   <span className="text-sm font-bold text-gray-600">
                                                     {booking.travelers} {booking.travelers === 1 ? 'participant' : 'participants'}
                                                   </span>
+                                                  
+                                                  {/* Change Log Button */}
+                                                  {booking.changeLog && booking.changeLog.length > 0 && (
+                                                    <>
+                                                      <span className="text-xs text-gray-400">•</span>
+                                                      <button
+                                                        onClick={() => toggleChangeLog(booking.bookingId)}
+                                                        className="inline-flex items-center gap-1.5 text-xs text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200 font-semibold hover:bg-purple-100 transition-colors"
+                                                      >
+                                                        <History size={12} />
+                                                        {booking.changeLog.length} {booking.changeLog.length === 1 ? 'change' : 'changes'}
+                                                      </button>
+                                                    </>
+                                                  )}
                                                 </div>
 
                                                 <p className="text-lg font-bold text-gray-900 mb-1">{booking.customerName}</p>
@@ -462,8 +760,19 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                                                   <p className="text-sm text-gray-600 mb-2">{booking.customerEmail}</p>
                                                 )}
 
+                                                {/* Last Modified Info */}
+                                                {booking.lastModifiedBy && booking.lastModifiedAt && (
+                                                  <div className="flex items-center gap-2 text-xs text-gray-500 mt-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200 inline-flex">
+                                                    <Clock size={12} className="text-gray-400" />
+                                                    <span>
+                                                      Last modified by <span className="font-bold text-gray-700">{booking.lastModifiedBy}</span>
+                                                      {' '}on {formatDateTime(booking.lastModifiedAt)}
+                                                    </span>
+                                                  </div>
+                                                )}
+
                                                 {booking.joinOrigin && (
-                                                  <span className="inline-flex items-center gap-1.5 text-xs text-green-700 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 font-semibold">
+                                                  <span className="inline-flex items-center gap-1.5 text-xs text-green-700 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200 font-semibold mt-2">
                                                     <MapPin size={12} />
                                                     Pickup: {booking.joinOrigin}
                                                   </span>
@@ -480,68 +789,16 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                                                   </p>
                                                 </div>
                                                 
-                                                {isEditingPaymentForThis ? (
-                                                  <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 space-y-2">
-                                                    <select
-                                                      value={editedPaymentData?.status || ''}
-                                                      onChange={(e) => setEditedPaymentData(prev => prev ? {...prev, status: e.target.value} : null)}
-                                                      className="w-full text-xs px-2 py-1.5 border border-gray-300 rounded-lg font-semibold"
-                                                    >
-                                                      <option value="Confirmed">Confirmed</option>
-                                                      <option value="Pending">Pending</option>
-                                                      <option value="Cancelled">Cancelled</option>
-                                                      <option value="Payment Pending">Payment Pending</option>
-                                                    </select>
-                                                    <select
-                                                      value={editedPaymentData?.paymentStatus || ''}
-                                                      onChange={(e) => setEditedPaymentData(prev => prev ? {...prev, paymentStatus: e.target.value} : null)}
-                                                      className="w-full text-xs px-2 py-1.5 border border-gray-300 rounded-lg font-semibold"
-                                                    >
-                                                      <option value="Online">Online</option>
-                                                      <option value="Cash">Cash</option>
-                                                      <option value="Credit Card">Credit Card</option>
-                                                      <option value="Debit Card">Debit Card</option>
-                                                      <option value="UPI">UPI</option>
-                                                      <option value="Bank Transfer">Bank Transfer</option>
-                                                    </select>
-                                                    <div className="flex gap-1">
-                                                      <button
-                                                        onClick={() => handleSavePayment(booking)}
-                                                        disabled={saving}
-                                                        className="flex-1 py-1.5 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 disabled:opacity-50"
-                                                      >
-                                                        <Save size={14} className="inline mr-1" /> Save
-                                                      </button>
-                                                      <button
-                                                        onClick={() => {setEditingPayment(null); setEditedPaymentData(null)}}
-                                                        disabled={saving}
-                                                        className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-300 disabled:opacity-50"
-                                                      >
-                                                        <X size={14} />
-                                                      </button>
-                                                    </div>
-                                                  </div>
-                                                ) : (
-                                                  <div className="flex flex-col gap-2 items-end">
-                                                    <div className="flex items-center gap-2">
-                                                      <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase border ${getStatusStyle(booking.status)}`}>
-                                                        {booking.status}
-                                                      </span>
-                                                      <button
-                                                        onClick={() => handleEditPayment(booking.bookingId, booking.status, booking.paymentStatus)}
-                                                        className="p-1.5 text-gray-500 hover:bg-gray-200 rounded-lg transition-colors"
-                                                        title="Edit payment"
-                                                      >
-                                                        <Edit2 size={14} />
-                                                      </button>
-                                                    </div>
-                                                    {booking.paymentStatus && (
-                                                      <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getPaymentMethodStyle(booking.paymentStatus)}`}>
-                                                        {booking.paymentStatus}
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                )}
+                                                <div className="flex flex-col gap-2 items-end">
+                                                  <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase border ${getStatusStyle(booking.status)}`}>
+                                                    {booking.status}
+                                                  </span>
+                                                  {booking.paymentStatus && (
+                                                    <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getPaymentMethodStyle(booking.paymentStatus)}`}>
+                                                      {booking.paymentStatus}
+                                                    </span>
+                                                  )}
+                                                </div>
                                               </div>
                                             </div>
 
@@ -777,6 +1034,112 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings, onBookingUpdate }
                                                     })}
                                                   </div>
                                                 )}
+                                              </div>
+                                            )}
+
+                                            {/* Change Log Section */}
+                                            {expandedChangeLogs.has(booking.bookingId) && booking.changeLog && booking.changeLog.length > 0 && (
+                                              <div className="mt-4 pt-4 border-t-2 border-purple-200">
+                                                <div className="flex items-center gap-2 mb-4">
+                                                  <History size={18} className="text-purple-600" />
+                                                  <h4 className="text-sm font-black text-gray-900 uppercase tracking-wide">
+                                                    Change History
+                                                  </h4>
+                                                </div>
+                                                <div className="space-y-3">
+                                                  {booking.changeLog.slice().reverse().map((log, idx) => {
+                                                    const isMasterAdmin = log.changedByRole === 'MASTER_ADMIN'
+                                                    const fieldChanges = parseFieldChanges(log.oldValue, log.newValue)
+                                                    
+                                                    return (
+                                                      <div
+                                                        key={idx}
+                                                        className={`border-l-4 p-4 rounded-lg ${
+                                                          isMasterAdmin 
+                                                            ? 'bg-gradient-to-r from-amber-50 to-white border-amber-500' 
+                                                            : 'bg-gradient-to-r from-purple-50 to-white border-purple-400'
+                                                        }`}
+                                                      >
+                                                        <div className="flex items-start justify-between gap-3 mb-2">
+                                                          <div className="flex items-center gap-2">
+                                                            {/* User Badge with Role-based styling */}
+                                                            <div className={`w-8 h-8 rounded-full text-white flex items-center justify-center font-black text-xs ${
+                                                              isMasterAdmin ? 'bg-amber-600' : 'bg-purple-600'
+                                                            }`}>
+                                                              {log.changedBy.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                                                            </div>
+                                                            
+                                                            <div className="flex-1">
+                                                              <div className="flex items-center gap-2">
+                                                                <p className="text-sm font-black text-gray-900">{log.changedBy}</p>
+                                                                
+                                                                {/* Role Badge */}
+                                                                {log.changedByRole && (
+                                                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                                                    isMasterAdmin 
+                                                                      ? 'bg-amber-100 border border-amber-300 text-amber-800'
+                                                                      : 'bg-purple-100 border border-purple-300 text-purple-800'
+                                                                  }`}>
+                                                                    {isMasterAdmin && (
+                                                                      <svg 
+                                                                        className="w-3 h-3" 
+                                                                        fill="currentColor" 
+                                                                        viewBox="0 0 20 20"
+                                                                      >
+                                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                                      </svg>
+                                                                    )}
+                                                                    {isMasterAdmin ? 'Master Admin' : log.changedByRole}
+                                                                  </span>
+                                                                )}
+                                                              </div>
+                                                              <p className="text-xs text-gray-500 font-semibold">{log.changeType}</p>
+                                                            </div>
+                                                          </div>
+                                                          
+                                                          <div className="text-right">
+                                                            <p className="text-xs text-gray-600 font-semibold">
+                                                              {formatDateTime(log.timestamp)}
+                                                            </p>
+                                                          </div>
+                                                        </div>
+                                                        
+                                                        {log.field && (
+                                                          <div className="text-xs bg-white px-3 py-2 rounded border mt-2" 
+                                                            style={{ borderColor: isMasterAdmin ? '#f59e0b' : '#a855f7' }}>
+                                                            <span className="font-bold" style={{ color: isMasterAdmin ? '#b45309' : '#7c3aed' }}>
+                                                              Updated: 
+                                                            </span>
+                                                            <span className="text-gray-700 ml-1">{log.field}</span>
+                                                          </div>
+                                                        )}
+                                                        
+                                                        {/* Show specific field changes */}
+                                                        {fieldChanges.length > 0 && (
+                                                          <div className="mt-3 space-y-2">
+                                                            {fieldChanges.map((change, changeIdx) => (
+                                                              <div key={changeIdx} className="bg-white rounded-lg p-3 border" style={{ borderColor: isMasterAdmin ? '#f59e0b' : '#a855f7' }}>
+                                                                <div className="flex items-start gap-2">
+                                                                  <span className="text-xs font-black text-gray-700 min-w-[100px]">{change.field}:</span>
+                                                                  <div className="flex-1 space-y-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                      <span className="text-[10px] font-bold text-red-600 uppercase">From:</span>
+                                                                      <span className="text-xs text-red-700 bg-red-50 px-2 py-0.5 rounded font-medium line-through">{change.oldVal}</span>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2">
+                                                                      <span className="text-[10px] font-bold text-green-600 uppercase">To:</span>
+                                                                      <span className="text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded font-bold">{change.newVal}</span>
+                                                                    </div>
+                                                                  </div>
+                                                                </div>
+                                                              </div>
+                                                            ))}
+                                                          </div>
+                                                        )}
+                                                      </div>
+                                                    )
+                                                  })}
+                                                </div>
                                               </div>
                                             )}
                                           </div>
