@@ -146,16 +146,16 @@ export default function AdminUserDetail() {
                       
                       {/* Group Booking Indicator */}
                       {bookingNumber(booking, 'travelers') > 1 && (
-                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-300 text-[8px] font-black uppercase tracking-wider">
-                          <UserRound size={11} />
+                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500 border-2 border-blue-400 text-white text-[10px] font-black uppercase tracking-wider shadow-md">
+                          <UserRound size={12} />
                           Group
                         </span>
                       )}
                       
                       {/* Transfer Badge */}
                       {(booking.transferredFrom || booking.transferredFromTrip || booking.transferredFromBooking) && (
-                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-500/20 border border-purple-400/40 text-purple-300 text-[8px] font-black uppercase tracking-wider">
-                          <ArrowRightLeft size={11} />
+                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 border-2 border-purple-500 text-white text-[10px] font-black uppercase tracking-wider shadow-md">
+                          <ArrowRightLeft size={12} />
                           Transferred
                         </span>
                       )}
