@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Calendar, LoaderCircle, Mail, MessageSquare, Phone, Search, Trash2, User, Users } from 'lucide-react'
 import PermissionGuard from '../../components/PermissionGuard'
+import ConfirmationToast from '../../components/admin/ConfirmationToast'
 
 type Enquiry = {
   id: string
@@ -48,7 +49,11 @@ export default function Enquiries() {
   const [selectedEnquiry, setSelectedEnquiry] = useState<Enquiry | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [updating, setUpdating] = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [pendingConfirmation, setPendingConfirmation] = useState<
+    | { type: 'confirm-status'; enquiry: Enquiry }
+    | { type: 'delete'; enquiry: Enquiry }
+    | null
+  >(null)
 
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
@@ -97,6 +102,15 @@ export default function Enquiries() {
     }
   }
 
+  const requestStatusChange = (enquiry: Enquiry, newStatus: string) => {
+    if (newStatus === 'CONFIRM') {
+      setPendingConfirmation({ type: 'confirm-status', enquiry })
+      return
+    }
+
+    void handleStatusChange(enquiry.id, newStatus)
+  }
+
   const handleNotesUpdate = async (id: string, notes: string) => {
     setUpdating(true)
     try {
@@ -131,11 +145,24 @@ export default function Enquiries() {
           setModalOpen(false)
           setSelectedEnquiry(null)
         }
-        setDeleteConfirm(null)
+        setPendingConfirmation(null)
       }
     } catch (error) {
       console.error('Failed to delete enquiry:', error)
     }
+  }
+
+  const handleConfirmedAction = () => {
+    if (!pendingConfirmation) return
+
+    if (pendingConfirmation.type === 'confirm-status') {
+      void handleStatusChange(pendingConfirmation.enquiry.id, 'CONFIRM').then(() => {
+        setPendingConfirmation(null)
+      })
+      return
+    }
+
+    void handleDelete(pendingConfirmation.enquiry.id)
   }
 
   const filteredEnquiries = enquiries.filter(enq =>
@@ -365,7 +392,7 @@ export default function Enquiries() {
                   {STATUS_OPTIONS.filter(s => s.value !== 'ALL').map(status => (
                     <button
                       key={status.value}
-                      onClick={() => handleStatusChange(selectedEnquiry.id, status.value)}
+                      onClick={() => requestStatusChange(selectedEnquiry, status.value)}
                       disabled={updating}
                       className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide transition-all ${selectedEnquiry.status === status.value
                         ? status.color + ' shadow-md'
@@ -400,35 +427,30 @@ export default function Enquiries() {
 
               {/* Delete Button */}
               <div className="border-t border-slate-200 pt-4">
-                {deleteConfirm === selectedEnquiry.id ? (
-                  <div className="flex items-center gap-3">
-                    <p className="flex-1 text-sm font-semibold text-red-600">Delete this enquiry?</p>
-                    <button
-                      onClick={() => handleDelete(selectedEnquiry.id)}
-                      className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold uppercase text-white transition-colors hover:bg-red-700"
-                    >
-                      Confirm Delete
-                    </button>
-                    <button
-                      onClick={() => setDeleteConfirm(null)}
-                      className="rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold uppercase text-slate-600 transition-colors hover:bg-slate-200"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setDeleteConfirm(selectedEnquiry.id)}
-                    className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-xs font-bold uppercase text-red-600 transition-colors hover:bg-red-100"
-                  >
-                    <Trash2 size={14} /> Delete Enquiry
-                  </button>
-                )}
+                <button
+                  onClick={() => setPendingConfirmation({ type: 'delete', enquiry: selectedEnquiry })}
+                  className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2 text-xs font-bold uppercase text-red-600 transition-colors hover:bg-red-100"
+                >
+                  <Trash2 size={14} /> Delete Enquiry
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
+      <ConfirmationToast
+        open={pendingConfirmation !== null}
+        tone={pendingConfirmation?.type === 'confirm-status' ? 'success' : 'danger'}
+        message={
+          pendingConfirmation?.type === 'confirm-status'
+            ? `Mark ${pendingConfirmation.enquiry.name}'s enquiry as confirmed?`
+            : `Delete ${pendingConfirmation?.enquiry.name || 'this enquiry'}? This action cannot be undone.`
+        }
+        confirmLabel={pendingConfirmation?.type === 'confirm-status' ? 'Confirm' : 'Delete'}
+        busy={updating}
+        onCancel={() => setPendingConfirmation(null)}
+        onConfirm={handleConfirmedAction}
+      />
     </div>
     </PermissionGuard>
   )

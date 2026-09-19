@@ -20,6 +20,7 @@ import {
   Save,
   ArrowLeft
 } from 'lucide-react'
+import ConfirmationToast from '../../components/admin/ConfirmationToast'
 
 type CancellationRequest = {
   id: string
@@ -63,6 +64,7 @@ const CancellationManagement = () => {
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<CancellationRequest | null>(null)
 
   const [formData, setFormData] = useState({
     status: '',
@@ -187,9 +189,8 @@ const CancellationManagement = () => {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this cancellation request?')) return
-
     try {
+      setProcessing(true)
       const response = await fetch(`/api/admin/cancellations/${id}`, {
         method: 'DELETE'
       })
@@ -197,8 +198,11 @@ const CancellationManagement = () => {
       if (!response.ok) throw new Error('Failed to delete')
 
       await loadData()
+      setPendingDelete(null)
     } catch (err) {
       alert('Failed to delete cancellation request')
+    } finally {
+      setProcessing(false)
     }
   }
 
@@ -425,7 +429,7 @@ const CancellationManagement = () => {
                       Review
                     </button>
                     <button
-                      onClick={() => handleDelete(cancellation.id)}
+                      onClick={() => setPendingDelete(cancellation)}
                       className="p-2.5 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
                       title="Delete"
                     >
@@ -590,6 +594,16 @@ const CancellationManagement = () => {
           </motion.div>
         )}
       </AnimatePresence>
+      <ConfirmationToast
+        open={pendingDelete !== null}
+        message={`Delete cancellation request for ${pendingDelete?.userName || 'this customer'}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        busy={processing}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => {
+          if (pendingDelete) void handleDelete(pendingDelete.id)
+        }}
+      />
     </div>
   )
 }

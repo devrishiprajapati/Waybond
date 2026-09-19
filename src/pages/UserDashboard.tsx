@@ -22,7 +22,7 @@ import { registerUser } from '../lib/adminStorage'
 import { getUser, logout } from '../lib/auth'
 import { useWishlist } from '../lib/wishlist'
 import { createSlug } from '../lib/dataService'
-import { formatDateShort } from '../lib/date'
+import { formatDateShort, parseDateOnly, addDaysToDateInput } from '../lib/date'
 import { downloadInvoice } from '../lib/invoice'
 import { downloadTicket } from '../lib/tickets'
 import CancellationModal from '../components/CancellationModal'
@@ -212,10 +212,24 @@ const UserDashboard = () => {
     return testimonials.some((testimonial) => testimonial.tripTitle === tripTitle)
   }
 
-  // Get confirmed trips without testimonials
+  // Helper: returns true if the trip's end date has passed (i.e. it is completed)
+  const isTripCompleted = (trip: any): boolean => {
+    const startDate = trip.nextBatch || trip.departure || ''
+    if (!startDate) return false
+    // Parse number of days from e.g. "5 Days / 4 Nights" or "3 Days"
+    const dayMatch = String(trip.duration || '').match(/(\d+)\s*Day/i)
+    const days = dayMatch ? parseInt(dayMatch[1], 10) : 0
+    const endDateStr = addDaysToDateInput(String(startDate), days)
+    if (!endDateStr) return false
+    const endDate = parseDateOnly(endDateStr)
+    if (!endDate) return false
+    return new Date() >= endDate
+  }
+
+  // Get confirmed trips that are completed (trip end date has passed) and don't yet have a testimonial
   const tripsAvailableForTestimonial = useMemo(() => {
     return bookedTrips.filter(
-      (trip) => trip.status === 'Confirmed' && !hasTestimonialForTrip(trip.title)
+      (trip) => trip.status === 'Confirmed' && isTripCompleted(trip) && !hasTestimonialForTrip(trip.title)
     )
   }, [bookedTrips, testimonials])
 
@@ -223,14 +237,14 @@ const UserDashboard = () => {
     event.preventDefault()
     if (!testimonialText.trim()) return
 
-    // Only allow testimonials for confirmed trips
-    const confirmedTrips = bookedTrips.filter((trip) => trip.status === 'Confirmed')
-    if (confirmedTrips.length === 0) {
-      alert('You can only add testimonials for confirmed trips.')
+    // Only allow testimonials for completed confirmed trips
+    const eligibleTrips = bookedTrips.filter((trip) => trip.status === 'Confirmed' && isTripCompleted(trip))
+    if (eligibleTrips.length === 0) {
+      alert('Testimonials are only available after your trip has been completed.')
       return
     }
 
-    const selectedTrip = confirmedTrips.find((trip) => String(trip.id) === testimonialTripId) || confirmedTrips[0]
+    const selectedTrip = eligibleTrips.find((trip) => String(trip.id) === testimonialTripId) || eligibleTrips[0]
 
     // Check if testimonial already exists for this trip
     if (hasTestimonialForTrip(selectedTrip?.title)) {
@@ -382,9 +396,13 @@ const UserDashboard = () => {
                   <div className="text-center py-8">
                     <MessageCircle className="text-white/15 mx-auto mb-4" size={34} />
                     <p className="text-sm text-white/40 font-medium italic">
-                      {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0
-                        ? 'Testimonials are only available for confirmed trips.'
-                        : 'You have already added testimonials for all your confirmed trips.'}
+                      {(() => {
+                        const confirmedTrips = bookedTrips.filter((t) => t.status === 'Confirmed')
+                        if (confirmedTrips.length === 0) return 'Testimonials are only available for confirmed trips.'
+                        const completedTrips = confirmedTrips.filter(isTripCompleted)
+                        if (completedTrips.length === 0) return 'You can leave a review once your trip has been completed.'
+                        return 'You have already added testimonials for all your completed trips.'
+                      })()}
                     </p>
                   </div>
                 ) : (
@@ -626,22 +644,35 @@ const UserDashboard = () => {
                               <Download size={15} /> Download Ticket
                             </button>
                           ))}
-                          <button
-                            onClick={() => {
-                              if (trip.status === 'Confirmed' && !hasTestimonialForTrip(trip.title)) {
-                                setTestimonialTripId(String(trip.id))
-                                document.getElementById('testimonial-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                              }
-                            }}
-                            disabled={trip.status !== 'Confirmed' || hasTestimonialForTrip(trip.title)}
-                            className={`h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border transition-all ${trip.status === 'Confirmed' && !hasTestimonialForTrip(trip.title)
-                              ? 'bg-white/5 text-white border-white/10 hover:bg-white/20 hover:border-white/30 hover:scale-105 cursor-pointer'
-                              : 'bg-white/5 text-white/30 border-white/10 cursor-not-allowed opacity-50'
-                              }`}
-                            title={hasTestimonialForTrip(trip.title) ? 'Testimonial already submitted' : ''}
-                          >
-                            {hasTestimonialForTrip(trip.title) ? 'Testimonial Added' : 'Add Testimonial'}
-                          </button>
+                          {(() => {
+                            const isConfirmed = trip.status === 'Confirmed'
+                            const isCompleted = isTripCompleted(trip)
+                            const alreadyReviewed = hasTestimonialForTrip(trip.title)
+                            const canReview = isConfirmed && isCompleted && !alreadyReviewed
+                            const tooltipText = alreadyReviewed
+                              ? 'Testimonial already submitted'
+                              : !isCompleted
+                                ? 'Available after your trip ends'
+                                : ''
+                            return (
+                              <button
+                                onClick={() => {
+                                  if (canReview) {
+                                    setTestimonialTripId(String(trip.id))
+                                    document.getElementById('testimonial-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                                  }
+                                }}
+                                disabled={!canReview}
+                                className={`h-12 px-6 rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-[0.16em] border transition-all ${canReview
+                                  ? 'bg-white/5 text-white border-white/10 hover:bg-white/20 hover:border-white/30 hover:scale-105 cursor-pointer'
+                                  : 'bg-white/5 text-white/30 border-white/10 cursor-not-allowed opacity-50'
+                                  }`}
+                                title={tooltipText}
+                              >
+                                {alreadyReviewed ? 'Testimonial Added' : !isCompleted ? 'Trip Not Ended Yet' : 'Add Testimonial'}
+                              </button>
+                            )
+                          })()}
                           {trip.status !== 'Confirmed' && (
                             <button
                               onClick={() => handleCancelTrip(trip.bookingDbId)}
@@ -756,9 +787,13 @@ const UserDashboard = () => {
                 <div className="text-center py-8">
                   <MessageCircle className="text-white/15 mx-auto mb-4" size={34} />
                   <p className="text-sm text-white/40 font-medium italic">
-                    {bookedTrips.filter((trip) => trip.status === 'Confirmed').length === 0
-                      ? 'Testimonials are only available for confirmed trips.'
-                      : 'You have already added testimonials for all your confirmed trips.'}
+                    {(() => {
+                      const confirmedTrips = bookedTrips.filter((t) => t.status === 'Confirmed')
+                      if (confirmedTrips.length === 0) return 'Testimonials are only available for confirmed trips.'
+                      const completedTrips = confirmedTrips.filter(isTripCompleted)
+                      if (completedTrips.length === 0) return 'You can leave a review once your trip has been completed.'
+                      return 'You have already added testimonials for all your completed trips.'
+                    })()}
                   </p>
                 </div>
               ) : (

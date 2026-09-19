@@ -17,6 +17,7 @@ import {
   ArrowLeft
 } from 'lucide-react'
 import { ALL_PERMISSIONS, type Permission } from '../../lib/permissions'
+import ConfirmationToast from '../../components/admin/ConfirmationToast'
 
 type Admin = {
   id: string
@@ -45,6 +46,8 @@ const AdminManagement = () => {
   const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [pendingDeleteAdmin, setPendingDeleteAdmin] = useState<Admin | null>(null)
   const navigate = useNavigate()
 
   // Form state
@@ -177,19 +180,19 @@ const AdminManagement = () => {
   }
 
   const handleDelete = async (admin: Admin) => {
-    if (!confirm(`Are you sure you want to delete admin "${admin.name}"? This action cannot be undone.`)) {
-      return
-    }
-
     try {
+      setDeleteLoading(true)
       const response = await fetch(`/api/admins/${admin.id}`, { method: 'DELETE' })
       if (!response.ok) {
         const error = await response.json()
         throw new Error(error.message || 'Failed to delete admin')
       }
       await loadData()
+      setPendingDeleteAdmin(null)
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to delete admin')
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -368,7 +371,7 @@ const AdminManagement = () => {
                       <Edit2 size={17} />
                     </button>
                     <button
-                      onClick={() => handleDelete(admin)}
+                      onClick={() => setPendingDeleteAdmin(admin)}
                       className="h-12 px-5 rounded-2xl bg-red-500/10 text-red-300 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center"
                       title="Delete admin"
                     >
@@ -631,6 +634,16 @@ const AdminManagement = () => {
           </motion.div>
         </div>
       )}
+      <ConfirmationToast
+        open={pendingDeleteAdmin !== null}
+        message={`Delete admin "${pendingDeleteAdmin?.name || ''}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        busy={deleteLoading}
+        onCancel={() => setPendingDeleteAdmin(null)}
+        onConfirm={() => {
+          if (pendingDeleteAdmin) void handleDelete(pendingDeleteAdmin)
+        }}
+      />
     </div>
   )
 }

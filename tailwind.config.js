@@ -30,11 +30,11 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Manrope', 'sans-serif'],
-        serif: ['Manrope', 'sans-serif'],
-        display: ['Manrope', 'sans-serif'],
-        bungee: ['Manrope', 'sans-serif'],
-        body: ['Manrope', 'sans-serif'],
+        sans: ['Montserrat', 'sans-serif'],
+        serif: ['Montserrat', 'sans-serif'],
+        display: ['Montserrat', 'sans-serif'],
+        bungee: ['Montserrat', 'sans-serif'],
+        body: ['Montserrat', 'sans-serif'],
       },
       fontWeight: {
         regular: '400',
