@@ -355,16 +355,6 @@ const TripDetails = () => {
                 <MapPin size={16} className="mr-2 text-secondary shrink-0" /> <span className="break-words">{trip.location}</span>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2.5 sm:gap-3">
-              <a
-                href='/faqs'
-                target="_blank" rel="noopener noreferrer"
-                onClick={() => haptics.medium()}
-                className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/10 border border-secondary/20 shadow-md transition-colors hover:bg-secondary hover:border-secondary sm:h-12 sm:w-12 sm:rounded-2xl group"
-              >
-                <MessageCircle size={20} className="text-secondary group-hover:text-white transition-colors" />
-              </a>
-            </div>
           </div>
         </div>
 
@@ -469,14 +459,6 @@ const TripDetails = () => {
                   <span className="uppercase tracking-wide">{trip.location}</span>
                 </div>
               </div>
-              <a
-                href='/faqs'
-                target="_blank" rel="noopener noreferrer"
-                onClick={() => haptics.medium()}
-                className="shrink-0 flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/10 border border-secondary/20 shadow-md transition-colors hover:bg-secondary hover:border-secondary group"
-              >
-                <MessageCircle size={20} className="text-secondary group-hover:text-white transition-colors" />
-              </a>
             </div>
           </div>
         </div>
@@ -1238,6 +1220,18 @@ const TripDetails = () => {
                 </div>
                 <span className="text-gray-900 text-xs sm:text-sm md:text-base font-semibold text-left">Cancellation Policy</span>
               </button>
+
+              {/* FAQs Link */}
+              <Link
+                to="/faqs"
+                onClick={() => haptics.light()}
+                className="flex items-center justify-start gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 rounded-lg sm:rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group w-full lg:w-auto"
+              >
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0 group-hover:bg-green-200 transition-colors">
+                  <MessageCircle size={16} className="text-green-600 sm:w-[18px] sm:h-[18px]" />
+                </div>
+                <span className="text-gray-900 text-xs sm:text-sm md:text-base font-semibold text-left">Traveler FAQs</span>
+              </Link>
             </div>
           </div>
         </section>
