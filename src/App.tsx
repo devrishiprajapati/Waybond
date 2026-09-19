@@ -74,14 +74,14 @@ function PublicRoutes({ location }: { location: ReturnType<typeof useLocation> }
       <Route path="/trip/:slug" element={<TripDetails />} />
       <Route path="/booking-form" element={<BookingForm />} />
       <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-      <Route path="/dashboard" element={<UserDashboard />} />
-      <Route path="/dashboard/:userId" element={<UserDashboard />} />
-      <Route path="/dashboard/:userId/all-trips" element={<AllTripsPage />} />
-      <Route path="/dashboard/:userId/booked-trips" element={<BookedTripsPage />} />
-      <Route path="/dashboard/:userId/confirmed" element={<ConfirmedTripsPage />} />
-      <Route path="/dashboard/:userId/testimonials" element={<TestimonialsPage />} />
-      <Route path="/dashboard/:userId/cancelled" element={<CancelledTripsPage />} />
-      <Route path="/dashboard/:userId/profile" element={<ProfilePage />} />
+      <Route path="/dashboard" element={<div className="user-dashboard-text"><UserDashboard /></div>} />
+      <Route path="/dashboard/:userId" element={<div className="user-dashboard-text"><UserDashboard /></div>} />
+      <Route path="/dashboard/:userId/all-trips" element={<div className="user-dashboard-text"><AllTripsPage /></div>} />
+      <Route path="/dashboard/:userId/booked-trips" element={<div className="user-dashboard-text"><BookedTripsPage /></div>} />
+      <Route path="/dashboard/:userId/confirmed" element={<div className="user-dashboard-text"><ConfirmedTripsPage /></div>} />
+      <Route path="/dashboard/:userId/testimonials" element={<div className="user-dashboard-text"><TestimonialsPage /></div>} />
+      <Route path="/dashboard/:userId/cancelled" element={<div className="user-dashboard-text"><CancelledTripsPage /></div>} />
+      <Route path="/dashboard/:userId/profile" element={<div className="user-dashboard-text"><ProfilePage /></div>} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
     </Routes>

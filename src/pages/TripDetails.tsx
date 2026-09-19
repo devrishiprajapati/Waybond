@@ -32,7 +32,7 @@ const TripDetails = () => {
   const [enquiryForm, setEnquiryForm] = useState({ name: '', phone: '', email: '', travelDate: '', travellers: '', message: '' })
   const [enquiryErrors, setEnquiryErrors] = useState<Record<string, string>>({})
   const [enquirySubmitting, setEnquirySubmitting] = useState(false)
-  const [enquiryDone, setEnquiryDone] = useState(false)
+  const [enquiryToastVisible, setEnquiryToastVisible] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [shareCopied, setShareCopied] = useState(false)
   const [showStickyBar, setShowStickyBar] = useState(false)
@@ -42,6 +42,7 @@ const TripDetails = () => {
   const [overviewExpanded, setOverviewExpanded] = useState(false)
   const [selectedAttraction, setSelectedAttraction] = useState<Attraction | null>(null)
   const travelDateInputRef = React.useRef<HTMLInputElement>(null)
+  const enquiryToastTimerRef = React.useRef<number | null>(null)
 
   const openTravelDatePicker = () => {
     const input = travelDateInputRef.current
@@ -67,6 +68,14 @@ const TripDetails = () => {
       })
     }
   }, [slug, departureParam])
+
+  useEffect(() => {
+    return () => {
+      if (enquiryToastTimerRef.current) {
+        window.clearTimeout(enquiryToastTimerRef.current)
+      }
+    }
+  }, [])
 
   // Auto-open enquiry form after 5 seconds once the trip has loaded
   useEffect(() => {
@@ -145,12 +154,15 @@ const TripDetails = () => {
     }
     haptics.medium()
     setEnquirySubmitting(false)
-    setEnquiryDone(true)
-    setTimeout(() => {
-      setEnquiryDone(false)
-      setEnquiryOpen(false)
-      setEnquiryForm({ name: '', phone: '', email: '', travelDate: '', travellers: '', message: '' })
-    }, 2500)
+    setEnquiryOpen(false)
+    setEnquiryForm({ name: '', phone: '', email: '', travelDate: '', travellers: '', message: '' })
+    setEnquiryToastVisible(true)
+    if (enquiryToastTimerRef.current) {
+      window.clearTimeout(enquiryToastTimerRef.current)
+    }
+    enquiryToastTimerRef.current = window.setTimeout(() => {
+      setEnquiryToastVisible(false)
+    }, 3000)
   }
 
   const joinUsFromOptions = (trip?.joinUsFrom || []).filter((origin: any) => origin.location)
@@ -344,25 +356,6 @@ const TripDetails = () => {
             <ArrowLeft size={16} className="mr-2" /> Back to Discover
           </Link>
 
-          {/* Desktop Header */}
-          <div className="hidden md:flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
-            <div>
-              <h1 className="text-2xl md:text-4xl font-bungee font-black text-white liquid-text italic uppercase tracking-tighter">{trip.title}</h1>
-              <div className="flex items-center text-white/60 mt-4 font-black uppercase tracking-widest text-xs min-w-0">
-                <MapPin size={16} className="mr-2 text-secondary shrink-0" /> <span className="break-words">{trip.location}</span>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2.5 sm:gap-3">
-              <a
-                href='/faqs'
-                target="_blank" rel="noopener noreferrer"
-                onClick={() => haptics.medium()}
-                className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/10 border border-secondary/20 shadow-md transition-colors hover:bg-secondary hover:border-secondary sm:h-12 sm:w-12 sm:rounded-2xl group"
-              >
-                <MessageCircle size={20} className="text-secondary group-hover:text-white transition-colors" />
-              </a>
-            </div>
-          </div>
         </div>
 
         {/* Full-Width Image Gallery Section */}
@@ -466,14 +459,6 @@ const TripDetails = () => {
                   <span className="uppercase tracking-wide">{trip.location}</span>
                 </div>
               </div>
-              <a
-                href='/faqs'
-                target="_blank" rel="noopener noreferrer"
-                onClick={() => haptics.medium()}
-                className="shrink-0 flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/10 border border-secondary/20 shadow-md transition-colors hover:bg-secondary hover:border-secondary group"
-              >
-                <MessageCircle size={20} className="text-secondary group-hover:text-white transition-colors" />
-              </a>
             </div>
           </div>
         </div>
@@ -485,6 +470,13 @@ const TripDetails = () => {
             <div className="hidden lg:block lg:col-span-8 space-y-12 md:space-y-16 overflow-y-auto max-h-[calc(100vh-6rem)] pr-4 scrollbar-thin scrollbar-thumb-secondary/30 scrollbar-track-white/5 hover:scrollbar-thumb-secondary/50">
               {/* Trip Overview */}
               <div>
+                <div className="mb-5 rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-7">
+                  <h1 className="text-2xl font-black uppercase tracking-tight text-slate-950 md:text-4xl">{trip.title}</h1>
+                  <div className="mt-3 flex items-center text-sm font-semibold uppercase tracking-wide text-slate-700">
+                    <MapPin size={16} className="mr-2 shrink-0 text-secondary" />
+                    <span>{trip.location}</span>
+                  </div>
+                </div>
                 <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
                   <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
                   <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg" style={overviewClampStyle}>
@@ -914,6 +906,13 @@ const TripDetails = () => {
         <section className="lg:hidden max-w-[1920px] mx-auto px-4 md:px-12 pb-12 space-y-12">
           {/* Overview - Mobile Only */}
           <div>
+            <div className="mb-5 rounded-[1.25rem] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5">
+              <h1 className="text-2xl font-black uppercase leading-tight tracking-tight text-slate-950">{trip.title}</h1>
+              <div className="mt-3 flex items-center text-sm font-semibold uppercase tracking-wide text-slate-700">
+                <MapPin size={16} className="mr-2 shrink-0 text-secondary" />
+                <span>{trip.location}</span>
+              </div>
+            </div>
             <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
               <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
               <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg" style={overviewClampStyle}>
@@ -1223,6 +1222,18 @@ const TripDetails = () => {
                 </div>
                 <span className="text-gray-900 text-xs sm:text-sm md:text-base font-semibold text-left">Cancellation Policy</span>
               </button>
+
+              {/* FAQs Link */}
+              <Link
+                to="/faqs"
+                onClick={() => haptics.light()}
+                className="flex items-center justify-start gap-2.5 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50 rounded-lg sm:rounded-xl border border-gray-200 hover:border-secondary hover:bg-secondary/5 transition-all group w-full lg:w-auto"
+              >
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-green-100 flex items-center justify-center shrink-0 group-hover:bg-green-200 transition-colors">
+                  <MessageCircle size={16} className="text-green-600 sm:w-[18px] sm:h-[18px]" />
+                </div>
+                <span className="text-gray-900 text-xs sm:text-sm md:text-base font-semibold text-left">Traveler FAQs</span>
+              </Link>
             </div>
           </div>
         </section>
@@ -1340,13 +1351,7 @@ const TripDetails = () => {
                       <X size={26} strokeWidth={3} />
                     </button>
                   </div>
-                  {enquiryDone ? (
-                    <div className="py-10 text-center">
-                      <p className="text-xl font-black text-secondary">Enquiry Sent!</p>
-                      <p className="mt-2 text-sm font-medium text-slate-500">Our team will reach out to you shortly.</p>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleEnquirySubmit} noValidate className="space-y-3.5">
+                  <form onSubmit={handleEnquirySubmit} noValidate className="space-y-3.5">
                       <div>
                         <input type="text" placeholder="Your Name" value={enquiryForm.name} onChange={e => setEnquiryForm(f => ({ ...f, name: e.target.value }))} className={`h-[50px] w-full rounded-xl border ${enquiryErrors.name ? 'border-red-500' : 'border-secondary/15'} bg-white px-4 text-base font-semibold text-[#1f2933] shadow-sm shadow-secondary/5 outline-none transition-colors placeholder:text-slate-400 focus:border-secondary/60`} />
                         {enquiryErrors.name && <p className="mt-1.5 text-xs font-bold text-red-500">{enquiryErrors.name}</p>}
@@ -1383,8 +1388,7 @@ const TripDetails = () => {
                         <MessageCircle size={18} />
                         {enquirySubmitting ? 'Connecting...' : 'Connect with Expert'}
                       </button>
-                    </form>
-                  )}
+                  </form>
                 </div>
               </div>
             </motion.div>
@@ -1393,6 +1397,28 @@ const TripDetails = () => {
       </AnimatePresence>
 
       {/* Floating Enquiry Button — fixed bottom center, outside any stacking context */}
+      <AnimatePresence>
+        {enquiryToastVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 18, scale: 0.96 }}
+            transition={{ type: 'spring', damping: 24, stiffness: 320 }}
+            role="status"
+            aria-live="polite"
+            className="fixed left-1/2 top-24 z-[220] flex w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 items-start gap-3 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-slate-900 shadow-2xl shadow-emerald-500/15 sm:px-5 sm:py-4"
+          >
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+              <CheckCircle2 size={20} strokeWidth={2.5} />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-black uppercase tracking-[0.12em] text-emerald-700">Enquiry Sent</span>
+              <span className="mt-0.5 block text-sm font-semibold leading-snug text-slate-600">Our travel expert will reach out to you shortly.</span>
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {!enquiryOpen && (
         <button
           onClick={() => { haptics.medium(); setEnquiryOpen(true) }}
