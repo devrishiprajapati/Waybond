@@ -121,6 +121,27 @@ select {
   opacity: 1;
 }
 
+/* User dashboard text should be black on the light theme, without changing
+   font weights or making any labels/buttons bolder. */
+.user-dashboard-text [class*="text-gray-"],
+.user-dashboard-text [class*="text-slate-"],
+.user-dashboard-text [class*="text-zinc-"],
+.user-dashboard-text [class*="text-neutral-"],
+.user-dashboard-text [class*="text-stone-"],
+.user-dashboard-text [class*="text-white/"] {
+  color: #000000 !important;
+}
+
+.user-dashboard-text [class*="placeholder:text-gray-"]::placeholder,
+.user-dashboard-text [class*="placeholder:text-slate-"]::placeholder,
+.user-dashboard-text [class*="placeholder:text-zinc-"]::placeholder,
+.user-dashboard-text [class*="placeholder:text-neutral-"]::placeholder,
+.user-dashboard-text [class*="placeholder:text-stone-"]::placeholder,
+.user-dashboard-text [class*="placeholder:text-white/"]::placeholder {
+  color: #000000 !important;
+  opacity: 1;
+}
+
 /* Image-led areas keep high-contrast copy over photography. */
 .light-theme .keep-light-text .text-white {
   color: #ffffff !important;
@@ -205,31 +226,31 @@ label {
 /* Legacy heading utility kept for existing class names. */
 .font-bungee {
   font-family: 'Montserrat', sans-serif !important;
-  font-weight: 800 !important;
+  font-weight: 600 !important;
   font-style: normal !important;
 }
 
 /* Utility classes for consistent typography */
 .text-title {
   font-family: 'Montserrat', sans-serif !important;
-  font-weight: 800 !important;
+  font-weight: 400 !important;
   font-style: normal !important;
 }
 
 .text-subtitle {
   font-family: 'Montserrat', sans-serif !important;
-  font-weight: 600 !important;
+  font-weight: 300 !important;
 }
 
 .text-body {
   font-family: 'Montserrat', sans-serif !important;
-  font-weight: 400 !important;
+  font-weight: 300 !important;
 }
 
 .text-button,
 .btn-text {
   font-family: 'Montserrat', sans-serif !important;
-  font-weight: 700 !important;
+  font-weight: 200 !important;
 }
 
 
