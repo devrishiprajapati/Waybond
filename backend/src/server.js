@@ -1361,6 +1361,47 @@ app.get('/api/testimonials', async (_req, res, next) => {
 app.post('/api/testimonials', async (req, res, next) => {
   try {
     const { name, trip, review, rating, email, media, mediaType, userId } = req.body
+
+    // If a userId is provided, verify the trip has been completed before allowing a testimonial
+    if (userId && trip) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { bookings: true, passengerBookings: { include: { booking: true } } }
+      })
+
+      if (user) {
+        // Gather all bookings (primary + passenger) for this user
+        const allBookings = [
+          ...user.bookings,
+          ...user.passengerBookings.map(pb => pb.booking)
+        ]
+
+        // Find a confirmed booking matching the submitted trip title
+        const matchingBooking = allBookings.find(booking => {
+          const payload = booking.payload || {}
+          const bookingTitle = normalizeText(payload.title)
+          const submittedTrip = normalizeText(trip)
+          return payload.status === 'Confirmed' && bookingTitle.toLowerCase() === submittedTrip.toLowerCase()
+        })
+
+        if (matchingBooking) {
+          const payload = matchingBooking.payload || {}
+          const startDateStr = normalizeText(payload.nextBatch || payload.departureDates?.[0] || '')
+          const dayMatch = normalizeText(payload.duration).match(/(\d+)\s*Day/i)
+          const days = dayMatch ? parseInt(dayMatch[1], 10) : 0
+          const startDate = parseDateOnly(startDateStr)
+
+          if (startDate) {
+            const endDate = new Date(startDate)
+            endDate.setDate(endDate.getDate() + days)
+            if (new Date() < endDate) {
+              return res.status(403).json({ error: 'Trip has not been completed yet. You can submit a review after your trip ends.' })
+            }
+          }
+        }
+      }
+    }
+
     res.status(201).json(await prisma.testimonial.create({ data: { name, trip, review, rating: Number(rating), email, media, mediaType, userId } }))
   } catch (error) { next(error) }
 })
@@ -1397,7 +1438,7 @@ app.get('/api/users/:id', async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({ where: { id: req.params.id } })
     if (!user) return res.status(404).json({ message: 'User not found' })
-    
+
     // Flatten profile data if it exists
     const userData = {
       ...publicUser(user),
@@ -2008,8 +2049,8 @@ app.post('/api/users/:id/bookings', async (req, res, next) => {
       const payload = booking.payload || {}
       const sameTrip = Number(payload.id) === tripId
       const sameTravelerCount = Number(payload.travelers) === travellers.length
-      const sameTravelerNames = JSON.stringify(travellers.map(t => t.name).sort()) === 
-                                JSON.stringify((payload.travellerDetails || []).map(t => t.name).sort())
+      const sameTravelerNames = JSON.stringify(travellers.map(t => t.name).sort()) ===
+        JSON.stringify((payload.travellerDetails || []).map(t => t.name).sort())
       return sameTrip && sameTravelerCount && sameTravelerNames
     })
 
@@ -2045,7 +2086,7 @@ app.post('/api/users/:id/bookings', async (req, res, next) => {
           matchedUsers.map((user) => {
             const traveller = travellers.find(t => t.phone?.trim() === user.phone)
             if (!traveller) return Promise.resolve()
-            
+
             const isPrimaryBooker = user.phone === firstTravellerPhone && user.id === req.params.id
             return prisma.passengerBooking.create({
               data: {
@@ -2252,7 +2293,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
     console.log('=== TRANSFER REQUEST RECEIVED ===')
     console.log('Request body:', JSON.stringify(req.body, null, 2))
     console.log('Booking ID:', req.params.bookingId)
-    
+
     const { targetTripId, reason, processedBy, participantIndex } = req.body
     if (!targetTripId) return res.status(400).json({ message: 'Target trip is required.' })
 
@@ -2268,12 +2309,12 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
 
     const oldPayload = booking.payload || {}
     const targetPayload = targetTrip.payload || {}
-    
+
     // Check if this is a group member transfer (participantIndex provided)
     let isGroupMemberTransfer = participantIndex !== undefined && participantIndex !== null
     let removedParticipant = null
     let updatedTravellerDetails = oldPayload.travellerDetails || []
-    
+
     if (isGroupMemberTransfer) {
       const travellerDetails = Array.isArray(oldPayload.travellerDetails) ? oldPayload.travellerDetails : []
       if (participantIndex >= 0 && participantIndex < travellerDetails.length) {
@@ -2288,7 +2329,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
         })
       }
     }
-    
+
     const travelers = isGroupMemberTransfer ? Math.max(1, updatedTravellerDetails.length) : Number(oldPayload.travelers || 1)
     const oldPrice = toMoneyNumber(oldPayload.price || 0)
     const newPrice = toMoneyNumber(targetPayload.price || 0)
@@ -2384,7 +2425,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
       where: { id: booking.id },
       data: { payload: updatedPayload }
     })
-    
+
     if (isGroupMemberTransfer) {
       console.log('Original booking updated:', {
         bookingId: updated.id,
@@ -2399,17 +2440,17 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
     let memberUser = null
     if (isGroupMemberTransfer && removedParticipant) {
       const newBookingId = `WB-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-      
+
       console.log('Creating new booking for transferred member:', {
         name: removedParticipant.name,
         email: removedParticipant.email,
         originalUserId: booking.userId
       })
-      
+
       // Find user by email or phone - try multiple fields
       if (removedParticipant.email || removedParticipant.phone) {
         const searchConditions = []
-        
+
         // Try to find by email
         if (removedParticipant.email) {
           searchConditions.push(
@@ -2418,7 +2459,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
             { email: removedParticipant.email.trim() }
           )
         }
-        
+
         // Try to find by phone
         if (removedParticipant.phone) {
           searchConditions.push(
@@ -2426,15 +2467,15 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
             { phone: removedParticipant.phone.trim() }
           )
         }
-        
-        memberUser = await prisma.user.findFirst({ 
-          where: { OR: searchConditions } 
+
+        memberUser = await prisma.user.findFirst({
+          where: { OR: searchConditions }
         })
-        
+
         // If user doesn't exist, create one automatically
         if (!memberUser) {
           console.log('User not found, creating new user account for transferred member')
-          
+
           try {
             memberUser = await prisma.user.create({
               data: {
@@ -2445,7 +2486,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
                 passwordHash: await hashPassword(`temp-${Date.now()}`)
               }
             })
-            
+
             console.log('New user created:', {
               id: memberUser.id,
               email: memberUser.email,
@@ -2458,15 +2499,15 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
           }
         }
       }
-      
+
       const targetUserId = memberUser?.id || booking.userId
-      
+
       console.log('Found/Created user for new booking:', {
         memberUser: memberUser ? memberUser.id : 'not found',
         willUseUserId: targetUserId,
         isNewUser: memberUser && !memberUser.createdAt ? false : true
       })
-      
+
       // Remove their passengerBooking entry from original booking
       if (memberUser) {
         try {
@@ -2481,7 +2522,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
           console.error('Failed to delete passengerBooking:', pbDeleteError)
         }
       }
-      
+
       newMemberBooking = await prisma.booking.create({
         data: {
           id: newBookingId,
@@ -2520,7 +2561,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
           }
         }
       })
-      
+
       // Create passenger booking entry for the transferred member
       // This ensures they can see their booking when they log in
       if (memberUser) {
@@ -2542,7 +2583,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
           console.error('Failed to create passengerBooking:', pbError)
         }
       }
-      
+
       console.log('New member booking created successfully:', {
         bookingId: newMemberBooking.id,
         userId: newMemberBooking.userId,
@@ -2654,25 +2695,25 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
 app.post('/api/bookings/:bookingId/remove-participant', async (req, res, next) => {
   try {
     const { participantIndex, participantName } = req.body
-    
+
     if (participantIndex === undefined) {
       return res.status(400).json({ message: 'Participant index is required.' })
     }
 
-    const booking = await prisma.booking.findUnique({ 
+    const booking = await prisma.booking.findUnique({
       where: { id: req.params.bookingId }
     })
     if (!booking) return res.status(404).json({ message: 'Booking not found.' })
 
     const payload = booking.payload || {}
     const travellerDetails = Array.isArray(payload.travellerDetails) ? payload.travellerDetails : []
-    
+
     if (participantIndex < 0 || participantIndex >= travellerDetails.length) {
       return res.status(404).json({ message: 'Participant not found.' })
     }
 
     const participant = travellerDetails[participantIndex]
-    
+
     // Remove participant
     const updatedTravellerDetails = travellerDetails.filter((_, index) => index !== participantIndex)
     const updatedTravelers = Math.max(1, updatedTravellerDetails.length)
@@ -2713,9 +2754,9 @@ app.post('/api/bookings/:bookingId/remove-participant', async (req, res, next) =
       removedParticipant: participant
     })
 
-  } catch (error) { 
+  } catch (error) {
     console.error('Remove participant error:', error)
-    next(error) 
+    next(error)
   }
 })
 
@@ -4053,7 +4094,7 @@ app.get('/api/admin/cancellations-stats', async (req, res, next) => {
 app.post('/api/admin/whatsapp-links', async (req, res, next) => {
   try {
     const { tripName, departureDate, whatsappLink } = req.body
-    
+
     if (!tripName || !departureDate || !whatsappLink) {
       return res.status(400).json({ message: 'Trip name, departure date, and WhatsApp link are required' })
     }
@@ -4075,7 +4116,7 @@ app.post('/api/admin/whatsapp-links', async (req, res, next) => {
         const bookingDate = booking.payload?.nextBatch || booking.payload?.departureDate
         return bookingDate === departureDate
       })
-      .map(booking => 
+      .map(booking =>
         prisma.booking.update({
           where: { id: booking.id },
           data: {
@@ -4099,7 +4140,7 @@ app.post('/api/admin/whatsapp-links', async (req, res, next) => {
 app.get('/api/whatsapp-link/:tripName/:departureDate', async (req, res, next) => {
   try {
     const { tripName, departureDate } = req.params
-    
+
     const booking = await prisma.booking.findFirst({
       where: {
         payload: {
@@ -4189,7 +4230,7 @@ app.delete('/api/admin/enquiries/:id', async (req, res, next) => {
 app.post('/api/admin/fix-transferred-bookings', async (req, res, next) => {
   try {
     console.log('🔍 Starting fix for transferred bookings...')
-    
+
     // Find all bookings
     const allBookings = await prisma.booking.findMany({
       include: {
@@ -4202,10 +4243,10 @@ app.post('/api/admin/fix-transferred-bookings', async (req, res, next) => {
     const transferredBookings = allBookings.filter(booking => {
       const payload = booking.payload
       return payload && (
-        payload.transferredFromBooking || 
+        payload.transferredFromBooking ||
         payload.transferredFromTrip ||
-        (Array.isArray(payload.travellerDetails) && 
-         payload.travellerDetails.some(t => t.transferredFrom))
+        (Array.isArray(payload.travellerDetails) &&
+          payload.travellerDetails.some(t => t.transferredFrom))
       )
     })
 
@@ -4242,11 +4283,11 @@ app.post('/api/admin/fix-transferred-bookings', async (req, res, next) => {
 
       if (customerEmail || customerPhone) {
         const searchConditions = []
-        
+
         if (customerEmail && customerEmail !== 'N/A') {
           searchConditions.push({ email: customerEmail.toLowerCase().trim() })
         }
-        
+
         if (customerPhone && customerPhone !== 'N/A') {
           searchConditions.push({ phone: customerPhone.trim() })
         }
@@ -4307,9 +4348,9 @@ app.post('/api/admin/fix-transferred-bookings', async (req, res, next) => {
       },
       errors: errors
     })
-  } catch (error) { 
+  } catch (error) {
     console.error('Error fixing transferred bookings:', error)
-    next(error) 
+    next(error)
   }
 })
 

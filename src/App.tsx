@@ -90,7 +90,7 @@ function PublicRoutes({ location }: { location: ReturnType<typeof useLocation> }
 
 function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> }) {
   return (
-    <>
+    <div className="admin-panel">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<AdminLogin />} />
         <Route path="/login" element={<AdminLogin />} />
@@ -137,7 +137,7 @@ function AdminRoutes({ location }: { location: ReturnType<typeof useLocation> })
         <Route path="/admin/new" element={<EditTrip />} />
       </Routes>
       <AdminMobileNav />
-    </>
+    </div>
   )
 }
 

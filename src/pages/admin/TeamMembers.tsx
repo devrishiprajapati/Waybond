@@ -6,6 +6,7 @@ import {
     ArrowLeft, Plus, Trash2, Edit2, X, Save, Users2,
     Loader2, RefreshCw, Mail, Phone, Upload, ImageIcon
 } from 'lucide-react'
+import ConfirmationToast from '../../components/admin/ConfirmationToast'
 
 type TeamMember = {
     id: number | string
@@ -46,6 +47,7 @@ export default function AdminTeamMembers() {
     const [error, setError] = useState('')
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
     const [editing, setEditing] = useState<TeamMember | null>(null)
+    const [pendingDelete, setPendingDelete] = useState<TeamMember | null>(null)
     const [isAddingNew, setIsAddingNew] = useState(false)
     const [draft, setDraft] = useState<Omit<TeamMember, 'id' | 'createdAt' | 'updatedAt'>>(EMPTY_FORM)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -185,12 +187,15 @@ export default function AdminTeamMembers() {
     }
 
     const handleDelete = async (member: TeamMember) => {
-        if (!window.confirm(`Remove ${member.name} from the team? This cannot be undone.`)) return
         try {
+            setSaving(true)
             await fetch(`/api/team-members/${member.id}`, { method: 'DELETE' })
             setMembers(curr => curr.filter(m => String(m.id) !== String(member.id)))
+            setPendingDelete(null)
         } catch {
             alert('Delete failed. Please try again.')
+        } finally {
+            setSaving(false)
         }
     }
 
@@ -327,7 +332,7 @@ export default function AdminTeamMembers() {
                                                 <Edit2 size={16} />
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(member)}
+                                                onClick={() => setPendingDelete(member)}
                                                 className="w-10 h-10 rounded-xl border border-red-400/25 bg-red-500/10 text-red-300 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all"
                                                 title="Delete member"
                                             >
@@ -542,6 +547,16 @@ export default function AdminTeamMembers() {
                     </motion.div>
                 )}
             </AnimatePresence>
+            <ConfirmationToast
+                open={pendingDelete !== null}
+                message={`Remove ${pendingDelete?.name || 'this member'} from the team? This cannot be undone.`}
+                confirmLabel="Delete"
+                busy={saving}
+                onCancel={() => setPendingDelete(null)}
+                onConfirm={() => {
+                    if (pendingDelete) void handleDelete(pendingDelete)
+                }}
+            />
         </div>
     )
 }

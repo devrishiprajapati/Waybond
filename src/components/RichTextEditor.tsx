@@ -58,6 +58,10 @@ const RichTextEditor = ({ value, onChange, placeholder, minHeight = '120px' }: R
                 style: `min-height: ${minHeight}`,
             },
         },
+        // Force editor to update selection state immediately
+        onSelectionUpdate: () => {
+            // This helps trigger re-renders when selection changes
+        },
     })
 
     // Sync external value changes (e.g. when loading saved data)
@@ -77,43 +81,79 @@ const RichTextEditor = ({ value, onChange, placeholder, minHeight = '120px' }: R
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-white/10 bg-white/[0.02]">
                 {/* Text style */}
-                <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} isActive={editor.isActive('bold')} title="Bold">
+                <ToolbarButton 
+                    onClick={() => editor.chain().focus().toggleBold().run()} 
+                    isActive={editor.isActive('bold')} 
+                    title="Bold"
+                >
                     <span className="font-black">B</span>
                 </ToolbarButton>
-                <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} isActive={editor.isActive('italic')} title="Italic">
+                <ToolbarButton 
+                    onClick={() => editor.chain().focus().toggleItalic().run()} 
+                    isActive={editor.isActive('italic')} 
+                    title="Italic"
+                >
                     <span className="italic font-bold">I</span>
                 </ToolbarButton>
-                <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} isActive={editor.isActive('underline')} title="Underline">
+                <ToolbarButton 
+                    onClick={() => editor.chain().focus().toggleUnderline().run()} 
+                    isActive={editor.isActive('underline')} 
+                    title="Underline"
+                >
                     <span className="underline font-bold">U</span>
                 </ToolbarButton>
 
                 <Divider />
 
                 {/* Headings */}
-                <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} isActive={editor.isActive('heading', { level: 1 })} title="Heading 1">
+                <ToolbarButton 
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} 
+                    isActive={editor.isActive('heading', { level: 1 })} 
+                    title="Heading 1"
+                >
                     H1
                 </ToolbarButton>
-                <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} isActive={editor.isActive('heading', { level: 2 })} title="Heading 2">
+                <ToolbarButton 
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} 
+                    isActive={editor.isActive('heading', { level: 2 })} 
+                    title="Heading 2"
+                >
                     H2
                 </ToolbarButton>
-                <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} isActive={editor.isActive('heading', { level: 3 })} title="Heading 3">
+                <ToolbarButton 
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} 
+                    isActive={editor.isActive('heading', { level: 3 })} 
+                    title="Heading 3"
+                >
                     H3
                 </ToolbarButton>
 
                 <Divider />
 
                 {/* Lists */}
-                <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} isActive={editor.isActive('bulletList')} title="Bullet List">
+                <ToolbarButton 
+                    onClick={() => editor.chain().focus().toggleBulletList().run()} 
+                    isActive={editor.isActive('bulletList')} 
+                    title="Bullet List"
+                >
                     <span className="text-sm">• List</span>
                 </ToolbarButton>
-                <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} isActive={editor.isActive('orderedList')} title="Numbered List">
+                <ToolbarButton 
+                    onClick={() => editor.chain().focus().toggleOrderedList().run()} 
+                    isActive={editor.isActive('orderedList')} 
+                    title="Numbered List"
+                >
                     <span className="text-sm">1. List</span>
                 </ToolbarButton>
 
                 <Divider />
 
                 {/* Clear */}
-                <ToolbarButton onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} isActive={false} title="Clear Formatting">
+                <ToolbarButton 
+                    onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} 
+                    isActive={false} 
+                    title="Clear Formatting"
+                >
                     <span className="line-through opacity-60">Aa</span>
                 </ToolbarButton>
             </div>

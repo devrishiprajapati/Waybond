@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Globe, Upload, FileText, CheckCircle, Percent } from 'lucide-react'
+import { Save, ArrowLeft, Image as ImageIcon, Clock, Trash2, Plus, Info, List, User, MapPin, IndianRupee, Globe, Upload, FileText, CheckCircle, Percent, AlertTriangle } from 'lucide-react'
 import { getAdminTripById, updateTrip, addTrip } from '../../lib/dataService'
 import { Attraction, DEFAULT_AGE_LIMIT, DEFAULT_CANCELLATION_POLICY, ExpeditionLead, Trip } from '../../lib/trips'
 import { formatDateOnly, parseDateOnly } from '../../lib/date'
@@ -98,6 +98,7 @@ const EditTrip = () => {
   const [mediaError, setMediaError] = useState('')
   const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false })
   const [confirmedDateOrigin, setConfirmedDateOrigin] = useState('default')
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [confirmedDateIndex, setConfirmedDateIndex] = useState('')
   const [confirmedDateValue, setConfirmedDateValue] = useState('')
   const [selectedDepartureForItinerary, setSelectedDepartureForItinerary] = useState<string>('default')
@@ -465,7 +466,7 @@ const EditTrip = () => {
               <h2 className="text-4xl md:text-6xl font-sans font-black tracking-tighter uppercase italic leading-none font-bungee">
                 {id === 'new' ? 'New' : 'Edit'} <span className="text-secondary font-bungee">Package</span>
               </h2>
-              <p className="text-white/45 font-bold italic mt-3 max-w-xl">
+              <p className="text-white/45 font-bold mt-3 max-w-xl">
                 Configure package details, images, batches, itinerary and trip lead.
               </p>
             </div>
@@ -1677,7 +1678,7 @@ const EditTrip = () => {
           <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-5 bg-white/85 backdrop-blur-3xl border border-white/10 p-4 md:p-5 rounded-[2rem] fixed bottom-24 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 lg:bottom-6 z-50 shadow-2xl shadow-black/40">
             <button
               type="button"
-              onClick={() => navigate('/admin/dashboard')}
+              onClick={() => setShowDiscardConfirm(true)}
               className="h-12 px-7 rounded-2xl font-black text-[10px] uppercase tracking-[0.18em] text-white/45 hover:text-white hover:bg-white/10 transition-all"
             >
               Discard
@@ -1698,6 +1699,43 @@ const EditTrip = () => {
         <CheckCircle size={18} className="shrink-0" />
         {toast.message}
       </div>
+      {/* Discard confirmation toast */}
+      {showDiscardConfirm && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] max-w-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="liquid-glass-dark border border-red-500/30 rounded-3xl p-5 shadow-2xl shadow-black/60 backdrop-blur-2xl"
+          >
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-red-500/15 border border-red-500/25 flex items-center justify-center shrink-0 text-red-300">
+                <AlertTriangle size={18} />
+              </div>
+              <div className="flex-grow min-w-0">
+                <p className="text-sm font-black uppercase tracking-wide text-white font-bungee">Discard Package?</p>
+                {formData.title && (
+                  <p className="text-xs text-white/45 font-medium mt-1 truncate">{formData.title}</p>
+                )}
+                <p className="text-[11px] text-white/35 mt-1">This action cannot be undone.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => setShowDiscardConfirm(false)}
+                className="flex-1 h-10 rounded-2xl bg-white/5 border border-white/10 text-white/70 font-black text-[10px] uppercase tracking-[0.16em] hover:bg-white/15 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => navigate('/admin/dashboard')}
+                className="flex-1 h-10 rounded-2xl bg-red-500 text-white font-black text-[10px] uppercase tracking-[0.16em] hover:bg-red-600 transition-all shadow-lg shadow-red-500/30 flex items-center justify-center gap-2"
+              >
+                <Trash2 size={13} /> Confirm Discard
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }
