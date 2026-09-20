@@ -266,7 +266,7 @@ const TeamMembersSection = () => {
                 transition={{ delay: i * 0.07 }}
                 whileHover={{ y: -8 }}
                 onClick={() => setSelected(member)}
-                className="group text-left bg-white rounded-2xl md:rounded-3xl overflow-hidden hover:shadow-2xl transition-all w-full"
+                className="group text-left bg-white rounded-2xl md:rounded-3xl overflow-hidden border-2 border-gray-200 shadow-[0_8px_30px_rgba(0,0,0,0.12)] hover:shadow-2xl hover:border-secondary/50 transition-all w-full"
               >
                 {/* Image with Rounded Corners */}
                 <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
@@ -280,7 +280,7 @@ const TeamMembersSection = () => {
                 {/* Info */}
                 <div className="p-3 md:p-5 space-y-1">
                   <p className="text-base md:text-xl font-black text-gray-900 leading-tight group-hover:text-secondary transition-colors">{member.name}</p>
-                  <p className="text-[10px] md:text-xs font-semibold">{member.designation}</p>
+                  <p className="text-[10px] md:text-xs font-semibold text-gray-600">{member.designation}</p>
                 </div>
               </motion.button>
             ))}

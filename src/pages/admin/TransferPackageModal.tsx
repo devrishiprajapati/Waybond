@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowRightLeft, CreditCard, History, X, ChevronRight, Check, IndianRupee, FileText, ArrowRight, Clock } from 'lucide-react'
 
 type Trip = { id: number; title?: string; location?: string; price?: number;[key: string]: unknown }
-type TransferRecord = { id: string; fromTripTitle: string; toTripTitle: string; fromPrice: number; toPrice: number; transferredAt: string; transferredBy: string }
+type TransferRecord = { id: string; fromTripTitle: string; toTripTitle: string; fromPrice: number; toPrice: number; transferredAt: string; transferredBy: string; transferredByRole?: string }
 type PaymentRecord = { id: string; amount: number; previousAmountPaid: number; newAmountPaid: number; pendingAmount: number; note: string; updatedAt: string; updatedBy: string }
 
 type Props = {
@@ -59,12 +59,16 @@ export default function TransferPackageModal({ booking, bookingDbId, onClose, on
         setError('')
         setSuccess('')
         try {
+            const adminData = JSON.parse(sessionStorage.getItem('adminData') || '{}')
+            
             const response = await fetch(`/api/bookings/${bookingDbId}/transfer`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     targetTripId: selectedTripId,
-                    participantIndex: selectedParticipantIndex  // Include participant index if selected
+                    participantIndex: selectedParticipantIndex,  // Include participant index if selected
+                    processedBy: adminData.name || adminData.email || 'admin',
+                    processedByRole: adminData.role || 'ADMIN'
                 })
             })
             const data = await response.json()

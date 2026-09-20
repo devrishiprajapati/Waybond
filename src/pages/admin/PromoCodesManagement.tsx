@@ -41,6 +41,7 @@ type PromoCode = {
   usageCount: number
   isActive: boolean
   createdBy: string
+  createdByRole?: string
   createdAt: string
   updatedAt: string
   description: string | null
@@ -230,7 +231,8 @@ const PromoCodesManagement = () => {
         validUntil: formData.validUntil,
         usageLimit: formData.usageLimit ? Number(formData.usageLimit) : null,
         description: formData.description || null,
-        createdBy: adminData.id || 'admin',
+        createdBy: adminData.name || adminData.email || 'admin',
+        createdByRole: adminData.role || 'ADMIN',
         autoGenerate: formData.autoGenerate
       }
 
@@ -656,6 +658,61 @@ const PromoCodesManagement = () => {
                                 <div className="p-4 bg-white rounded-lg border border-gray-200">
                                   <p className="text-xs text-gray-500 font-semibold uppercase mb-2">Description</p>
                                   <p className="text-sm text-gray-700">{promo.description}</p>
+                                </div>
+                              )}
+
+                              {/* Created By Admin */}
+                              {promo.createdBy && (
+                                <div className="p-4 bg-gradient-to-r from-purple-50 to-white border-2 border-purple-200 rounded-xl">
+                                  <p className="text-xs text-gray-500 font-semibold uppercase mb-2">Created By</p>
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center font-black text-sm ${
+                                      promo.createdByRole === 'MASTER_ADMIN' ? 'bg-amber-600' : 'bg-purple-600'
+                                    }`}>
+                                      {(() => {
+                                        const isCuid = /^c[a-z0-9]{20,30}$/i.test(promo.createdBy)
+                                        const displayName = isCuid 
+                                          ? (promo.createdByRole === 'MASTER_ADMIN' ? 'Master Admin' : 'Admin')
+                                          : promo.createdBy
+                                        return displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+                                      })()}
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <p className="text-sm font-black text-gray-900">
+                                          {(() => {
+                                            const isCuid = /^c[a-z0-9]{20,30}$/i.test(promo.createdBy)
+                                            return isCuid 
+                                              ? (promo.createdByRole === 'MASTER_ADMIN' ? 'Master Admin' : 'Admin')
+                                              : promo.createdBy
+                                          })()}
+                                        </p>
+                                        {promo.createdByRole && (
+                                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                            promo.createdByRole === 'MASTER_ADMIN'
+                                              ? 'bg-amber-100 border border-amber-300 text-amber-800'
+                                              : 'bg-purple-100 border border-purple-300 text-purple-800'
+                                          }`}>
+                                            {promo.createdByRole === 'MASTER_ADMIN' && (
+                                              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                              </svg>
+                                            )}
+                                            {promo.createdByRole === 'MASTER_ADMIN' ? 'Master Admin' : 'Admin'}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-xs text-gray-500 font-medium">
+                                        {new Date(promo.createdAt).toLocaleString('en-IN', {
+                                          day: '2-digit',
+                                          month: 'short',
+                                          year: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}
+                                      </p>
+                                    </div>
+                                  </div>
                                 </div>
                               )}
 
