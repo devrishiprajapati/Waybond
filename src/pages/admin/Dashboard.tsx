@@ -188,18 +188,19 @@ const AdminDashboard = () => {
               </h1>
             </div>
 
-            <nav className="flex-grow space-y-3">
+            <nav className="flex-grow space-y-1.5">
               {visibleNavItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 p-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.16em] transition-all${location.pathname === item.path
-                    ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
-                    : 'text-white/55 hover:text-white hover:bg-white/5'
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl font-black text-[11px] uppercase tracking-[0.16em] transition-all border-2 ${location.pathname === item.path
+                    ? 'bg-secondary text-white shadow-xl shadow-secondary/20 border-secondary'
+                    : 'text-white/55 hover:text-white hover:bg-white/5 border-transparent'
                     }`}
+                  aria-current={location.pathname === item.path ? 'page' : undefined}
                 >
                   <item.icon size={18} />
-                  <span className='font-bungee'>{item.label}</span>
+                  <span className='font-bungee capitalize'>{item.label}</span>
                 </Link>
               ))}
             </nav>
@@ -274,7 +275,7 @@ const AdminDashboard = () => {
                     <stat.icon size={16} className="md:w-6 md:h-6" />
                   </div>
                   <div className="text-left">
-                    <p className="text-[7px] md:text-[9px] text-white/35 font-black uppercase tracking-[0.12em] md:tracking-[0.24em] leading-tight">{stat.label}</p>
+                    <p className="text-[7px] md:text-[9px] text-white/35 font-black capitalize tracking-[0.12em] md:tracking-[0.18em] leading-tight">{stat.label}</p>
                     <p className="text-xl md:text-3xl font-sans font-black text-white mt-0.5 md:mt-2 leading-none">{stat.value}</p>
                   </div>
                 </motion.div>
@@ -334,17 +335,21 @@ const AdminDashboard = () => {
                           <span className="text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full bg-white/5 text-white/50 border border-white/10">
                             {trip.category}
                           </span>
-                          <span className={`text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-full border ${trip.isVisible === false
+                          <span className={`text-[8px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-md border flex items-center gap-1.5 ${trip.isVisible === false
                             ? 'bg-red-500/10 text-red-300 border-red-500/20'
                             : 'bg-green-500/10 text-green-300 border-green-500/20'
                             }`}>
-                            {trip.isVisible === false ? 'Hidden' : 'Shown'}
+                            {trip.isVisible === false ? (
+                              <><EyeOff size={10} /> Hidden</>
+                            ) : (
+                              <><Eye size={10} /> Visible</>
+                            )}
                           </span>
                         </div>
-                        <h3 className="text-xl md:text-2xl font-bungee font-black uppercase italic text-white leading-tight break-words">{trip.title}</h3>
-                        <div className="flex flex-wrap items-center gap-4 text-white/45 text-[10px] font-black uppercase tracking-[0.16em]">
-                          <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" /> {trip.location}</span>
-                          <span className="flex items-center gap-2"><Calendar size={13} className="text-secondary" /> {trip.nextBatch || 'Batch TBA'}</span>
+                        <h3 className="text-xl md:text-2xl font-bungee font-black italic text-white leading-tight break-words">{trip.title}</h3>
+                        <div className="flex flex-wrap items-center gap-4 text-white/45 text-xs font-black uppercase tracking-[0.16em]">
+                          <span className="flex items-center gap-2"><MapPin size={14} className="text-secondary" /> {trip.location}</span>
+                          <span className="flex items-center gap-2"><Calendar size={14} className="text-secondary" /> {trip.nextBatch || 'Batch TBA'}</span>
                         </div>
                       </div>
 
@@ -362,7 +367,7 @@ const AdminDashboard = () => {
                       <div className="grid grid-cols-3 gap-3 xl:ml-auto xl:flex xl:items-center">
                         <button
                           onClick={() => handleVisibilityToggle(trip)}
-                          className={`h-12 rounded-2xl border transition-all flex items-center justify-center xl:px-5 ${trip.isVisible === false
+                          className={`h-12 rounded-2xl border transition-all flex items-center justify-center gap-2 px-4 ${trip.isVisible === false
                             ? 'bg-green-500/10 text-green-300 border-green-500/20 hover:bg-green-500 hover:text-white'
                             : 'bg-white/5 text-white border-white/10 hover:bg-white/20 hover:border-white/30'
                             }`}
@@ -370,20 +375,25 @@ const AdminDashboard = () => {
                           aria-label={trip.isVisible === false ? 'Show package to users' : 'Hide package from users'}
                         >
                           {trip.isVisible === false ? <Eye size={17} /> : <EyeOff size={17} />}
+                          <span className="hidden xl:inline text-[10px] font-black uppercase tracking-wider">
+                            {trip.isVisible === false ? 'Show' : 'Hide'}
+                          </span>
                         </button>
                         <Link
                           to={`/admin/edit/${trip.id}`}
-                          className="h-12 rounded-2xl bg-secondary text-white hover:bg-secondary/80 transition-all flex items-center justify-center xl:px-5"
+                          className="h-12 rounded-2xl bg-secondary text-white hover:bg-secondary/80 transition-all flex items-center justify-center gap-2 px-4"
                           title="Edit trip"
                         >
                           <Edit2 size={17} />
+                          <span className="hidden xl:inline text-[10px] font-black uppercase tracking-wider">Edit</span>
                         </Link>
                         <button
                           onClick={() => handleDelete(trip.id)}
-                          className="h-12 rounded-2xl bg-red-500/10 text-red-300 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center xl:px-5"
+                          className="h-12 rounded-2xl bg-red-500/10 text-red-300 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-2 px-4"
                           title="Delete trip"
                         >
                           <Trash2 size={17} />
+                          <span className="hidden xl:inline text-[10px] font-black uppercase tracking-wider">Delete</span>
                         </button>
                       </div>
                     </motion.article>

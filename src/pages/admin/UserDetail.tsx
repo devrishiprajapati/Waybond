@@ -146,7 +146,7 @@ export default function AdminUserDetail() {
                       
                       {/* Group Booking Indicator */}
                       {bookingNumber(booking, 'travelers') > 1 && (
-                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500 border-2 border-blue-400 text-white text-[10px] font-black uppercase tracking-wider shadow-md">
+                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-700 border-2 border-blue-600 text-white text-[10px] font-black uppercase tracking-wider shadow-md">
                           <UserRound size={12} />
                           Group
                         </span>
@@ -154,7 +154,7 @@ export default function AdminUserDetail() {
                       
                       {/* Transfer Badge */}
                       {(booking.transferredFrom || booking.transferredFromTrip || booking.transferredFromBooking) && (
-                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 border-2 border-purple-500 text-white text-[10px] font-black uppercase tracking-wider shadow-md">
+                        <span className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-800 border-2 border-purple-700 text-white text-[10px] font-black uppercase tracking-wider shadow-md">
                           <ArrowRightLeft size={12} />
                           Transferred
                         </span>
@@ -196,7 +196,7 @@ export default function AdminUserDetail() {
                   <div className="mb-4 bg-purple-100/95 backdrop-blur-sm border-2 border-purple-300 rounded-xl p-4 shadow-lg">
                     <div className="flex items-center gap-2 mb-3">
                       <ArrowRightLeft size={18} className="text-purple-600" />
-                      <h4 className="text-sm font-black text-purple-700 uppercase tracking-wide">Transfer History</h4>
+                      <h3 className="text-sm font-black text-purple-700 uppercase tracking-wide">Transfer History</h3>
                       {Array.isArray(booking.transferHistory) && booking.transferHistory.length > 0 && (
                         <span className="text-xs text-purple-700 font-bold ml-auto">
                           {booking.transferHistory.length} Transfer{booking.transferHistory.length > 1 ? 's' : ''} Made
@@ -233,7 +233,7 @@ export default function AdminUserDetail() {
                               {transfer.transferredBy && (
                                 <div className="flex items-center gap-2">
                                   <div className={`w-8 h-8 rounded-full text-white flex items-center justify-center font-black text-xs ${
-                                    isMasterAdmin ? 'bg-amber-600' : 'bg-blue-600'
+                                    isMasterAdmin ? 'bg-amber-700' : 'bg-blue-800'
                                   }`}>
                                     {transfer.transferredBy.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
                                   </div>
