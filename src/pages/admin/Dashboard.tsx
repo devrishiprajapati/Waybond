@@ -176,6 +176,13 @@ const AdminDashboard = () => {
   // Filter navigation items based on permissions
   const visibleNavItems = navItems.filter(item => hasPermission(item.permission))
 
+  const getInventoryBatchLabel = (trip: Trip) => {
+    const topLevelDate = trip.nextBatch || trip.departureDates?.filter(Boolean).sort()[0]
+    if (topLevelDate) return topLevelDate
+    const joinOriginDate = trip.joinUsFrom?.flatMap((origin) => origin.departureDates || []).filter(Boolean).sort()[0]
+    return joinOriginDate || 'Batch TBA'
+  }
+
   return (
     <>
       <PermissionGuard>
@@ -344,7 +351,7 @@ const AdminDashboard = () => {
                         <h3 className="text-xl md:text-2xl font-bungee font-black uppercase italic text-white leading-tight break-words">{trip.title}</h3>
                         <div className="flex flex-wrap items-center gap-4 text-white/45 text-[10px] font-black uppercase tracking-[0.16em]">
                           <span className="flex items-center gap-2"><MapPin size={13} className="text-secondary" /> {trip.location}</span>
-                          <span className="flex items-center gap-2"><Calendar size={13} className="text-secondary" /> {trip.nextBatch || 'Batch TBA'}</span>
+                          <span className="flex items-center gap-2"><Calendar size={13} className="text-secondary" /> {getInventoryBatchLabel(trip)}</span>
                         </div>
                       </div>
 
