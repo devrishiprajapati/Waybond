@@ -557,6 +557,19 @@ const UserDashboard = () => {
                           </div>
                         )}
 
+                        {/* Transfer Badge - Show if package was transferred */}
+                        {trip.transferredFrom && (
+                          <div className="absolute right-5 top-5 bg-purple-500/95 backdrop-blur-sm rounded-xl px-3 py-2 shadow-lg border border-purple-400/30">
+                            <div className="flex items-center gap-2">
+                              <div className="relative">
+                                <div className="absolute inset-0 bg-white/30 rounded-full animate-ping"></div>
+                                <div className="relative w-2 h-2 bg-white rounded-full"></div>
+                              </div>
+                              <span className="text-[9px] font-black text-white uppercase tracking-wider">Transferred</span>
+                            </div>
+                          </div>
+                        )}
+
                         <span className="absolute left-5 bottom-5 bg-secondary text-white rounded-full px-4 py-2 text-[9px] font-black uppercase tracking-[0.18em]">
                           {trip.status}
                         </span>
@@ -583,15 +596,19 @@ const UserDashboard = () => {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                           {[
-                            { label: 'Trip Start', value: formatDateShort(trip.nextBatch || 'TBD') },
-                            { label: 'Travelers', value: `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}` },
-                            { label: 'Booked On', value: trip.bookedOn }
+                            { label: 'Departure Date', value: formatDateShort(trip.departureDate || trip.nextBatch || 'TBD'), icon: Calendar },
+                            { label: 'Join From', value: trip.joinOrigin || 'To be confirmed', icon: MapPin },
+                            { label: 'Travelers', value: `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}`, icon: Users },
+                            { label: 'Booked On', value: trip.bookedOn, icon: CheckCircle2 }
                           ].map((item) => (
                             <div key={item.label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
-                              <p className="text-[8px] text-white/30 font-black uppercase tracking-[0.2em]">{item.label}</p>
-                              <p className="text-sm font-black text-white mt-2">{item.value}</p>
+                              <div className="flex items-center gap-2 mb-2">
+                                <item.icon size={14} className="text-secondary" />
+                                <p className="text-[8px] text-white/30 font-black uppercase tracking-[0.2em]">{item.label}</p>
+                              </div>
+                              <p className="text-sm font-black text-white">{item.value}</p>
                             </div>
                           ))}
                         </div>
@@ -603,6 +620,40 @@ const UserDashboard = () => {
                             </span>
                           ))}
                         </div>
+
+                        {/* Transfer Information - Show transfer tracking if transferred */}
+                        {trip.transferredFrom && (
+                          <div className="bg-purple-50/10 border border-purple-400/30 rounded-2xl p-4">
+                            <div className="flex items-start gap-3">
+                              <div className="bg-purple-500/20 rounded-full p-2 mt-0.5">
+                                <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                </svg>
+                              </div>
+                              <div className="flex-1 space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[9px] font-black text-purple-300 uppercase tracking-wider">Transfer History</span>
+                                  <div className="h-px flex-1 bg-purple-400/20"></div>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-xs text-white/60">
+                                    <span className="font-bold text-white/80">From:</span> {trip.transferredFrom}
+                                  </p>
+                                  {trip.transferredOn && (
+                                    <p className="text-xs text-white/60">
+                                      <span className="font-bold text-white/80">Transferred On:</span> {formatDateShort(trip.transferredOn)}
+                                    </p>
+                                  )}
+                                  {trip.transferReason && (
+                                    <p className="text-xs text-white/60">
+                                      <span className="font-bold text-white/80">Reason:</span> {trip.transferReason}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="flex flex-wrap gap-3">
                           {trip.status === 'Confirmed' && (

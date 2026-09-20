@@ -147,12 +147,7 @@ const TeamMembersSection = () => {
       transition={{ delay: 0.1 }}
       className=""
     >
-      {/* Section Heading */}
-      <div className="mb-14 text-center">
-        <h2 className="text-3xl md:text-5xl lg:text-[5rem] font-bungee font-black text-white tracking-tighter uppercase leading-[0.9] italic liquid-text">
-          Meet The <span className="text-primary px-2">Team</span>
-        </h2>
-      </div>
+     
 
       {/* Pinned/Featured Member - Full Details */}
       {pinnedMember && (
@@ -307,6 +302,33 @@ const About = () => (
     seoDescription="Learn about Way Bond's mission to make travel meaningful, accessible, and community-driven for Ahmedabad."
     title=''
   >
+    {/* Hero Section */}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="mb-16"
+    >
+      {/* Combined Section */}
+      <div className="liquid-glass-dark rounded-[2.5rem] p-6 md:p-10 border border-secondary/30 shadow-[0_20px_60px_rgba(100,149,237,0.3)] relative overflow-hidden">
+        {/* Decorative blur */}
+        <div className="absolute top-0 right-0 w-48 h-48 bg-secondary/10 blur-3xl rounded-full"></div>
+        
+        <div className="relative z-10">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bungee font-black text-white italic tracking-tighter leading-tight mb-2">
+            About <span className="text-secondary">Waybond</span>
+          </h1>
+          <p className="text-white/70 text-xs md:text-sm font-medium tracking-wide mb-4">
+            Adventure Awaits, Community Thrives
+          </p>
+          
+          <p className="text-white/60 text-xs md:text-sm leading-relaxed italic font-medium">
+            Waybond - the youth-driven travel community - is a registered organization dedicated to making travel meaningful, accessible, and community-driven. Guided by the philosophy of "Journey Together, Grow Together," the organization focuses on curating responsible, budget-friendly, and unforgettable travel experiences. Through meticulously planned group trips, adventure expeditions, cultural explorations, and community-building activities, Waybond nurtures connection, builds confidence, and empowers young travelers to explore the world actively while contributing to a positive, inclusive travel culture.
+          </p>
+        </div>
+      </div>
+    </motion.div>
+
     <TeamMembersSection />
   </PageLayout>
 )
