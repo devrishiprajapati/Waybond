@@ -176,7 +176,7 @@ function App() {
       </AnimatePresence>
 
       <div className="light-theme flex flex-col min-h-screen selection:bg-secondary/30 w-full overflow-x-hidden">
-        <Navbar />
+        {!isAdminSection && <Navbar />}
         <main className="flex-grow w-full">
           <AnimatePresence mode="wait">
             {isAdminSection ? <AdminRoutes location={location} /> : <PublicRoutes location={location} />}

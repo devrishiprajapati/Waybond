@@ -41,6 +41,7 @@ type CancellationRequest = {
   requestedAt: string
   processedAt: string | null
   processedBy: string | null
+  processedByRole: string | null
   adminNotes: string | null
 }
 
@@ -166,7 +167,8 @@ const CancellationManagement = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          processedBy: adminData.id || adminData.email
+          processedBy: adminData.name || adminData.email,
+          processedByRole: adminData.role || 'ADMIN'
         })
       })
 
@@ -230,6 +232,16 @@ const CancellationManagement = () => {
       default:
         return <AlertCircle size={16} />
     }
+  }
+
+  const formatRole = (role: string): string => {
+    if (!role) return 'Admin'
+    if (role === 'MASTER_ADMIN') return 'Master Admin'
+    if (role === 'ADMIN') return 'Admin'
+    // Handle other roles with proper formatting
+    return role.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ')
   }
 
   return (
@@ -418,6 +430,47 @@ const CancellationManagement = () => {
                     <p className="text-xs text-gray-500 mt-3">
                       Requested: {new Date(cancellation.requestedAt).toLocaleString('en-IN')}
                     </p>
+
+                    {/* Show admin info for processed requests */}
+                    {cancellation.processedAt && cancellation.processedBy && (
+                      <div className="mt-4 pt-4 border-t-2 border-gray-200">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full text-white flex items-center justify-center font-black text-xs ${
+                            cancellation.processedByRole === 'MASTER_ADMIN' ? 'bg-amber-600' : 'bg-purple-600'
+                          }`}>
+                            {cancellation.processedBy.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-black text-gray-900">{cancellation.processedBy}</p>
+                              {cancellation.processedByRole && (
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                  cancellation.processedByRole === 'MASTER_ADMIN'
+                                    ? 'bg-amber-100 border border-amber-300 text-amber-800'
+                                    : 'bg-purple-100 border border-purple-300 text-purple-800'
+                                }`}>
+                                  {cancellation.processedByRole === 'MASTER_ADMIN' && (
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                  )}
+                                  {formatRole(cancellation.processedByRole || '')}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-500 font-semibold">
+                              Processed: {new Date(cancellation.processedAt).toLocaleString('en-IN')}
+                            </p>
+                          </div>
+                        </div>
+                        {cancellation.adminNotes && (
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                            <p className="text-xs font-bold text-gray-500 uppercase mb-1">Admin Notes</p>
+                            <p className="text-sm text-gray-700">{cancellation.adminNotes}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -500,6 +553,55 @@ const CancellationManagement = () => {
                   <div>
                     <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Additional Feedback</h3>
                     <p className="text-sm text-gray-900 p-3 bg-gray-50 rounded-lg">{selectedCancellation.feedback}</p>
+                  </div>
+                )}
+
+                {/* Processing History */}
+                {selectedCancellation.processedAt && selectedCancellation.processedBy && (
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-white border-2 border-purple-200 rounded-xl">
+                    <h3 className="text-sm font-bold text-gray-500 uppercase mb-3">Processing History</h3>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-12 h-12 rounded-full text-white flex items-center justify-center font-black text-sm ${
+                        selectedCancellation.processedByRole === 'MASTER_ADMIN' ? 'bg-amber-600' : 'bg-purple-600'
+                      }`}>
+                        {selectedCancellation.processedBy.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-base font-black text-gray-900">{selectedCancellation.processedBy}</p>
+                          {selectedCancellation.processedByRole && (
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                              selectedCancellation.processedByRole === 'MASTER_ADMIN'
+                                ? 'bg-amber-100 border border-amber-300 text-amber-800'
+                                : 'bg-purple-100 border border-purple-300 text-purple-800'
+                            }`}>
+                              {selectedCancellation.processedByRole === 'MASTER_ADMIN' && (
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                              )}
+                              {formatRole(selectedCancellation.processedByRole || '')}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-500 font-semibold">
+                          Processed on {new Date(selectedCancellation.processedAt).toLocaleString('en-IN', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    {selectedCancellation.adminNotes && (
+                      <div className="mt-3 p-3 bg-white rounded-lg border border-purple-200">
+                        <p className="text-xs font-bold text-purple-700 uppercase mb-1">Admin Notes</p>
+                        <p className="text-sm text-gray-900">{selectedCancellation.adminNotes}</p>
+                      </div>
+                    )}
                   </div>
                 )}
 

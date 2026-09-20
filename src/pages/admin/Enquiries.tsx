@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Calendar, LoaderCircle, Mail, MessageSquare, Phone, Search, Trash2, User, Users } from 'lucide-react'
+import { ArrowLeft, Calendar, LoaderCircle, Mail, MessageSquare, Phone, Search, Trash2, User, Users, History } from 'lucide-react'
 import PermissionGuard from '../../components/PermissionGuard'
 import ConfirmationToast from '../../components/admin/ConfirmationToast'
 
@@ -17,8 +17,21 @@ type Enquiry = {
   status: string
   notes: string | null
   updatedBy: string | null
+  updatedByRole: string | null
+  changeLog: ChangeLogEntry[]
   createdAt: string
   updatedAt: string
+}
+
+type ChangeLogEntry = {
+  timestamp: string
+  changedBy: string
+  changedByRole: string
+  changes: Array<{
+    field: string
+    oldValue: string
+    newValue: string
+  }>
 }
 
 const STATUS_OPTIONS = [
@@ -38,6 +51,27 @@ const formatDateTime = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+const formatRole = (role: string): string => {
+  if (!role) return 'Admin'
+  if (role === 'MASTER_ADMIN') return 'Master Admin'
+  if (role === 'ADMIN') return 'Admin'
+  // Handle other roles with proper formatting
+  return role.split('_').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ')
+}
+
+const formatAdminName = (name: string, role?: string): string => {
+  if (!name) return role === 'MASTER_ADMIN' ? 'Master Admin' : 'Admin'
+  // Check if it looks like a database ID (cuid format: starts with 'c' and contains lowercase letters and numbers)
+  const isCuid = /^c[a-z0-9]{20,30}$/i.test(name)
+  if (isCuid) {
+    // If it's an ID, use the role to determine the display name
+    return role === 'MASTER_ADMIN' ? 'Master Admin' : 'Admin'
+  }
+  return name
 }
 
 export default function Enquiries() {
@@ -85,7 +119,11 @@ export default function Enquiries() {
       const response = await fetch(`/api/admin/enquiries/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus, updatedBy: adminData.id })
+        body: JSON.stringify({ 
+          status: newStatus, 
+          updatedBy: adminData.name || adminData.email,
+          updatedByRole: adminData.role || 'ADMIN'
+        })
       })
 
       if (response.ok) {
@@ -118,7 +156,11 @@ export default function Enquiries() {
       const response = await fetch(`/api/admin/enquiries/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notes, updatedBy: adminData.id })
+        body: JSON.stringify({ 
+          notes, 
+          updatedBy: adminData.name || adminData.email,
+          updatedByRole: adminData.role || 'ADMIN'
+        })
       })
 
       if (response.ok) {
@@ -291,6 +333,41 @@ export default function Enquiries() {
                     <div className="mt-3 text-xs text-slate-400">
                       Received {formatDateTime(enquiry.createdAt)}
                     </div>
+
+                    {/* Show admin info for updated enquiries */}
+                    {enquiry.updatedBy && enquiry.updatedAt && (
+                      <div className="mt-3 pt-3 border-t border-slate-200">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-8 h-8 rounded-full text-white flex items-center justify-center font-black text-xs ${
+                            enquiry.updatedByRole === 'MASTER_ADMIN' ? 'bg-amber-600' : 'bg-purple-600'
+                          }`}>
+                            {formatAdminName(enquiry.updatedBy, enquiry.updatedByRole || undefined).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-black text-slate-900">{formatAdminName(enquiry.updatedBy, enquiry.updatedByRole || undefined)}</p>
+                              {enquiry.updatedByRole && (
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                  enquiry.updatedByRole === 'MASTER_ADMIN'
+                                    ? 'bg-amber-100 border border-amber-300 text-amber-800'
+                                    : 'bg-purple-100 border border-purple-300 text-purple-800'
+                                }`}>
+                                  {enquiry.updatedByRole === 'MASTER_ADMIN' && (
+                                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                  )}
+                                  {formatRole(enquiry.updatedByRole)}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-500 font-semibold">
+                              Last updated {formatDateTime(enquiry.updatedAt)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -418,6 +495,88 @@ export default function Enquiries() {
                   className="h-32 w-full rounded-xl border border-slate-300 bg-white p-4 text-sm text-slate-900 outline-none transition-all focus:border-secondary focus:ring-2 focus:ring-secondary/20"
                 />
               </div>
+
+              {/* Change History */}
+              {selectedEnquiry.changeLog && selectedEnquiry.changeLog.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <History size={16} className="text-slate-500" />
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Change History</p>
+                  </div>
+                  <div className="space-y-3">
+                    {selectedEnquiry.changeLog.slice().reverse().map((log, idx) => {
+                      const isMasterAdmin = log.changedByRole === 'MASTER_ADMIN'
+                      return (
+                        <div
+                          key={idx}
+                          className={`border-l-4 p-4 rounded-xl ${
+                            isMasterAdmin
+                              ? 'bg-gradient-to-r from-amber-50 to-white border-amber-500'
+                              : 'bg-gradient-to-r from-purple-50 to-white border-purple-400'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-8 h-8 rounded-full text-white flex items-center justify-center font-black text-xs ${
+                                isMasterAdmin ? 'bg-amber-600' : 'bg-purple-600'
+                              }`}>
+                                {formatAdminName(log.changedBy, log.changedByRole).split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-black text-slate-900">{formatAdminName(log.changedBy, log.changedByRole)}</p>
+                                  {log.changedByRole && (
+                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                      isMasterAdmin
+                                        ? 'bg-amber-100 border border-amber-300 text-amber-800'
+                                        : 'bg-purple-100 border border-purple-300 text-purple-800'
+                                    }`}>
+                                      {isMasterAdmin && (
+                                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                      )}
+                                      {formatRole(log.changedByRole)}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-slate-500 font-semibold">
+                                  {formatDateTime(log.timestamp)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Show specific field changes */}
+                          {log.changes && log.changes.length > 0 && (
+                            <div className="mt-3 space-y-2">
+                              {log.changes.map((change, changeIdx) => (
+                                <div key={changeIdx} className="bg-white rounded-lg p-3 border border-slate-200">
+                                  <p className="text-xs font-black text-slate-700 mb-2 uppercase">{change.field}</p>
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[10px] font-bold text-red-600 uppercase">From:</span>
+                                      <span className="text-xs text-red-700 bg-red-50 px-2 py-0.5 rounded font-medium line-through">
+                                        {change.field === 'status' ? change.oldValue.replace('_', ' ') : (change.oldValue || '(empty)')}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-[10px] font-bold text-green-600 uppercase">To:</span>
+                                      <span className="text-xs text-green-700 bg-green-50 px-2 py-0.5 rounded font-bold">
+                                        {change.field === 'status' ? change.newValue.replace('_', ' ') : change.newValue}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Metadata */}
               <div className="rounded-xl bg-slate-50 p-4 text-xs text-slate-500">

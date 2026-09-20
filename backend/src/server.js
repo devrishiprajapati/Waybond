@@ -2297,7 +2297,7 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
     console.log('Request body:', JSON.stringify(req.body, null, 2))
     console.log('Booking ID:', req.params.bookingId)
 
-    const { targetTripId, reason, processedBy, participantIndex } = req.body
+    const { targetTripId, reason, processedBy, processedByRole, participantIndex } = req.body
     if (!targetTripId) return res.status(400).json({ message: 'Target trip is required.' })
 
     console.log('Participant index:', participantIndex)
@@ -2349,7 +2349,8 @@ app.post('/api/bookings/:bookingId/transfer', async (req, res, next) => {
       fromPrice: oldPrice,
       toPrice: newPrice,
       transferredAt: new Date().toISOString(),
-      transferredBy: processedBy || 'admin'
+      transferredBy: processedBy || 'admin',
+      transferredByRole: processedByRole || 'ADMIN'
     }
 
     const transferHistory = Array.isArray(oldPayload.transferHistory) ? [...oldPayload.transferHistory, transferRecord] : [transferRecord]
@@ -3396,6 +3397,7 @@ app.post('/api/admin/promo-codes', async (req, res, next) => {
       validUntil,
       usageLimit,
       createdBy,
+      createdByRole,
       description,
       autoGenerate
     } = req.body
@@ -3464,6 +3466,7 @@ app.post('/api/admin/promo-codes', async (req, res, next) => {
         validUntil: new Date(validUntil),
         usageLimit: usageLimit ? Number(usageLimit) : null,
         createdBy: createdBy || 'system',
+        createdByRole: createdByRole || 'ADMIN',
         description: description || null
       }
     })
@@ -3994,7 +3997,7 @@ app.get('/api/admin/cancellations/:id', async (req, res, next) => {
 // Update cancellation request (Admin - Approve/Reject)
 app.put('/api/admin/cancellations/:id', async (req, res, next) => {
   try {
-    const { status, refundAmount, refundStatus, adminNotes, processedBy } = req.body
+    const { status, refundAmount, refundStatus, adminNotes, processedBy, processedByRole } = req.body
 
     const cancellation = await prisma.bookingCancellation.findUnique({
       where: { id: req.params.id }
@@ -4013,6 +4016,7 @@ app.put('/api/admin/cancellations/:id', async (req, res, next) => {
     if (refundStatus) updateData.refundStatus = refundStatus
     if (adminNotes !== undefined) updateData.adminNotes = adminNotes
     if (processedBy) updateData.processedBy = processedBy
+    if (processedByRole) updateData.processedByRole = processedByRole
 
     if (status && status !== 'PENDING') {
       updateData.processedAt = new Date()
@@ -4203,14 +4207,57 @@ app.get('/api/admin/enquiries/:id', async (req, res, next) => {
 // Update enquiry status and notes
 app.patch('/api/admin/enquiries/:id', async (req, res, next) => {
   try {
-    const { status, notes, updatedBy } = req.body
+    const { status, notes, updatedBy, updatedByRole } = req.body
+
+    // Get current enquiry to track changes
+    const currentEnquiry = await prisma.enquiry.findUnique({
+      where: { id: req.params.id }
+    })
+
+    if (!currentEnquiry) {
+      return res.status(404).json({ message: 'Enquiry not found' })
+    }
+
+    // Build change log entry
+    const changeLogEntry = {
+      timestamp: new Date().toISOString(),
+      changedBy: updatedBy || 'Admin',
+      changedByRole: updatedByRole || 'ADMIN',
+      changes: []
+    }
+
+    // Track status change
+    if (status && status !== currentEnquiry.status) {
+      changeLogEntry.changes.push({
+        field: 'status',
+        oldValue: currentEnquiry.status,
+        newValue: status
+      })
+    }
+
+    // Track notes change
+    if (notes !== undefined && notes !== currentEnquiry.notes) {
+      changeLogEntry.changes.push({
+        field: 'notes',
+        oldValue: currentEnquiry.notes || '',
+        newValue: notes
+      })
+    }
+
+    // Only add to change log if there are actual changes
+    const existingChangeLogs = Array.isArray(currentEnquiry.changeLog) ? currentEnquiry.changeLog : []
+    const newChangeLog = changeLogEntry.changes.length > 0 
+      ? [...existingChangeLogs, changeLogEntry]
+      : existingChangeLogs
 
     const enquiry = await prisma.enquiry.update({
       where: { id: req.params.id },
       data: {
         ...(status && { status }),
         ...(notes !== undefined && { notes }),
-        ...(updatedBy && { updatedBy })
+        ...(updatedBy && { updatedBy }),
+        ...(updatedByRole && { updatedByRole }),
+        changeLog: newChangeLog
       }
     })
 

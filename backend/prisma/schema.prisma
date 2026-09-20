@@ -196,7 +196,8 @@ model PromoCode {
   usageLimit       Int? // Maximum number of times this code can be used (null = unlimited)
   usageCount       Int              @default(0)
   isActive         Boolean          @default(true)
-  createdBy        String // Admin ID who created this promo code
+  createdBy        String // Admin name who created this promo code
+  createdByRole    String? // Admin role (ADMIN/MASTER_ADMIN)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   description      String? // Optional description for admin reference
@@ -274,7 +275,8 @@ model BookingCancellation {
   refundStatus      String?   // PENDING, PROCESSED, COMPLETED
   requestedAt       DateTime  @default(now())
   processedAt       DateTime?
-  processedBy       String?   // Admin ID who processed
+  processedBy       String?   // Admin name who processed
+  processedByRole   String?   // Admin role (ADMIN/MASTER_ADMIN)
   adminNotes        String?   @db.Text
   emailSent         Boolean   @default(false)
   createdAt         DateTime  @default(now())
@@ -298,7 +300,9 @@ model Enquiry {
   tripLocation String?
   status       String   @default("NEW") // NEW, CONTACTED, IN_PROGRESS, CONVERTED, CLOSED
   notes        String?  @db.Text
-  updatedBy    String? // Admin ID who last updated
+  updatedBy    String? // Admin name who last updated
+  updatedByRole String? // Admin role (ADMIN/MASTER_ADMIN)
+  changeLog    Json[]   @default([]) // Track all status and notes changes
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
