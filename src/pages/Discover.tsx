@@ -10,6 +10,14 @@ import { useWishlist } from '../lib/wishlist'
 import { formatDateOnly, parseDateOnly } from '../lib/date'
 import { getDepartureOptions } from '../lib/dateFilters'
 
+const stripHtml = (value: string) => value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+const getDefaultDepartureDate = (trip: any, departureOptions: string[]) => {
+  const nextBatch = String(trip.nextBatch || '').trim()
+  if (nextBatch && departureOptions.includes(nextBatch)) return nextBatch
+  return departureOptions[0] || ''
+}
+
 const experienceFilters = [
   { key: 'monsoon', label: 'Monsoon ', icon: '⛰️' },
   { key: 'weekend', label: 'Weekend ', icon: '🥾' },
@@ -231,7 +239,16 @@ const Discover = () => {
               <AnimatePresence mode="popLayout">
                 {filteredTrips.map((trip) => {
                   const departureOptions = getDepartureOptions(trip)
-                  const selectedDeparture = selectedDepartures[trip.id] || departureOptions[0]
+                  const defaultDeparture = getDefaultDepartureDate(trip, departureOptions)
+                  const storedDeparture = selectedDepartures[trip.id]
+                  const selectedDeparture = storedDeparture && departureOptions.includes(storedDeparture)
+                    ? storedDeparture
+                    : defaultDeparture
+                  const departureLabel = 'Next Departure'
+                  const selectedDepartureLabel = selectedDeparture
+                    ? formatDateOnly(selectedDeparture, { month: 'short', day: 'numeric', year: 'numeric' })
+                    : ''
+                  const descriptionPreview = stripHtml(String(trip.description || ''))
                   const isWishlisted = isInList(trip.id)
 
                   return (
@@ -267,8 +284,6 @@ const Discover = () => {
                       {/* Image Section - Fixed */}
                       <div className="relative h-56 sm:h-60 overflow-hidden bg-white flex-shrink-0">
                         <img src={trip.image} alt={trip.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-[2s] group-hover:scale-105" />
-
-                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">{Array.from({ length: 4 }).map((_, dot) => <span key={dot} className={`h-2 w-2 rounded-full border border-white/60 ${dot === 0 ? 'bg-secondary' : 'bg-white/70'}`} />)}</div>
                       </div>
 
                       {/* Content Section - Flexible */}
@@ -276,10 +291,16 @@ const Discover = () => {
                         <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[10px] font-bold text-white/55 mb-3">
                           <span className="inline-flex items-center gap-1.5 whitespace-nowrap"><Calendar size={13} className="text-secondary" /> {trip.duration}</span>
                           <span className="inline-flex items-center gap-1.5 min-w-0"><MapPin size={13} className="text-secondary shrink-0" /><span className="truncate">{trip.location}</span></span>
+                          {selectedDepartureLabel && (
+                            <span className="col-span-2 inline-flex items-center gap-1.5 text-white/75">
+                              <Calendar size={13} className="text-secondary shrink-0" />
+                              <span className="truncate">{departureLabel}: {selectedDepartureLabel}</span>
+                            </span>
+                          )}
                         </div>
                         <div className="h-px bg-white/10 mb-3" />
                         <h3 className="text-lg md:text-xl font-bungee font-black tracking-tight text-white leading-snug line-clamp-2 mb-2">{trip.title}</h3>
-                        <p className="text-xs md:text-sm text-white/55 line-clamp-3 flex-grow">{trip.description}</p>
+                        <p className="text-xs md:text-sm text-white/55 line-clamp-3 flex-grow">{descriptionPreview}</p>
                       </div>
 
                       {/* Bottom Section - Fixed, Independent */}
@@ -318,7 +339,14 @@ const Discover = () => {
 
                         {/* Date Selection */}
                         <div className="space-y-2">
-                          <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-[8px] font-black uppercase tracking-[0.18em] text-white/45">SELECT DEPARTURE</p>
+                            {selectedDepartureLabel && (
+                              <p className="shrink-0 text-[9px] font-black uppercase tracking-[0.12em] text-secondary">
+                                {selectedDepartureLabel}
+                              </p>
+                            )}
+                          </div>
 
                           {/* Month tabs and dates */}
                           {(() => {
@@ -348,7 +376,7 @@ const Discover = () => {
 
                             // Get or set current selected month
                             let currentSelectedMonth = firstMonth
-                            let currentSelectedDate = selectedDepartures[trip.id]
+                            let currentSelectedDate = selectedDeparture
 
                             if (currentSelectedDate) {
                               const dateMonthKey = getMonthKey(currentSelectedDate)

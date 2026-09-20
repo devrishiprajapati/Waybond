@@ -62,6 +62,26 @@ type GroupedBookings = {
   }
 }
 
+const collectSearchValues = (value: unknown): string[] => {
+  if (value === null || value === undefined) return []
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return [String(value)]
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap(collectSearchValues)
+  }
+  if (typeof value === 'object') {
+    return Object.values(value as Record<string, unknown>).flatMap(collectSearchValues)
+  }
+  return []
+}
+
+const bookingMatchesSearch = (booking: Booking, query: string) => {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) return true
+  return collectSearchValues(booking).some((value) => value.toLowerCase().includes(normalizedQuery))
+}
+
 const BookingsView: React.FC<BookingsViewProps> = ({ bookings: initialBookings, onBookingUpdate }) => {
   const [bookings, setBookings] = useState<Booking[]>(initialBookings)
   const [expandedTrips, setExpandedTrips] = useState<Set<string>>(new Set())
@@ -310,18 +330,7 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings: initialBookings, 
   }
 
   const filteredBookings = bookings.filter(booking => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    const customerState = booking.travellerDetails?.[0]?.state || ''
-    const joinLocation = booking.joinOrigin || 'No pickup point specified'
-    return (
-      booking.tripName.toLowerCase().includes(query) ||
-      booking.location.toLowerCase().includes(query) ||
-      booking.customerName.toLowerCase().includes(query) ||
-      booking.bookingId.toLowerCase().includes(query) ||
-      customerState.toLowerCase().includes(query) ||
-      joinLocation.toLowerCase().includes(query)
-    )
+    return bookingMatchesSearch(booking, searchQuery)
   })
 
   const groupedBookings: GroupedBookings = filteredBookings.reduce((acc, booking) => {
@@ -534,7 +543,7 @@ const BookingsView: React.FC<BookingsViewProps> = ({ bookings: initialBookings, 
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder="Search bookings..."
+            placeholder="Search any booking field, traveller detail, payment, date, or link..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"

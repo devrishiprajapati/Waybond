@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import DOMPurify from 'dompurify'
 import {
   MapPin, Star, ArrowLeft,
   CheckCircle2, Clock, ShieldCheck, ChevronDown,
@@ -16,6 +17,28 @@ import { isLoggedIn } from '../lib/auth'
 import { addDaysToDateInput, formatDateOnly } from '../lib/date'
 import AttractionModal from '../components/AttractionModal'
 import { Attraction } from '../lib/trips'
+
+const stripHtml = (value: string) => value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+
+const RichTextContent = ({
+  content,
+  className = '',
+  style,
+}: {
+  content: string
+  className?: string
+  style?: React.CSSProperties
+}) => {
+  const sanitizedHtml = useMemo(() => DOMPurify.sanitize(content || ''), [content])
+
+  return (
+    <div
+      className={`rich-text-content whitespace-pre-line break-words [&_*]:whitespace-normal [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_h1]:mb-3 [&_h1]:mt-4 [&_h1]:text-3xl [&_h1]:font-black [&_h1]:leading-tight [&_h2]:mb-3 [&_h2]:mt-4 [&_h2]:text-2xl [&_h2]:font-extrabold [&_h2]:leading-tight [&_h3]:mb-2 [&_h3]:mt-3 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:leading-snug [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:my-1 [&_strong]:font-extrabold [&_em]:italic [&_u]:underline ${className}`}
+      style={style}
+      dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+    />
+  )
+}
 
 const TripDetails = () => {
   const { slug } = useParams()
@@ -287,6 +310,7 @@ const TripDetails = () => {
   }
 
   const cancellationPolicy = String(trip.cancellationPolicy || DEFAULT_CANCELLATION_POLICY).trim()
+  const plainDescription = stripHtml(String(trip.description || ''))
   const expeditionLeads = Array.isArray(trip.captains) && trip.captains.length > 0
     ? trip.captains
     : trip.captain ? [trip.captain] : []
@@ -298,7 +322,7 @@ const TripDetails = () => {
       WebkitLineClamp: 4,
       overflow: 'hidden'
     }
-  const shouldShowOverviewToggle = String(trip.description || '').length > 180
+  const shouldShowOverviewToggle = plainDescription.length > 180
   const joinUsFromSection = joinUsFromOptions.length > 0 ? (
     <div className="rounded-[1.25rem] bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-6">
       <h2 className="mb-5 text-xl font-extrabold tracking-tight text-slate-950 md:text-2xl">Join Us From</h2>
@@ -344,7 +368,7 @@ const TripDetails = () => {
       <div className="bg-white min-h-screen pt-28 pb-28 relative">
         <Helmet>
           <title>{trip.title} | WAYBOND</title>
-          <meta name="description" content={trip.description.substring(0, 160)} />
+          <meta name="description" content={plainDescription.substring(0, 160)} />
         </Helmet>
         {/* Navigation & Header */}
         <div className="max-w-[1920px] mx-auto px-4 md:px-12 md:py-8 lg:px-20">
@@ -479,9 +503,11 @@ const TripDetails = () => {
                 </div>
                 <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
                   <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
-                  <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg" style={overviewClampStyle}>
-                    {trip.description}
-                  </p>
+                  <RichTextContent
+                    content={String(trip.description || '')}
+                    className="text-base font-medium leading-relaxed text-slate-700 md:text-lg"
+                    style={overviewClampStyle}
+                  />
                   {shouldShowOverviewToggle && (
                     <button
                       type="button"
@@ -598,9 +624,10 @@ const TripDetails = () => {
                                 </div>
                               )}
 
-                              <p className="text-white/60 font-medium leading-relaxed">
-                                {item.description}
-                              </p>
+                              <RichTextContent
+                                content={String(item.description || '')}
+                                className="text-white/60 font-medium leading-relaxed"
+                              />
                             </div>
                           </motion.div>
                         )}
@@ -915,9 +942,11 @@ const TripDetails = () => {
             </div>
             <div className="rounded-[1.25rem] bg-white p-6 shadow-[0_10px_30px_rgba(15,23,42,0.08)] ring-1 ring-black/5 md:p-9">
               <h2 className="mb-5 text-2xl font-extrabold tracking-tight text-slate-950 md:text-3xl">Trip Overview</h2>
-              <p className="text-base font-medium leading-relaxed text-slate-700 md:text-lg" style={overviewClampStyle}>
-                {trip.description}
-              </p>
+              <RichTextContent
+                content={String(trip.description || '')}
+                className="text-base font-medium leading-relaxed text-slate-700 md:text-lg"
+                style={overviewClampStyle}
+              />
               {shouldShowOverviewToggle && (
                 <button
                   type="button"
@@ -1034,9 +1063,10 @@ const TripDetails = () => {
                             </div>
                           )}
 
-                          <p className="text-white/60 font-medium leading-relaxed">
-                            {item.description}
-                          </p>
+                          <RichTextContent
+                            content={String(item.description || '')}
+                            className="text-white/60 font-medium leading-relaxed"
+                          />
                         </div>
                       </motion.div>
                     )}
@@ -1574,9 +1604,10 @@ const TripDetails = () => {
 
               <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
                 <div className="prose prose-sm sm:prose-base max-w-none">
-                  <div className="text-gray-800 leading-relaxed whitespace-pre-line">
-                    {trip.termsAndConditions}
-                  </div>
+                  <RichTextContent
+                    content={String(trip.termsAndConditions || '')}
+                    className="text-gray-800 leading-relaxed"
+                  />
                 </div>
               </div>
             </motion.div>
@@ -1619,9 +1650,10 @@ const TripDetails = () => {
               </div>
 
               <div className="overflow-y-auto max-h-[calc(85vh-5rem)] px-5 sm:px-7 py-5 sm:py-6">
-                <p className="whitespace-pre-line text-gray-800 text-sm sm:text-base leading-relaxed font-medium">
-                  {cancellationPolicy}
-                </p>
+                <RichTextContent
+                  content={cancellationPolicy}
+                  className="text-sm font-medium leading-relaxed text-gray-800 sm:text-base"
+                />
               </div>
             </motion.div>
           </motion.div>

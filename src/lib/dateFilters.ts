@@ -44,7 +44,10 @@ export function getNextDepartureDate(trip: any): string {
 export function getDepartureOptions(trip: any): string[] {
   const dates = [
     trip.nextBatch,
-    ...(Array.isArray(trip.departureDates) ? trip.departureDates : [])
+    ...(Array.isArray(trip.departureDates) ? trip.departureDates : []),
+    ...(Array.isArray(trip.joinUsFrom)
+      ? trip.joinUsFrom.flatMap((origin: any) => Array.isArray(origin?.departureDates) ? origin.departureDates : [])
+      : [])
   ]
   
   const validDates = Array.from(new Set(dates.map((date) => String(date || '').trim()).filter(Boolean)))
