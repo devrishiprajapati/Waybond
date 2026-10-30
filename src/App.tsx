@@ -6,6 +6,8 @@ import Footer from './components/Footer'
 import FloatingWhatsApp from './components/FloatingWhatsApp'
 import SplashScreen from './components/SplashScreen'
 import AdminMobileNav from './components/admin/AdminMobileNav'
+import { AuthValidator } from './components/AuthValidator'
+import { AdminAuthValidator } from './components/admin/AdminAuthValidator'
 import Home from './pages/Home'
 import Discover from './pages/Discover'
 import HimachalPage from './pages/HimachalPage'
@@ -174,6 +176,9 @@ function App() {
       <AnimatePresence mode="wait">
         {showSplash && <SplashScreen key="splash" />}
       </AnimatePresence>
+
+      {/* Add appropriate validator based on section */}
+      {isAdminSection ? <AdminAuthValidator /> : <AuthValidator />}
 
       <div className="light-theme flex flex-col min-h-screen selection:bg-secondary/30 w-full overflow-x-hidden">
         {!isAdminSection && <Navbar />}

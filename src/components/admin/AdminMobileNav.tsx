@@ -17,11 +17,7 @@ import {
   XCircle,
   LogOut
 } from 'lucide-react'
-
-type AdminData = {
-  role?: string
-  permissions?: string[]
-}
+import { getAdmin, logoutAdmin, hasPermission as checkPermission } from '../../lib/adminAuth'
 
 const navItems = [
   { label: 'Inventory', path: '/admin/dashboard', icon: LayoutDashboard, permission: 'manage_trips' },
@@ -42,34 +38,19 @@ const navItems = [
   { label: 'Admins', path: '/admin/admins', icon: Shield, permission: 'manage_admins' }
 ]
 
-const getAdminData = (): AdminData | null => {
-  try {
-    return JSON.parse(sessionStorage.getItem('adminData') || 'null')
-  } catch {
-    return null
-  }
-}
-
 export default function AdminMobileNav() {
   const location = useLocation()
   const navigate = useNavigate()
-  const isAdmin = sessionStorage.getItem('isAdmin') === 'true'
-  const adminData = getAdminData()
+  const admin = getAdmin()
 
-  if (!isAdmin || location.pathname.includes('/login')) return null
-
-  const hasPermission = (permission: string) => {
-    if (adminData?.role === 'MASTER_ADMIN') return true
-    return Boolean(adminData?.permissions?.includes(permission))
-  }
+  if (!admin || location.pathname.includes('/login')) return null
 
   const handleLogout = () => {
-    sessionStorage.removeItem('isAdmin')
-    sessionStorage.removeItem('adminData')
+    logoutAdmin()
     navigate('/admin/login')
   }
 
-  const visibleNavItems = navItems.filter((item) => hasPermission(item.permission))
+  const visibleNavItems = navItems.filter((item) => checkPermission(item.permission))
   if (!visibleNavItems.length) return null
 
   return (

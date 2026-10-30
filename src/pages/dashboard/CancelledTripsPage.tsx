@@ -125,15 +125,47 @@ const CancelledTripsPage = () => {
                             </div>
                             <div className="text-left lg:text-right">
                               <p className="text-[9px] text-white/40 font-black uppercase tracking-[0.22em]">Total Amount</p>
-                              <p className="text-3xl font-sans font-black text-white tracking-tighter">₹{trip.price}</p>
+                              <p className="text-3xl font-sans font-black text-white tracking-tighter">
+                                ₹{trip.totalAmount 
+                                    ? (typeof trip.totalAmount === 'string' 
+                                        ? trip.totalAmount 
+                                        : trip.totalAmount.toLocaleString('en-IN'))
+                                    : (trip.price 
+                                        ? (typeof trip.price === 'string' 
+                                            ? trip.price 
+                                            : trip.price.toLocaleString('en-IN'))
+                                        : '0')}
+                              </p>
+                              {trip.refundAmount && (
+                                <p className="text-xs text-green-400 font-bold mt-1">
+                                  Refunded: ₹{typeof trip.refundAmount === 'string' 
+                                    ? trip.refundAmount 
+                                    : trip.refundAmount.toLocaleString('en-IN')}
+                                </p>
+                              )}
                             </div>
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             {[
-                              { label: 'Trip Start', value: formatDateOnly(trip.nextBatch || 'TBD') },
-                              { label: 'Travelers', value: `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}` },
-                              { label: 'Cancelled On', value: trip.cancelledOn }
+                              { 
+                                label: 'Trip Start', 
+                                value: trip.departureDate || trip.departure || trip.nextBatch 
+                                  ? formatDateOnly(trip.departureDate || trip.departure || trip.nextBatch) 
+                                  : 'TBD' 
+                              },
+                              { 
+                                label: 'Travelers', 
+                                value: trip.travelers 
+                                  ? `${trip.travelers} Member${trip.travelers > 1 ? 's' : ''}` 
+                                  : 'undefined Member'
+                              },
+                              { 
+                                label: 'Cancelled On', 
+                                value: trip.cancelledOn || trip.cancelledAt 
+                                  ? formatDateOnly(trip.cancelledOn || trip.cancelledAt) 
+                                  : 'N/A' 
+                              }
                             ].map((item) => (
                               <div key={item.label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
                                 <p className="text-[8px] text-white/30 font-black uppercase tracking-[0.2em]">{item.label}</p>

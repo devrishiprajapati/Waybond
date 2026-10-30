@@ -1190,6 +1190,40 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
       return res.status(400).json({ message: 'Email and password are required.' })
     }
 
+    // Check master admin first (environment variable - never deleted)
+    const masterEmail = process.env.MASTER_ADMIN_EMAIL || 'master@waybond.com'
+    const masterPassword = process.env.MASTER_ADMIN_PASSWORD || 'master123'
+
+    if (email === masterEmail && password === masterPassword) {
+      return res.json({
+        admin: {
+          id: 'waybond-master-admin',
+          name: 'Master Admin',
+          email: masterEmail,
+          role: 'MASTER_ADMIN',
+          permissions: MASTER_ADMIN_PERMISSIONS,
+          isPersistent: true // Flag to indicate this admin can't be deleted
+        }
+      })
+    }
+
+    // Check legacy admin (environment variable for backward compatibility)
+    const envEmail = process.env.ADMIN_EMAIL || 'admin@waybond.local'
+    const envPassword = process.env.ADMIN_PASSWORD || 'admin123'
+
+    if (email === envEmail && password === envPassword) {
+      return res.json({
+        admin: {
+          id: 'waybond-admin-legacy',
+          name: 'WayBond Admin',
+          email: envEmail,
+          role: 'ADMIN',
+          permissions: ADMIN_PERMISSIONS,
+          isPersistent: true // Flag to indicate this admin can't be deleted
+        }
+      })
+    }
+
     // Try to find admin in database
     const admin = await prisma.admin.findUnique({ where: { email } })
 
@@ -1211,43 +1245,46 @@ app.post('/api/auth/admin/login', async (req, res, next) => {
           name: updatedAdmin.name,
           email: updatedAdmin.email,
           role: updatedAdmin.role,
-          permissions: updatedAdmin.permissions
-        }
-      })
-    }
-
-    const masterEmail = process.env.MASTER_ADMIN_EMAIL || 'master@waybond.com'
-    const masterPassword = process.env.MASTER_ADMIN_PASSWORD || 'master123'
-
-    if (email === masterEmail && password === masterPassword) {
-      return res.json({
-        admin: {
-          id: 'waybond-master-admin',
-          name: 'Master Admin',
-          email: masterEmail,
-          role: 'MASTER_ADMIN',
-          permissions: MASTER_ADMIN_PERMISSIONS
-        }
-      })
-    }
-
-    // Fallback to environment variable for backward compatibility
-    const envEmail = process.env.ADMIN_EMAIL || 'admin@waybond.local'
-    const envPassword = process.env.ADMIN_PASSWORD || 'admin123'
-
-    if (email === envEmail && password === envPassword) {
-      return res.json({
-        admin: {
-          id: 'waybond-admin-legacy',
-          name: 'WayBond Admin',
-          email: envEmail,
-          role: 'ADMIN',
-          permissions: ADMIN_PERMISSIONS
+          permissions: updatedAdmin.permissions,
+          isPersistent: false
         }
       })
     }
 
     return res.status(401).json({ message: 'Invalid admin credentials.' })
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Validate admin session endpoint (check if admin still exists)
+app.get('/api/auth/admin/validate', async (req, res, next) => {
+  try {
+    const adminId = req.query.adminId
+
+    if (!adminId) {
+      return res.status(400).json({ message: 'Admin ID is required' })
+    }
+
+    // Check if this is a persistent admin (master or legacy)
+    if (adminId === 'waybond-master-admin' || adminId === 'waybond-admin-legacy') {
+      return res.json({ valid: true, isPersistent: true })
+    }
+
+    // Check database admin
+    const admin = await prisma.admin.findUnique({
+      where: { id: String(adminId) }
+    })
+
+    if (!admin) {
+      return res.status(404).json({ valid: false, message: 'Admin account not found' })
+    }
+
+    if (!admin.isActive) {
+      return res.status(403).json({ valid: false, message: 'Admin account is deactivated' })
+    }
+
+    return res.json({ valid: true, isPersistent: false })
   } catch (error) {
     next(error)
   }
@@ -1512,7 +1549,19 @@ app.get('/api/analytics', async (req, res, next) => {
     )
 
     // Calculate net revenue after refunds
-    const totalRefunds = confirmedBookings.reduce((sum, booking) => sum + getRefundAmount(booking), 0)
+    // Get approved cancellations with refund amounts
+    const approvedCancellations = await prisma.bookingCancellation.findMany({
+      where: {
+        status: 'APPROVED',
+        refundAmount: { not: null }
+      }
+    })
+    
+    // Calculate total refunds from both booking paymentStatus and cancellation table
+    const bookingRefunds = confirmedBookings.reduce((sum, booking) => sum + getRefundAmount(booking), 0)
+    const cancellationRefunds = approvedCancellations.reduce((sum, cancellation) => sum + (cancellation.refundAmount || 0), 0)
+    const totalRefunds = bookingRefunds + cancellationRefunds
+    
     const totalRevenue = confirmedBookings.reduce((sum, booking) => sum + getNetBookingRevenue(booking), 0)
 
     // Calculate average booking value
@@ -1546,7 +1595,7 @@ app.get('/api/analytics', async (req, res, next) => {
 
     // Monthly revenue (last 12 months)
     const monthlyRevenue = generateMonthlyRevenue(allBookings)
-    const monthlyRefunds = generateMonthlyRefunds(allBookings)
+    const monthlyRefunds = await generateMonthlyRefunds(allBookings)
 
     // User growth (last 6 months)
     const userGrowth = generateUserGrowth(allUsers)
@@ -1717,24 +1766,40 @@ function generateMonthlyRevenue(bookings) {
   return { labels, data }
 }
 
-function generateMonthlyRefunds(bookings) {
+async function generateMonthlyRefunds(bookings) {
   const labels = []
   const data = []
   const now = new Date()
+  
+  // Get all approved cancellations
+  const approvedCancellations = await prisma.bookingCancellation.findMany({
+    where: {
+      status: 'APPROVED',
+      refundAmount: { not: null }
+    }
+  })
 
   for (let i = 11; i >= 0; i--) {
     const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const monthStr = month.toLocaleDateString('en-IN', { month: 'short' })
     labels.push(monthStr)
 
-    const monthRefunds = bookings.filter(b => {
+    // Calculate refunds from booking paymentStatus
+    const bookingMonthRefunds = bookings.filter(b => {
       const refundDate = new Date(b.payload?.refundedAt || b.payload?.paymentStatusUpdatedAt || b.createdAt)
       return b.payload?.paymentStatus === 'Refunded' &&
         refundDate.getMonth() === month.getMonth() &&
         refundDate.getFullYear() === month.getFullYear()
     }).reduce((sum, booking) => sum + getRefundAmount(booking), 0)
 
-    data.push(Math.round(monthRefunds))
+    // Calculate refunds from cancellation table
+    const cancellationMonthRefunds = approvedCancellations.filter(c => {
+      const refundDate = new Date(c.processedAt || c.requestedAt)
+      return refundDate.getMonth() === month.getMonth() &&
+        refundDate.getFullYear() === month.getFullYear()
+    }).reduce((sum, cancellation) => sum + (cancellation.refundAmount || 0), 0)
+
+    data.push(Math.round(bookingMonthRefunds + cancellationMonthRefunds))
   }
 
   return { labels, data }
@@ -3777,7 +3842,20 @@ app.get('/api/analytics', async (req, res, next) => {
       booking.payload?.paymentStatus === 'Refunded'
     )
     const totalBookings = bookings.length
-    const totalRefunds = revenueBookings.reduce((sum, booking) => sum + getRefundAmount(booking), 0)
+    
+    // Get approved cancellations with refund amounts
+    const approvedCancellations = await prisma.bookingCancellation.findMany({
+      where: {
+        status: 'APPROVED',
+        refundAmount: { not: null }
+      }
+    })
+    
+    // Calculate total refunds from both booking paymentStatus and cancellation table
+    const bookingRefunds = revenueBookings.reduce((sum, booking) => sum + getRefundAmount(booking), 0)
+    const cancellationRefunds = approvedCancellations.reduce((sum, cancellation) => sum + (cancellation.refundAmount || 0), 0)
+    const totalRefunds = bookingRefunds + cancellationRefunds
+    
     const totalRevenue = revenueBookings.reduce((sum, booking) => sum + getNetBookingRevenue(booking), 0)
 
     const averageBookingValue = totalBookings > 0 ? Math.round(totalRevenue / totalBookings) : 0

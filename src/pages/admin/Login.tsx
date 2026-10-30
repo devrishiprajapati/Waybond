@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, Navigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Lock, ShieldCheck, ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { getAdmin, setAdmin } from '../../lib/adminAuth'
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('')
@@ -9,32 +10,36 @@ const AdminLogin = () => {
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const errorParam = searchParams.get('error')
 
-  if (sessionStorage.getItem('isAdmin') === 'true') {
+  // Show error message if redirected from session expiry
+  useEffect(() => {
+    if (errorParam === 'session_expired') {
+      setError('Your session has expired. Please log in again.')
+    } else if (errorParam === 'admin_not_found') {
+      setError('Your admin account was not found. It may have been deleted or deactivated.')
+    }
+  }, [errorParam])
+
+  const admin = getAdmin()
+  if (admin) {
     // Check where to redirect based on permissions
-    const adminDataStr = sessionStorage.getItem('adminData')
-    if (adminDataStr) {
-      try {
-        const adminData = JSON.parse(adminDataStr)
-        const hasDashboardAccess = adminData.role === 'MASTER_ADMIN' || 
-          (adminData.permissions && adminData.permissions.includes('manage_trips'))
-        
-        if (!hasDashboardAccess) {
-          // Find first available page
-          const availablePages = [
-            { path: '/admin/data-filters', permission: 'view_data_filters' },
-            { path: '/admin/analytics', permission: 'view_analytics' },
-            { path: '/admin/payment-update', permission: 'view_bookings' }
-          ]
-          
-          for (const page of availablePages) {
-            if (adminData.permissions && adminData.permissions.includes(page.permission)) {
-              return <Navigate to={page.path} replace />
-            }
-          }
+    const hasDashboardAccess = admin.role === 'MASTER_ADMIN' || 
+      (admin.permissions && admin.permissions.includes('manage_trips'))
+    
+    if (!hasDashboardAccess) {
+      // Find first available page
+      const availablePages = [
+        { path: '/admin/data-filters', permission: 'view_data_filters' },
+        { path: '/admin/analytics', permission: 'view_analytics' },
+        { path: '/admin/payment-update', permission: 'view_bookings' }
+      ]
+      
+      for (const page of availablePages) {
+        if (admin.permissions && admin.permissions.includes(page.permission)) {
+          return <Navigate to={page.path} replace />
         }
-      } catch (error) {
-        console.error('Error parsing admin data:', error)
       }
     }
     return <Navigate to="/admin/dashboard" replace />
@@ -52,12 +57,10 @@ const AdminLogin = () => {
       const data = await response.json()
       if (!response.ok) throw new Error(data.message || 'Unable to authorize')
       
-      // Store admin data including role and permissions
-      sessionStorage.setItem('isAdmin', 'true')
-      sessionStorage.setItem('adminData', JSON.stringify(data.admin))
+      // Store admin data using the new auth library
+      setAdmin(data.admin)
       
       // Redirect based on permissions
-      const adminData = data.admin
       // All admins go to dashboard - sidebar will show only accessible pages
       navigate('/admin/dashboard')
     } catch (requestError) {

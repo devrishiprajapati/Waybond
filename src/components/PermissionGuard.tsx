@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ShieldAlert, Lock } from 'lucide-react'
+import { getAdmin, logoutAdmin, hasPermission as checkPermission, hasAnyPermission } from '../lib/adminAuth'
 
 type PermissionGuardProps = {
   children: React.ReactNode
@@ -9,17 +10,9 @@ type PermissionGuardProps = {
   requireMasterAdmin?: boolean
 }
 
-type AdminData = {
-  id: string
-  name: string
-  email: string
-  role: 'MASTER_ADMIN' | 'ADMIN'
-  permissions: string[]
-}
-
 const PermissionGuard = ({ children, requiredPermission, requireMasterAdmin = false }: PermissionGuardProps) => {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null)
-  const [adminData, setAdminData] = useState<AdminData | null>(null)
+  const [admin, setAdmin] = useState<ReturnType<typeof getAdmin>>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -27,50 +20,37 @@ const PermissionGuard = ({ children, requiredPermission, requireMasterAdmin = fa
 
     const checkPermissions = () => {
       // Check if admin is logged in
-      const isAdmin = sessionStorage.getItem('isAdmin')
-      if (isAdmin !== 'true') {
+      const adminData = getAdmin()
+      if (!adminData) {
         navigate('/admin/login')
         return
       }
 
-      // Get admin data
-      const adminDataStr = sessionStorage.getItem('adminData')
-      if (!adminDataStr) {
-        navigate('/admin/login')
+      if (!isMounted) return
+
+      setAdmin(adminData)
+
+      // Master Admin has access to everything
+      // Master Admin has access to everything
+      if (adminData.role === 'MASTER_ADMIN') {
+        setHasPermission(true)
         return
       }
 
-      try {
-        const admin: AdminData = JSON.parse(adminDataStr)
-        
-        if (!isMounted) return
+      // Check if Master Admin role is required
+      if (requireMasterAdmin) {
+        setHasPermission(false)
+        return
+      }
 
-        setAdminData(admin)
-
-        // Master Admin has access to everything
-        if (admin.role === 'MASTER_ADMIN') {
-          setHasPermission(true)
-          return
-        }
-
-        // Check if Master Admin role is required
-        if (requireMasterAdmin) {
-          setHasPermission(false)
-          return
-        }
-
-        // Check specific permission(s)
-        if (requiredPermission) {
-          const permissions = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission]
-          const hasAllPermissions = permissions.every(perm => admin.permissions && admin.permissions.includes(perm))
-          setHasPermission(hasAllPermissions)
-        } else {
-          // No specific permission required, just need to be logged in as admin
-          setHasPermission(true)
-        }
-      } catch (error) {
-        console.error('Failed to parse admin data:', error)
-        navigate('/admin/login')
+      // Check specific permission(s)
+      if (requiredPermission) {
+        const permissions = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission]
+        const hasAllPermissions = permissions.every(perm => checkPermission(perm))
+        setHasPermission(hasAllPermissions)
+      } else {
+        // No specific permission required, just need to be logged in as admin
+        setHasPermission(true)
       }
     }
 
@@ -139,13 +119,13 @@ const PermissionGuard = ({ children, requiredPermission, requireMasterAdmin = fa
                 </div>
               </div>
 
-              {adminData && (
+              {admin && (
                 <div className="pt-4 border-t border-red-500/20">
                   <p className="text-xs text-white/40 font-medium">
-                    Logged in as: <span className="text-white/60 font-bold">{adminData.name}</span>
+                    Logged in as: <span className="text-white/60 font-bold">{admin.name}</span>
                   </p>
                   <p className="text-xs text-white/40 font-medium mt-1">
-                    Role: <span className="text-white/60 font-bold">{adminData.role === 'MASTER_ADMIN' ? 'Master Admin' : 'Admin'}</span>
+                    Role: <span className="text-white/60 font-bold">{admin.role === 'MASTER_ADMIN' ? 'Master Admin' : 'Admin'}</span>
                   </p>
                 </div>
               )}
@@ -160,8 +140,7 @@ const PermissionGuard = ({ children, requiredPermission, requireMasterAdmin = fa
               </button>
               <button
                 onClick={() => {
-                  sessionStorage.removeItem('isAdmin')
-                  sessionStorage.removeItem('adminData')
+                  logoutAdmin()
                   navigate('/admin/login')
                 }}
                 className="h-12 px-6 rounded-2xl bg-white/5 text-white border border-white/10 hover:bg-white/10 transition-all font-black text-[10px] uppercase tracking-[0.16em]"

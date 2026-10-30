@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, Link, Navigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
@@ -23,7 +23,17 @@ const Login = () => {
     const navigate = useNavigate()
     const [searchParams] = useSearchParams()
     const redirectTo = searchParams.get('redirect') || '/dashboard'
+    const errorParam = searchParams.get('error')
     const existingUser = getUser()
+
+    // Show error message if redirected from session expiry
+    useEffect(() => {
+        if (errorParam === 'session_expired') {
+            setError('Your session has expired. Please log in again.')
+        } else if (errorParam === 'user_not_found') {
+            setError('Your account was not found. The database may have been reset. Please sign up or log in again.')
+        }
+    }, [errorParam])
 
 
     if (existingUser) {

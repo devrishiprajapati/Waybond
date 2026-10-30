@@ -90,6 +90,20 @@ const Analytics = () => {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d')
   const navigate = useNavigate()
 
+  // Helper function to format currency amounts intelligently
+  const formatCurrency = (amount: number): string => {
+    if (amount >= 100000) {
+      // 1 lakh or more -> show in Lakhs (L)
+      return `₹${(amount / 100000).toFixed(1)}L`
+    } else if (amount >= 1000) {
+      // 1 thousand or more (but less than 1 lakh) -> show in Thousands (K)
+      return `₹${(amount / 1000).toFixed(1)}K`
+    } else {
+      // Less than 1000 -> show as is
+      return `₹${amount}`
+    }
+  }
+
   useEffect(() => {
     if (sessionStorage.getItem('isAdmin') !== 'true') {
       navigate('/admin/login')
@@ -469,7 +483,7 @@ const Analytics = () => {
                 Total Revenue
               </p>
               <p className="text-2xl font-sans font-black text-white">
-                ₹{((data?.stats.totalRevenue || 0) / 100000).toFixed(1)}L
+                {formatCurrency(data?.stats.totalRevenue || 0)}
               </p>
             </motion.div>
 
@@ -507,7 +521,7 @@ const Analytics = () => {
                 Refunds
               </p>
               <p className="text-2xl font-sans font-black text-white">
-                ₹{((data?.stats.totalRefunds || 0) / 100000).toFixed(1)}L
+                {formatCurrency(data?.stats.totalRefunds || 0)}
               </p>
             </motion.div>
 

@@ -474,13 +474,24 @@ const CancellationManagement = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleOpenDetails(cancellation)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm transition-colors"
-                    >
-                      <Edit2 size={16} />
-                      Review
-                    </button>
+                    {cancellation.status === 'PENDING' ? (
+                      <button
+                        onClick={() => handleOpenDetails(cancellation)}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm transition-colors"
+                      >
+                        <Edit2 size={16} />
+                        Review
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gray-300 text-gray-500 rounded-lg font-bold text-sm cursor-not-allowed"
+                        title="Decision already made - cannot edit"
+                      >
+                        <CheckCircle size={16} />
+                        {cancellation.status === 'APPROVED' ? 'Approved' : 'Rejected'}
+                      </button>
+                    )}
                     <button
                       onClick={() => setPendingDelete(cancellation)}
                       className="p-2.5 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
