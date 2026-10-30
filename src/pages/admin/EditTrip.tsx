@@ -22,7 +22,7 @@ const EXPERIENCES: { value: Trip['experience'], label: string }[] = [
 
 const sectionClass = 'liquid-glass-dark border border-white/10 rounded-[2.5rem] p-5 md:p-8 space-y-7'
 const labelClass = 'text-[10px] uppercase font-black text-white/45 tracking-[0.2em] ml-2 flex items-center'
-const inputClass = 'w-full bg-white/5 border border-white/10 p-4 md:p-5 rounded-2xl text-white placeholder:text-white/25 focus:border-secondary focus:bg-white/10 outline-none transition-all font-bold'
+const inputClass = 'w-full bg-white/5 border border-white/10 p-4 md:p-5 rounded-2xl text-white placeholder:text-white/25 focus:border-secondary focus:bg-white/10 outline-none transition-all font-normal'
 const textareaClass = `${inputClass} min-h-[120px] resize-none leading-relaxed`
 
 const createEmptyLead = (): ExpeditionLead => ({
@@ -234,8 +234,11 @@ const EditTrip = () => {
     const joinUsFromItineraries = Object.fromEntries(
       Object.entries(formData.joinUsFromItineraries || {}).filter(([originId]) => joinUsFromKeys.has(originId))
     )
+    const departureDates = mergeUniqueDates([cleanData.nextBatch, ...(formData.departureDates || [])])
+    const nextBatch = normalizeDateText(cleanData.nextBatch) || departureDates[0] || ''
     const finalData = {
       ...cleanData,
+      nextBatch,
       captain: assignedLeads[0],
       captains: assignedLeads,
       images: formData.images && formData.images.length > 0 ? formData.images : [formData.image || ''],
@@ -249,7 +252,7 @@ const EditTrip = () => {
         max: formData.ageLimit?.max ? Number(formData.ageLimit.max) : ''
       },
       isVisible: formData.isVisible !== false,
-      departureDates: mergeUniqueDates([cleanData.nextBatch, ...(formData.departureDates || [])]),
+      departureDates,
       itinerary: formData.itinerary || [],
       departureItineraries: formData.departureItineraries || undefined,
       joinUsFrom,
@@ -466,7 +469,7 @@ const EditTrip = () => {
               <h2 className="text-4xl md:text-6xl font-sans font-black tracking-tighter uppercase italic leading-none font-bungee">
                 {id === 'new' ? 'New' : 'Edit'} <span className="text-secondary font-bungee">Package</span>
               </h2>
-              <p className="text-white/45 font-bold mt-3 max-w-xl">
+              <p className="text-white/45 font-normal mt-3 max-w-xl">
                 Configure package details, images, batches, itinerary and trip lead.
               </p>
             </div>
@@ -777,7 +780,7 @@ const EditTrip = () => {
                       ...formData,
                       inclusion: [...(formData.inclusion || []), '']
                     })}
-                    className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                    className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-normal text-sm"
                   >
                     <Plus size={16} /> Add Inclusion Item
                   </button>
@@ -830,7 +833,7 @@ const EditTrip = () => {
                       ...formData,
                       exclusion: [...(formData.exclusion || []), '']
                     })}
-                    className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                    className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-normal text-sm"
                   >
                     <Plus size={16} /> Add Exclusion Item
                   </button>
@@ -1048,7 +1051,7 @@ const EditTrip = () => {
                   )
                 })}
                 {!(formData.joinUsFrom || []).some((origin) => origin.location.trim()) && (
-                  <p className="w-full rounded-2xl border border-dashed border-white/10 py-5 text-center text-sm font-bold italic text-white/35">
+                  <p className="w-full rounded-2xl border border-dashed border-white/10 py-5 text-center text-sm font-normal text-white/35">
                     Add Join Us From places above to create location-wise itineraries.
                   </p>
                 )}
@@ -1089,7 +1092,7 @@ const EditTrip = () => {
 
               {selectedDepartureForItinerary !== 'default' && !isJoinOriginSelected && (
                 <div className="mt-3 p-4 rounded-xl bg-blue-500/10 border border-blue-400/20">
-                  <p className="text-xs text-blue-300 font-bold flex items-center gap-2">
+                  <p className="text-xs text-blue-300 font-normal flex items-center gap-2">
                     <Info size={14} />
                     Creating a custom itinerary for {new Date(selectedDepartureForItinerary).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </p>
@@ -1111,7 +1114,7 @@ const EditTrip = () => {
 
               {isJoinOriginSelected && (
                 <div className="mt-3 p-4 rounded-xl bg-blue-500/10 border border-blue-400/20">
-                  <p className="text-xs text-blue-300 font-bold flex items-center gap-2">
+                  <p className="text-xs text-blue-300 font-normal flex items-center gap-2">
                     <Info size={14} />
                     Creating a custom itinerary for {(formData.joinUsFrom || []).find((origin) => getJoinOriginKey(origin) === selectedJoinOriginId)?.location || 'this Join Us From location'}
                   </p>
@@ -1245,7 +1248,7 @@ const EditTrip = () => {
 
                 if (!currentItinerary || currentItinerary.length === 0) {
                   return (
-                    <p className="text-center text-white/35 font-bold italic py-8 border border-dashed border-white/10 rounded-[2rem]">
+                    <p className="text-center text-white/35 font-normal  py-8 border border-dashed border-white/10 rounded-[2rem]">
                       No itinerary days added yet. Add a day to get started.
                     </p>
                   );
@@ -1309,7 +1312,7 @@ const EditTrip = () => {
                   ...formData,
                   thingsToCarry: [...(formData.thingsToCarry || []), '']
                 })}
-                className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                className="w-full h-12 rounded-xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-normal text-sm"
               >
                 <Plus size={16} /> Add Item
               </button>
@@ -1669,7 +1672,7 @@ const EditTrip = () => {
                 const newAttraction: Attraction = { name: '', description: '', image: '', location: '' }
                 setFormData({ ...formData, attractions: [...(formData.attractions || []), newAttraction] })
               }}
-              className="w-full h-14 rounded-2xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-bold text-sm disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-white/20 disabled:hover:text-white/50"
+              className="w-full h-14 rounded-2xl border-2 border-dashed border-white/20 text-white/50 hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-2 font-normal text-sm disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-white/20 disabled:hover:text-white/50"
             >
               <Plus size={18} /> Add Attraction {(formData.attractions || []).length >= 8 ? '(Max 8)' : ''}
             </button>
